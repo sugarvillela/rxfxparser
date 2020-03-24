@@ -1,0 +1,9 @@
+/*%%
+	file="space separated file name.txt"
+		
+
+	%%ENUB
+		%%POS(extra stuff here) linking (hold over
+		across line) yeah
+		
+%%*/ hello
