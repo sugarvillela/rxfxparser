@@ -4,7 +4,8 @@
 /*$
 
 	RX{ 
-		"myPatternIsThis{5-15}" 
+		~(A=a&B='b')|~(C=~c&D=d)+ dru='&'|LEN()=2 'moustache' 
+		myDog=gary
 	}
 		
 $*/
