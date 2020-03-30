@@ -20,7 +20,9 @@ public interface IParse {
     public final String ITEM_CLOSE = "}";       // ends item content
     public final String USERDEF_OPEN = "$";     // user-defined heading
     public final String COMMENT = "//";         // Widget.getCommentSymbol() TODO
-    public final char KEYVAL = '=';             // key=value or key:value ?
+    public final char EQUAL = '=';             // key=value or key:value ?
+    public final String DEFAULT_KEYNAME = "text";// implemenation default for text field
+    
     
     
     // List of handlers to be implemented
@@ -28,11 +30,12 @@ public interface IParse {
         // File generating handlers
         TARGLANG_BASE, ENUB, ENUD, SCOPE, RX, FX,
         // Non-file-generating handlers
-        RX_ITEM, SRCLANG, ATTRIB, USERDEF, TARGLANG,
+        SRCLANG, ATTRIB, USERDEF, TARGLANG,
+        RX_PATTERN, RX_KEYVAL, FX_PATTERN, 
         // Top enum ordinal gives size of list
         NUM_HANDLERS,
         // Keys for setAttrib()
-        DEF_NAME, LO, HI
+        DEF_NAME, LO, HI, KEY, VAL, IF, ELIF, ELSE, NEGATE
         ;
         public static H get( String text ){
             for(H h : values()){
@@ -57,10 +60,13 @@ public interface IParse {
     public final String TARGLANG_BASE = "TARGLANG_BASE";
     public final String TARGLANG =      "TARGLANG";
     public final String USERDEF =       "USERDEF";
+    public final String DEF_NAME =      "DEF_NAME";
+    public final String LO =            "LO";
+    public final String HI =            "HI";
     
     // List of commands output by scanner and read by parser
     public enum CMD { 
-        PUSH, POP, ADD_TO, SET_ATTRIB;
+        PUSH, POP, ADD_TO, SET_ATTRIB, OPEN, CLOSE;
         public static CMD get( String text ){
             for(CMD cmd : values()){
                 if(cmd.toString().equals(text)){
@@ -70,10 +76,6 @@ public interface IParse {
             return null;
         }
     }
-    // String constants for switches; to match H enums exactly
-    public final String DEF_NAME =      "DEF_NAME";
-    public final String LO =            "LO";
-    public final String HI =            "HI";
     
     // node for input and output list
     public class ScanNode{
@@ -140,35 +142,65 @@ public interface IParse {
         public static boolean isUserDef( String text ){
             return text.startsWith(USERDEF_OPEN);
         }
-        public static boolean isItemOpener_front( String text ){
-            return text.startsWith(ITEM_OPEN);
-        }
-        public static boolean isItemOpener_back( String text ){
-            return text.endsWith(ITEM_OPEN);
-        }
-        public static boolean isItemCloser( String text ){
-            return text.endsWith(ITEM_CLOSE);
-        }
         public static String getUserDef( String text ){
             return text.substring(USERDEF_OPEN.length());
         }
-        public static String rmItemOpener_front( String text ){
-            return text.substring(ITEM_OPEN.length());
+    }
+    public class ScanUtil_AttachedSymbol{
+        // Unattached symbol handled in pushPop switch;
+        // Attached symbol needs string manip
+        private boolean oSymbol, cSymbol;
+        
+        public void reset(){
+            oSymbol = cSymbol = false;
         }
-        public static String rmItemOpener_back( String text ){
-            return text.substring(0, text.length() - ITEM_OPEN.length());
-        }
-        public static String rmItemCloser( String text ){
-            return text.substring(0, text.length() - ITEM_CLOSE.length());
-        }
-        public static boolean errOBrace( Base_Stack P, String text ){
-            if( text.startsWith(ITEM_OPEN) ){
-                return false;
+        public String rmOSymbol_back( String text ){
+            //System.out.print("rmOSymbol_back: text="+text);
+            if( text.endsWith(ITEM_OPEN) ){// keyword{
+                oSymbol = true;
+                //System.out.println(": found it");
+                return text.substring(0, text.length() - ITEM_OPEN.length());
             }
             else{
-                P.setEr("Opening curly brace required here: "+text);
-                return true;
+                //System.out.println(": no find");
+                return text;
             }
+        }
+        public String rmOSymbol_front( String text ){//found it, has it, or error
+            //System.out.print("rmOSymbol_front: text="+text);
+            if( oSymbol ){// already found and removed
+                //System.out.println(": already done");
+                return text;
+            }
+            oSymbol = true; // ignore after first call
+            if( text.startsWith(ITEM_OPEN) ){//
+                return text.substring(ITEM_OPEN.length());
+            }
+            else{
+                Class_Scanner.getInstance().setEr("Opening curly brace required here: "+text);
+                return text;
+            }
+        }
+        public String rmCSymbol( String text ){// handles this: data}
+            if( text.endsWith(ITEM_CLOSE) ){// 
+                cSymbol = true;
+                return text.substring(0, text.length() - ITEM_CLOSE.length());
+            }
+            else{
+                return text;
+            }
+        }
+        public boolean isOpened(){
+            return oSymbol;
+        }
+        public boolean isClosed(){
+            return cSymbol;
+        }
+        public void forceOpened(){
+            oSymbol = true;
+        }
+        public void forceClosed(){
+            cSymbol = true;
         }
     }
     

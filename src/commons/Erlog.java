@@ -12,12 +12,14 @@ import java.util.ArrayList;
 public class Erlog {
     protected Ignore log;               // behavior class nested within
     protected String fname;             // for log file
+    protected boolean useSysOut;
     
     // Behavior enums
     public static final int IGNORE = 0;
     public static final int LOG = 1;
     public static final int NOTIFY = 2;
     public static final int DISRUPT = 3;
+    public static final int USESYSOUT = 0x10;
     public static Erlog instance;
     
     // 4 constructors
@@ -33,6 +35,13 @@ public class Erlog {
     private Erlog( int behavior, String filename ){
         // Enum passed sets which behavior class gets instantiated
         this.fname=filename;
+        if( (USESYSOUT & behavior) != 0 ){
+            useSysOut = true;
+            behavior &= 0xF;
+        }
+        else{
+            useSysOut = true;
+        }
         switch(behavior){
             case IGNORE:
                 this.log=new Ignore();
@@ -154,6 +163,17 @@ public class Erlog {
             }
             return "Error: line " + line + ", word " + word + ": " + text;
         }
+        protected void printErr( String errText ){
+            // Print red or print prominently in black
+            if( useSysOut ){
+                System.out.println("=========================================");
+                System.out.println(errText);
+                System.out.println("=========================================");
+            }
+            else{
+                System.err.println(errText);
+            }
+        }
     }
     
     /**
@@ -176,7 +196,7 @@ public class Erlog {
         public void set( String text, int line, int word ){
             String errText = this.errText(text, line, word);
             this.content.add(errText);
-            System.err.println(errText);
+            printErr(errText);
         }
     }
     
@@ -190,8 +210,8 @@ public class Erlog {
             String errText = this.errText(text, line, word);
             this.content.add(errText);
             this.finish();
-            System.err.println(errText);
-            System.err.println("Exit...");
+            printErr(errText);
+            System.out.println("Exit...");
             System.exit(0); 
         }
     }

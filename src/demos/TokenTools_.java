@@ -90,11 +90,11 @@ public class TokenTools_ {
     }
     public static void toList(){
       
-        boolean keepSkip1 =     true;
-        boolean keepSkip2 =     true;
-        boolean keepSkip3 =     true;
-        boolean skipOut =       true;
-        boolean manyDelims =    true;
+        boolean keepSkip1 =     false;
+        boolean keepSkip2 =     false;
+        boolean keepSkip3 =     false;
+        boolean skipOut =       false;
+        boolean manyDelims =    false;
         boolean delimsIn =      true;
         
         String text;
@@ -145,6 +145,7 @@ public class TokenTools_ {
         }
         if( manyDelims ){
             text="||We_!got!-lots_of-delimiters";
+            
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
                 "|_!-",                            //delimiter
@@ -155,6 +156,8 @@ public class TokenTools_ {
             Commons.disp( t, "\nTokens:" );
         }
         if( delimsIn ){
+            //text="NoDelimiters";
+            //text="myPatternIsThis&myWillIsThat";
             text="^text.in=scratch_(flag.poss|pos.det)_!pos.adj|pos.gerund*_head$";
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
@@ -184,26 +187,26 @@ public class TokenTools_ {
         Commons.disp( instance.getSkips(), "Skips:" );
     }
     public static void toList_lines(){
-        TK instance = TK.getInstance();
-       
-        String text1="This_is_a_series_(that_starts\n";
-        String text2="on_one_line)_and_ends";
-        ArrayList<String> t;
-        
-        
-        instance.setDelims("_"); 
-        instance.setMap("(\""); 
-        instance.setFlags(TK.HOLDOVER);
-        
-        instance.setText(text1);
-        instance.parse();
-        t = instance.get();
-        Commons.disp( t, "\nTokens:" );
-
-        instance.setText(text2);
-        instance.parse();
-        t = instance.get();
-        Commons.disp( t, "\nTokens:" );
+//        TK instance = TK.getInstance();
+//       
+//        String text1="This_is_a_series_(that_starts\n";
+//        String text2="on_one_line)_and_ends";
+//        ArrayList<String> t;
+//        
+//        
+//        instance.setDelims("_"); 
+//        instance.setMap("(\""); 
+//        instance.setFlags(TK.HOLDOVER);
+//        
+//        instance.setText(text1);
+//        instance.parse();
+//        t = instance.get();
+//        Commons.disp( t, "\nTokens:" );
+//
+//        instance.setText(text2);
+//        instance.parse();
+//        t = instance.get();
+//        Commons.disp( t, "\nTokens:" );
     }
     public static void toList_simple(){
         String text = "__First half_second half__third half_____fourth half__";

@@ -17,7 +17,8 @@ import toktools.TK;
 public class Class_Scanner extends Base_Stack {
     private ArrayList<ScanNode> nodes;
     private String foutName;
-    private boolean oBrace;                     // if opening brace was found
+    //private int count;                  // used by RX classes
+    ScanUtil_AttachedSymbol attachedSymb;                  // helper class
     
     private static Class_Scanner staticInstance;
     
@@ -31,6 +32,7 @@ public class Class_Scanner extends Base_Stack {
         setFile( inFileName, "rxfx" );//rxfx validates file extension .rxfx
         nodes = new ArrayList<>();
         foutName = outFileName;
+        attachedSymb = new ScanUtil_AttachedSymbol();
     }
     
     // Singleton pattern
@@ -59,14 +61,15 @@ public class Class_Scanner extends Base_Stack {
         // start in line mode for target language
         fin.setLineGetter();
         while( fin.hasNext() ){
-            if( backText == null ){
-                text = fin.next();
-            }
-            else{
-                text = backText;
-                backText = null;
-            }
-            System.out.println( "___________________"+text );
+//            if( backText == null ){
+//                text = fin.next();
+//            }
+//            else{
+//                text = backText;
+//                backText = null;
+//            }
+            text = fin.next();
+            System.out.println( fin.isWordGetter() + "___________________"+text );
             top.pushPop(text);
         }
         // pop target language handler;
@@ -75,13 +78,12 @@ public class Class_Scanner extends Base_Stack {
     }
     @Override
     public void onQuit(){
-        System.out.println( "Scanner onQuit" );
+        //System.out.println( "Scanner onQuit" );
         if(foutName != null && !write_rxlx_file(foutName)){
-            P.setEr("Failed to write output file for name: " + foutName);
+            setEr("Failed to write output file for name: " + foutName);
         }
     }
     
-    // handlers for context-sensitive control of stack
     // handlers for context-sensitive control of stack
     public abstract class Base_Context extends Base_StackItem{
         public Base_Context(){
@@ -89,12 +91,12 @@ public class Class_Scanner extends Base_Stack {
         }
         @Override
         public void onPush(){
-            System.out.println( "called start on " + this.h );
+            //System.out.println( "called start on " + this.h );
             nodes.add( new ScanNode( CMD.PUSH, this.h ) );
         }
         @Override
         public void onPop(){
-            System.out.println( "called finish on " + this.h );
+            //System.out.println( "called finish on " + this.h );
             nodes.add( new ScanNode( CMD.POP, this.h ) );
         }
         // helper Util
@@ -127,47 +129,41 @@ public class Class_Scanner extends Base_Stack {
         
         @Override
         public void pushPop( String text ){
-            text = text.trim();
-            if(SOURCE_CLOSE.equals(text)){
-                System.out.println( text+" means pop in Handler_source" );
-                P.fin.setLineGetter();
-                P.pop();
-            }
-            if( ScanUtil.isItemOpener_back(text) ){
-                oBrace = true;
-                text = ScanUtil.rmItemOpener_back(text);
-            }
-            else{
-                oBrace = false;
-            }
+            attachedSymb.reset();// reset { } flags
+            text = attachedSymb.rmOSymbol_back(text);//if { attached to keyword
             switch (text){
                 case SOURCE_CLOSE:
+                    P.setLineGetter();
                     P.popAllSource();
                     break;
                 case ATTRIB:
-                    System.out.println( text+" means push an ATTRIB" );
+                    //System.out.println( text+" means push an ATTRIB" );
                     P.push( new Context_ATTRIB( H.ATTRIB ) );
                     break;
                 case TARGLANG:
-                    System.out.println( text+" means push a TARGLANG" );
+                    //System.out.println( text+" means push a TARGLANG" );
                     P.push( new Context_non_nesting( H.TARGLANG ) );
                     break;
                 case ENUB:
-                    System.out.println( text+" means push an ENUB" );
+                    //System.out.println( text+" means push an ENUB" );
                     P.push( new Context_nesting( H.ENUB ) );
                     break;
                 case ENUD:
-                    System.out.println( text+" means push an ENUD" );
+                    //System.out.println( text+" means push an ENUD" );
                     P.push( new Context_nesting( H.ENUD ) );
                     break;
                 case RX:
-                    System.out.println( text+" means push an RX" );
+                    //System.out.println( text+" means push an RX" );
                     P.push( new Context_RX() );
                     break;
+                case FX:
+                    //System.out.println( text+" means push an RX" );
+                    P.push( new Context_FX() );
+                    break;
                 default:
-                    if(!text.startsWith(COMMENT)){//One word comments?? TODO fix
-                        P.setEr("Unknown keyword: " + text);
-                    }
+//                    if(!text.startsWith(COMMENT)){//One word comments?? TODO fix
+//                        P.setEr("Unknown keyword: " + text);
+//                    }
                     break;
             }
         }
@@ -187,19 +183,17 @@ public class Class_Scanner extends Base_Stack {
                 case ITEM_CLOSE:
                     P.pop();
                     break;
+                case ITEM_OPEN: // log and skip
+                    attachedSymb.forceOpened();
+                    break;
                 default:
-                    // Look for opening brace connected to first data
-                    if(!oBrace && !ScanUtil.errOBrace( P, text )){
-                        oBrace = true;
-                        text = ScanUtil.rmItemOpener_front( text );
-                    }
+                    // Look for opening symbol connected to first data
+                    text = attachedSymb.rmOSymbol_front( text );
                     // Look for closing brace connected to last data
-                    if( ScanUtil.isItemCloser(text) ){
-                        this.addText( ScanUtil.rmItemCloser(text) );
+                    text = attachedSymb.rmCSymbol( text );
+                    this.addText(text);
+                    if( attachedSymb.isClosed() ){
                         P.pop();
-                    }
-                    else{
-                        this.addText(text);
                     }
             }
         }
@@ -209,8 +203,8 @@ public class Class_Scanner extends Base_Stack {
             super(setH); 
         }
         @Override
-        protected void addText( String text ){//override to add more validation
-            if( text.chars().filter(ch -> ch == KEYVAL).count() != 1 ){
+        protected void addText( String text ){//add more validation
+            if( text.chars().filter(ch -> ch == EQUAL).count() != 1 ){
                 P.setEr("For ATTRIB tag key=value format is required at " + text);
             }
             nodes.add(new ScanNode( CMD.ADD_TO, h, text));
@@ -224,12 +218,12 @@ public class Class_Scanner extends Base_Stack {
         }
         @Override
         public void onPush(){
-            System.out.println( "called onStart on " + this.h );
+            //System.out.println( "called onStart on " + this.h );
             nodes.add( new ScanNode( CMD.PUSH, this.h, this.defName ) );
         }
         @Override
         public void onPop(){
-            System.out.println( "called onFinish on " + this.h );
+            //System.out.println( "called onFinish on " + this.h );
             nodes.add( new ScanNode( CMD.POP, this.h, this.defName ) );
         }
     }
@@ -247,28 +241,23 @@ public class Class_Scanner extends Base_Stack {
                 case ITEM_CLOSE:
                     P.pop();
                     break;
+                case ITEM_OPEN: // log and skip
+                    attachedSymb.forceOpened();
+                    break;
                 case TARGLANG:
-                    System.out.println( text+" means push a TARGLANG" );
+                    //System.out.println( text+" means push a TARGLANG" );
                     P.push( new Context_non_nesting( H.TARGLANG ) );
                     break;
                 default:
-                    // Look for opening brace connected to first data
-                    if(!oBrace && !ScanUtil.errOBrace( P, text )){
-                        oBrace = true;
-                        text = ScanUtil.rmItemOpener_front( text );
-                    }
+                    // Look for opening symbol connected to first data
+                    text = attachedSymb.rmOSymbol_front( text );
                     if( ScanUtil.isUserDef(text) ){
                         text = ScanUtil.getUserDef(text);
-                        System.out.println( text+" means push a USERDEF" );
-                        if( ScanUtil.isItemOpener_back(text) ){
-                            System.out.println( text+" is item opener" );
-                            oBrace = true;
-                            text = ScanUtil.rmItemOpener_back(text);
-                        }
-                        else{
-                            oBrace = false;
-                        }
-                        System.out.println( text+" edited?" );
+                        //System.out.println( text+" means push a USERDEF" );
+                        
+                        attachedSymb.reset();// reset { } flags
+                        text = attachedSymb.rmOSymbol_back(text);//if { attached to keyword
+                        //System.out.println( text+" edited?" );
                         P.push( new Context_userDef( H.USERDEF, text ) );
                     }
                     //out.add(new ScanNode( h, text));
@@ -278,14 +267,8 @@ public class Class_Scanner extends Base_Stack {
     }
     // RX: Sub-scanner for RX patterns
     public class Context_RX extends Base_Context{
-        protected boolean cBrace;
-        protected Util_ScanRX.Range range;
-        protected Util_ScanRX.PatternItr itr;
-        
         public Context_RX(){
             h = H.RX;
-            range = Util_ScanRX.getInstance_Range();
-            itr = Util_ScanRX.getInstance_PatternItr();
         }
         @Override
         public void pushPop( String text ){
@@ -296,108 +279,275 @@ public class Class_Scanner extends Base_Stack {
                 case ITEM_CLOSE:
                     P.pop();
                     break;
+                case ITEM_OPEN: // log and skip
+                    attachedSymb.forceOpened();
+                    break;
                 default:
-                    // Reach default once, then ITEM_CLOSE or SOURCE_CLOSE
-                    if(cBrace){
-                        P.setEr("Expected closing brace here: "+text);
-                    }
-                    // Look for opening brace before
-                    if(!oBrace && !IParse.ScanUtil.errOBrace( P, text )){
-                        oBrace = true;
-                        text = IParse.ScanUtil.rmItemOpener_front( text );
-                    }
-                    // Look for closing brace after
-                    if( ScanUtil.isItemCloser(text) ){
-                        ScanUtil.rmItemCloser(text);
-                        cBrace = true;
-                    }
-                    // Look for surrounding quotes
-                    if(text.charAt(0) != '"' || text.charAt(text.length()-1) != '"' ){
-                        P.setEr("RX item must be in quotes: "+text);
+                    // Look for opening symbol connected to first data
+                    text = attachedSymb.rmOSymbol_front( text );
+                    // Look for closing brace connected to last data
+                    text = attachedSymb.rmCSymbol( text );
+//                    // Look for optional double quotes around RX  TODO troubleshoot Itr_file hold
+//                    if( (text = Util_string.trimSurrounding('"', text) ).isEmpty() ){
+//                        P.setEr("Empty RX pattern");
+//                        P.pop();
+//                    }
+                    // Primary action: push parser for single RX pattern
+                    P.push( new Context_RXPattern() );
+                    top.pushPop( text );
+                    P.pop();
+                    
+                    // pop if rmCSymbol removed closing brace
+                    if( attachedSymb.isClosed() ){
                         P.pop();
                     }
-                    if( text.length() == 0){
-                        P.setEr("Empty RX pattern");
-                        P.pop();
-                    }
-                    //scanAll(text.substring( 1, text.length()-1 ));
-                    if(cBrace){
-                        P.pop();
-                    }
-                    cBrace = true;// expect next token to be closing symbol
                     break;
             }
         }
-    
-        protected void scanAll( String text ){
-            String[] patterns = TK.toArr(' ', text);
-            for (String pattern : patterns) {
-                System.out.println("setNodes:" + pattern);
-                scanOne( pattern );
-            }
+    }
+    public class Context_RXPattern extends Base_Context{
+        protected Util_ScanRX.Range range;
+        protected Util_ScanRX.PatternItr itr;
+        protected Util_ScanRX.PairMinder pairMinder;
+        
+        public Context_RXPattern(){
+            h = H.RX_PATTERN;
+            range = Util_ScanRX.getInstance_Range();
+            itr = Util_ScanRX.getInstance_PatternItr();
+            pairMinder = Util_ScanRX.getInstance_ParMinder();
         }
-        protected void scanOne( String text ){
-            P.push( new Context_RXItem( true ) );
-            range.init(text);
+        @Override
+        public void pushPop( String text ){
+            range.init(text);                   // parse RX back end
             nodes.add( new ScanNode( CMD.SET_ATTRIB, H.LO, ""+range.getLo() ) );
             nodes.add( new ScanNode( CMD.SET_ATTRIB, H.HI, ""+range.getHi() ) );
-            itr.init(P, text);
+            text = range.getPattern();          //remove range
+            text = pairMinder.trimSurrounding(text);// remove outer parenth
+            if(!pairMinder.validParenth(text)){ // check open-close ratio
+                P.setEr("Mismatched opening/closing parentheses at: "+text);
+            }
+            if(!pairMinder.validQuotes(text)){ // check open-close ratio
+                P.setEr("Mismatched opening/closing quotes at: "+text);
+            }
+            char disallowed;
+            if( (disallowed = pairMinder.disallowedChar("\"+*?", text)) != '\0' ){
+                P.setEr( 
+                    disallowed + " not allowed here in '" + text + 
+                            ")'unless surrounded by single quotes"
+                );
+            }
+            //System.out.println("Context_RXPattern pushPop: text="+text);
+            itr.init(text);  // split on RX characters
+            nodes.add( new ScanNode( CMD.OPEN, H.IF, "\t\tpattern" ) );
+            P.push( new Context_RX_KeyVal() );
             while(itr.hasNext()){
-                top.pushPop(itr.next());
+                top.pushPop(itr.next());//itr.next()
             }
             P.pop();
+            nodes.add( new ScanNode( CMD.CLOSE, H.IF, "\t\tpattern" ) );
         }
     }
-    public class Context_RXItem extends Base_Context{
-        public final String DELIMS = "=()'&|";
-        public final char EQUAL = '=';
+    public class Context_RX_KeyVal extends Base_Context{
         public final char AND = '&';
         public final char OR = '|';
+        public final char NOT = '~';
         public final char OPAR = '(';
-        public final char CPAR = '}';
+        public final char CPAR = ')';
         public final char QUOTE = '\'';
-        
-        private boolean ignorePar;
+        private boolean isLiteral, isNegated, haveKey;
+        private String key;
+        private int ifLevel;
 
-        public Context_RXItem( boolean ignoreParentheses ){
-            ignorePar = ignoreParentheses;
-            h = H.RX_ITEM;
+        public Context_RX_KeyVal(){
+            h = H.RX_KEYVAL;
+            isLiteral = false;
+            isNegated = false;
+            haveKey = false;
+            key = "";
+            ifLevel = 0;      // Scanner field
         }
         @Override
         public void pushPop( String text ){
             if(text.length() == 1){
                 switch(text.charAt(0)){
                     case EQUAL:
-                        break;
-                    case AND:
+                        if(!haveKey){
+                            P.setEr("Expected key=value format or 'literal' here: "+text);
+                        }
+                        this.clearNegated(text);
                         break;
                     case OR:
+                        System.out.printf( "clearing negated for %s\n", text );
+                        this.clearNegated(text);
+                        this.or();
+                        break;
+                    case AND:
+                        System.out.printf( "clearing negated for %s\n", text );
+                        this.clearNegated(text);
+                        this.and();
+                        break;
+                    case NOT:
+                        System.out.printf( "setting negated for %s\n", text );
+                        this.setNegated(text);
                         break;
                     case OPAR:
-                        if(!ignorePar){
-                            P.push( new Context_RXItem( false ) );
-                        }
+                        //System.out.printf( "OPAR PUSHPOP Context_RX_KeyVal: %s, ifLevel=%d \n", text, ifLevel );
+                        P.push( new Context_RX_KeyVal() );
                         break;
                     case CPAR:
-                        if(!ignorePar){
-                            P.pop();
-                        }
-                        break;
-                    case QUOTE:
+                        //System.out.printf( "CPAR PUSHPOP Context_RX_KeyVal: %s, ifLevel=%d \n", text, ifLevel );
+                        P.pop();
                         break;
                     default:
+                        add(text);
                         break;
                 }
-            
+            }
+            else{
+                add(text);
+            }
+            //System.out.printf( "TEXT=%s, ifLevel=%d \n", text, ifLevel );
+        }
+        @Override
+        public void onPop(){
+            popIfLevel();
+            clearNegated("ON POP");
+            nodes.add( new ScanNode( CMD.POP, this.h ) );
+        }
+        @Override
+        public void add(Object obj){
+            String text = trimSurrounding( (String)obj );
+            //System.out.printf( "at default: %s, isLiteral=%b \n", text, isLiteral );
+            if(haveKey){
+                nodes.add( new ScanNode( CMD.SET_ATTRIB, H.KEY, key ) );
+                nodes.add( new ScanNode( CMD.SET_ATTRIB, H.VAL, text ) );
+                haveKey = false;
+            }
+            else if(isLiteral){
+                nodes.add( new ScanNode( CMD.SET_ATTRIB, H.KEY, DEFAULT_KEYNAME ) );//DEFAULT_KEYNAME in IParse
+                nodes.add( new ScanNode( CMD.SET_ATTRIB, H.VAL, text ) );
+            }
+            else{
+                key = text;
+                haveKey = true;
             }
         }
-        // helper Util
-//        protected void addText( String text ){//override to add more validation
-//            nodes.add(new ScanNode( CMD.ADD_TO, h, text));
-//        }
+        private String trimSurrounding(String text){
+            //System.out.println("trimSurrounding: "+text);
+            if(text.charAt(0) == '\'' && text.charAt(text.length()-1) == '\''){
+                isLiteral = true;
+                return text.substring( 1, text.length()-1 );
+            }
+            else{
+                isLiteral = false;
+                return text;
+            }
+        }
+        private void or(){
+            nodes.add( new ScanNode( CMD.CLOSE, H.IF, "\t\tkvOR" ) );
+            nodes.add( new ScanNode( CMD.OPEN, H.ELIF ) );
+        }
+        private void and(){
+            nodes.add( new ScanNode( CMD.OPEN, H.IF, "\t\tkvAND" ) );
+            ifLevel ++;
+        }
+        private void setNegated(String text){
+            isNegated = !isNegated;
+            if( isNegated ){
+                nodes.add( new ScanNode( CMD.OPEN, H.NEGATE, "\t\t\tkv: " + text ) );
+            }
+            else{
+                nodes.add( new ScanNode( CMD.CLOSE, H.NEGATE, "\t\t\tkv: " + text ) );
+            }
+        }
+        private void clearNegated(String text){
+            if( isNegated ){
+                isNegated = false;
+                nodes.add( new ScanNode( CMD.CLOSE, H.NEGATE, "\t\t\tkv: " + text) );
+            }
+        }
+        private void popIfLevel(){
+            for(int i=ifLevel; i>0; i--){
+                nodes.add( new ScanNode( CMD.CLOSE, H.IF, "\t\tkvPopIfLevel" ) );
+            }
+            ifLevel=0;
+        }
     }
-
-
+    
+    
+    
+        // RX: Sub-scanner for RX patterns
+    public class Context_FX extends Base_Context{
+        public Context_FX(){
+            h = H.FX;
+        }
+        @Override
+        public void pushPop( String text ){
+            switch (text){
+                case SOURCE_CLOSE:
+                    P.popAllSource();
+                    break;
+                case ITEM_CLOSE:
+                    P.pop();
+                    break;
+                case ITEM_OPEN: // log and skip
+                    attachedSymb.forceOpened();
+                    break;
+                default:
+                    // Look for opening symbol connected to first data
+                    text = attachedSymb.rmOSymbol_front( text );
+                    // Look for closing brace connected to last data
+                    text = attachedSymb.rmCSymbol( text );
+                    
+                    // Primary action: push parser for single FX pattern
+                    P.push( new Context_RXPattern() );
+                    top.pushPop( text );
+                    P.pop();
+                    
+                    // pop if rmCSymbol removed closing brace
+                    if( attachedSymb.isClosed() ){
+                        P.pop();
+                    }
+                    break;
+            }
+        }
+    }
+    public class Context_FXPattern extends Base_Context{
+        protected Util_ScanRX.Range range;
+        protected Util_ScanRX.PatternItr itr;
+        protected Util_ScanRX.PairMinder pairMinder;
+        
+        public Context_FXPattern(){
+            h = H.FX_PATTERN;
+            range = Util_ScanRX.getInstance_Range();
+            itr = Util_ScanRX.getInstance_PatternItr();
+            pairMinder = Util_ScanRX.getInstance_ParMinder();
+        }
+        @Override
+        public void pushPop( String text ){
+            range.init(text);                   // parse RX back end
+            nodes.add( new ScanNode( CMD.SET_ATTRIB, H.LO, ""+range.getLo() ) );
+            nodes.add( new ScanNode( CMD.SET_ATTRIB, H.HI, ""+range.getHi() ) );
+            text = range.getPattern();          //remove range
+            text = pairMinder.trimSurrounding(text);// remove outer parenth
+            if(!pairMinder.validParenth(text)){ // check open-close ratio
+                P.setEr("Mismatched opening/closing parentheses at: "+text);
+            }
+            if(!pairMinder.validQuotes(text)){ // check open-close ratio
+                P.setEr("Mismatched opening/closing quotes at: "+text);
+            }
+            //System.out.println("Context_RXPattern pushPop: text="+text);
+            itr.init(text);  // split on RX characters
+            
+            P.push( new Context_RX_KeyVal() );
+            nodes.add( new ScanNode( CMD.OPEN, H.IF ) );
+            while(itr.hasNext()){
+                top.pushPop(itr.next());//itr.next()
+            }
+            nodes.add( new ScanNode( CMD.CLOSE, H.IF ) );
+            P.pop();
+        }
+    }
     // Serialize and deserialize
     public boolean write_rxlx_file(String f){
         f = Commons.assertFileExt(f, "rxlx");

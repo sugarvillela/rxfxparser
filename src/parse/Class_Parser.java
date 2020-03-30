@@ -213,7 +213,7 @@ public class Class_Parser extends Base_Stack {
     }
     @Override
     public void onQuit(){
-        System.out.println( "parser onQuit" ); 
+        //System.out.println( "parser onQuit" ); 
         String wErr;
         for(Widget w : widgets ){
             if( w !=null && ( wErr = w.finish() )!= null ){

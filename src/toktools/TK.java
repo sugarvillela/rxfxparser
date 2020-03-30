@@ -55,15 +55,15 @@ public class TK {
     protected boolean delimIn;//, skipOut; // keep delims, skips to separate list
     //protected boolean holdOver;         // carry over skip area to next parse
     //protected String holdText;          // To support holdOver
-    private SkipBehavior skipper;
-    private HoldBehavior holder;
+    private SkipBehavior skipBehavior;
+    private HoldBehavior holdBehavior;
     
     private TK() {
         symbIn = 1;
         //skipOut = false;
         delimIn = false;
-        skipper = new Skip_false();
-        holder = new Hold_false();
+        skipBehavior = new Skip_false();
+        holdBehavior = new Hold_false();
         
     }
     private static TK tk=null;
@@ -93,8 +93,8 @@ public class TK {
     }
     public void setFlags( int flags ){
         symbIn = ( ( flags & SYMBOUT )==0 )? 1 : 0;   // integer for adding index
-        skipper = ( ( flags & SKIPOUT )==0 )? new Skip_false() : new Skip_true();
-        holder = ( ( flags & HOLDOVER )==0 )? new Hold_false() : new Hold_true();
+        skipBehavior = ( ( flags & SKIPOUT )==0 )? new Skip_false() : new Skip_true();
+        holdBehavior = ( ( flags & HOLDOVER )==0 )? new Hold_false() : new Hold_true();
         //skipOut = ( ( flags & SKIPOUT )!=0 );
         delimIn = ( ( flags & DELIMIN )!=0 );
 
@@ -102,10 +102,11 @@ public class TK {
     
     // utility for better readability in parse()
     protected boolean isDelim( char symb ){
+        //System.out.printf("\nisDelim symb=%c\n", symb);
         return ( delims.indexOf( symb )!= -1 );
     }
     public boolean isHolding(){
-        return holder.isHolding();
+        return holdBehavior.isHolding();
     }
 
     // utilities, not needed because dup prevention works
@@ -142,22 +143,22 @@ public class TK {
         parse();
     }
     public void parse(){
-        //System.out.printf("\nParse: holding=%b, text=%s\n", holder.isHolding(), text);
-        holder.initParse();        // close symbol, matches opening symbol
-        //holder.newList();  // to put skips in
+        //System.out.printf("\nParse: holding=%b, text=%s\n", holdBehavior.isHolding(), text);
+        holdBehavior.initParse();         // close symbol, matches opening symbol
+        //holdBehavior.newList();           // to put skips in
 
         int start=0;        // beginning of substring
         int i;              // for current char being checked
         for ( i = 0; i < text.length(); i++) {
-            if( holder.isHolding() ){                     // in skip area            
-                if( holder.isClosing( text.charAt(i) ) ){ // found closing skip symbol
-                    holder.clearCSymb();                  // leaving skip area
+            if( holdBehavior.isHolding() ){                     // in skip area            
+                if( holdBehavior.isClosing( text.charAt(i) ) ){ // found closing skip symbol
+                    holdBehavior.clearCSymb();                  // leaving skip area
                     // if symbIn==1, will keep current symbol, else lose it
-                    skipper.add( text.substring( start, i+symbIn ) );
+                    skipBehavior.add( text.substring( start, i+symbIn ) );
                     start=i+1;                    // reset for next token
                 }
             }
-            else if( holder.isOpening( text.charAt(i) ) ){// opener
+            else if( holdBehavior.isOpening( text.charAt(i) ) ){// opener
                 if( i != start ){               // if prev wasn't a delim, dump
                     tokens.add( text.substring( start, i ) );
                     start=i;
@@ -167,6 +168,7 @@ public class TK {
                 }
             }
             else if( isDelim( text.charAt(i) ) ){//delimiter
+                //System.out.printf("yes %c\n", text.charAt(i) );
                 if( i!=start ){                 // if text, dump
                     tokens.add( text.substring( start, i ) );
                 }
@@ -192,11 +194,11 @@ public class TK {
         return skips;
     }
     private interface SkipBehavior{
-        
         public void newList();
         public void add( String skipText );
     }
     private class Skip_false implements SkipBehavior{
+        // This one ignores command to add to skips; adds to tokens instead
         @Override
         public void newList(){
             skips = null;
@@ -207,6 +209,7 @@ public class TK {
         }
     }
     private class Skip_true implements SkipBehavior{
+        // this one adds to skips when commanded
         @Override
         public void newList(){
             skips = new ArrayList<>();
@@ -249,7 +252,7 @@ public class TK {
         public void initParse(){
             cSymb = 0;
             tokens = new ArrayList<>();     // for main tokenized output
-            skipper.newList();              // to put skips in
+            skipBehavior.newList();              // to put skips in
         }
 
         @Override
@@ -267,7 +270,7 @@ public class TK {
             if(!isHolding()){
                 cSymb = 0;
                 tokens = new ArrayList<>();     // for main tokenized output
-                skipper.newList();              // to put skips in
+                skipBehavior.newList();              // to put skips in
             }
         }
 

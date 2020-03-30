@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.ArrayList;
-import commons.Erlog;
+import commons.*;
 import toktools.TK;
 /** Word/line iterator; changes modes on the fly; doesn't preserve half-lines
  *
@@ -59,7 +59,7 @@ public class Itr_file implements Itr_CallNext{
         this.tk = TK.getInstance();     // init tokenizer
         this.tk.setDelims(" ");
         this.tk.setMap("\"");
-        this.tk.setFlags(TK.HOLDOVER); // 
+        this.tk.setFlags(0); // 
         this.name="Itr_file";
     }
     /* Initialize or re-initialize */
@@ -82,12 +82,16 @@ public class Itr_file implements Itr_CallNext{
         this.input.close();
     }
     /* Output mode: Word trims; line keeps tabs, spaces, newlines */
+    @Override
     public void setLineGetter(){
+        System.out.println("\n setLineGetter");
         this.col = 0;
         this.tok = null;
         this.getter = this.gLine;
     }
+    @Override
     public void setWordGetter(){
+        System.out.println("\n setWordGetter");
         this.col = 0;
         this.tok = null;
         this.getter = this.gWord;
@@ -130,22 +134,25 @@ public class Itr_file implements Itr_CallNext{
         @Override
         public String next(){
             if( tok == null || col >= tok.size()-1 ){//first or refresh
-                do{
+//                do{
                     this.text = "";
-                    while( this.text.trim().isEmpty()){
+                    while( this.text.isEmpty()){
                         if(done){
+                            System.out.println("Getter_word: line getter says done" );
                             col=0;
                             tok = null;
                             return "";
                         }
-                        this.text = gLine.next();
+                        this.text = gLine.next().trim();
+                        System.out.println("text from line getter = " + this.text );
                     }
                     //System.out.println("line = "+this.line);
-                    tk.parse( this.text.trim() );
-                }while(tk.isHolding());
+                    tk.parse( this.text );
+//                }while(tk.isHolding());
                 
                 tok = tk.get();
                 col=-1;
+                Commons.disp(tok, "====GETTER_WORD=====");
             }
             col++;
             this.text = tok.get(col).trim();
@@ -162,7 +169,9 @@ public class Itr_file implements Itr_CallNext{
     public boolean hasFile(){ return this.good; }
     @Override
     public boolean hasNext(){ return !this.done; }
+    @Override
     public boolean isLineGetter(){ return getter == gLine; }
+    @Override
     public boolean isWordGetter(){ return getter == gWord; }
     public ArrayList<String> readAll(){//return array of file contents
         ArrayList<String> arr;

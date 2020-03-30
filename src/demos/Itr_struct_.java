@@ -175,6 +175,27 @@ public class Itr_struct_ {
         }
     
     }
+    public static void itr_file_word(){
+        // Can change modes on the fly. Doesn't save half-lines
+        Itr_file f =  new Itr_file("test.rxfx");
+        System.out.println( "hasFile = "+f.hasFile());
+        int i = 1;
+        int row, col;
+        f.setLineGetter();
+        while( f.hasNext() ){
+            String text = f.next();
+            row=f.getRow();
+            col=f.getCol();
+            System.out.printf( "%d %d : %s \n", row, col, text);//System.out.println("===row "+row+"===");
+            if("RX{".equals(text.trim())){
+                f.setWordGetter();
+            }
+            if(100<i++){
+                break;
+            }
+        }
+    
+    }
     public static void itr_file_skips(){
         // Can change modes on the fly. Doesn't save half-lines
         Itr_file f =  new Itr_file("file02.txt");

@@ -1,6 +1,6 @@
 package parse;
 
-import commons.Util_string;
+import commons.Commons;
 import itr_struct.Itr_noFile;
 import java.util.ArrayList;
 import toktools.TK;
@@ -11,15 +11,20 @@ import toktools.TK;
  */
 public class Util_ScanRX{
     protected static String name;
-    protected static Range range;
-    protected static PatternItr patternItr;
-
+    protected static Range range;           // parses range on RX patterns
+    protected static PatternItr patternItr; // take itr build out of nested
+    protected static PairMinder pairMinder;
+    
     public static Range getInstance_Range(){
         return (range==null)? ( range = new Range() ) : range ;
     }
     public static PatternItr getInstance_PatternItr(){
         return (patternItr==null)? ( patternItr = new PatternItr() ) : patternItr ;
     }
+    public static PairMinder getInstance_ParMinder(){
+        return (pairMinder==null)? ( pairMinder = new PairMinder() ) : pairMinder ;
+    }
+    
     public static class Range{
         private final int MAX = 1024;
         private int lo,  hi;
@@ -92,26 +97,26 @@ public class Util_ScanRX{
         }
     }
     public static class PatternItr{
-        public static String DELIMS = "=()'&|";
+        public static String DELIMS = "=~()&|";
         protected TK tk;
         protected Itr_noFile words;
         
         public PatternItr(){
             tk = TK.getInstance();
             tk.setDelims(DELIMS); 
-            tk.setMap(""); 
+            tk.setMap("'"); 
             tk.setFlags(TK.DELIMIN);
         }
-        public void init( Base_Stack P, String text){
-            tk.setText(text);
-            tk.parse();
+        public void init( String text){
+            tk.parse(text);
             ArrayList<Object> temp = new ArrayList<>();
             for( String obj : tk.get() ){
+                //System.out.println("PatternItr init: obj ="+obj);
                 temp.add(obj);
             }
             words = new Itr_noFile( temp );
             if(!words.hasFile()){
-                P.setEr("Err at:"+text);
+                Class_Scanner.getInstance().setEr("Err at:"+text);
             }
         }
         public boolean hasNext(){
@@ -119,6 +124,87 @@ public class Util_ScanRX{
         }
         public String next(){
             return (String)words.next();
+        }
+    }
+    public static class PairMinder{
+        public String trimSurrounding(String text){
+            //System.out.println("trimSurrounding: "+text);
+            if(text.charAt(0) != '(' || text.charAt(text.length()-1) != ')'){
+                //System.out.println("trimSurrounding first return: "+text);
+                return text;
+            }
+            int stackLevel = 1;
+            for(int i=1; i<text.length()-1; i++){
+                switch(text.charAt(i)){
+                    case '(':
+                        stackLevel++;
+                        break;
+                    case ')':
+                        stackLevel--;
+                        if(stackLevel == 0){
+                            //System.out.println("trimSurrounding loop return: "+text);
+                            return text;
+                        }
+                        break;
+                }
+            }
+            //System.out.println("trimSurrounding final return: "+text);
+            return text.substring( 1, text.length()-1 );
+        }
+        public boolean validParenth( String text ){// even ( ) ratio
+            int stackLevel = 0;
+            for(int i=0; i<text.length(); i++){
+                switch(text.charAt(i)){
+                    case '(':
+                        stackLevel++;
+                        break;
+                    case ')':
+                        stackLevel--;
+                        break;
+                    default:
+                        break;
+                }
+                //System.out.printf("%c %d \n", text.charAt(i), stackLevel);
+            }
+            return stackLevel == 0;
+        }
+        public boolean validQuotes( String text ){// even ( ) ratio
+            int count = 0;
+            for(int i=0; i<text.length(); i++){
+                if('\'' == text.charAt(i)){
+                    count++;
+                }
+            }
+            return count%2 == 0;
+        }
+        public char disallowedChar( String disallow, String text ){
+            boolean ignore = false;
+            for(int i=1; i<text.length(); i++){
+                char c = text.charAt(i);
+                if( '\'' == c ){
+                    ignore = !ignore;
+                }
+                else if( !ignore && disallow.indexOf(c) != -1){
+                    return c;
+                }
+            }
+            return '\0';
+        }
+        public String encodeFunction( String text ){// something useful
+            char[] chars = text.toCharArray();
+            char last = chars[0];
+            boolean ignore = true, changed = false;
+            for(int i=1; i<chars.length; i++){
+                if('\'' == chars[i]){
+                    ignore = !ignore;
+                }
+                else if( !ignore && ')' == chars[i] && '(' == last){
+                    chars[i-1]='\0';
+                    chars[i]='~';
+                    changed = true;
+                }
+            }
+            return changed? new String(Commons.copyNonNull(chars)) : text;
         }
     }
 }

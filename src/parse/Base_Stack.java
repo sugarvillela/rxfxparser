@@ -9,7 +9,6 @@ import itr_struct.Itr_file;
  * @author Dave Swanson
  */
 public abstract class Base_Stack implements IParse{
-    protected Base_Stack P;        //Implementation of B_PStack
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
     protected Itr_CallNext fin;  // file to be parsed
@@ -23,6 +22,7 @@ public abstract class Base_Stack implements IParse{
     
     @Override
     public void push( Base_StackItem nuTop ){
+        System.out.println( "Pushing "+nuTop.name+", stackSize = "+stackSize );
         if(top==null){
             top = nuTop;
             stackSize=1;
@@ -37,7 +37,7 @@ public abstract class Base_Stack implements IParse{
     public void pop(){
         if(top==null){
             stackSize=0;
-            System.out.println( "Stack empty" ); 
+            setEr("Blame developer: Stack empty"); 
             //finish();
             //System.exit(0);
         }
@@ -76,7 +76,7 @@ public abstract class Base_Stack implements IParse{
         System.out.println("pop all source: "+stackSize);
         while( stackSize > 1 ){
             pop();
-            System.out.println("after: "+stackSize);
+            //System.out.println("after: "+stackSize);
         }
         fin.setLineGetter();
     }
@@ -98,7 +98,7 @@ public abstract class Base_Stack implements IParse{
             return false;
         }
         title = f.substring(0, f.length() - ext.length() - 1 );
-        System.out.println( "title... " + title );
+        //System.out.println( "title... " + title );
         return true;
     }
     public final void setEr( String text ){

@@ -35,6 +35,23 @@ public class Commons {
         }
         return out;
     }
+    public static char[] copyNonNull( char[] arr ){
+        int i = 0;
+        for( char c : arr ){
+            if( c != '\0' ){
+                i ++;
+            }
+        }
+        char[] out = new char[i];
+        i = 0;
+        for( char c : arr ){
+            if( c != '\0' ){
+                out[i] = c;
+                i ++;
+            }
+        }
+        return out;
+    }
     
     public static Result equals(CharSequence[] A, CharSequence[] B){
         final int len = A.length;
@@ -194,7 +211,16 @@ public class Commons {
         }
         System.out.println("End Display: " + label+"\n");
     }
-
+    public static void disp( char[] arr ){
+        if( arr==null || arr.length==0 ){
+            System.out.println("\nDisplay: NULL or EMPTY array" );
+            return;
+        }
+        System.out.println("\nDisplay char array: " + arr.length );
+        for( char elem : arr ){
+            System.out.println( "\t" + elem );
+        }
+    }
     public static int boolInt(boolean bool){// Java can't cast bool to int
         return bool? 1 : 0;
     }

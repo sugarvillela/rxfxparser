@@ -10,9 +10,9 @@ import parse.*;
 public class Parse_ {
     
     public static void scanner(){
-        Class_Scanner S = Class_Scanner.getInstance("semantic.rxfx", "scanOutput");//, "scanOutput"
-        ArrayList<IParse.ScanNode_fromFile> list = S.read_rxlx_file("scanOutput.rxlx");
-        Commons.disp(list);
+        Class_Scanner S = Class_Scanner.getInstance("test.rxfx", "scanOutput");//, "scanOutput"
+        //ArrayList<IParse.ScanNode_fromFile> list = S.read_rxlx_file("scanOutput.rxlx");
+        //Commons.disp(list);
         S.onPush();
         //S.onQuit();
     }

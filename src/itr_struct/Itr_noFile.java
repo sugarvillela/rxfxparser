@@ -1,4 +1,5 @@
 package itr_struct;
+import commons.Commons;
 import java.util.ArrayList;
 //import unique.*;
 /**
@@ -18,6 +19,8 @@ public class Itr_noFile implements Itr_CallNext{// implements Iterator, Iterable
         this.content = setContent;
         this.row = 0;
         this.done = false;
+        System.out.println("===Itr_noFile===");
+        Commons.disp(setContent);
     }
     
     @Override
@@ -33,7 +36,7 @@ public class Itr_noFile implements Itr_CallNext{// implements Iterator, Iterable
         this.row++;
         if(row >= this.content.size()){
             this.done = true;
-            return "";
+            //return "";
         }
         return this.content.get(row-1).toString();
     } 
