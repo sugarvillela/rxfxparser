@@ -1,7 +1,7 @@
 package parse;
 
 import commons.Commons;
-import itr_struct.Itr_noFile;
+import itr_struct.StringSource_list;
 import java.util.ArrayList;
 import toktools.TK;
 
@@ -99,7 +99,7 @@ public class Util_ScanRX{
     public static class PatternItr{
         public static String DELIMS = "=~()&|";
         protected TK tk;
-        protected Itr_noFile words;
+        protected StringSource_list words;
         
         public PatternItr(){
             tk = TK.getInstance();
@@ -114,7 +114,7 @@ public class Util_ScanRX{
                 //System.out.println("PatternItr init: obj ="+obj);
                 temp.add(obj);
             }
-            words = new Itr_noFile( temp );
+            words = new StringSource_list( temp );
             if(!words.hasFile()){
                 Class_Scanner.getInstance().setEr("Err at:"+text);
             }

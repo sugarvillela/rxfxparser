@@ -6,12 +6,12 @@ import java.util.ArrayList;
  *
  * @author newAdmin
  */
-public class Itr_noFile implements Itr_CallNext{// implements Iterator, Iterable
+public class StringSource_list implements StringSource{// implements Iterator, Iterable
     ArrayList<Object> content;
     boolean good, done;
     protected int row;
     
-    public Itr_noFile(ArrayList<Object> setContent){
+    public StringSource_list(ArrayList<Object> setContent){
         this.init(setContent);
     }
     public final void init(ArrayList<Object> setContent){
@@ -59,4 +59,6 @@ public class Itr_noFile implements Itr_CallNext{// implements Iterator, Iterable
     public boolean isLineGetter(){ return true; }
     @Override
     public boolean isWordGetter(){ return false; }
+    @Override
+    public boolean isEndLine(){ return false; }
 }

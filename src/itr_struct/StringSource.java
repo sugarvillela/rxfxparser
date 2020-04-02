@@ -1,10 +1,10 @@
 package itr_struct;
 
-/**
+/**Interface for Itr_file, Itr_noFile
  *
  * @author Dave Swanson
  */
-public interface Itr_CallNext {
+public interface StringSource {
     public int getRow();
     public int getCol();
     public String next();
@@ -16,4 +16,5 @@ public interface Itr_CallNext {
     public void setWordGetter();
     public boolean isLineGetter();
     public boolean isWordGetter();
+    public boolean isEndLine();
 }

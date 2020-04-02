@@ -18,7 +18,7 @@ public class Parse_ {
     }
     public static void read_rxlx_file(){
         Class_Scanner S = Class_Scanner.getInstance();//, "scanOutput"
-        ArrayList<IParse.ScanNode_fromFile> list = S.read_rxlx_file("scanOutput.rxlx");
+        ArrayList<IParse.ScanNode> list = S.read_rxlx_file("scanOutput.rxlx");
         Commons.disp(list);
     }
     public static void testEnub(){

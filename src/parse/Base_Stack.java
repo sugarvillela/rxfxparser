@@ -1,8 +1,9 @@
 package parse;
 
 import commons.Erlog;
-import itr_struct.Itr_CallNext;
-import itr_struct.Itr_file;
+import itr_struct.StringSource_file;
+import java.util.ArrayList;
+import itr_struct.StringSource;
 
 /**Abstract base class for Scanner and Parser classes
  *
@@ -11,7 +12,7 @@ import itr_struct.Itr_file;
 public abstract class Base_Stack implements IParse{
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
-    protected Itr_CallNext fin;  // file to be parsed
+    protected StringSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
     protected final Erlog er;    // logs, notifies, quits or all 3
     protected String backText;   // repeat lines
@@ -22,7 +23,7 @@ public abstract class Base_Stack implements IParse{
     
     @Override
     public void push( Base_StackItem nuTop ){
-        System.out.println( "Pushing "+nuTop.name+", stackSize = "+stackSize );
+        System.out.println( "Pushing "+nuTop.getClass().getSimpleName()+", stackSize = "+stackSize );
         if(top==null){
             top = nuTop;
             stackSize=1;
@@ -42,7 +43,7 @@ public abstract class Base_Stack implements IParse{
             //System.exit(0);
         }
         else{
-            System.out.println( "Popping "+top.name+", stackSize = "+stackSize );
+            System.out.println( "Popping "+top.getClass().getSimpleName()+", stackSize = "+stackSize );
             top.onPop();
             top.pop();
             stackSize--;
@@ -64,6 +65,22 @@ public abstract class Base_Stack implements IParse{
     public void onPop(){}
     @Override
     public void onQuit(){}
+    @Override
+    public ArrayList<ScanNode> getScanNodeList(){
+        commons.Erlog.getInstance().set(
+            "Developer: no getScanNodeList() implementation in "
+                    + this.getClass().getSimpleName()
+        );
+        return new ArrayList<>();
+    }
+    @Override
+    public Base_StackItem getTop(){
+        return top;
+    }
+    @Override
+    public StringSource getStringSource(){
+        return fin;
+    }
     @Override
     public void disp(){
         if( top != null ){
@@ -88,7 +105,7 @@ public abstract class Base_Stack implements IParse{
             er.set( "Not a ." + ext + " file: " + filename );
             return;
         }
-        fin = new Itr_file( filename );
+        fin = new StringSource_file( filename );
         if( !fin.hasFile() ){
             er.set( "Bad input file name: "+filename );
         }

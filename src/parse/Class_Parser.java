@@ -2,11 +2,15 @@
  */
 package parse;
 
+import parse.Keywords.HANDLER;
+import parse.Keywords.CMD;
+
 import codegen.*;
 import commons.Commons;
 import itr_struct.Enumstore;
-import itr_struct.Itr_file;
-import itr_struct.Itr_noFile;
+import itr_struct.StringSource;
+import itr_struct.StringSource_file;
+import itr_struct.StringSource_list;
 import java.util.ArrayList;
 import java.util.Iterator;
 import unique.*;
@@ -19,7 +23,7 @@ public class Class_Parser extends Base_Stack {
     
 //    public Handler top;     // stack; handlers are linked nodes
 //    public int stackSize;       // changes on push, pop
-//    public Itr_file fin;        // file to be parsed
+//    public Stringsource_file fin;        // file to be parsed
     public Unique uq;           // unique number/string generator
     private Widget[] widgets;   // output generator
     private Base_Gen[] handlers;
@@ -38,7 +42,7 @@ public class Class_Parser extends Base_Stack {
     }
     private Class_Parser(String filename){
         setFile(filename, "rxlx");
-        fin = new Itr_file( filename );
+        fin = new StringSource_file( filename );
         if( !fin.hasFile() ){
             er.set( "Bad input file name: "+filename );
             return;
@@ -46,7 +50,7 @@ public class Class_Parser extends Base_Stack {
         generalInit();
     }
     private Class_Parser(ArrayList<Object> setContent){
-        fin = new Itr_noFile( setContent );
+        fin = new StringSource_list( setContent );
         if( !fin.hasFile() ){
             er.set( "Bad input content" );
             return;
@@ -54,10 +58,10 @@ public class Class_Parser extends Base_Stack {
         generalInit();
     }
     private void generalInit(){
-        widgets = new Widget[H.NUM_HANDLERS.ordinal()]; //TODO remove
+        widgets = new Widget[HANDLER.NUM_HANDLERS.ordinal()]; //TODO remove
         uq = new Unique();                          //TODO remove
         // defaults
-        handlers = new Base_Gen[H.NUM_HANDLERS.ordinal()];
+        handlers = new Base_Gen[HANDLER.NUM_HANDLERS.ordinal()];
         
         wrow = 8;
         wval = 4;
@@ -131,7 +135,7 @@ public class Class_Parser extends Base_Stack {
     }
     // widgets is a store for any widgets made by handlers
     // widgets[0] is the default writer
-    public Widget getWidget(IParse.H h){//TODO remove
+    public Widget getWidget(HANDLER h){//TODO remove
         int i = h.ordinal();
         if(widgets[i] == null){
             widgets[i]=Widget.getNewWidget();
@@ -239,6 +243,30 @@ public class Class_Parser extends Base_Stack {
         }
         @Override
         public abstract void add( Object obj );
+        
+        @Override
+        public ArrayList<ScanNode> getScanNodeList(){
+            return null;
+//            if(nodes==null){
+//                commons.Erlog.getInstance().set(
+//                    "Developer: scan node list not initialized in "+this.getClass().getSimpleName()
+//                );
+//            }
+//            return nodes;
+        }
+        @Override
+        public Base_StackItem getTop(){
+            return P.getTop();
+        }
+        @Override
+        public StringSource getStringSource(){
+            if(fin==null){
+                commons.Erlog.getInstance().set(
+                    "Developer: StringSource not initialized in "+this.getClass().getSimpleName()
+                );
+            }
+            return fin;
+        }
     }
     public class Gen_targetLang extends Base_Gen{
         public Gen_targetLang( Widget setW ){
@@ -336,15 +364,15 @@ public class Class_Parser extends Base_Stack {
     
     
     public void test_Gen_ENUB(){
-        getGen(new ScanNode(CMD.PUSH, H.TARGLANG_BASE));
-        Gen_ENUB g = (Gen_ENUB)getGen(new ScanNode(CMD.PUSH, H.ENUB));
-        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, H.USERDEF, "Wowee"));
+        getGen(new ScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
+        Gen_ENUB g = (Gen_ENUB)getGen(new ScanNode(CMD.PUSH, HANDLER.ENUB));
+        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
         u.below = g;
         u.onPush();
         u.add("donkey");
         u.add("fritter");
         u.add("incompetent");
-        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, H.USERDEF, "Fantastique"));
+        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
         u2.below = g;
         u2.onPush();
         u2.add("jeepers");
@@ -353,16 +381,16 @@ public class Class_Parser extends Base_Stack {
         g.onQuit();
     }
     public void test_Gen_ENUD(){
-        getGen(new ScanNode(CMD.PUSH, H.TARGLANG_BASE));
-        Gen_ENUD g = (Gen_ENUD)getGen(new ScanNode(CMD.PUSH, H.ENUD));
+        getGen(new ScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
+        Gen_ENUD g = (Gen_ENUD)getGen(new ScanNode(CMD.PUSH, HANDLER.ENUD));
         g.onCreate();
-        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, H.USERDEF, "Wowee"));
+        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
         u.below = g;
         u.onPush();
         u.add("donkey");
         u.add("fritter");
         u.add("incompetent");
-        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, H.USERDEF, "Fantastique"));
+        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
         u2.below = g;
         u2.onPush();
         u2.add("jeepers");

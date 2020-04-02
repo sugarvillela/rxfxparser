@@ -11,11 +11,12 @@ import toktools.TK;
  *
  * @author Dave Swanson
  */
-public class Itr_file implements Itr_CallNext{
+public class StringSource_file implements StringSource{
     /*  For text file input;
-        hasFile() is true if file opened
-        Returns one word or line with each call.
-        hasNext() is false when iterator runs out of words or lines
+        Returns one word or line with each next() call.
+        isEndLn() true if word mode, end line reached and no extension '...'
+        hasFile() true if file opened
+        hasNext() false when iterator runs out of words or lines
         static function readAll dumps file to array list
     */
     public Scanner input;
@@ -26,37 +27,39 @@ public class Itr_file implements Itr_CallNext{
     protected int row, col;
     protected boolean good;
     protected boolean done;
-    protected Getter getter;
+    protected Getter getter;// current getter
     protected Getter gLine;
     protected Getter gWord;
+    protected String ignoreEndLn;// force isEndLine() false by adding at end of line
     public String name;
     public static final int LINE = 1;
     public static final int WORD = 2;
     
-    public Itr_file( String fileName ){
-        init( fileName, WORD );// default word output
+    public StringSource_file( String fileName ){
+        init( fileName, WORD );// default word output with ext pattern
     }
-    public Itr_file( String fileName, int defBehavior ){
-        init( fileName, defBehavior );
+    public StringSource_file( String fileName, int defBehavior ){
+        init( fileName, defBehavior );// choose behavior, no pattern
     }
     public final void init(String fileName, int defBehavior){
         this.log = Erlog.getInstance();
         openFile( fileName );
-        this.gLine = new Getter_line();
-        this.gWord = new Getter_word();
-        
+        this.gLine = new Getter_line();// need this whether line or word mode
+
         switch(defBehavior){
             case LINE:
                 this.getter = this.gLine;
                 break;
             case WORD:
+                this.gWord = new Getter_word();
                 this.getter = this.gWord;
                 break;
             default:
                 log.set("ItrFile: set default behavior");
                 break;
-        }       
-        this.tk = TK.getInstance();     // init tokenizer
+        }
+        // init tokenizer
+        this.tk = TK.getInstance();     
         this.tk.setDelims(" ");
         this.tk.setMap("\"");
         this.tk.setFlags(0); // 
@@ -106,16 +109,23 @@ public class Itr_file implements Itr_CallNext{
         return this.col;
     }
     @Override
+    public boolean isEndLine(){ 
+        return getter.isEndLine(); 
+    }
+    @Override
     public String next(){
         //String s =this.getter.next();
-        //System.out.println( "Itr_file: "+s ); 
+        //System.out.println( "StringSource_FromFile: "+s ); 
         return this.getter.next();
     }
     public abstract class Getter{
         protected String text;
         public abstract String next();
+        public abstract boolean isEndLine();
     }
     public class Getter_line extends Getter{
+        public Getter_line(){}
+        public Getter_line(String discard){}
         @Override
         public String next(){
             try{
@@ -129,22 +139,29 @@ public class Itr_file implements Itr_CallNext{
                 return "";
             }
         }
+        @Override
+        public boolean isEndLine(){ return false; }
     }
     public class Getter_word extends Getter{
+        private boolean endLn;
+        
+        public Getter_word(){
+            endLn = true;
+        }
         @Override
         public String next(){
-            if( tok == null || col >= tok.size()-1 ){//first or refresh
+            if( endLn ){//first or refresh
 //                do{
                     this.text = "";
                     while( this.text.isEmpty()){
                         if(done){
-                            System.out.println("Getter_word: line getter says done" );
+                            //System.out.println("Getter_word: line getter says done" );
                             col=0;
                             tok = null;
                             return "";
                         }
                         this.text = gLine.next().trim();
-                        System.out.println("text from line getter = " + this.text );
+                        //System.out.println("text from line getter = " + this.text );
                     }
                     //System.out.println("line = "+this.line);
                     tk.parse( this.text );
@@ -152,11 +169,17 @@ public class Itr_file implements Itr_CallNext{
                 
                 tok = tk.get();
                 col=-1;
-                Commons.disp(tok, "====GETTER_WORD=====");
+                endLn = false;
+                //Commons.disp(tok, "====GETTER_WORD=====");
             }
             col++;
             this.text = tok.get(col).trim();
+            endLn = (col >= tok.size() - 1);
             return this.text;
+        }
+        @Override
+        public boolean isEndLine(){
+            return endLn;
         }
     }
     @Override

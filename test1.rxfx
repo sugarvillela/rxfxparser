@@ -1,0 +1,13 @@
+<?php
+
+
+/*$
+
+	RX{ 
+		~(A=a&B='b')|~(C=~c&D=d)+ dru='&'|LEN()=2 'moustache' ...
+		myDog=gary
+	}
+		
+$*/
+
+?>

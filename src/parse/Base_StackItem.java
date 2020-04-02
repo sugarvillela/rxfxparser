@@ -1,26 +1,47 @@
 package parse;
-
+import itr_struct.StringSource;
+import java.util.ArrayList;
+import parse.Keywords.HANDLER;
 /**Abstract base class for handlers
  *
  * @author Dave Swanson
  */
 public abstract class Base_StackItem implements IParse{
-    protected Base_Stack P;
-    protected Base_StackItem above, below;
-    protected H h;
-    public String name;
+    protected Base_Stack P;                 // containing stack
+    protected Base_StackItem above, below;  // stack links
+    protected HANDLER h;                    // class's own enum
+    protected HANDLER[] allowedHandlers;    // children handlers to instantiate
 
     //public Handler_base(){}
     public Base_StackItem(){
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
-        name = this.getClass().getSimpleName();
     }
-    // each handler must implement pushPop
-    public abstract void pushPop( String text );
-    
+    // utilities
+    // careful: these two are opposite logic, one positive one negative
+    protected boolean isAllowedHandler(HANDLER handler){
+        for( HANDLER allowed : allowedHandlers ){
+            if( handler == allowed ){
+                return true;
+            }
+        }
+        return false;
+    }
+    // sets a parse error
+    protected boolean erOnBadHandler(HANDLER handler){
+        if(isAllowedHandler(handler)){
+            return false;
+        }
+        P.setEr( handler + " not allowed here");
+        return true;
+    }
+    // implementations
     @Override
     public void push( Base_StackItem nuTop ){
+        System.out.println("\n Base stack item...");
+        System.out.println("this: "+this.toString());
+        System.out.println("P: "+P.toString());
+        System.out.println("Nu top: "+nuTop.toString());
         nuTop.below = this;
         this.above = nuTop;
         P.top = nuTop;
@@ -36,6 +57,11 @@ public abstract class Base_StackItem implements IParse{
             this.below = null;
         }
     }
+
+    // children must implement pushPop
+    public abstract void pushPop( String text );
+    
+    // stubs: children may override to implement
     @Override
     public void add(Object obj){}
     @Override
@@ -52,9 +78,10 @@ public abstract class Base_StackItem implements IParse{
     public void onPop(){}
     @Override
     public void onQuit(){}
+
     @Override
     public void disp(){
-        System.out.println( "My name is "+this.name ); 
+        System.out.println( "My name is "+this.getClass().getSimpleName() ); 
         if(this.below==null){
             System.out.println( "display done" ); 
         }

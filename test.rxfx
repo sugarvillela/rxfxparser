@@ -1,13 +1,21 @@
 <?php
-
+/* This part has no purpose but to be copied $*/
+$number = 0;
 
 /*$
-
-	RX{ 
-		~(A=a&B='b')|~(C=~c&D=d)+ dru='&'|LEN()=2 'moustache' 
-		myDog=gary
-	}
-		
+	ATTRIB 
+		title=myTitle ...
+		favoriteMovie=none
+	// Boolean	
+	ENUB
+		$POS
+			verb noun adjective adverb linking article determiner 
+		$STATE 
+			begin middle end 
+			
+	TARGLANG
+		incNumber();
+	
 $*/
 
 ?>

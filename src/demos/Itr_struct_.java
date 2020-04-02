@@ -146,7 +146,7 @@ public class Itr_struct_ {
     }
     public static void itr_file(){
         // Can change modes on the fly. Doesn't save half-lines
-        Itr_file f =  new Itr_file("file01.txt");
+        StringSource_file f =  new StringSource_file("file01.txt");
         System.out.println( "hasFile = "+f.hasFile());
         int i = 1;
         int last = -1;
@@ -177,7 +177,7 @@ public class Itr_struct_ {
     }
     public static void itr_file_word(){
         // Can change modes on the fly. Doesn't save half-lines
-        Itr_file f =  new Itr_file("test.rxfx");
+        StringSource_file f =  new StringSource_file("test1.rxfx");
         System.out.println( "hasFile = "+f.hasFile());
         int i = 1;
         int row, col;
@@ -186,7 +186,7 @@ public class Itr_struct_ {
             String text = f.next();
             row=f.getRow();
             col=f.getCol();
-            System.out.printf( "%d %d : %s \n", row, col, text);//System.out.println("===row "+row+"===");
+            System.out.printf( "%d %d : %s %b\n", row, col, text, f.isEndLine());//System.out.println("===row "+row+"===");
             if("RX{".equals(text.trim())){
                 f.setWordGetter();
             }
@@ -198,7 +198,7 @@ public class Itr_struct_ {
     }
     public static void itr_file_skips(){
         // Can change modes on the fly. Doesn't save half-lines
-        Itr_file f =  new Itr_file("file02.txt");
+        StringSource_file f =  new StringSource_file("file02.txt");
         System.out.println( "hasFile = "+f.hasFile());
         int i = 0;
         f.setWordGetter();
