@@ -66,6 +66,9 @@ public abstract class Base_Stack implements IParse{
     @Override
     public void onQuit(){}
     @Override
+    public void notify(Keywords.KWORD k){}
+    
+    @Override
     public ArrayList<ScanNode> getScanNodeList(){
         commons.Erlog.getInstance().set(
             "Developer: no getScanNodeList() implementation in "

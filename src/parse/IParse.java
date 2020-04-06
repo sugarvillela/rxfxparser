@@ -7,11 +7,13 @@ package parse;
 
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
+import parse.Keywords.KWORD;
+
 import commons.Commons;
 import itr_struct.StringSource;
 import java.util.ArrayList;
 
-/**Contains the language definition, including enums, constants, node classes
+/**Interface and static node classes
  *
  * @author Dave Swanson
  */
@@ -21,20 +23,33 @@ public interface IParse {
     public class ScanNode{
         public CMD cmd;
         public HANDLER h;
+        public KWORD k;
         public String data;
         
         public ScanNode(CMD setCommand, HANDLER setHandler){
-            this(setCommand, setHandler, "");
+            this(setCommand, setHandler, null, "");
         }
         public ScanNode(CMD setCommand, HANDLER setHandler, String setData){
+            this(setCommand, setHandler, null, setData);
+        }
+        public ScanNode(CMD setCommand, HANDLER setHandler, KWORD setKWord){
+            this(setCommand, setHandler, setKWord, "");
+        }
+        public ScanNode(CMD setCommand, HANDLER setHandler, KWORD setKWord, String setData){
             h = setHandler;
             cmd = setCommand;
+            k = setKWord;
             data = setData;
         }
         @Override
-        public String toString(){
-            return Commons.objStr(cmd) + "," + 
-                    Commons.objStr(h) + "," + data + ",";
+        public String toString(){//one line of a csv file
+            return String.format(
+                "%s,%s,%s,%s,", 
+                Commons.objStr(cmd), 
+                Commons.objStr(h), 
+                Commons.objStr(k),
+                data
+            );
         }
     }
     public class GroupNode{
@@ -65,6 +80,7 @@ public interface IParse {
     public void onPush();   // call immediately after push
     public void onPop();    // call just before pop
     public void onQuit();   // call when program/task is finished
+    public void notify(KWORD k);// not used
     
     // Getters
     public Base_StackItem getTop();

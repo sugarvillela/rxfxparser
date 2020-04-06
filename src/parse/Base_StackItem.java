@@ -78,7 +78,9 @@ public abstract class Base_StackItem implements IParse{
     public void onPop(){}
     @Override
     public void onQuit(){}
-
+    @Override
+    public void notify(Keywords.KWORD k){}
+    
     @Override
     public void disp(){
         System.out.println( "My name is "+this.getClass().getSimpleName() ); 

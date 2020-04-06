@@ -6,14 +6,17 @@
 package parse;
 
 import java.util.ArrayList;
+
+import parse.Keywords.HANDLER;
+
 import static parse.Keywords.COMMENT_TEXT;
 import static parse.Keywords.SOURCE_CLOSE;
 import static parse.Keywords.USERDEF_OPEN;
-import static parse.IParse.ScanNode;
-import parse.Keywords.HANDLER;
-import itr_struct.StringSource;
-import static parse.Keywords.COMMENT_OPEN;
+import static parse.Keywords.HANDLER.TARGLANG_INSERT;
+import static parse.Keywords.TARGLANG_OPEN;
 
+import static parse.IParse.ScanNode;
+import itr_struct.StringSource;
 /**
  *
  * @author Dave Swanson
@@ -28,7 +31,14 @@ import static parse.Keywords.COMMENT_OPEN;
             nodes = P.getScanNodeList();
             fin = P.getStringSource();
         }
-        // Utilities for subclasses: call in this order
+        // First: Utilities for subclasses:
+        
+        // detect connected symbol; false on symbol alone
+        protected final boolean isUserDef(String text){
+            return text.startsWith(USERDEF_OPEN) && 
+                    !text.equals(USERDEF_OPEN);
+        }
+        // Push/Pops: Call popAll first, if you call it...
         protected final boolean popAll(String text){
             if(SOURCE_CLOSE.equals(text)){
                 P.setLineGetter();
@@ -37,31 +47,31 @@ import static parse.Keywords.COMMENT_OPEN;
             }
             return false;
         }
-        // detects connected or unconnected 
+        // detects connected or unconnected comment symbol
         protected final boolean pushComment(String text){
             if(text.startsWith(COMMENT_TEXT)){// okay to discard text
                 P.push( Factory_Context.get(HANDLER.COMMENT) );
                 return true;
             }
-            if(text.startsWith(COMMENT_OPEN)){// okay to discard text
-                P.push( Factory_Context.get(HANDLER.COMMENT_LONG) );
+            return false;
+        }
+        protected final boolean pushTargLang(String text){
+            if( TARGLANG_OPEN.equals(text) ){
+                P.push( Factory_Context.get(TARGLANG_INSERT) );
                 return true;
             }
             return false;
         }
-        protected final boolean pushUserDefListItem(String text){
-            if( text.startsWith(USERDEF_OPEN) ){
-                P.push( 
-                    Factory_Context.get(
-                        HANDLER.USERDEF, text.substring(USERDEF_OPEN.length())
-                    )
-                );
-                return true;
-            }
-            return false;
+        protected final boolean pushUserDef(HANDLER uDefHandler, String text){
+            P.push( 
+                Factory_Context.get(
+                    uDefHandler, text.substring(USERDEF_OPEN.length())
+                )
+            );
+            return true;
         }
         protected boolean popOnKeyword(String text){
-            Keywords.HANDLER keyword = Keywords.HANDLER.get(text);
+            HANDLER keyword = HANDLER.get(text);
             if( keyword != null){
                 P.back(text);//repeat keyword so next handler can push it
                 P.pop();
@@ -83,7 +93,7 @@ import static parse.Keywords.COMMENT_OPEN;
                     return false;
                 }
             }
-            P.setEr( "Unknown keyword in: " + text );
+            P.setEr( "Unknown keyword: " + text );
             return false;
         }
         

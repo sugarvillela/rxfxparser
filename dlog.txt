@@ -1,1 +1,1 @@
-Error: line 8, word 1: Expected key=value format or 'literal' here: =
+Error: line 16, word 0: Unknown keyword in: TARGLANG

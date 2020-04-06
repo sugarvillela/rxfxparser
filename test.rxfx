@@ -13,8 +13,9 @@ $number = 0;
 		$STATE 
 			begin middle end 
 			
-	TARGLANG
-		incNumber();
+	*/
+		$number++;
+    /*
 	
 $*/
 

@@ -10,6 +10,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
+import parse.Keywords.KWORD;
+import static parse.Keywords.KWORD.ENDLINE;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
  *
@@ -47,7 +49,7 @@ public class Class_Scanner extends Base_Stack {
     public static void killInstance(){
         staticInstance = null;
     }
-    
+
     // Runs Scanner
     @Override
     public void onPush(){
@@ -126,32 +128,26 @@ public class Class_Scanner extends Base_Stack {
         return out;
     }
     public ScanNode read_rxlx_elem( String text){
-        int start = 0, i, j=0;
-        HANDLER h = null;
-        CMD cmd = null;
-        String data;
-        
-        for( i=0; i<text.length(); i++ ){
+        String[] tok = new String[4];
+        int j = 0, start = 0;
+        for( int i=0; i<text.length(); i++ ){
             if( text.charAt(i) == ',' ){
-                cmd = CMD.get(text.substring(start, i));
-
+                tok[j]=text.substring(start, i);
+                System.out.printf("%d, %d, %d, %s \n", i, j, start, tok[j]);
                 start=i+1;
-                System.out.println(cmd+": i = "+i);
-                break;
+                j++;
+            }
+            if(j == 4){
+                return new ScanNode(
+                    CMD.get(tok[0]),
+                    HANDLER.get(tok[1]),
+                    KWORD.get(tok[2]),
+                    tok[3]
+                );
             }
         }
-        for( i=start; i<text.length(); i++ ){
-            if( text.charAt(i) == ',' ){
-                h = HANDLER.get(text.substring(start, i));
-                System.out.println(h+": i = "+i);
-                start=i+1;
-                break;
-            }
-        }
-        data = text.substring(start, text.length()-1);
-        System.out.println(text);
-        System.out.println(data+": i = "+i);
-        System.out.println(this.toString());
-        return new ScanNode(cmd, h, data);
+        System.out.println(j);
+        setEr( "Bad CSV file format at: " + text );
+        return null;
     }
 }
