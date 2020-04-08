@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
 import parse.Keywords.KWORD;
-import static parse.Keywords.KWORD.ENDLINE;
+//import static parse.Keywords.KWORD.ENDLINE;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
  *

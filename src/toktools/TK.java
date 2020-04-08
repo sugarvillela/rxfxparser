@@ -14,13 +14,22 @@ import java.util.ArrayList;
 /**
  * Tokenizer with multi-delimiters, empty-element prevention, special options.
  * Can define 'skip' areas not to tokenize, like quoted text etc.
+ * Can leave 'skip' characters in or take them out
+ * Can leave delimiters in or take them out.
+ * Can leave skipped text in or put it into a separate list: skips
+ * Can extend skip areas across two or more lines
+ * 
  * Three types of static method:
- * 1. Simple tokenizers without multi-delimiters and skip areas
+ * 1. getInstance() for Tokens_simple, Tokens_special, Tokens_wSkipHold
+ *  a. Returns appropriate instance for parameters passed
+ *  b. Instance is initialized; just call toArr or toList with text to split
+ *  c. Instances are always new; save instance locally and pass as first 
+ *       parameter of subsequent calls
+ * 2. Simple tokenizer without multi-delimiters and skip areas
  *  a. Return arrayList or array
- * 2. Complex tokenizers with all features
+ * 3. Complex tokenizers with all features
  *  a. Return arrayList or array
- * 3. Complex tokenizers that return instance of self with arrays initialized
- *  a. no arg getInstance() returns uninitialized instance (singleton pattern)
+
  * 
  * 
  * @author Dave Swanson
@@ -46,375 +55,150 @@ public class TK {
      * then setText() and parse() again. setMap() clears the holdover */
     public static final int HOLDOVER = 0x08;
     
-    protected  String text, delims;     // input text, list of delimiters
-    protected ArrayList<String> tokens; // output
-    protected ArrayList<String> skips;  // removed strings if SKIPOUT else null
-    protected char[] oMap, cMap;        // matched open/close skip char arrays
-    
-    protected int symbIn;               // leave open/close chars in if 1
-    protected boolean delimIn;//, skipOut; // keep delims, skips to separate list
-    //protected boolean holdOver;         // carry over skip area to next parse
-    //protected String holdText;          // To support holdOver
-    private SkipBehavior skipBehavior;
-    private HoldBehavior holdBehavior;
-    
-    private TK() {
-        symbIn = 1;
-        //skipOut = false;
-        delimIn = false;
-        skipBehavior = new Skip_false();
-        holdBehavior = new Hold_false();
-        
-    }
-    private static TK tk=null;
-    
-    // initializers before parsing
-    public void setText( String text ){
-        this.text = text;
-    }    
-    public void setDelims( String delims ){
-        this.delims = delims;
-    }
-    public void setMap( String skips ){
-        // map openers to closers, using symbols from arg
-        // if you want different symbols, edit this or add a strategy pattern
-        oMap =  new char[skips.length()];
-        cMap =  new char[skips.length()];
-        char[] openers = new char[]{'(','{','[','<','"','\''};
-        char[] closers = new char[]{')','}',']','>','"','\''};
-        int to = 0;
-        for ( int i = 0; i < openers.length; i++) {
-            if( skips.indexOf(openers[i])!=-1){
-                oMap[to]=openers[i];
-                cMap[to]=closers[i];
-                to++;
-            }
-        }
-    }
-    public void setFlags( int flags ){
-        symbIn = ( ( flags & SYMBOUT )==0 )? 1 : 0;   // integer for adding index
-        skipBehavior = ( ( flags & SKIPOUT )==0 )? new Skip_false() : new Skip_true();
-        holdBehavior = ( ( flags & HOLDOVER )==0 )? new Hold_false() : new Hold_true();
-        //skipOut = ( ( flags & SKIPOUT )!=0 );
-        delimIn = ( ( flags & DELIMIN )!=0 );
-
-    }
-    
-    // utility for better readability in parse()
-    protected boolean isDelim( char symb ){
-        //System.out.printf("\nisDelim symb=%c\n", symb);
-        return ( delims.indexOf( symb )!= -1 );
-    }
-    public boolean isHolding(){
-        return holdBehavior.isHolding();
-    }
-
-    // utilities, not needed because dup prevention works
-    // Then again, you may want to keep delims but lose spaces, so here you go.
-    // Or set the delims, run parse() then set other delims to get rid of
-    public void trimDelims(){
-        /* Make sure no empty or all-delimiter strings are included */
-        ArrayList<String> trimmed = new ArrayList<>();
-        for ( String tok : tokens ){
-            for ( int i = 0; i < tok.length(); i++){
-                if( !isDelim( tok.charAt(i) ) ){
-                    trimmed.add( tok );
-                    break;
-                }
-            }
-        }
-        tokens = trimmed;
-    }
-    public void trimSpaces(){
-        /* Make sure no empty strings are included */
-        ArrayList<String> trimmed = new ArrayList<>();
-        for ( String tok : tokens ){
-            tok = tok.trim();
-            if( tok.length() != 0 ){
-                trimmed.add( tok );
-            }
-        }
-        tokens = trimmed;
-    }
-    
-    // main method
-    public void parse( String text ){ // save a step if repeating parse
-        setText( text );
-        parse();
-    }
-    public void parse(){
-        //System.out.printf("\nParse: holding=%b, text=%s\n", holdBehavior.isHolding(), text);
-        holdBehavior.initParse();         // close symbol, matches opening symbol
-        //holdBehavior.newList();           // to put skips in
-
-        int start=0;        // beginning of substring
-        int i;              // for current char being checked
-        for ( i = 0; i < text.length(); i++) {
-            if( holdBehavior.isHolding() ){                     // in skip area            
-                if( holdBehavior.isClosing( text.charAt(i) ) ){ // found closing skip symbol
-                    holdBehavior.clearCSymb();                  // leaving skip area
-                    // if symbIn==1, will keep current symbol, else lose it
-                    skipBehavior.add( text.substring( start, i+symbIn ) );
-                    start=i+1;                    // reset for next token
-                }
-            }
-            else if( holdBehavior.isOpening( text.charAt(i) ) ){// opener
-                if( i != start ){               // if prev wasn't a delim, dump
-                    tokens.add( text.substring( start, i ) );
-                    start=i;
-                }
-                if(symbIn == 0){                // lose the current symbol
-                    start += 1;
-                }
-            }
-            else if( isDelim( text.charAt(i) ) ){//delimiter
-                //System.out.printf("yes %c\n", text.charAt(i) );
-                if( i!=start ){                 // if text, dump
-                    tokens.add( text.substring( start, i ) );
-                }
-                if( delimIn ){                  // give delim its own element
-                    tokens.add( text.substring(i, i+1) );
-                }
-                start=i+1;                      // reset for next token
-            }
-        }
-        if( i!=start ){                         // final dump if needed
-            tokens.add( text.substring( start, i ) );
-        }
-    }
-    
-    // get result
-    public ArrayList<String> get(){
-        return tokens;
-    }
-    public ArrayList<String> getTokens(){
-        return tokens;
-    }
-    public ArrayList<String> getSkips(){
-        return skips;
-    }
-    private interface SkipBehavior{
-        public void newList();
-        public void add( String skipText );
-    }
-    private class Skip_false implements SkipBehavior{
-        // This one ignores command to add to skips; adds to tokens instead
-        @Override
-        public void newList(){
-            skips = null;
-        }
-        @Override
-        public void add( String skipText ){
-            tokens.add( skipText );
-        }
-    }
-    private class Skip_true implements SkipBehavior{
-        // this one adds to skips when commanded
-        @Override
-        public void newList(){
-            skips = new ArrayList<>();
-        }
-        @Override
-        public void add( String skipText ){
-            skips.add( skipText );
-        }
-    }
-    private abstract class HoldBehavior{
-        protected char cSymb;           // Closing symbol (replace with stack?)
-        public HoldBehavior(){
-            cSymb = 0;                  // clear closing symbol used for parse()
-        }
-        public final boolean isOpening( char symb ){
-            // Set closer to match opener, or null if not an opener
-            for(int i=0; i<oMap.length; i++){
-                if( symb == oMap[i] ){
-                    cSymb = cMap[i];    // important side effect
-                    return true;
-                }
-            }
-            return false;
-        }
-        public final boolean isHolding(){
-            return cSymb != 0;
-        }
-        public final boolean isClosing( char symb ){// ((cSymb = getMappedSymb(text.charAt(i))) != 0)
-            return symb == cSymb;
-        }
-        public final void clearCSymb(){
-            cSymb = 0;
-        }
-        public abstract void initParse();
-        public abstract void newList();
-        public abstract void add( String skipText );
-    }
-    private class Hold_false extends HoldBehavior{
-        @Override
-        public void initParse(){
-            cSymb = 0;
-            tokens = new ArrayList<>();     // for main tokenized output
-            skipBehavior.newList();              // to put skips in
-        }
-
-        @Override
-        public void newList(){
-
-        }
-        @Override
-        public void add( String skipText ){
-            skips.add( skipText );
-        }
-    }
-    private class Hold_true extends HoldBehavior{
-        @Override
-        public void initParse(){
-            if(!isHolding()){
-                cSymb = 0;
-                tokens = new ArrayList<>();     // for main tokenized output
-                skipBehavior.newList();              // to put skips in
-            }
-        }
-
-        @Override
-        public void newList(){
-            skips = new ArrayList<>();
-        }
-        @Override
-        public void add( String skipText ){
-            skips.add( skipText );
-        }
-    }
     /*========================================================================*/
-    // Static methods to run tokenizer: this one returns tokenizer instance so
-    // you can use get() methods for the return array you want
-    public static TK getInstance(){
-        /* Returns uninitialized instance */
-        return (tk==null)? ( tk = new TK() ) : tk;
+    // Static methods to run tokenizer: 
+
+    /**Gets simple tokenizer with split on space
+     * @return instance initialized with everything but text
+     */
+    public static Tokens getInstance(){
+        return new Tokens_simple();  // initialized
     }
-    public static TK getInstance( String delims, String text, String skips ){
-        /* One stop shop: sets, runs and returns with no flags */
-        return getInstance( delims, text, skips, 0 );
+    
+    /**Gets simple tokenizer with default limit (high)
+     * @param delim single char delimiter like space etc
+     * @return instance initialized with everything but text
+     */
+    public static Tokens getInstance( char delim ){
+        return new Tokens_simple( delim );  // initialized
     }
-    public static TK getInstance( String delims, String text, String skips, int flags ){
-        /* One stop shop: sets, runs and returns */
-        if (tk==null){
-            tk = new TK();
-        }
-        tk.setText(text);
-        tk.setDelims(delims); 
-        tk.setMap(skips); 
-        tk.setFlags(flags);
-        tk.parse();
-        return tk;  // initialized
+    
+    /**Gets simple tokenizer
+     * @param delim single char delimiter like space etc
+     * @param limit max number of splits allowed
+     * @return instance initialized with everything but text
+     */
+    public static Tokens getInstance( char delim, int limit ){
+        return new Tokens_simple( delim, limit );  // initialized
+    }
+
+    /**Gets special tokenizer with default settings
+     * @param delims delimiters like space etc
+     * @param skips symbols surround text you don't want split, like "() etc
+     * @return instance initialized with everything but text
+     */
+    public static Tokens getInstance( String delims, String skips ){//, int flags
+        return new Tokens_special( delims, skips, 0 );
+    }
+    /**Gets special tokenizer or skip-and-hold-enabled tokenizer
+     * 
+     * @param delims delimiters like space etc
+     * @param skips symbols surround text you don't want split, like "() etc
+     * @param flags constants enumerated in Tokens interface
+     * @return instance initialized with everything but text
+     */
+    public static Tokens getInstance( String delims, String skips, int flags ){//, int flags
+        return ( (flags & (TK.SKIPOUT|TK.HOLDOVER) ) != 0 )? 
+            new Tokens_special( delims, skips, flags ) : 
+            new Tokens_wSkipHold( delims, skips, flags );
+    }
+    
+    public static Tokens getInstance( String[] grps, String skips, int flags ){
+        return new Tokens_byGroup(grps, skips, flags);
+    }
+    
+    /*========================================================================*/
+    // Simple tokenize methods with empty-element prevention (see above)
+    // List version
+    public static ArrayList<String> toList( char delim, String text ){
+        return TK.toList(
+            TK.getInstance( delim ), 
+            text
+        );
+    }
+    public static ArrayList<String> toList( char delim, int limit, String text ){
+        return TK.toList(
+            TK.getInstance( delim, limit ), 
+            text
+        );
+    }
+
+    /*========================================================================*/
+    // Simple tokenize methods with empty-element prevention (see above)
+    // Array version
+    public static String[] toArr( char delim, String text ){
+        return TK.toArr(
+            TK.getInstance( delim, 0x7FFFFFFF ), 
+            text
+        );
+    }
+    public static String[] toArr( char delim, int limit, String text ){
+        return TK.toArr(
+            TK.getInstance( delim, limit ), 
+            text
+        );
+    }
+    // Keep this: Tokens_simple has custom method for array output
+    public static String[] toArr( Tokens_simple instance, String text ){
+        return instance.toArr( text );
     }
     
     /*========================================================================*/
     // Complex tokenize methods with multi-delims and skip symbols (see above)
-    public static ArrayList<String> toList( String delims, String text, String skips ){
+    // List version
+    public static ArrayList<String> toList( String delims, String skips, String text ){
         /* One stop shop: sets, runs and returns with no flags */
-        return TK.toList( delims, text, skips, 0 );
+        return TK.toList( delims, skips, 0, text );
     }
-    public static ArrayList<String> toList( String delims, String text, String skips, int flags ){
+    public static ArrayList<String> toList( String delims, String skips, int flags, String text ){
         /* One stop shop: sets, runs and returns */
-        return TK.toList( getInstance(), delims, text, skips, flags );
+        return TK.toList( 
+            getInstance( delims, skips, flags ),
+            text
+        );
     }
-    public static String[] toArr( String delims, String text, String skips ){
-        return TK.toList( delims, text, skips, 0 ).toArray(new String[0]);
+    public static ArrayList<String> toList( String[] grps, String skips, int flags, String text ){
+        return TK.toList( 
+            getInstance( grps, skips, flags ),
+            text
+        );
     }
-    public static String[] toArr( String delims, String text, String skips, int flags ){
-        return TK.toList( delims, text, skips, flags ).toArray(new String[0]);
-    }
-
+    
     /*========================================================================*/
-    // As above, but use an existing instance
-    public static ArrayList<String> toList( TK instance, String delims, String text, String skips ){
-        /* One stop shop: sets, runs and returns with no flags */
-        return TK.toList( instance, delims, text, skips, 0 );
+    // Complex tokenize methods with multi-delims and skip symbols (see above)
+    // Array version
+    public static String[] toArr( String delims, String skips, String text ){
+        return TK.toArr( 
+            getInstance( delims, skips, 0 ),
+            text
+        );
     }
-    public static ArrayList<String> toList( TK instance, String delims, String text, String skips, int flags ){
-        /* One stop shop: sets, runs and returns */
-        instance.setText(text);
-        instance.setDelims(delims); 
-        instance.setMap(skips); 
-        instance.setFlags(flags);
-        instance.parse();
-        return instance.get();
+    public static String[] toArr( String delims, String skips, int flags, String text ){
+        return TK.toArr( 
+            getInstance( delims, skips, flags ),
+            text
+        );
     }
-    public static String[] toArr( TK instance, String delims, String text, String skips ){
-        return TK.toList( instance, delims, text, skips, 0 ).toArray(new String[0]);
+    public static String[] toArr( String[] grps, String skips, int flags, String text ){
+        return TK.toArr( 
+            getInstance( grps, skips, flags ),
+            text
+        );
     }
-    public static String[] toArr( TK instance, String delims, String text, String skips, int flags ){
-        return TK.toList( instance, delims, text, skips, flags ).toArray(new String[0]);
-    }
+    
     /*========================================================================*/
-    // Simple tokenize methods with empty-element prevention (see above)
-    public static ArrayList<String> toList( char delim, String text ){
-        return TK.toList( delim, text, 0x7FFFFFFF );
-    }
-    public static ArrayList<String> toList( char delim, String text, int limit ){
-        ArrayList<String> out = new ArrayList<>();
-        int i, j=0, start = 0;
-        for( i=0; i<text.length(); i++ ){
-            if( text.charAt(i) == delim ){
-                if( i != start ){
-                    if( j >= limit-1){
-                        break;
-                    }
-                    out.add( text.substring(start, i) );
-                    j++;
+    // Runner: assumes passed instance is initialized
 
-                }
-                start=i+1;
-            }
-        }
-        if( i != start ){
-            out.add( text.substring(start) );
-        }
-        return out;
+    public static ArrayList<String> toList( Tokens instance, String text ){
+        return instance.toList(text);
     }
-    public static String[] toArr( char delim, String text ){
-        return toArr( delim, text, 0x7FFFFFFF );
+    public static String[] toArr( Tokens instance, String text ){
+        return TK.toList( 
+            instance,
+            text
+        ).toArray(new String[0]);
     }
-    public static String[] toArr( char delim, String text, int limit ){
-        // Simple tokenizer with unlimited splits, no empty
-        // Rehearse to get size
-        int count = 0;
-        int start = 0;
-        int i, j = 0;
-        for( i=0; i<text.length(); i++ ){
-            if( text.charAt(i) == delim ){
-                if( i != start ){
-                    count++;
-                    // Limit size, if limit passed
-                    if( count == limit ){
-                        i = start;
-                        break;
-                    }
-                }
-                start=i+1;
-            }
-        }
-        if( i != start ){
-            count++;
-        }
-        // Set array and run again to populate
-        String[] out = new String[count];
-        start = 0;
-        for( i=0; i<text.length(); i++ ){
-            if( text.charAt(i) == delim ){
-                if( i != start ){
-                    if( j >= limit-1){
-                        break;
-                    }
-                    out[j] = text.substring(start, i);
-                    j++;
 
-                }
-                start=i+1;
-            }
-        }
-        if( i != start ){
-            out[j] = text.substring(start);
-        }
-        return out;
-    }
+    
+
 }

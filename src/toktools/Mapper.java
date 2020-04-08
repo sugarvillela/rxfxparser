@@ -47,7 +47,7 @@ public class Mapper {
          * array (see Commons_.map2).
          * Don't pass empty strings. */
         //System.out.printf( "map i = %s\n", map.substring(i, i+1) );
-        String[] tok = TK.toArr( map.charAt(i), text, limit );
+        String[] tok = TK.toArr( map.charAt(i), limit, text );
         i++;
         if( i >= map.length() || ( map.charAt(i)-'0' ) >= tok.length){
             return tok;

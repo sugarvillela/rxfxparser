@@ -7,6 +7,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 import commons.*;
 import toktools.TK;
+import toktools.Tokens;
 /** Word/line iterator; changes modes on the fly; doesn't preserve half-lines
  *
  * @author Dave Swanson
@@ -23,7 +24,7 @@ public class StringSource_file implements StringSource{
     protected Erlog log;
     //protected String line, word;
     protected ArrayList<String> tok;
-    protected TK tk;
+    protected Tokens tk;
     protected int row, col;
     protected boolean good;
     protected boolean done;
@@ -32,16 +33,22 @@ public class StringSource_file implements StringSource{
     protected Getter gWord;
     protected String ignoreEndLn;// force isEndLine() false by adding at end of line
     public String name;
-    public static final int LINE = 1;
-    public static final int WORD = 2;
+    public static final int LINE = 0x10;
+    public static final int WORD = 0x20;
     
     public StringSource_file( String fileName ){
-        init( fileName, WORD );// default word output with ext pattern
+        init( fileName, WORD, TK.getInstance(" ", "\"'", 0) );// default word output with ext pattern
     }
     public StringSource_file( String fileName, int defBehavior ){
-        init( fileName, defBehavior );// choose behavior, no pattern
+        init( fileName, defBehavior, TK.getInstance(" ", "\"'", defBehavior) );// choose behavior, no pattern
     }
-    public final void init(String fileName, int defBehavior){
+    public StringSource_file( String fileName, Tokens setTokenizer ){
+        init( fileName, WORD, setTokenizer );// choose behavior, no pattern
+    }
+    public StringSource_file( String fileName, int defBehavior, Tokens setTokenizer ){
+        init( fileName, defBehavior, setTokenizer );// choose behavior, no pattern
+    }
+    public final void init(String fileName, int defBehavior, Tokens setTokenizer ){
         this.log = Erlog.getInstance();
         openFile( fileName );
         this.gLine = new Getter_line();// need this whether line or word mode
@@ -59,10 +66,7 @@ public class StringSource_file implements StringSource{
                 break;
         }
         // init tokenizer
-        this.tk = TK.getInstance();     
-        this.tk.setDelims(" ");
-        this.tk.setMap("\"");
-        this.tk.setFlags(0); // 
+        this.tk = setTokenizer;
         this.name="Itr_file";
     }
     /* Initialize or re-initialize */
@@ -167,7 +171,7 @@ public class StringSource_file implements StringSource{
                     tk.parse( this.text );
 //                }while(tk.isHolding());
                 
-                tok = tk.get();
+                tok = tk.getTokens();
                 col=-1;
                 endLn = false;
                 //Commons.disp(tok, "====GETTER_WORD=====");

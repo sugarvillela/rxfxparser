@@ -4,6 +4,7 @@ import commons.Commons;
 import itr_struct.StringSource_list;
 import java.util.ArrayList;
 import toktools.TK;
+import toktools.Tokens;
 
 /**Sub-scanner utilities for RX pattern language
  *
@@ -98,19 +99,16 @@ public class Util_ScanRX{
     }
     public static class PatternItr{
         public static String DELIMS = "=~()&|";
-        protected TK tk;
+        protected Tokens tk;
         protected StringSource_list words;
         
         public PatternItr(){
-            tk = TK.getInstance();
-            tk.setDelims(DELIMS); 
-            tk.setMap("'"); 
-            tk.setFlags(TK.DELIMIN);
+            tk = TK.getInstance(DELIMS, "'", TK.DELIMIN);
         }
         public void init( String text){
-            tk.parse(text);
+            //tk.parse(text);
             ArrayList<Object> temp = new ArrayList<>();
-            for( String obj : tk.get() ){
+            for( String obj : tk.toList(text) ){
                 //System.out.println("PatternItr init: obj ="+obj);
                 temp.add(obj);
             }

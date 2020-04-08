@@ -18,11 +18,11 @@ public class Rxfxparser {
 //        System.out.println(n);
         //demos.Unique_.uq_enumgen();
         //demos.Itr_struct_.itr_file_word();
-        //demos.TokenTools_.toList();
+        demos.TokenTools_.tokens_byGroup();
         //demos.Stemmer_.stemmer3();
         //demos.Parse_.parseStack();
         //demos.Parse_.parseStack();
-        demos.Parse_.scanner();
+        //demos.Parse_.scanner();
         //demos.Commons_.assertFileExt();
         //demos.BIT_.maskRound();
         //System.out.println("12, 3, 45, 6, 7, 8900".matches("[ ,0-9]+"));

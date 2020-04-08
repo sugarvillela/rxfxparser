@@ -11,14 +11,15 @@ import parse.Keywords.KWORD;
 
 import static parse.Keywords.DEFAULT_KEYNAME;
 import static parse.Keywords.EQUAL;
-import static parse.Keywords.HANDLER.ATTRIB;
-import static parse.Keywords.HANDLER.ENUB;
-import static parse.Keywords.HANDLER.ENUD;
-import static parse.Keywords.HANDLER.FX;
-import static parse.Keywords.HANDLER.RX;
+import static parse.Keywords.HANDLER.*;
+//import static parse.Keywords.HANDLER.ENUB;
+//import static parse.Keywords.HANDLER.ENUD;
+//import static parse.Keywords.HANDLER.FX;
+//import static parse.Keywords.HANDLER.RX;
+//import static parse.Keywords.HANDLER.RXFX;
+//import static parse.Keywords.HANDLER.SCOPE;
 import static parse.Keywords.SOURCE_OPEN;
 import static parse.Keywords.TARGLANG_CLOSE;
-import static parse.Keywords.USERDEF_OPEN;
 
 /**
  *
@@ -64,6 +65,8 @@ public abstract class Factory_Context {
         switch(h){
             case USERDEF:
                 return new UserDefListItem(h, text);
+            case VAR:
+                return new Var(h, text);
         }
         return null;
     }
@@ -102,7 +105,12 @@ public abstract class Factory_Context {
         @Override
         public void pushPop( String text ){
             // look for end of source or comment
-            if( popAll(text) || pushComment(text)){
+            if( 
+                popAll(text) || 
+                pushComment(text) ||
+                pushTargLang(text)  ||
+                ( isUserDef(text) && pushUserDef(VAR, text) )    
+            ){
                 return;
             }
             // different from pushPopOrErr(): no pop on keyword
@@ -265,6 +273,41 @@ public abstract class Factory_Context {
         }
     }
 
+    public static class Var extends Base_Context{
+        private final String defName;
+        
+        public Var(HANDLER setH, String setName){
+            this.h = setH;
+            this.defName = setName;
+            this.allowedHandlers = new HANDLER[]{ SCOPE, RXFX, RX, FX };
+        }
+        
+        @Override
+        public void pushPop( String text ){
+            if( 
+                popAll(text)        || 
+                pushComment(text)   ||
+                pushTargLang(text)  ||
+                pushPopOrErr(text)
+            ){}
+        }
+    }
+    public static class Scope extends Base_Context{
+        public Scope(HANDLER setH ){
+            this.h = setH;
+            this.allowedHandlers = new HANDLER[]{ ATTRIB, RXFX, RX, FX };
+        }
+        
+        @Override
+        public void pushPop( String text ){
+            if( 
+                popAll(text)        || 
+                pushComment(text)   ||
+                pushTargLang(text)  ||
+                pushPopOrErr(text)
+            ){}
+        }
+    }
     public static class Rxfx extends Base_Context{
         private boolean haveRx, haveFx, haveAntiFx;
         public Rxfx(HANDLER setH ){
@@ -299,7 +342,7 @@ public abstract class Factory_Context {
                     }
                     break;
                 case FX:
-                    if( !haveRx ){
+                    if( haveRx ){
                         if( !haveFx ){
                             haveFx = true;
                             P.push( Factory_Context.get(keyword) );
@@ -368,13 +411,13 @@ public abstract class Factory_Context {
             }
             //System.out.println("Context_RXPattern pushPop: text="+text);
             itr.init(text);  // split on RX characters
-            nodes.add( new IParse.ScanNode( CMD.OPEN, h, KWORD.IF, "\t\tpattern" ) );
+            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tpattern" ) );
             P.push( get(HANDLER.RX_KEYVAL) );
             while(itr.hasNext()){
                 P.getTop().pushPop(itr.next());//itr.next()
             }
             P.pop();
-            nodes.add( new IParse.ScanNode( CMD.CLOSE, h, KWORD.IF, "\t\tpattern" ) );
+            nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tpattern" ) );
         }
     }
     public static class RX_KeyVal extends Base_Context{
@@ -474,31 +517,31 @@ public abstract class Factory_Context {
             }
         }
         private void or(){
-            nodes.add( new IParse.ScanNode( CMD.CLOSE, h, KWORD.IF, "\t\tkvOR" ) );
-            nodes.add( new IParse.ScanNode( CMD.OPEN, h, KWORD.ELIF ) );
+            nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tkvOR" ) );
+            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.ELIF ) );
         }
         private void and(){
-            nodes.add( new IParse.ScanNode( CMD.OPEN, h, KWORD.IF, "\t\tkvAND" ) );
+            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tkvAND" ) );
             ifLevel ++;
         }
         private void setNegated(String text){
             isNegated = !isNegated;
             if( isNegated ){
-                nodes.add( new IParse.ScanNode( CMD.OPEN, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
+                nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
             }
             else{
-                nodes.add( new IParse.ScanNode( CMD.CLOSE, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
+                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
             }
         }
         private void clearNegated(String text){
             if( isNegated ){
                 isNegated = false;
-                nodes.add( new IParse.ScanNode( CMD.CLOSE, h, KWORD.NEGATE, "\t\t\tkv: " + text) );
+                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text) );
             }
         }
         private void popIfLevel(){
             for(int i=ifLevel; i>0; i--){
-                nodes.add( new IParse.ScanNode( CMD.CLOSE, h, KWORD.IF, "\t\tkvPopIfLevel" ) );
+                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tkvPopIfLevel" ) );
             }
             ifLevel=0;
         }

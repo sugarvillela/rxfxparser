@@ -1,14 +1,13 @@
 
 package demos;
 
-import toktools.Mapper;
-import toktools.TK;
+import toktools.*;
+
 import commons.Commons;
 import java.util.ArrayList;
-
 /**
  *
- * @author newAdmin
+ * @author Dave Swanson
  */
 public class TokenTools_ {
     public static void map1(){
@@ -88,13 +87,29 @@ public class TokenTools_ {
 //        System.out.printf( "\nDone\n".implode(", ", TK::map3( $text, $map ))."" );
 //        L::disp();
     }
-    public static void toList(){
-      
-        boolean keepSkip1 =     false;
-        boolean keepSkip2 =     false;
-        boolean keepSkip3 =     false;
-        boolean skipOut =       false;
-        boolean manyDelims =    false;
+    public static void tokens_simple_toList(){
+        String text = "__First half_second half__third half_____fourth half__";
+        Commons.disp(TK.toList('_', text), text );
+        text = "I eat coconuts   all year long ";
+        Commons.disp(TK.toList(' ', 5, text), text );
+        text = "I eat coconuts all year long except Christmas";
+        Commons.disp(TK.toList(' ', 2, text), text );
+    }
+    public static void tokens_simple_toArr(){
+        Tokens_simple tk = new Tokens_simple();
+        String text = "__First half_second half__third half_____fourth half__";
+        Commons.disp(TK.toArr('_', text), text );
+        text = "I eat coconuts   all year long ";
+        Commons.disp(TK.toArr(' ', 5, text), text );
+        text = "I eat coconuts all year long except Christmas";
+        Commons.disp(TK.toArr(' ', 2, text), text );
+    }
+    public static void tokens_special(){
+        boolean keepSkip1 =     true;
+        boolean keepSkip2 =     true;
+        boolean keepSkip3 =     true;
+        //boolean skipOut =       false;
+        boolean manyDelims =    true;
         boolean delimsIn =      true;
         
         String text;
@@ -104,9 +119,9 @@ public class TokenTools_ {
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
                 "_",                            //delimiter
-                text,                           //string input
                 "(\"",                          //skip symbol
-                TK.SYMBOUT                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                TK.SYMBOUT,                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                text                           //string input
             );
             Commons.disp( t, "\nTokens:" );
         }
@@ -115,9 +130,9 @@ public class TokenTools_ {
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
                 "_",                            //delimiter
-                text,                           //string input
                 "(\"",                          //skip symbol
-                TK.SYMBOUT                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                TK.SYMBOUT,                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                text                           //string input
             );
             Commons.disp( t, "\nTokens:" );
         }
@@ -126,32 +141,32 @@ public class TokenTools_ {
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
                 "_",                            //delimiter
-                text,                           //string input
                 "(\"",                          //skip symbol
-                TK.SYMBOUT                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                TK.SYMBOUT,                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+                text                           //string input
             );
             Commons.disp( t, "\nTokens:" );
         }
-        if( skipOut ){
-            text="Comment_=_(This_is_my_comment_\"in_parentheses!\")_so_yeah";
-            System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
-            t = TK.toList(
-                "_",                            //delimiter
-                text,                           //string input
-                "(\"",                          //skip symbol
-                TK.SYMBOUT|TK.SKIPOUT                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
-            );
-            Commons.disp( t, "\nTokens:" );
-        }
+//        if( skipOut ){
+//            text="Comment_=_(This_is_my_comment_\"in_parentheses!\")_so_yeah";
+//            System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
+//            t = TK.toList(
+//                "_",                            //delimiter
+//                text,                           //string input
+//                "(\"",                          //skip symbol
+//                TK.SYMBOUT|TK.SKIPOUT                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+//            );
+//            Commons.disp( t, "\nTokens:" );
+//        }
         if( manyDelims ){
             text="||We_!got!-lots_of-delimiters";
             
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
-                "|_!-",                            //delimiter
-                text,                           //string input
+                "|_!-",                         //delimiter
                 "(\"",                          //skip symbol
-                0                      //flag to give delim own element
+                0,                              //default flags
+                text                            //string input
             );
             Commons.disp( t, "\nTokens:" );
         }
@@ -162,66 +177,45 @@ public class TokenTools_ {
             System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
             t = TK.toList(
                 "_.*+?!&|=()^$",                            //delimiter
-                text,                           //string input
                 "(\"",                          //skip symbol
-                TK.DELIMIN                      //flag to give delim own element
+                TK.DELIMIN,                      //flag to give delim own element
+                text                           //string input
             );
             Commons.disp( t, "\nTokens:" );
         }
     }
-    public static void toList_skips(){
-        TK instance = TK.getInstance();
+    public static void tokens_wSkipHold_skip(){
+        Tokens tk = TK.getInstance(
+            " ", "(\"", TK.SYMBOUT|TK.SKIPOUT
+        );//new Tokens_special();//
        
-        String text1="This is a sentence(with secret text,) with words \"you can't see\"";
-        ArrayList<String> t;
-        
-        
-        instance.setDelims("_"); 
-        instance.setMap("(\""); 
-        instance.setFlags(0);
-        //instance.setFlags(TK.SYMBOUT|TK.SKIPOUT);
-        
-        instance.setText(text1);
-        instance.parse();
-        Commons.disp( instance.get(), "Tokens:" );
-        Commons.disp( instance.getSkips(), "Skips:" );
+        String text1="This is a sentence(with secret text) with words \"you can't see\"";      
+
+        tk.parse(text1);
+        Commons.disp( tk.getTokens(), "Tokens:" );
+        Commons.disp( tk.getSkips(), "Skips:" );
     }
-    public static void toList_lines(){
-//        TK instance = TK.getInstance();
-//       
-//        String text1="This_is_a_series_(that_starts\n";
-//        String text2="on_one_line)_and_ends";
-//        ArrayList<String> t;
-//        
-//        
-//        instance.setDelims("_"); 
-//        instance.setMap("(\""); 
-//        instance.setFlags(TK.HOLDOVER);
-//        
-//        instance.setText(text1);
-//        instance.parse();
-//        t = instance.get();
-//        Commons.disp( t, "\nTokens:" );
-//
-//        instance.setText(text2);
-//        instance.parse();
-//        t = instance.get();
-//        Commons.disp( t, "\nTokens:" );
+    public static void tokens_wSkipHold_hold(){
+        Tokens tk = TK.getInstance("_", "(\"", TK.HOLDOVER);
+       
+        String text1="This_is_a_series_(that_starts";
+        String text2="on_one_line)_and_ends";
+ 
+        tk.parse(text1);
+        Commons.disp( tk.getTokens(), "\nTokens 1:" );
+
+        tk.parse(text2);
+        Commons.disp( tk.getTokens(), "\nTokens 2:" );
     }
-    public static void toList_simple(){
-        String text = "__First half_second half__third half_____fourth half__";
-        Commons.disp(TK.toList('_', text), text );
-        text = "I eat coconuts   all year long ";
-        Commons.disp(TK.toList(' ', text, 5), text );
-        text = "I eat coconuts all year long except Christmas";
-        Commons.disp(TK.toList(' ', text, 2), text );
-    }
-    public static void toArr_simple(){
-        String text = "__First half_second half__third half_____fourth half__";
-        Commons.disp(TK.toArr('_', text), text );
-        text = "I eat coconuts   all year long ";
-        Commons.disp(TK.toArr(' ', text, 5), text );
-        text = "I eat coconuts all year long except Christmas";
-        Commons.disp(TK.toArr(' ', text, 2), text );
+
+    public static void tokens_byGroup(){
+        Tokens_byGroup tk = new Tokens_byGroup(
+            new String[]{"<=>", "!", " "},
+            "",
+            0
+        );
+        String text = "mildew<=tacos && !frankfurters";
+        tk.parse(text);
+        Commons.disp( tk.getTokens(), text );
     }
 }

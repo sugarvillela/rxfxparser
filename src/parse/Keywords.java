@@ -15,7 +15,7 @@ public final class Keywords {
     }
     // List of commands to instruct parser
     public enum CMD { 
-        PUSH, POP, ADD_TO, SET_ATTRIB, OPEN, CLOSE;
+        PUSH, POP, ADD_TO, SET_ATTRIB, BEGIN, END;
         public static CMD get( String text ){
             for(CMD cmd : values()){
                 if(cmd.toString().equals(text)){
@@ -28,7 +28,7 @@ public final class Keywords {
     // List of handlers to be implemented
     public enum HANDLER {//values() returns H[] array
         // File generating handlers
-        TARGLANG_BASE, ENUB, ENUD, SCOPE, RXFX, 
+        TARGLANG_BASE, ENUB, ENUD, VAR, SCOPE, RXFX, 
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
