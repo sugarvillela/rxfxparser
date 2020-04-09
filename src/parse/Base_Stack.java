@@ -1,9 +1,9 @@
 package parse;
 
 import commons.Erlog;
-import itr_struct.StringSource_file;
+import toksource.TokenSourceImpl;
 import java.util.ArrayList;
-import itr_struct.StringSource;
+import toksource.TokenSource;
 
 /**Abstract base class for Scanner and Parser classes
  *
@@ -12,7 +12,7 @@ import itr_struct.StringSource;
 public abstract class Base_Stack implements IParse{
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
-    protected StringSource fin;  // file to be parsed
+    protected TokenSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
     protected final Erlog er;    // logs, notifies, quits or all 3
     protected String backText;   // repeat lines
@@ -81,7 +81,7 @@ public abstract class Base_Stack implements IParse{
         return top;
     }
     @Override
-    public StringSource getStringSource(){
+    public TokenSource getTokenSource(){
         return fin;
     }
     @Override
@@ -108,8 +108,8 @@ public abstract class Base_Stack implements IParse{
             er.set( "Not a ." + ext + " file: " + filename );
             return;
         }
-        fin = new StringSource_file( filename );
-        if( !fin.hasFile() ){
+        fin = new TokenSourceImpl( filename );
+        if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
         }
     }

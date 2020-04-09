@@ -5,6 +5,7 @@ import toktools.*;
 
 import commons.Commons;
 import java.util.ArrayList;
+import toksource.*;
 /**
  *
  * @author Dave Swanson
@@ -207,7 +208,6 @@ public class TokenTools_ {
         tk.parse(text2);
         Commons.disp( tk.getTokens(), "\nTokens 2:" );
     }
-
     public static void tokens_byGroup(){
         Tokens_byGroup tk = new Tokens_byGroup(
             new String[]{"<=>", "!", " "},
@@ -217,5 +217,25 @@ public class TokenTools_ {
         String text = "mildew<=tacos && !frankfurters";
         tk.parse(text);
         Commons.disp( tk.getTokens(), text );
+    }
+
+    public static void stringSourceFile(){
+        System.out.println( "StringSourceImp_file... basic open and iterate");
+        StringSourceImp_file f =  new StringSourceImp_file("file01.txt");
+        System.out.println( "hasFile = "+f.hasData());
+        int i = 1;
+        while( f.hasNext() ){
+            String next = f.next();
+            System.out.println(  "("+f.getRow()+ ")"+next + " ");
+            if(100<i++){
+                break;
+            }
+        }
+        f.onQuit();
+    }
+    public static void stringSourceFileConvert(){
+        ArrayList<String> arr = new ArrayList<>();
+        StringSourceImp_file.convert( "file01.txt", arr );
+        Commons.disp(arr);
     }
 }

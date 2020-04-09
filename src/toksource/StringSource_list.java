@@ -1,4 +1,4 @@
-package itr_struct;
+package toksource;
 import commons.Commons;
 import java.util.ArrayList;
 //import unique.*;
@@ -6,7 +6,7 @@ import java.util.ArrayList;
  *
  * @author newAdmin
  */
-public class StringSource_list implements StringSource{// implements Iterator, Iterable
+public class StringSource_list implements TokenSource{// implements Iterator, Iterable
     ArrayList<Object> content;
     boolean good, done;
     protected int row;
@@ -41,7 +41,7 @@ public class StringSource_list implements StringSource{// implements Iterator, I
         return this.content.get(row-1).toString();
     } 
     @Override
-    public boolean hasFile(){ return this.good; }
+    public boolean hasData(){ return this.good; }
     @Override
     public boolean hasNext(){ return !this.done; }
     @Override
@@ -61,4 +61,10 @@ public class StringSource_list implements StringSource{// implements Iterator, I
     public boolean isWordGetter(){ return false; }
     @Override
     public boolean isEndLine(){ return false; }
+    
+    
+    @Override
+    public void onCreate(){}
+    @Override
+    public void onQuit(){}
 }

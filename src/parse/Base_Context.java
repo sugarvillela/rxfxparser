@@ -16,7 +16,8 @@ import static parse.Keywords.HANDLER.TARGLANG_INSERT;
 import static parse.Keywords.TARGLANG_OPEN;
 
 import static parse.IParse.ScanNode;
-import itr_struct.StringSource;
+import toksource.StringSource;
+import toksource.TokenSource;
 /**
  *
  * @author Dave Swanson
@@ -24,12 +25,12 @@ import itr_struct.StringSource;
     // handlers for context-sensitive control of stack
     public abstract class Base_Context extends Base_StackItem{
         protected ArrayList<ScanNode> nodes;
-        protected StringSource fin;
+        protected TokenSource fin;
         
         public Base_Context(){
             P = Class_Scanner.getInstance();
             nodes = P.getScanNodeList();
-            fin = P.getStringSource();
+            fin = P.getTokenSource();
         }
         // First: Utilities for subclasses:
         
@@ -125,7 +126,7 @@ import itr_struct.StringSource;
             return P.getTop();
         }
         @Override
-        public StringSource getStringSource(){
+        public TokenSource getTokenSource(){
             if(fin==null){
                 commons.Erlog.getInstance().set(
                     "Developer: StringSource not initialized in "+this.getClass().getSimpleName()

@@ -4,7 +4,7 @@ package parse;
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 import commons.Commons;
-import itr_struct.StringSource_file;
+import toksource.TokenSourceImpl;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -111,8 +111,8 @@ public class Class_Scanner extends Base_Stack {
         }
     }
     public ArrayList<ScanNode> read_rxlx_file(String path){
-        StringSource_file rxlx = new StringSource_file( path );
-        if( !rxlx.hasFile() ){
+        TokenSourceImpl rxlx = new TokenSourceImpl( path );
+        if( !rxlx.hasData() ){
             er.set( "Reading rxlx file: bad file name: "+path );
         }
         rxlx.setLineGetter();

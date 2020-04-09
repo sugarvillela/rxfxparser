@@ -18,7 +18,7 @@ public class Rxfxparser {
 //        System.out.println(n);
         //demos.Unique_.uq_enumgen();
         //demos.Itr_struct_.itr_file_word();
-        demos.TokenTools_.tokens_byGroup();
+        demos.TokenTools_.stringSourceFileConvert();
         //demos.Stemmer_.stemmer3();
         //demos.Parse_.parseStack();
         //demos.Parse_.parseStack();

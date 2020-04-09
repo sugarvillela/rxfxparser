@@ -1,5 +1,5 @@
 package parse;
-import itr_struct.StringSource;
+import toksource.StringSource;
 import java.util.ArrayList;
 import parse.Keywords.HANDLER;
 /**Abstract base class for handlers

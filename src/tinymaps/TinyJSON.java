@@ -1,7 +1,7 @@
 package tinymaps;
 
 import commons.Erlog;
-import itr_struct.StringSource_file;
+import toksource.TokenSourceImpl;
 import java.util.ArrayList;
 import toktools.TK;
 
@@ -12,7 +12,7 @@ import toktools.TK;
  */
 public class TinyJSON {
     private final Erlog log;
-    private final StringSource_file fin;
+    private final TokenSourceImpl fin;
     private int lineNumber;
     private char opener;
     private String curr;
@@ -21,8 +21,8 @@ public class TinyJSON {
     public TinyJSON(String filename){
         // initialize
         log = Erlog.getInstance();
-        fin = new StringSource_file( filename, StringSource_file.LINE );
-        if( fin.hasFile() ){
+        fin = new TokenSourceImpl( filename, TokenSourceImpl.LINE );
+        if( fin.hasData() ){
             parseLines();
         }
         else{

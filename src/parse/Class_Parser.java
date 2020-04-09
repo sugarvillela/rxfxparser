@@ -6,11 +6,11 @@ import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 
 import codegen.*;
-import itr_struct.StringSource;
-import itr_struct.StringSource_file;
-import itr_struct.StringSource_list;
+import toksource.TokenSourceImpl;
+import toksource.StringSource_list;
 import java.util.ArrayList;
 import java.util.Iterator;
+import toksource.TokenSource;
 import unique.*;
 
 /**
@@ -40,8 +40,8 @@ public class Class_Parser extends Base_Stack {
     }
     private Class_Parser(String filename){
         setFile(filename, "rxlx");
-        fin = new StringSource_file( filename );
-        if( !fin.hasFile() ){
+        fin = new TokenSourceImpl( filename );
+        if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
             return;
         }
@@ -49,10 +49,10 @@ public class Class_Parser extends Base_Stack {
     }
     private Class_Parser(ArrayList<Object> setContent){
         fin = new StringSource_list( setContent );
-        if( !fin.hasFile() ){
-            er.set( "Bad input content" );
-            return;
-        }
+//        if( !fin.hasData() ){
+//            er.set( "Bad input content" );
+//            return;
+//        }
         generalInit();
     }
     private void generalInit(){
@@ -257,7 +257,7 @@ public class Class_Parser extends Base_Stack {
             return P.getTop();
         }
         @Override
-        public StringSource getStringSource(){
+        public TokenSource getTokenSource(){
             if(fin==null){
                 commons.Erlog.getInstance().set(
                     "Developer: StringSource not initialized in "+this.getClass().getSimpleName()

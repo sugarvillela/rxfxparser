@@ -1,5 +1,6 @@
 package demos;
 
+import toksource.TokenSourceImpl;
 import commons.BIT;
 import itr_struct.*;
 import unique.Unique;
@@ -146,8 +147,8 @@ public class Itr_struct_ {
     }
     public static void itr_file(){
         // Can change modes on the fly. Doesn't save half-lines
-        StringSource_file f =  new StringSource_file("file01.txt");
-        System.out.println( "hasFile = "+f.hasFile());
+        TokenSourceImpl f =  new TokenSourceImpl("file01.txt");
+        System.out.println( "hasFile = "+f.hasData());
         int i = 1;
         int last = -1;
         f.setLineGetter();
@@ -177,8 +178,8 @@ public class Itr_struct_ {
     }
     public static void itr_file_word(){
         // Can change modes on the fly. Doesn't save half-lines
-        StringSource_file f =  new StringSource_file("test1.rxfx");
-        System.out.println( "hasFile = "+f.hasFile());
+        TokenSourceImpl f =  new TokenSourceImpl("test1.rxfx");
+        System.out.println( "hasFile = "+f.hasData());
         int i = 1;
         int row, col;
         f.setLineGetter();
@@ -198,8 +199,8 @@ public class Itr_struct_ {
     }
     public static void itr_file_skips(){
         // Can change modes on the fly. Doesn't save half-lines
-        StringSource_file f =  new StringSource_file("file02.txt");
-        System.out.println( "hasFile = "+f.hasFile());
+        TokenSourceImpl f =  new TokenSourceImpl("file02.txt");
+        System.out.println( "hasFile = "+f.hasData());
         int i = 0;
         f.setWordGetter();
         while( f.hasNext() ){

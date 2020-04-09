@@ -10,8 +10,8 @@ import parse.Keywords.CMD;
 import parse.Keywords.KWORD;
 
 import commons.Commons;
-import itr_struct.StringSource;
 import java.util.ArrayList;
+import toksource.TokenSource;
 
 /**Interface and static node classes
  *
@@ -85,6 +85,6 @@ public interface IParse {
     // Getters
     public Base_StackItem getTop();
     public ArrayList<ScanNode> getScanNodeList();
-    public StringSource getStringSource();
+    public TokenSource getTokenSource();
     public void disp();
 }

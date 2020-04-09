@@ -1,7 +1,7 @@
 package parse;
 
 import commons.Commons;
-import itr_struct.StringSource_list;
+import toksource.StringSource_list;
 import java.util.ArrayList;
 import toktools.TK;
 import toktools.Tokens;
@@ -113,7 +113,7 @@ public class Util_ScanRX{
                 temp.add(obj);
             }
             words = new StringSource_list( temp );
-            if(!words.hasFile()){
+            if(!words.hasData()){
                 Class_Scanner.getInstance().setEr("Err at:"+text);
             }
         }

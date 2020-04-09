@@ -1,4 +1,4 @@
-package itr_struct;
+package toksource;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,7 +12,7 @@ import toktools.Tokens;
  *
  * @author Dave Swanson
  */
-public class StringSource_file implements StringSource{
+public class TokenSourceImpl implements TokenSource{
     /*  For text file input;
         Returns one word or line with each next() call.
         isEndLn() true if word mode, end line reached and no extension '...'
@@ -36,16 +36,16 @@ public class StringSource_file implements StringSource{
     public static final int LINE = 0x10;
     public static final int WORD = 0x20;
     
-    public StringSource_file( String fileName ){
+    public TokenSourceImpl( String fileName ){
         init( fileName, WORD, TK.getInstance(" ", "\"'", 0) );// default word output with ext pattern
     }
-    public StringSource_file( String fileName, int defBehavior ){
+    public TokenSourceImpl( String fileName, int defBehavior ){
         init( fileName, defBehavior, TK.getInstance(" ", "\"'", defBehavior) );// choose behavior, no pattern
     }
-    public StringSource_file( String fileName, Tokens setTokenizer ){
+    public TokenSourceImpl( String fileName, Tokens setTokenizer ){
         init( fileName, WORD, setTokenizer );// choose behavior, no pattern
     }
-    public StringSource_file( String fileName, int defBehavior, Tokens setTokenizer ){
+    public TokenSourceImpl( String fileName, int defBehavior, Tokens setTokenizer ){
         init( fileName, defBehavior, setTokenizer );// choose behavior, no pattern
     }
     public final void init(String fileName, int defBehavior, Tokens setTokenizer ){
@@ -193,7 +193,7 @@ public class StringSource_file implements StringSource{
     }
     /* State booleans */
     @Override
-    public boolean hasFile(){ return this.good; }
+    public boolean hasData(){ return this.good; }
     @Override
     public boolean hasNext(){ return !this.done; }
     @Override
@@ -218,4 +218,9 @@ public class StringSource_file implements StringSource{
         }
         return arr;
     }
+    
+    @Override
+    public void onCreate(){}
+    @Override
+    public void onQuit(){}
 }
