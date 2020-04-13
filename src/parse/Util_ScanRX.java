@@ -1,7 +1,7 @@
 package parse;
 
 import commons.Commons;
-import toksource.StringSource_list;
+import toksource.TextSource_list;
 import java.util.ArrayList;
 import toktools.TK;
 import toktools.Tokens;
@@ -100,19 +100,13 @@ public class Util_ScanRX{
     public static class PatternItr{
         public static String DELIMS = "=~()&|";
         protected Tokens tk;
-        protected StringSource_list words;
+        protected TextSource_list words;
         
         public PatternItr(){
             tk = TK.getInstance(DELIMS, "'", TK.DELIMIN);
         }
         public void init( String text){
-            //tk.parse(text);
-            ArrayList<Object> temp = new ArrayList<>();
-            for( String obj : tk.toList(text) ){
-                //System.out.println("PatternItr init: obj ="+obj);
-                temp.add(obj);
-            }
-            words = new StringSource_list( temp );
+            words = new TextSource_list( tk.toList(text) );
             if(!words.hasData()){
                 Class_Scanner.getInstance().setEr("Err at:"+text);
             }

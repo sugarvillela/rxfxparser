@@ -1,10 +1,10 @@
 package toksource;
 
-/**Interface for Itr_file, Itr_noFile
+/**Interface for base class -> file and list implementations
  *
  * @author Dave Swanson
  */
-public interface StringSource {
+public interface TextSource {
     public void rewind();
     public String next();
     public boolean hasNext();

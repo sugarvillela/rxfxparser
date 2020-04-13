@@ -1,13 +1,9 @@
 package toksource;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.ArrayList;
 import commons.*;
-import toktools.TK;
-import toktools.Tokens;
+import toktools.*;
+
 /** Word/line iterator; changes modes on the fly; doesn't preserve half-lines
  *
  * @author Dave Swanson
@@ -20,39 +16,33 @@ public class TokenSourceImpl implements TokenSource{
         hasNext() false when iterator runs out of words or lines
         static function readAll dumps file to array list
     */
-    public Scanner input;
-    protected Erlog log;
-    //protected String line, word;
-    protected ArrayList<String> tok;
+    //public Scanner input;
+    protected Erlog log;  
     protected Tokens tk;
-    protected int row, col;
-    protected boolean good;
-    protected boolean done;
-    protected Getter getter;// current getter
-    protected Getter gLine;
-    protected Getter gWord;
-    protected String ignoreEndLn;// force isEndLine() false by adding at end of line
+    private boolean endLn;
+    protected TextSource getter;// current getter
+    protected TextSource gLine;
+    protected TextSource gWord;
     public String name;
     public static final int LINE = 0x10;
     public static final int WORD = 0x20;
     
-    public TokenSourceImpl( String fileName ){
-        init( fileName, WORD, TK.getInstance(" ", "\"'", 0) );// default word output with ext pattern
+    public TokenSourceImpl( TextSource lineGetter ){
+        init( lineGetter, WORD, TK.getInstance(" ", "\"'", 0) );// default word output with ext pattern
     }
-    public TokenSourceImpl( String fileName, int defBehavior ){
-        init( fileName, defBehavior, TK.getInstance(" ", "\"'", defBehavior) );// choose behavior, no pattern
+    public TokenSourceImpl( TextSource lineGetter, int defBehavior ){
+        init( lineGetter, defBehavior, TK.getInstance(" ", "\"'", defBehavior) );// choose behavior, no pattern
     }
-    public TokenSourceImpl( String fileName, Tokens setTokenizer ){
-        init( fileName, WORD, setTokenizer );// choose behavior, no pattern
+    public TokenSourceImpl( TextSource lineGetter, Tokens setTokenizer ){
+        init( lineGetter, WORD, setTokenizer );// choose behavior, no pattern
     }
-    public TokenSourceImpl( String fileName, int defBehavior, Tokens setTokenizer ){
-        init( fileName, defBehavior, setTokenizer );// choose behavior, no pattern
+    public TokenSourceImpl( TextSource lineGetter, int defBehavior, Tokens setTokenizer ){
+        init( lineGetter, defBehavior, setTokenizer );// choose behavior, no pattern
     }
-    public final void init(String fileName, int defBehavior, Tokens setTokenizer ){
+    public final void init(TextSource lineGetter, int defBehavior, Tokens setTokenizer ){
         this.log = Erlog.getInstance();
-        openFile( fileName );
-        this.gLine = new Getter_line();// need this whether line or word mode
-
+        this.gLine = lineGetter;// need this whether line or word mode
+        
         switch(defBehavior){
             case LINE:
                 this.getter = this.gLine;
@@ -69,52 +59,41 @@ public class TokenSourceImpl implements TokenSource{
         this.tk = setTokenizer;
         this.name="Itr_file";
     }
-    /* Initialize or re-initialize */
-    public final void openFile( String fileName ){
-        this.row = 0;
-        this.col = -1;
-        this.tok = null;
-        try{
-            this.input = new Scanner( new File(fileName) );
-            this.good = true;
-            this.done = false;
-        }
-        catch ( FileNotFoundException e ){
-            this.good = false;
-            this.done = true;
-            //this.log.set(eeee.getMessage());
-        }
+    @Override
+    public final void onCreate(){
+    
     }
-    public void finish(){
-        this.input.close();
+    @Override
+    public void onQuit(){
+        this.gLine.onQuit();
+        this.gWord.onQuit();
     }
     /* Output mode: Word trims; line keeps tabs, spaces, newlines */
     @Override
     public void setLineGetter(){
         System.out.println("\n setLineGetter");
-        this.col = 0;
-        this.tok = null;
         this.getter = this.gLine;
+        this.endLn = false;
     }
     @Override
     public void setWordGetter(){
         System.out.println("\n setWordGetter");
-        this.col = 0;
-        this.tok = null;
         this.getter = this.gWord;
+        this.getter.rewind();
+        this.endLn = true;
     }
     /* Iterator */
     @Override
     public int getRow(){//row number
-        return this.row;
+        return this.gLine.getRow();
     }
     @Override
     public int getCol(){//column number
-        return this.col;
+        return this.gWord.getRow();
     }
     @Override
     public boolean isEndLine(){ 
-        return getter.isEndLine(); 
+        return this.endLn;
     }
     @Override
     public String next(){
@@ -122,33 +101,10 @@ public class TokenSourceImpl implements TokenSource{
         //System.out.println( "StringSource_FromFile: "+s ); 
         return this.getter.next();
     }
-    public abstract class Getter{
-        protected String text;
-        public abstract String next();
-        public abstract boolean isEndLine();
-    }
-    public class Getter_line extends Getter{
-        public Getter_line(){}
-        public Getter_line(String discard){}
-        @Override
-        public String next(){
-            try{
-                this.text = input.nextLine();
-                row++;
-                return this.text;
-            }
-            catch ( NoSuchElementException | IllegalStateException e ){
-                //System.out.println("Getter_line: Bazooka: "+eeee);
-                done = true;
-                return "";
-            }
-        }
-        @Override
-        public boolean isEndLine(){ return false; }
-    }
-    public class Getter_word extends Getter{
-        private boolean endLn;
-        
+
+    public class Getter_word extends TextSource_base{
+        protected ArrayList<String> tokens;
+        private int col;
         public Getter_word(){
             endLn = true;
         }
@@ -158,69 +114,57 @@ public class TokenSourceImpl implements TokenSource{
 //                do{
                     this.text = "";
                     while( this.text.isEmpty()){
+                        this.text = gLine.next().trim();
                         if(done){
                             //System.out.println("Getter_word: line getter says done" );
                             col=0;
-                            tok = null;
-                            return "";
+                            this.tokens = null;
+                            return this.text;
                         }
-                        this.text = gLine.next().trim();
+                        
                         //System.out.println("text from line getter = " + this.text );
                     }
                     //System.out.println("line = "+this.line);
                     tk.parse( this.text );
 //                }while(tk.isHolding());
                 
-                tok = tk.getTokens();
+                this.tokens = tk.getTokens();
                 col=-1;
                 endLn = false;
-                //Commons.disp(tok, "====GETTER_WORD=====");
+                //Commons.disp(this.tokens, "====GETTER_WORD=====");
             }
             col++;
-            this.text = tok.get(col).trim();
-            endLn = (col >= tok.size() - 1);
+            this.text = this.tokens.get(col).trim();
+            endLn = (col >= this.tokens.size() - 1);
             return this.text;
         }
         @Override
-        public boolean isEndLine(){
-            return endLn;
+        public int getRow(){// misleading name
+            return this.col;
+        }
+        @Override
+        public void rewind() {
+            this.tokens = null;
+            this.col = 0;
         }
     }
     @Override
     public void rewind(){
-        this.good = false;
-        this.done = false;
+        this.gLine.rewind();
+        this.gWord.rewind();
     }
     /* State booleans */
     @Override
-    public boolean hasData(){ return this.good; }
+    public boolean hasData(){ 
+        return this.gLine.hasData(); 
+    }
     @Override
-    public boolean hasNext(){ return !this.done; }
+    public boolean hasNext(){ 
+        return this.gLine.hasNext(); 
+    }
     @Override
     public boolean isLineGetter(){ return getter == gLine; }
     @Override
     public boolean isWordGetter(){ return getter == gWord; }
-    public ArrayList<String> readAll(){//return array of file contents
-        ArrayList<String> arr;
-        arr = new ArrayList<>();
-        String text;
-        try{
-            while ( ( text = this.input.nextLine() ) != null ){
-                text = text.trim();
-                if( !text.isEmpty()){
-                    arr.add(text);
-                }
-            }
-        }
-        catch ( NoSuchElementException | IllegalStateException eeee ){
-            this.good = false;
-            this.log.set(eeee.getMessage());
-        }
-        return arr;
-    }
     
-    @Override
-    public void onCreate(){}
-    @Override
-    public void onQuit(){}
 }

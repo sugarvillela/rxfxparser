@@ -1,8 +1,11 @@
 package demos;
 
 import commons.BIT;
+import commons.Commons;
+import commons.Dev;
 import itr_struct.Enumstore;
 import unique.*;
+//import unique.Factory.*;
 /**
  *
  * @author newAdmin
@@ -212,6 +215,113 @@ public class Unique_ {
 
     }
 
-    
+    public static void sequential(){
+        Factory.setPrefix(4, "sequential_");
+        Factory.UQSequence u = Factory.getSequential(0x100, 0x0, 0x1000);
+        //Factory.UQSequence u = Factory.getSequential(1, 0, 15);
+        int i = 0;
+        while(u.hasNext()){
+            System.out.println( BIT.str(u.next()) + " =\t" + u + "\t");
+            if(i>25){break;}
+            i++;
+        }
+        i = 0;
+        u.rewind();
+        while(u.hasNext()){
+            System.out.println( BIT.str(u.next()) + " =\t" + u + "\t");
+            if(i>25){break;}
+            i++;
+        }
+    }
+    public static void random(){
+        Factory.setPrefix(4, "random_");
+        Factory.UQSequence u = Factory.getRandom(50);
+        int i = 0;
+        while(u.hasNext()){
+            System.out.println( u.next() + " =\t" + u);
+            if(i>25){break;}
+            i++;
+        }
+    }
+    public static void shift(){
+        //Factory.setPrefix(8, "");
+        Factory.UQSequence u = Factory.getShift();
+        int i = 0;
+        while(u.hasNext()){
+            System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+            if(i>10){break;}
+            i++;
+        }
+    }
+    public static void mask(){
+        //Factory.setPrefix(11, "shift_");
+        Factory.UQSequence u = Factory.getMask(4,1,5);
+        int i = 0;
+        while(u.hasNext()){
+            System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+            if(i>12){break;}
+            i++;
+        }
+    }
+    public static void discrete(){
+        //Factory.setPrefix(11, "shift_");
+        Factory.UQSequence u;
+        {
+            u = Factory.getDiscrete(4,0);
+            int i = 0;
+            while(u.hasNext()){
+                System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+                if(i>35){break;}
+                i++;
+            }
+        }
+        {
+            u = Factory.getDiscrete(4,16);
+            int i = 0;
+            while(u.hasNext()){
+                System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+                if(i>35){break;}
+                i++;
+            }
+        }
+    }
+    public static void enubGen(){
+        // getEnubGen( int wrow, int initialEnub, int finalEnub )
+        Factory.UQSequence u;
+        {
+            u = Factory.getEnubGen(24, 0x80, 0x202);
+            int i = 0;
+            while(u.hasNext()){
+                System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+                if(i>35){break;}
+                i++;
+            }
+        }
+    }
+    public static void enudGen(){
+        // getEnudGen( int wrow, int initialEnub, int finalEnub )
+        Factory.UQSequence u;
+        {
+            int init = 0xF0;
+            int fin = 0x1F0;
+            Dev.bnow("init, fin", init, fin);
+            u = Factory.getEnudGen(24, 4, 0x0F0, 0x1F0);
+            int i = 0;
+            while(u.hasNext()){
+                System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+                if(i>45){break;}
+                i++;
+            }
+        }
+//        {
+//            u = Factory.getEnubGen(24, 1, 0x100);
+//            int i = 0;
+//            while(u.hasNext()){
+//                System.out.println( BIT.str(u.next(), 4) + " =\t" + u);
+//                if(i>35){break;}
+//                i++;
+//            }
+//        }
 
+    }
 }

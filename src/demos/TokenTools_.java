@@ -219,9 +219,9 @@ public class TokenTools_ {
         Commons.disp( tk.getTokens(), text );
     }
 
-    public static void stringSourceFile(){
-        System.out.println( "StringSourceImp_file... basic open and iterate");
-        StringSourceImp_file f =  new StringSourceImp_file("file01.txt");
+    public static void textSource_file(){
+        System.out.println( "textSource_file... basic open and iterate");
+        TextSource_file f =  new TextSource_file("file01.txt");
         System.out.println( "hasFile = "+f.hasData());
         int i = 1;
         while( f.hasNext() ){
@@ -233,9 +233,96 @@ public class TokenTools_ {
         }
         f.onQuit();
     }
-    public static void stringSourceFileConvert(){
+    public static void textSource_fileConvert(){
         ArrayList<String> arr = new ArrayList<>();
-        StringSourceImp_file.convert( "file01.txt", arr );
+        TextSource_file.convert( "file01.txt", arr );
         Commons.disp(arr);
+    }
+    public static void textSource_list(){
+        System.out.println( "textSource_list... basic open and iterate");
+        ArrayList<String> list = new ArrayList<>();
+        list.add("ducks");
+        list.add("bucks");
+        list.add("Chucks");
+        list.add("fucks");
+        Commons.disp(list, "before");
+        TextSource_list f =  new TextSource_list( list );
+        System.out.println( "hasFile = "+f.hasData());
+        int i = 1;
+        while( f.hasNext() ){
+            String next = f.next();
+            System.out.println(  "("+f.getRow()+ ")"+next + " ");
+            if(100<i++){
+                break;
+            }
+        }
+        f.onQuit();
+    }
+    public static void itr_file(){
+        // Can change modes on the fly. Doesn't save half-lines
+        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("file01.txt"));
+        System.out.println( "hasFile = "+f.hasData());
+        int i = 1;
+        int last = -1;
+        f.setLineGetter();
+        while( f.hasNext() ){
+            String next = f.next();
+            if( last!=f.getRow()){
+                last=f.getRow();
+                System.out.println("\n===row "+last+"=== ");
+            }
+            System.out.print(  "("+f.getCol()+ ")"+next + " ");//System.out.println("===row "+row+"===");
+            if( last==4 ){
+                System.out.println("\nchange to word");
+                f.setWordGetter();
+            }
+            if( next.equals("members") ){
+                System.out.println("\nchange to line");
+                f.setLineGetter();
+            }
+//            if( (i%10)==0 ){
+//                System.out.println();
+//            }
+            if(100<i++){
+                break;
+            }
+        }
+    
+    }
+    public static void itr_file_word(){
+        // Can change modes on the fly. Doesn't save half-lines
+        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("test1.rxfx"));
+        System.out.println( "hasFile = "+f.hasData());
+        int i = 1;
+        int row, col;
+        f.setLineGetter();
+        while( f.hasNext() ){
+            String text = f.next();
+            row=f.getRow();
+            col=f.getCol();
+            System.out.printf( "%d %d : %s %b\n", row, col, text, f.isEndLine());//System.out.println("===row "+row+"===");
+            if("RX{".equals(text.trim())){
+                f.setWordGetter();
+            }
+            if(100<i++){
+                break;
+            }
+        }
+    
+    }
+    public static void itr_file_skips(){
+        // Can change modes on the fly. Doesn't save half-lines
+        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("file02.txt"));
+        System.out.println( "hasFile = "+f.hasData());
+        int i = 0;
+        f.setWordGetter();
+        while( f.hasNext() ){
+            String next = f.next();
+            System.out.println(  f.getRow()+" "+f.getCol()+ ": "+next);
+            if(100<i++){
+                break;
+            }
+        }
+    
     }
 }

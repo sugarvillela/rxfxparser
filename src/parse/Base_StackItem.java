@@ -1,7 +1,7 @@
 package parse;
-import toksource.StringSource;
 import java.util.ArrayList;
 import parse.Keywords.HANDLER;
+import toksource.TextSource;
 /**Abstract base class for handlers
  *
  * @author Dave Swanson

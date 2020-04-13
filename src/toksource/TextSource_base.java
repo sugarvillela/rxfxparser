@@ -5,14 +5,14 @@ import commons.Erlog;
  *
  * @author Dave Swanson
  */
-public abstract class StringSourceBase implements StringSource{
+public abstract class TextSource_base implements TextSource{
     protected Erlog er;
     protected String text;
     protected boolean good;
     protected boolean done;
     protected int row;
     
-    public StringSourceBase(){
+    public TextSource_base(){
         this.er = Erlog.getInstance();
     }
     // abstracts 

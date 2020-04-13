@@ -1,6 +1,7 @@
 package rxfxparser;
 
 import codegen.Widget;
+import commons.Dev;
 import commons.Erlog;
 
 /**Code generator and translator for ReXFeX language
@@ -16,9 +17,10 @@ public class Rxfxparser {
 //        int max = 20;
 //        int n = (int)(Math.random()*max);
 //        System.out.println(n);
-        //demos.Unique_.uq_enumgen();
+        Dev.dispOff();
+        demos.Unique_.enudGen();
         //demos.Itr_struct_.itr_file_word();
-        demos.TokenTools_.stringSourceFileConvert();
+        //demos.TokenTools_.textSource_list();
         //demos.Stemmer_.stemmer3();
         //demos.Parse_.parseStack();
         //demos.Parse_.parseStack();

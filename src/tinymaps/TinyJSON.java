@@ -3,6 +3,7 @@ package tinymaps;
 import commons.Erlog;
 import toksource.TokenSourceImpl;
 import java.util.ArrayList;
+import toksource.TextSource_file;
 import toktools.TK;
 
 /**Simple JSON parser: converts object and array notation to java map and array.
@@ -12,7 +13,7 @@ import toktools.TK;
  */
 public class TinyJSON {
     private final Erlog log;
-    private final TokenSourceImpl fin;
+    private final TextSource_file fin;
     private int lineNumber;
     private char opener;
     private String curr;
@@ -21,7 +22,7 @@ public class TinyJSON {
     public TinyJSON(String filename){
         // initialize
         log = Erlog.getInstance();
-        fin = new TokenSourceImpl( filename, TokenSourceImpl.LINE );
+        fin = new TextSource_file( filename );
         if( fin.hasData() ){
             parseLines();
         }

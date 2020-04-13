@@ -3,6 +3,7 @@ package parse;
 import commons.Erlog;
 import toksource.TokenSourceImpl;
 import java.util.ArrayList;
+import toksource.TextSource_file;
 import toksource.TokenSource;
 
 /**Abstract base class for Scanner and Parser classes
@@ -108,7 +109,7 @@ public abstract class Base_Stack implements IParse{
             er.set( "Not a ." + ext + " file: " + filename );
             return;
         }
-        fin = new TokenSourceImpl( filename );
+        fin = new TokenSourceImpl( new TextSource_file(filename) );
         if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
         }

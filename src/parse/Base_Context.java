@@ -16,8 +16,8 @@ import static parse.Keywords.HANDLER.TARGLANG_INSERT;
 import static parse.Keywords.TARGLANG_OPEN;
 
 import static parse.IParse.ScanNode;
-import toksource.StringSource;
 import toksource.TokenSource;
+import toksource.TextSource;
 /**
  *
  * @author Dave Swanson

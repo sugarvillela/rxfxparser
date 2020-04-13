@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
 import parse.Keywords.KWORD;
+import toksource.TextSource_file;
 //import static parse.Keywords.KWORD.ENDLINE;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
@@ -111,11 +112,10 @@ public class Class_Scanner extends Base_Stack {
         }
     }
     public ArrayList<ScanNode> read_rxlx_file(String path){
-        TokenSourceImpl rxlx = new TokenSourceImpl( path );
+        TextSource_file rxlx = new TextSource_file( path );
         if( !rxlx.hasData() ){
             er.set( "Reading rxlx file: bad file name: "+path );
         }
-        rxlx.setLineGetter();
         ArrayList<ScanNode> out = new ArrayList<>();
         String cur;
         while(rxlx.hasNext()){

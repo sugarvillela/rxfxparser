@@ -39,10 +39,11 @@ public class BIT {
         return String.valueOf(fstring);
     }
     public static void disp( int n ){
-        System.out.println( BIT.str( n, "0000_0000_0000_0000_0000_0000_0000_0000" ) );
+        System.out.printf( "%s \t %08X \n", BIT.str( n, "0000_0000_0000_0000_0000_0000_0000_0000" ), n );
     }
     public static void disp( int n, String formatString ){
         System.out.println( BIT.str( n, formatString ) );
+        System.out.printf( "%s \t %08X \n", BIT.str( n, formatString ), n );
     }
     public static void disp( int[] n, String formatString ){
         for( int i=0; i<n.length; i++ )

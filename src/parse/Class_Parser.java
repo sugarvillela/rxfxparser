@@ -6,8 +6,7 @@ import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 
 import codegen.*;
-import toksource.TokenSourceImpl;
-import toksource.StringSource_list;
+import toksource.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import toksource.TokenSource;
@@ -40,15 +39,15 @@ public class Class_Parser extends Base_Stack {
     }
     private Class_Parser(String filename){
         setFile(filename, "rxlx");
-        fin = new TokenSourceImpl( filename );
+        fin = new TokenSourceImpl( new TextSource_file(filename) );
         if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
             return;
         }
         generalInit();
     }
-    private Class_Parser(ArrayList<Object> setContent){
-        fin = new StringSource_list( setContent );
+    private Class_Parser(ArrayList<String> setContent){
+        fin = null;//new TextSource_list( setContent );
 //        if( !fin.hasData() ){
 //            er.set( "Bad input content" );
 //            return;

@@ -181,14 +181,11 @@ public class Commons {
     }
     
     public static <T> void disp( ArrayList<T> arr ){
-        if( arr==null ){
-            return;
-        }
-        disp(arr, "");
+        disp(arr, "generic array");
     }
     public static <T> void disp( ArrayList<T> arr, String label ){
         if( arr==null || arr.isEmpty() ){
-            System.out.println("\nDisplay: NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.size() );
@@ -197,12 +194,13 @@ public class Commons {
         }
         System.out.println("End Display: " + label+"\n");
     }
+    // For Strings or Objects
     public static <T> void disp( T[] arr ){
         disp(arr, "");
     }
     public static <T> void disp( T[] arr, String label ){
         if( arr==null || arr.length==0 ){
-            System.out.println("\nDisplay: NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.length );
@@ -211,15 +209,34 @@ public class Commons {
         }
         System.out.println("End Display: " + label+"\n");
     }
+    // For primitives
     public static void disp( char[] arr ){
+        disp(arr, "char array");
+    }
+    public static void disp( char[] arr, String label ){
         if( arr==null || arr.length==0 ){
-            System.out.println("\nDisplay: NULL or EMPTY array" );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
             return;
         }
-        System.out.println("\nDisplay char array: " + arr.length );
+        System.out.println("\nDisplay: " + label + ": " + arr.length );
         for( char elem : arr ){
             System.out.println( "\t" + elem );
         }
+        System.out.println("End Display: " + label+"\n");
+    }
+    public static void disp( int[] arr ){
+        disp(arr, "int array");
+    }
+    public static void disp( int[] arr, String label ){
+        if( arr==null || arr.length==0 ){
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
+            return;
+        }
+        System.out.println("\nDisplay: " + label + ": " + arr.length );
+        for( int elem : arr ){
+            System.out.println( "\t" + elem );
+        }
+        System.out.println("End Display: " + label+"\n");
     }
     public static int boolInt(boolean bool){// Java can't cast bool to int
         return bool? 1 : 0;

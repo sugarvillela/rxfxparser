@@ -7,15 +7,14 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-/**One of a set of passive iterators that implement StringSource
+/**One of a set of passive iterators that implement TextSource
  * @author Dave Swanson
  */
-public class StringSourceImp_file extends StringSourceBase{
+public class TextSource_file extends TextSource_base{
     protected String fileName, prev;
     protected Scanner input;
     
-    public StringSourceImp_file( String fileName ){
-        this.er = Erlog.getInstance();
+    public TextSource_file( String fileName ){
         this.fileName = fileName;
         onCreate();
     }
@@ -61,12 +60,11 @@ public class StringSourceImp_file extends StringSourceBase{
      * @param param a list reference, instantiated and empty
      */
     public static void convert(String fileName, ArrayList<String> param ){
-        StringSourceImp_file f = new StringSourceImp_file(fileName);
+        TextSource_file f = new TextSource_file(fileName);
         if(f.hasData()){
             while( f.hasNext() ){
                 param.add( f.next() );
             }
         }
     }
-
 }

@@ -1,1 +1,1 @@
-Error: line 16, word 0: Unknown keyword in: TARGLANG
+Error: TextSource_list: null or empty text source
