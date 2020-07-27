@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package parse;
+package parse.interfaces;
 
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
@@ -11,15 +11,16 @@ import parse.Keywords.KWORD;
 
 import commons.Commons;
 import java.util.ArrayList;
+import parse.Base_StackItem;
 import toksource.TokenSource;
 
-/**Interface and static node classes
+/**Interface and static node classes for scan/parse components
  *
  * @author Dave Swanson
  */
 public interface IParse {
        
-    // node for input and output list
+    /** node for input and output list */
     public class ScanNode{
         public CMD cmd;
         public HANDLER h;
@@ -41,6 +42,8 @@ public interface IParse {
             k = setKWord;
             data = setData;
         }
+        /**Data to string for writing to file
+         * @return one line of a csv file */
         @Override
         public String toString(){//one line of a csv file
             return String.format(
@@ -65,25 +68,12 @@ public interface IParse {
         }
     }
     
-    // Below: Interface
-    // Stack commands
-    public void push( Base_StackItem nuTop );   // enum CMD
-    public void pop();                          // enum CMD
-    
-    // Fancy setters
-    public void add(Object obj);                // enum CMD
-    public void setAttrib(String key, Object value);// enum KEY
-    public Object getAttrib(String key);           // enum KEY
-    
-    // Event-based
-    public void onCreate(); // call if object exists before push
-    public void onPush();   // call immediately after push
-    public void onPop();    // call just before pop
-    public void onQuit();   // call when program/task is finished
-    public void notify(KWORD k);// not used
+//    // Fancy setters
+//    public void add(Object obj);                // enum CMD
+//    public void setAttrib(String key, Object value);// enum KEY
+//    //public Object getAttrib(String key);           // enum KEY
     
     // Getters
-    public Base_StackItem getTop();
     public ArrayList<ScanNode> getScanNodeList();
     public TokenSource getTokenSource();
     public void disp();

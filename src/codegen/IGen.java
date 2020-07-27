@@ -1,7 +1,7 @@
 package codegen;
 
 import java.util.ArrayList;
-import parse.IParse;
+import parse.interfaces.IParse;
 
 /**For RXFX-specific code generation using Widget
  * Need implementation for each target language

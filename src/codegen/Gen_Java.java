@@ -2,7 +2,7 @@ package codegen;
 
 import commons.Commons;
 import java.util.ArrayList;
-import parse.IParse;
+import parse.interfaces.IParse;
 
 /**
  *

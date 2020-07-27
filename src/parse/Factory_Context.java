@@ -1,10 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package parse;
 
+import parse.interfaces.IParse;
 import parse.Keywords.CMD;
 import parse.Keywords.HANDLER;
 import parse.Keywords.KWORD;
@@ -20,6 +17,7 @@ import static parse.Keywords.HANDLER.*;
 //import static parse.Keywords.HANDLER.SCOPE;
 import static parse.Keywords.SOURCE_OPEN;
 import static parse.Keywords.TARGLANG_CLOSE;
+import parse.interfaces.IContext;
 
 /**
  *
@@ -70,6 +68,7 @@ public abstract class Factory_Context {
         }
         return null;
     }
+    
     public static class TargetLanguage extends Base_Context{
         public TargetLanguage( HANDLER setH ){
             this.h = setH;
@@ -372,7 +371,7 @@ public abstract class Factory_Context {
                 return;//
             }
             P.push( get(HANDLER.RX_ITEM) );
-            P.getTop().pushPop( text );
+            ((IContext)P.getTop()).pushPop( text );
             P.pop();
             if( fin.isEndLine() ){
                 P.pop();
@@ -414,7 +413,7 @@ public abstract class Factory_Context {
             nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tpattern" ) );
             P.push( get(HANDLER.RX_KEYVAL) );
             while(itr.hasNext()){
-                P.getTop().pushPop(itr.next());//itr.next()
+                ((IContext)P.getTop()).pushPop(itr.next());//itr.next()
             }
             P.pop();
             nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tpattern" ) );

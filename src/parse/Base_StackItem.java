@@ -1,12 +1,14 @@
 package parse;
-import java.util.ArrayList;
+import parse.interfaces.IParse;
 import parse.Keywords.HANDLER;
-import toksource.TextSource;
+import parse.interfaces.ILifeCycle;
+import parse.interfaces.IStackComponent;
+
 /**Abstract base class for handlers
  *
  * @author Dave Swanson
  */
-public abstract class Base_StackItem implements IParse{
+public abstract class Base_StackItem implements IParse, IStackComponent, ILifeCycle{
     protected Base_Stack P;                 // containing stack
     protected Base_StackItem above, below;  // stack links
     protected HANDLER h;                    // class's own enum
@@ -35,7 +37,8 @@ public abstract class Base_StackItem implements IParse{
         P.setEr( handler + " not allowed here");
         return true;
     }
-    // implementations
+    
+    /* IStackComponent methods */
     @Override
     public void push( Base_StackItem nuTop ){
         System.out.println("\n Base stack item...");
@@ -57,19 +60,16 @@ public abstract class Base_StackItem implements IParse{
             this.below = null;
         }
     }
-
-    // children must implement pushPop
-    public abstract void pushPop( String text );
-    
-    // stubs: children may override to implement
     @Override
-    public void add(Object obj){}
-    @Override
-    public void setAttrib(String key, Object value){}
-    @Override
-    public Object getAttrib(String key){
-        return null;
+    public Base_StackItem getTop(){
+        return P.getTop();
     }
+    @Override
+    public int getStackSize(){
+        return this.P.getStackSize();
+    }
+    
+    /* ILifeCycle methods */
     @Override
     public void onCreate(){}
     @Override
@@ -78,8 +78,6 @@ public abstract class Base_StackItem implements IParse{
     public void onPop(){}
     @Override
     public void onQuit(){}
-    @Override
-    public void notify(Keywords.KWORD k){}
     
     @Override
     public void disp(){

@@ -1,5 +1,6 @@
 package demos;
 
+import parse.interfaces.IParse;
 import commons.Commons;
 import java.util.ArrayList;
 import parse.*;
@@ -13,7 +14,7 @@ public class Parse_ {
         Class_Scanner S = Class_Scanner.getInstance("test.rxfx", "scanOutput");//, "scanOutput"
         //ArrayList<IParse.ScanNode_fromFile> list = S.read_rxlx_file("scanOutput.rxlx");
         //Commons.disp(list);
-        S.onPush();
+        S.go();
         //S.onQuit();
     }
     public static void read_rxlx_file(){
@@ -35,7 +36,7 @@ public class Parse_ {
     public static void parseStack(){
         Class_Parser P = Class_Parser.getInstance("scanOutput.rxlx");
         //Parsestack.setAttrib(key, val);
-        P.onPush();
+        P.go();
     }
     
 }

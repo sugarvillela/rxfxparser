@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
 import parse.Keywords.KWORD;
+import parse.interfaces.IContext;
 import toksource.TextSource_file;
 //import static parse.Keywords.KWORD.ENDLINE;
 
@@ -52,8 +53,7 @@ public class Class_Scanner extends Base_Stack {
     }
 
     // Runs Scanner
-    @Override
-    public void onPush(){
+    public void go(){
         backText = null;
         String text;
         
@@ -74,13 +74,12 @@ public class Class_Scanner extends Base_Stack {
             }
 
             System.out.println( fin.isEndLine() + "___________________"+text );
-            top.pushPop(text);
+            ((IContext)top).pushPop(text);
         }
         // pop target language handler;
         pop();
         Commons.disp(nodes);
     }
-    @Override
     public void onQuit(){
         //System.out.println( "Scanner onQuit" );
         if(foutName != null && !write_rxlx_file(foutName)){

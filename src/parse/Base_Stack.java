@@ -1,8 +1,10 @@
 package parse;
 
+import parse.interfaces.IParse;
 import commons.Erlog;
 import toksource.TokenSourceImpl;
 import java.util.ArrayList;
+import parse.interfaces.IStackComponent;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 
@@ -10,7 +12,7 @@ import toksource.TokenSource;
  *
  * @author Dave Swanson
  */
-public abstract class Base_Stack implements IParse{
+public abstract class Base_Stack implements IParse, IStackComponent{//
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
     protected TokenSource fin;  // file to be parsed
@@ -22,6 +24,7 @@ public abstract class Base_Stack implements IParse{
         er = Erlog.getInstance();
     }
     
+    /* IStackComponent methods */
     @Override
     public void push( Base_StackItem nuTop ){
         System.out.println( "Pushing "+nuTop.getClass().getSimpleName()+", stackSize = "+stackSize );
@@ -51,23 +54,22 @@ public abstract class Base_Stack implements IParse{
         }
     }
     @Override
-    public void add(Object obj){}
-    @Override
-    public void setAttrib(String key, Object value){}
-    @Override
-    public Object getAttrib(String key){
-        return null;
+    public Base_StackItem getTop(){
+        return top;
     }
     @Override
-    public void onCreate(){}
-    @Override
-    public void onPush(){}
-    @Override
-    public void onPop(){}
-    @Override
-    public void onQuit(){}
-    @Override
-    public void notify(Keywords.KWORD k){}
+    public int getStackSize(){
+        return this.stackSize;
+    }
+//    /* Iparse methods */
+//    @Override
+//    public void add(Object obj){}
+//    @Override
+//    public void setAttrib(String key, Object value){}
+//    @Override
+//    public Object getAttrib(String key){
+//        return null;
+//    }
     
     @Override
     public ArrayList<ScanNode> getScanNodeList(){
@@ -77,10 +79,7 @@ public abstract class Base_Stack implements IParse{
         );
         return new ArrayList<>();
     }
-    @Override
-    public Base_StackItem getTop(){
-        return top;
-    }
+
     @Override
     public TokenSource getTokenSource(){
         return fin;
@@ -101,9 +100,7 @@ public abstract class Base_Stack implements IParse{
         }
         fin.setLineGetter();
     }
-    public int getStackSize(){
-        return this.stackSize;
-    }
+
     public final void setFile(String filename, String ext){
         if(!checkAndSetTitle(filename, ext)){
             er.set( "Not a ." + ext + " file: " + filename );

@@ -9,6 +9,7 @@ import codegen.*;
 import toksource.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import parse.interfaces.IContext;
 import toksource.TokenSource;
 import unique.*;
 
@@ -117,7 +118,7 @@ public class Class_Parser extends Base_Stack {
         CMD cmd = s.cmd;
         switch (cmd){
             case ADD_TO:
-                top.add(s.data);
+                ((IContext)top).add(s.data);
                 break;
             case PUSH:
                 push( getGen(s) );
@@ -139,27 +140,29 @@ public class Class_Parser extends Base_Stack {
         }
         return widgets[i];
     }
-    public void setAttrib( String key, String val ){
+
+    public void setAttrib( String key, Object val ){
+        String strVal = (String)val;
         switch (key){
             case "title":
-                title = val;
-                if(Boolean.parseBoolean(val)){
+                title = strVal;
+                if(Boolean.parseBoolean(strVal)){
                     //onFinish();
                 }
                 break;
             case "done":
-                if(Boolean.parseBoolean(val)){
+                if(Boolean.parseBoolean(strVal)){
                     //onFinish();
                 }
                 break;
             case "wrow":
-                wrow = Integer.parseInt(val);
+                wrow = Integer.parseInt(strVal);
                 break;
             case "wval":
-                wval = Integer.parseInt(val);
+                wval = Integer.parseInt(strVal);
                 break;
             case "initRow":
-                initRow = Integer.parseInt(val);
+                initRow = Integer.parseInt(strVal);
                 break;
             default:
                 setEr("Parser.setAttrib: unknown attrib: " + key );
@@ -187,8 +190,7 @@ public class Class_Parser extends Base_Stack {
         }
     }
 
-    @Override
-    public void onPush(){
+    public void go(){
 //        String next;
 //        backText = null;
 //        // start with a base language handler
@@ -212,7 +214,7 @@ public class Class_Parser extends Base_Stack {
 //        }
 //        finish();
     }
-    @Override
+
     public void onQuit(){
         //System.out.println( "parser onQuit" ); 
         String wErr;
@@ -223,7 +225,7 @@ public class Class_Parser extends Base_Stack {
         }
     }
     
-    public abstract class Base_Gen extends Base_StackItem {
+    public abstract class Base_Gen extends Base_Context {
         protected Widget W;
         protected IGen rxfx;
         public Base_Gen(){
@@ -235,7 +237,7 @@ public class Class_Parser extends Base_Stack {
         @Override
         public void setAttrib(String key, Object value){
             if(below != null){
-                below.setAttrib(key, value);
+                ((IContext)below).setAttrib(key, value);
             }
         }
         @Override
@@ -344,18 +346,18 @@ public class Class_Parser extends Base_Stack {
         }
         @Override
         public void onPush(){
-            below.setAttrib("DEF_NAME", defName);
+            ((IContext)below).setAttrib("DEF_NAME", defName);
         }
         @Override
         public void add( Object obj ) {
-            below.add(obj);
+            ((IContext)below).add(obj);
         }
     }
     public class Gen_ATTR extends Base_Gen{
         @Override
         public void add( Object obj ) {
             String[] tok = ((String)obj).split("=");
-            this.below.setAttrib( tok[0], tok[1] );
+            ((IContext)this.below).setAttrib( tok[0], tok[1] );
         }
     }
     
