@@ -1,58 +1,45 @@
 package parse;
-import parse.interfaces.IParse;
-import parse.Keywords.HANDLER;
-import parse.interfaces.ILifeCycle;
+import erlog.Erlog;
+import interfaces.ILifeCycle;
 import parse.interfaces.IStackComponent;
 
-/**Abstract base class for handlers
- *
+/**For separation of concerns, this class handles the self-stacking of items
  * @author Dave Swanson
  */
-public abstract class Base_StackItem implements IParse, IStackComponent, ILifeCycle{
+public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
+    protected Erlog er;
     protected Base_Stack P;                 // containing stack
     protected Base_StackItem above, below;  // stack links
-    protected HANDLER h;                    // class's own enum
-    protected HANDLER[] allowedHandlers;    // children handlers to instantiate
-
+    
     //public Handler_base(){}
     public Base_StackItem(){
+        this.er = Erlog.getCurrentInstance();
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
     }
-    // utilities
-    // careful: these two are opposite logic, one positive one negative
-    protected boolean isAllowedHandler(HANDLER handler){
-        for( HANDLER allowed : allowedHandlers ){
-            if( handler == allowed ){
-                return true;
-            }
-        }
-        return false;
-    }
-    // sets a parse error
-    protected boolean erOnBadHandler(HANDLER handler){
-        if(isAllowedHandler(handler)){
-            return false;
-        }
-        P.setEr( handler + " not allowed here");
-        return true;
-    }
     
-    /* IStackComponent methods */
+    /*=====IStackComponent methods============================================*/
+    
     @Override
     public void push( Base_StackItem nuTop ){
-        System.out.println("\n Base stack item...");
-        System.out.println("this: "+this.toString());
-        System.out.println("P: "+P.toString());
-        System.out.println("Nu top: "+nuTop.toString());
+        System.out.printf(
+            "\n Push... oldTop: %s, nuTop: %s\n",
+                this.getClass().getSimpleName(),
+                nuTop.getClass().getSimpleName()
+        );
+        
         nuTop.below = this;
         this.above = nuTop;
         P.top = nuTop;
-        //P.top.start();
     }
     @Override
     public void pop(){
-        //this.finish();
+        String name = this.below == null? "NULL" : this.below.getClass().getSimpleName();
+        System.out.printf(
+            "\n Popping... oldTop: %s, nuTop: %s\n",
+                this.getClass().getSimpleName(),
+                name
+        );
         this.above = null;
         P.top = this.below;
         if( this.below != null){
@@ -64,20 +51,11 @@ public abstract class Base_StackItem implements IParse, IStackComponent, ILifeCy
     public Base_StackItem getTop(){
         return P.getTop();
     }
+    
     @Override
     public int getStackSize(){
         return this.P.getStackSize();
     }
-    
-    /* ILifeCycle methods */
-    @Override
-    public void onCreate(){}
-    @Override
-    public void onPush(){}
-    @Override
-    public void onPop(){}
-    @Override
-    public void onQuit(){}
     
     @Override
     public void disp(){
@@ -89,4 +67,11 @@ public abstract class Base_StackItem implements IParse, IStackComponent, ILifeCy
             this.below.disp();
         }
     }
+    
+    /*======Empty ILifeCycle methods==========================================*/
+    
+    @Override
+    public void onCreate(){}
+    @Override
+    public void onQuit(){}
 }

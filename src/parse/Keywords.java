@@ -68,12 +68,12 @@ public final class Keywords {
     public static final String CONT_LINE = "...";      // Matlab-like extension
     public static final String SOURCE_OPEN = "/*$";    // pushes source handler
     public static final String SOURCE_CLOSE = "$*/";   // pops all source handlers
-    public static final String TARGLANG_OPEN = "*/";   // inserts target language without popping source
-    public static final String TARGLANG_CLOSE = "/*";  // pops target language insert
+    public static final String TARGLANG_INSERT_OPEN = "*/"; // inserts target language without popping source
+    public static final String TARGLANG_INSERT_CLOSE = "/*";// pops target language insert
     public static final String ITEM_OPEN = "{";        // surrounds item content
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined heading
     public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
-    public static final char EQUAL = '=';              // key=value or key:value ?
+    public static final char   EQUAL = '=';            // key=value or key:value ?
     public static final String DEFAULT_KEYNAME = "text";// class WORD text field
 }

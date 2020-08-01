@@ -1,7 +1,7 @@
 
 package parse;
 
-import parse.interfaces.IParse;
+import erlog.Erlog;
 import parse.Keywords.CMD;
 import parse.Keywords.HANDLER;
 import parse.Keywords.KWORD;
@@ -9,14 +9,8 @@ import parse.Keywords.KWORD;
 import static parse.Keywords.DEFAULT_KEYNAME;
 import static parse.Keywords.EQUAL;
 import static parse.Keywords.HANDLER.*;
-//import static parse.Keywords.HANDLER.ENUB;
-//import static parse.Keywords.HANDLER.ENUD;
-//import static parse.Keywords.HANDLER.FX;
-//import static parse.Keywords.HANDLER.RX;
-//import static parse.Keywords.HANDLER.RXFX;
-//import static parse.Keywords.HANDLER.SCOPE;
 import static parse.Keywords.SOURCE_OPEN;
-import static parse.Keywords.TARGLANG_CLOSE;
+import parse.factories.Factory_Node;
 import parse.interfaces.IContext;
 
 /**
@@ -69,6 +63,8 @@ public abstract class Factory_Context {
         return null;
     }
     
+    /*=====Context handlers===================================================*/
+    
     public static class TargetLanguage extends Base_Context{
         public TargetLanguage( HANDLER setH ){
             this.h = setH;
@@ -79,13 +75,13 @@ public abstract class Factory_Context {
         @Override
         public void pushPop( String text ){
             switch (text.trim()){
-                case SOURCE_OPEN:                        // Start rxfx source code
-                    P.fin.setWordGetter();              // rxfx parses word-by-word
-                    P.push( get( HANDLER.SRCLANG ) );  // main source handler
+                case SOURCE_OPEN:                       // Start rxfx source code
+                    P.setWordGetter();                  // rxfx parses word-by-word
+                    P.push( get( HANDLER.SRCLANG ) );   // main source handler
                     break; 
                 default:// Add exact copy: text not trimmed
                     nodes.add(
-                        new IParse.ScanNode( 
+                        Factory_Node.newScanNode( 
                             CMD.ADD_TO, HANDLER.TARGLANG_BASE, text 
                         ) 
                     );
@@ -96,7 +92,7 @@ public abstract class Factory_Context {
     public static class SourceLanguage extends Base_Context{
         SourceLanguage( HANDLER setH ){
             this.h = setH;
-            this.allowedHandlers = new HANDLER[]{ATTRIB, ENUB, ENUD, RX, FX };
+            action.setAllowedHandlers(new HANDLER[]{ATTRIB, ENUB, ENUD, RX, FX });
         }
         /**Pushes handler from list, or sets error; no non-keyword input
          * @param text a word, no space
@@ -105,17 +101,19 @@ public abstract class Factory_Context {
         public void pushPop( String text ){
             // look for end of source or comment
             if( 
-                popAll(text) || 
-                pushComment(text) ||
-                pushTargLang(text)  ||
-                ( isUserDef(text) && pushUserDef(VAR, text) )    
+                action.popAll(text) || 
+                action.pushComment(text) ||
+                action.pushTargLang(text)  ||
+                action.pushUserDef(VAR, text) 
             ){
+                System.out.println("returned...");
                 return;
             }
-            // different from pushPopOrErr(): no pop on keyword
-            HANDLER keyword = HANDLER.get(text);
-            if(keyword != null && !erOnBadHandler(keyword)){
-                P.push( get( keyword ) );
+            
+            // different from pushPopOrErr(): no pop on handler
+            HANDLER handler = HANDLER.get(text);
+            if(action.assertGoodHandler(handler)){
+                P.push( get( handler ) );
             }
         }
     }
@@ -125,11 +123,7 @@ public abstract class Factory_Context {
          */
         @Override
         public void pushPop( String text ){
-            if(!popAll(text)){
-                if( fin.isEndLine()){
-                    P.pop();
-                }
-            }
+            if(!action.popAll(text) && action.popOnEndLine()){}
         }
         @Override
         public void onPush(){}
@@ -150,16 +144,16 @@ public abstract class Factory_Context {
         @Override
         public void pushPop( String text ){
             if( 
-                popAll(text) ||  
-                popOnKeyword(text) ||
-                pushComment(text) || 
-                pushTargLang(text) 
+                action.popAll(text) ||  
+                action.popOnKeyword(text) ||
+                action.pushComment(text) || 
+                action.pushTargLang(text) 
             ){}
             else{
                 this.addText(text);
-                if( fin.isEndLine() ){
-                    P.pop();
-                }
+//                if( action.popOnEndLine() ){
+//                    P.pop();
+//                }
             }
         }
     }
@@ -172,14 +166,11 @@ public abstract class Factory_Context {
          */
         @Override
         public void pushPop( String text ){
-            if( TARGLANG_CLOSE.equals(text)){
-                P.pop();
-            }
-            else{
+            if(!action.popOnTargLangClose(text)){
                 this.addText( text + " " );
-                if( fin.isEndLine() ){
+                if(action.TestIsEndLine() ){
                     nodes.add(
-                        new IParse.ScanNode(CMD.SET_ATTRIB, h, KWORD.ENDLINE ) 
+                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, KWORD.ENDLINE ) 
                     );
                 }
             }
@@ -190,7 +181,7 @@ public abstract class Factory_Context {
     public static class Context_nesting extends Base_Context{
         public Context_nesting( HANDLER setH ){
             h = setH;
-            this.allowedHandlers = new HANDLER[]{ATTRIB };
+            action.setAllowedHandlers(new HANDLER[]{ATTRIB, TARGLANG_INSERT });
         }
         /**Allows nested handlers as defined by list and items below
          * @param text a word
@@ -198,11 +189,11 @@ public abstract class Factory_Context {
         @Override
         public void pushPop( String text ){
             if( 
-                    popAll(text)        || 
-                    pushComment(text)   || 
-                    pushTargLang(text)  || 
-                    ( isUserDef(text) && pushUserDef(HANDLER.USERDEF, text) ) || 
-                    pushPopOrErr(text)
+                    action.popAll(text)        || 
+                    action.pushComment(text)   || 
+                    action.pushTargLang(text)  || 
+                    action.pushUserDef(HANDLER.USERDEF, text) || 
+                    action.pushPopOrErr(text)
             );
         }
     }
@@ -214,15 +205,20 @@ public abstract class Factory_Context {
         protected void addText( String text ){//adds more validation
             String toks[] = text.split("=");
             if( toks.length != 2 ){
-                P.setEr("key=value format is required at " + text);
+                Erlog.getCurrentInstance().set("key=value format is required at " + text);
                 return;
             }
-            KWORD k = KWORD.get(toks[0]);
-            if(k == null){
-                P.setEr("Unknown keyword "+toks[0]+" at: " + text);
-                return;
+            KWORD key = KWORD.get(toks[0]);
+            String val = toks[1];
+            System.out.println("Attrib: key = " + key + ". val = " + val);
+            if(key != null){
+                nodes.add(
+                    Factory_Node.newScanNode(CMD.SET_ATTRIB, h, key, val ) 
+                );
             }
-            nodes.add(new IParse.ScanNode( CMD.SET_ATTRIB, h, k, toks[1]));
+            else{
+                Erlog.getCurrentInstance().set("Unknown keyword "+toks[0]+" at: " + text);
+            }
         }
     }
     public static class UserDefListItem extends Context_non_nesting {
@@ -236,39 +232,28 @@ public abstract class Factory_Context {
         @Override
         public void onPush(){
             //System.out.println( "called onStart on " + this.h );
-            nodes.add( new IParse.ScanNode( CMD.PUSH, this.h, KWORD.DEF_NAME, this.defName ) );
+            nodes.add( Factory_Node.newScanNode( CMD.PUSH, this.h, KWORD.DEF_NAME, this.defName ) );
         }
         
         @Override
         public void onPop(){
             //System.out.println( "called onFinish on " + this.h );
-            nodes.add( new IParse.ScanNode( CMD.POP, this.h, KWORD.DEF_NAME, this.defName ) );
+            nodes.add( Factory_Node.newScanNode( CMD.POP, this.h, KWORD.DEF_NAME, this.defName ) );
         }
-        
-        protected final boolean popOnUserDef(String text){
-            if( isUserDef(text) ){
-                P.back(text);
-                P.pop();
-                return true;
-            }
-            return false;
-        }
-        
+
         @Override
         public void pushPop( String text ){
             if( 
-                popAll(text)        || 
-                popOnUserDef(text)  || 
-                popOnKeyword(text)  ||
-                pushComment(text)   ||
-                pushTargLang(text)
+                action.popAll(text)        || 
+                action.popOnUserDef(text)  || 
+                action.popOnKeyword(text)  ||
+                action.pushComment(text)   ||
+                action.pushTargLang(text)
             ){
                 return;
             }
             this.addText(text);
-            if( fin.isEndLine() ){
-                P.pop();
-            }
+            if(action.popOnEndLine()){}
         }
     }
 
@@ -278,32 +263,32 @@ public abstract class Factory_Context {
         public Var(HANDLER setH, String setName){
             this.h = setH;
             this.defName = setName;
-            this.allowedHandlers = new HANDLER[]{ SCOPE, RXFX, RX, FX };
+            action.setAllowedHandlers(new HANDLER[]{ SCOPE, RXFX, RX, FX });
         }
         
         @Override
         public void pushPop( String text ){
             if( 
-                popAll(text)        || 
-                pushComment(text)   ||
-                pushTargLang(text)  ||
-                pushPopOrErr(text)
+                action.popAll(text)        || 
+                action.pushComment(text)   ||
+                action.pushTargLang(text)  ||
+                action.pushPopOrErr(text)
             ){}
         }
     }
     public static class Scope extends Base_Context{
         public Scope(HANDLER setH ){
             this.h = setH;
-            this.allowedHandlers = new HANDLER[]{ ATTRIB, RXFX, RX, FX };
+            action.setAllowedHandlers(new HANDLER[]{ ATTRIB, RXFX, RX, FX });
         }
         
         @Override
         public void pushPop( String text ){
             if( 
-                popAll(text)        || 
-                pushComment(text)   ||
-                pushTargLang(text)  ||
-                pushPopOrErr(text)
+                action.popAll(text)        || 
+                action.pushComment(text)   ||
+                action.pushTargLang(text)  ||
+                action.pushPopOrErr(text)
             ){}
         }
     }
@@ -311,51 +296,51 @@ public abstract class Factory_Context {
         private boolean haveRx, haveFx, haveAntiFx;
         public Rxfx(HANDLER setH ){
             this.h = setH;
-            this.allowedHandlers = new HANDLER[]{ ATTRIB };
+            action.setAllowedHandlers(new HANDLER[]{ ATTRIB });
             haveRx = haveFx = haveAntiFx = false;
         }
         @Override
         public void pushPop(String text){
             if( 
-                popAll(text)        || 
-                pushComment(text)   ||
-                pushTargLang(text)
+                action.popAll(text)        || 
+                action.pushComment(text)   ||
+                action.pushTargLang(text)
             ){
                 return;
             }
-            HANDLER keyword = HANDLER.get(text);
-            if( keyword == null ){
-                P.setEr( "Unknown keyword: " + text );
+            HANDLER handler = HANDLER.get(text);
+            if( handler == null ){
+                Erlog.getCurrentInstance().set( "Unknown keyword: " + text );
                 return;
             }
-            switch(keyword){
+            switch(handler){
                 case ATTRIB:
                     break;
                 case RX:
                     if(!haveRx){
                         haveRx = true;
-                        P.push( Factory_Context.get(keyword) );
+                        P.push( Factory_Context.get(handler) );
                     }
                     else{
-                        P.setEr( "RXFX must contain one RX" );
+                        Erlog.getCurrentInstance().set( "RXFX must contain one RX" );
                     }
                     break;
                 case FX:
                     if( haveRx ){
                         if( !haveFx ){
                             haveFx = true;
-                            P.push( Factory_Context.get(keyword) );
+                            P.push( Factory_Context.get(handler) );
                         }
                         else{
-                            P.setEr( "RXFX must contain one FX" );
+                            Erlog.getCurrentInstance().set( "RXFX must contain one FX" );
                         }
                     }
                     else{
-                        P.setEr( "FX must follow RX");
+                        Erlog.getCurrentInstance().set( "FX must follow RX");
                     }
                     break;
                 default:
-                    pushPopOrErr(text);
+                    action.pushPopOrErr(text);
             }
             
         }
@@ -367,15 +352,13 @@ public abstract class Factory_Context {
         }
         @Override
         public void pushPop( String text ){
-            if( popAll(text) || popOnKeyword(text) ){
+            if( action.popAll(text) || action.popOnKeyword(text) ){
                 return;//
             }
             P.push( get(HANDLER.RX_ITEM) );
             ((IContext)P.getTop()).pushPop( text );
             P.pop();
-            if( fin.isEndLine() ){
-                P.pop();
-            }
+            if(action.popOnEndLine()){}
         }
     }
     public static class RX_Item extends Base_Context{
@@ -391,32 +374,31 @@ public abstract class Factory_Context {
         @Override
         public void pushPop( String text ){
             range.init(text);                   // parse RX back end
-            nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.LO, ""+range.getLo() ) );
-            nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.HI, ""+range.getHi() ) );
+            nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.LO, ""+range.getLo() ) );
+            nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.HI, ""+range.getHi() ) );
             text = range.getPattern();          //remove range
             text = pairMinder.trimSurrounding(text);// remove outer parenth
             if(!pairMinder.validParenth(text)){ // check open-close ratio
-                P.setEr("Mismatched opening/closing parentheses at: "+text);
+                Erlog.getCurrentInstance().set("Mismatched opening/closing parentheses at: "+text);
             }
             if(!pairMinder.validQuotes(text)){ // check open-close ratio
-                P.setEr("Mismatched opening/closing quotes at: "+text);
+                Erlog.getCurrentInstance().set("Mismatched opening/closing quotes at: "+text);
             }
             char disallowed;
             if( (disallowed = pairMinder.disallowedChar("\"+*?", text)) != '\0' ){
-                P.setEr( 
+                Erlog.getCurrentInstance().set( 
                     disallowed + " not allowed here in '" + text + 
                             ")'unless surrounded by single quotes"
                 );
             }
-            //System.out.println("Context_RXPattern pushPop: text="+text);
             itr.init(text);  // split on RX characters
-            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tpattern" ) );
+            nodes.add(Factory_Node.newScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tpattern" ) );
             P.push( get(HANDLER.RX_KEYVAL) );
             while(itr.hasNext()){
                 ((IContext)P.getTop()).pushPop(itr.next());//itr.next()
             }
             P.pop();
-            nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tpattern" ) );
+            nodes.add(Factory_Node.newScanNode( CMD.END, h, KWORD.IF, "\t\tpattern" ) );
         }
     }
     public static class RX_KeyVal extends Base_Context{
@@ -444,7 +426,7 @@ public abstract class Factory_Context {
                 switch(text.charAt(0)){
                     case EQUAL:
                         if(!haveKey){
-                            P.setEr("Expected key=value format or 'literal' here: "+text);
+                            Erlog.getCurrentInstance().set("Expected key=value format or 'literal' here: "+text);
                         }
                         this.clearNegated(text);
                         break;
@@ -484,20 +466,20 @@ public abstract class Factory_Context {
         public void onPop(){
             popIfLevel();
             clearNegated("ON POP");
-            nodes.add( new IParse.ScanNode( CMD.POP, this.h ) );
+            nodes.add( Factory_Node.newScanNode( CMD.POP, this.h ) );
         }
         @Override
         public void add(Object obj){
             String text = trimSurrounding( (String)obj );
             //System.out.printf( "at default: %s, isLiteral=%b \n", text, isLiteral );
             if(haveKey){
-                nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.KEY, key ) );
-                nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.VAL, text ) );
+                nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.KEY, key ) );
+                nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.VAL, text ) );
                 haveKey = false;
             }
             else if(isLiteral){
-                nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.KEY, DEFAULT_KEYNAME ) );//DEFAULT_KEYNAME in IParse
-                nodes.add( new IParse.ScanNode( CMD.SET_ATTRIB, h, KWORD.VAL, text ) );
+                nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.KEY, DEFAULT_KEYNAME ) );//DEFAULT_KEYNAME in IParse
+                nodes.add( Factory_Node.newScanNode( CMD.SET_ATTRIB, h, KWORD.VAL, text ) );
             }
             else{
                 key = text;
@@ -516,31 +498,31 @@ public abstract class Factory_Context {
             }
         }
         private void or(){
-            nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tkvOR" ) );
-            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.ELIF ) );
+            nodes.add( Factory_Node.newScanNode( CMD.END, h, KWORD.IF, "\t\tkvOR" ) );
+            nodes.add( Factory_Node.newScanNode( CMD.BEGIN, h, KWORD.ELIF ) );
         }
         private void and(){
-            nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tkvAND" ) );
+            nodes.add( Factory_Node.newScanNode( CMD.BEGIN, h, KWORD.IF, "\t\tkvAND" ) );
             ifLevel ++;
         }
         private void setNegated(String text){
             isNegated = !isNegated;
             if( isNegated ){
-                nodes.add( new IParse.ScanNode( CMD.BEGIN, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
+                nodes.add( Factory_Node.newScanNode( CMD.BEGIN, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
             }
             else{
-                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
+                nodes.add( Factory_Node.newScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text ) );
             }
         }
         private void clearNegated(String text){
             if( isNegated ){
                 isNegated = false;
-                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text) );
+                nodes.add( Factory_Node.newScanNode( CMD.END, h, KWORD.NEGATE, "\t\t\tkv: " + text) );
             }
         }
         private void popIfLevel(){
             for(int i=ifLevel; i>0; i--){
-                nodes.add( new IParse.ScanNode( CMD.END, h, KWORD.IF, "\t\tkvPopIfLevel" ) );
+                nodes.add( Factory_Node.newScanNode( CMD.END, h, KWORD.IF, "\t\tkvPopIfLevel" ) );
             }
             ifLevel=0;
         }

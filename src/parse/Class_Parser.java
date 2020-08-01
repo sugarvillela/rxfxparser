@@ -10,11 +10,12 @@ import toksource.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import parse.interfaces.IContext;
-import toksource.TokenSource;
+import parse.factories.Factory_Node.ScanNode;
+import parse.factories.Factory_Node.GroupNode;
+import parse.factories.Factory_Node;
 import unique.*;
 
 /**
- *
  * @author Dave Swanson
  */
 public class Class_Parser extends Base_Stack {
@@ -40,7 +41,7 @@ public class Class_Parser extends Base_Stack {
     }
     private Class_Parser(String filename){
         setFile(filename, "rxlx");
-        fin = new TokenSourceImpl( new TextSource_file(filename) );
+        fin = new TokenSource( new TextSource_file(filename) );
         if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
             return;
@@ -110,7 +111,7 @@ public class Class_Parser extends Base_Stack {
             case USERDEF:
                 return new Gen_USERDEF(s.data);//don't save the instance
             default:
-                setEr("rxlx file contains unknown handler name: "+s.cmd);
+                er.set("rxlx file contains unknown handler name: "+s.cmd);
                 return null;//fail loudly
         }
     }
@@ -127,7 +128,7 @@ public class Class_Parser extends Base_Stack {
                 pop();
                 break;
             default:
-                setEr("rxlx file contains unknown command: "+s.cmd);
+                er.set("rxlx file contains unknown command: "+s.cmd);
                 break;
         }
     }
@@ -165,7 +166,7 @@ public class Class_Parser extends Base_Stack {
                 initRow = Integer.parseInt(strVal);
                 break;
             default:
-                setEr("Parser.setAttrib: unknown attrib: " + key );
+                er.set("Parser.setAttrib: unknown attrib: " + key );
         }
     }
     public void setAttrib( String key, int val ){
@@ -174,7 +175,7 @@ public class Class_Parser extends Base_Stack {
                 initRow = val;
                 break;
             default:
-                setEr("Parser.setAttrib: unknown attrib: " + key );
+                er.set("Parser.setAttrib: unknown attrib: " + key );
         }
     }
     public String getAttrib_str( String key ){
@@ -185,12 +186,12 @@ public class Class_Parser extends Base_Stack {
             case "initRow":
                 return initRow;
             default:
-                setEr("Parser.getAttrib_int: unknown attrib: " + key );
+                er.set("Parser.getAttrib_int: unknown attrib: " + key );
                 return 0;
         }
     }
-
-    public void go(){
+    @Override
+    public void onCreate(){
 //        String next;
 //        backText = null;
 //        // start with a base language handler
@@ -244,27 +245,8 @@ public class Class_Parser extends Base_Stack {
         public abstract void add( Object obj );
         
         @Override
-        public ArrayList<ScanNode> getScanNodeList(){
-            return null;
-//            if(nodes==null){
-//                commons.Erlog.getInstance().set(
-//                    "Developer: scan node list not initialized in "+this.getClass().getSimpleName()
-//                );
-//            }
-//            return nodes;
-        }
-        @Override
         public Base_StackItem getTop(){
             return P.getTop();
-        }
-        @Override
-        public TokenSource getTokenSource(){
-            if(fin==null){
-                commons.Erlog.getInstance().set(
-                    "Developer: StringSource not initialized in "+this.getClass().getSimpleName()
-                );
-            }
-            return fin;
         }
     }
     public class Gen_targetLang extends Base_Gen{
@@ -304,7 +286,7 @@ public class Class_Parser extends Base_Stack {
             switch(key){
                 case "DEF_NAME":  // called on USERDEF push to set name
                     iGroup++;
-                    groups.add( new GroupNode( (String)value, curr ) );
+                    groups.add( Factory_Node.newGroupNode( (String)value, curr ) );
                     break;
             }
         }
@@ -334,7 +316,7 @@ public class Class_Parser extends Base_Stack {
                         curr = itr.next();
                     }
                     iGroup++;
-                    groups.add( new GroupNode( (String)value, curr ) );
+                    groups.add( Factory_Node.newGroupNode( (String)value, curr ) );
                     break;
             }
         }
@@ -363,15 +345,15 @@ public class Class_Parser extends Base_Stack {
     
     
     public void test_Gen_ENUB(){
-        getGen(new ScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
-        Gen_ENUB g = (Gen_ENUB)getGen(new ScanNode(CMD.PUSH, HANDLER.ENUB));
-        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
+        getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
+        Gen_ENUB g = (Gen_ENUB)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.ENUB));
+        Gen_USERDEF u = (Gen_USERDEF)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
         u.below = g;
         u.onPush();
         u.add("donkey");
         u.add("fritter");
         u.add("incompetent");
-        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
+        Gen_USERDEF u2 = (Gen_USERDEF)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
         u2.below = g;
         u2.onPush();
         u2.add("jeepers");
@@ -380,16 +362,16 @@ public class Class_Parser extends Base_Stack {
         g.onQuit();
     }
     public void test_Gen_ENUD(){
-        getGen(new ScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
-        Gen_ENUD g = (Gen_ENUD)getGen(new ScanNode(CMD.PUSH, HANDLER.ENUD));
+        getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.TARGLANG_BASE));
+        Gen_ENUD g = (Gen_ENUD)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.ENUD));
         g.onCreate();
-        Gen_USERDEF u = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
+        Gen_USERDEF u = (Gen_USERDEF)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.USERDEF, "Wowee"));
         u.below = g;
         u.onPush();
         u.add("donkey");
         u.add("fritter");
         u.add("incompetent");
-        Gen_USERDEF u2 = (Gen_USERDEF)getGen(new ScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
+        Gen_USERDEF u2 = (Gen_USERDEF)getGen(Factory_Node.newScanNode(CMD.PUSH, HANDLER.USERDEF, "Fantastique"));
         u2.below = g;
         u2.onPush();
         u2.add("jeepers");

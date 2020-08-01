@@ -1,6 +1,5 @@
 package toksource;
 
-import commons.Erlog;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -10,7 +9,7 @@ import java.util.Scanner;
 /**One of a set of passive iterators that implement TextSource
  * @author Dave Swanson
  */
-public class TextSource_file extends TextSource_base{
+public class TextSource_file extends Base_TextSource{
     protected String fileName, prev;
     protected Scanner input;
     
@@ -32,7 +31,6 @@ public class TextSource_file extends TextSource_base{
         catch ( FileNotFoundException e ){
             this.good = false;
             this.done = true;
-            this.er.set(e.getMessage());
         }
     }
     @Override
@@ -55,6 +53,11 @@ public class TextSource_file extends TextSource_base{
         }
         return this.prev;
     }
+    @Override
+    public String readableStatus(){
+        return String.format("TextSource_file: Line %d", this.getRow());
+    }
+    
     /**Fills empty list with file contents
      * @param fileName valid path (no action if bad file name)
      * @param param a list reference, instantiated and empty

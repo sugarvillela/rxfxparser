@@ -1,6 +1,7 @@
 package parse;
 
 import commons.Commons;
+import erlog.Erlog;
 import toksource.TextSource_list;
 import java.util.ArrayList;
 import toktools.TK;
@@ -72,7 +73,7 @@ public class Util_ScanRX{
                 return Integer.parseInt( pattern.substring(start, end) );
             }
             catch(NumberFormatException e){
-                Class_Scanner.getInstance().setEr("Bad number format: " + pattern );
+                Erlog.getCurrentInstance().set("Bad number format: " + pattern );
                 return 0;
             }
         }
@@ -108,7 +109,7 @@ public class Util_ScanRX{
         public void init( String text){
             words = new TextSource_list( tk.toList(text) );
             if(!words.hasData()){
-                Class_Scanner.getInstance().setEr("Err at:"+text);
+                Erlog.getCurrentInstance().set("Err at:"+text);
             }
         }
         public boolean hasNext(){

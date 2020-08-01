@@ -7,7 +7,7 @@ package codegen;
 
 import commons.Commons;
 import java.util.ArrayList;
-import parse.interfaces.IParse;
+import parse.factories.Factory_Node.GroupNode;
 
 /**
  *
@@ -23,11 +23,11 @@ public class Gen_PHP implements IGen{
         W.line( String.format("const %s = 0x0%X;", varName, varVal ) );
     }
     @Override
-    public void ENU_getGroupName_(Widget W, ArrayList<IParse.GroupNode> groups){
+    public void ENU_getGroupName_(Widget W, ArrayList<GroupNode> groups){
             Commons.disp(groups);
             W.blank();
             W.function_("getGroupName", "group name", "$enum");
-                for( IParse.GroupNode g : groups ){
+                for( GroupNode g : groups ){
                     W.if_( 
                         String.format( "0x0%X >= $enum && $enum >= 0x0%X", g.e, g.s ) 
                     );

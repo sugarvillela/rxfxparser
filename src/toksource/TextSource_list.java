@@ -1,6 +1,6 @@
 package toksource;
 
-import commons.Erlog;
+import erlog.Erlog;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,13 +10,14 @@ import java.util.ArrayList;
  * Note: 1-index row instead of 0-index as you'd expect from an array
  * @author Dave Swanson
  */
-public class TextSource_list extends TextSource_base{
+public class TextSource_list extends Base_TextSource{
     java.util.AbstractList<String> content;
     
     public TextSource_list(java.util.AbstractList<String> setContent){
         this.content = setContent;
         onCreate();
     }
+    
     @Override
     public final void onCreate(){
         this.row = 0;
@@ -25,7 +26,6 @@ public class TextSource_list extends TextSource_base{
         if(this.content == null || this.content.isEmpty()){
             this.good = false;
             this.done = true;
-            this.er.set("TextSource_list: null or empty text source");
         }
         else{
             this.good = true;
@@ -43,7 +43,7 @@ public class TextSource_list extends TextSource_base{
     @Override
     public String next(){
         row++;
-        this.done = row >= content.size();
+        this.done = (row >= content.size());
         return content.get(row-1);
     }
     
@@ -65,7 +65,7 @@ public class TextSource_list extends TextSource_base{
 
             }
             catch(IOException e){
-                Erlog.getInstance().set(e.getMessage());
+                Erlog.getCurrentInstance().set(e.getMessage());
             }
         }
     }

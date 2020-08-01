@@ -5,7 +5,7 @@
  */
 package rxfxparser;
 
-import commons.Erlog;
+import erlog.Erlog;
 
 /**
  *
@@ -23,7 +23,7 @@ public class RxTest_base {
     protected Erlog er;
     
     public RxTest_base(){
-        er = Erlog.getInstance();
+        er = Erlog.getCurrentInstance();
     }
     public void reset(){
         this.count=0;

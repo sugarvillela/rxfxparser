@@ -1,6 +1,6 @@
 package demos;
 
-import toksource.TokenSourceImpl;
+import toksource.TokenSource;
 import commons.BIT;
 import itr_struct.*;
 import unique.Unique;

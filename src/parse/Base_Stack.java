@@ -1,33 +1,31 @@
 package parse;
 
-import parse.interfaces.IParse;
-import commons.Erlog;
-import toksource.TokenSourceImpl;
-import java.util.ArrayList;
+import erlog.Erlog;
+import interfaces.ILifeCycle;
+import toksource.TokenSource;
 import parse.interfaces.IStackComponent;
 import toksource.TextSource_file;
-import toksource.TokenSource;
+import toksource.interfaces.ITextSource;
 
 /**Abstract base class for Scanner and Parser classes
  *
  * @author Dave Swanson
  */
-public abstract class Base_Stack implements IParse, IStackComponent{//
+public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
-    protected TokenSource fin;  // file to be parsed
+    protected ITextSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
     protected final Erlog er;    // logs, notifies, quits or all 3
     protected String backText;   // repeat lines
     
     public Base_Stack(){
-        er = Erlog.getInstance();
+        er = Erlog.getCurrentInstance();
     }
     
     /* IStackComponent methods */
     @Override
     public void push( Base_StackItem nuTop ){
-        System.out.println( "Pushing "+nuTop.getClass().getSimpleName()+", stackSize = "+stackSize );
         if(top==null){
             top = nuTop;
             stackSize=1;
@@ -37,21 +35,22 @@ public abstract class Base_Stack implements IParse, IStackComponent{//
             stackSize++;
         }
         top.onPush();
+        System.out.println("Push: StackSize = " + this.getStackSize());
     }
     @Override
     public void pop(){
         if(top==null){
             stackSize=0;
-            setEr("Blame developer: Stack empty"); 
+            er.set("Blame developer: Stack empty"); 
             //finish();
             //System.exit(0);
         }
         else{
-            System.out.println( "Popping "+top.getClass().getSimpleName()+", stackSize = "+stackSize );
             top.onPop();
             top.pop();
             stackSize--;
         }
+        System.out.println("Pop: StackSize = " + this.getStackSize());
     }
     @Override
     public Base_StackItem getTop(){
@@ -61,27 +60,8 @@ public abstract class Base_Stack implements IParse, IStackComponent{//
     public int getStackSize(){
         return this.stackSize;
     }
-//    /* Iparse methods */
-//    @Override
-//    public void add(Object obj){}
-//    @Override
-//    public void setAttrib(String key, Object value){}
-//    @Override
-//    public Object getAttrib(String key){
-//        return null;
-//    }
-    
-    @Override
-    public ArrayList<ScanNode> getScanNodeList(){
-        commons.Erlog.getInstance().set(
-            "Developer: no getScanNodeList() implementation in "
-                    + this.getClass().getSimpleName()
-        );
-        return new ArrayList<>();
-    }
 
-    @Override
-    public TokenSource getTokenSource(){
+    public ITextSource getTokenSource(){
         return fin;
     }
     @Override
@@ -106,10 +86,11 @@ public abstract class Base_Stack implements IParse, IStackComponent{//
             er.set( "Not a ." + ext + " file: " + filename );
             return;
         }
-        fin = new TokenSourceImpl( new TextSource_file(filename) );
+        fin = new TokenSource( new TextSource_file(filename) );
         if( !fin.hasData() ){
             er.set( "Bad input file name: "+filename );
         }
+        er.setTextStatusReporter(fin);
     }
     private boolean checkAndSetTitle(String f, String ext){
         if( f.length() < ext.length() + 2 || !f.endsWith( "." + ext) ){
@@ -118,10 +99,6 @@ public abstract class Base_Stack implements IParse, IStackComponent{//
         title = f.substring(0, f.length() - ext.length() - 1 );
         //System.out.println( "title... " + title );
         return true;
-    }
-    public final void setEr( String text ){
-        // handlers don't need to know line number; just call parser to set
-        er.set( text, fin.getRow(), fin.getCol() );
     }
     public final void setWordGetter(){
         fin.setWordGetter();
@@ -132,5 +109,16 @@ public abstract class Base_Stack implements IParse, IStackComponent{//
     public void back( String repeatThis ){// if backText not null, use it 
         backText = repeatThis;
     }
-
+    
+    // Empty ILifeCycle implementions
+    @Override
+    public void onCreate(){}
+    @Override
+    public void onPush(){}
+    @Override
+    public void onPop(){}
+    @Override
+    public void onQuit(){
+        er.clearTextStatusReporter();
+    }
 }

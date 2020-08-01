@@ -4,16 +4,15 @@ package parse;
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 import commons.Commons;
-import toksource.TokenSourceImpl;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
 import parse.Keywords.KWORD;
+import parse.factories.Factory_Node.ScanNode;
 import parse.interfaces.IContext;
 import toksource.TextSource_file;
-//import static parse.Keywords.KWORD.ENDLINE;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
  *
@@ -53,7 +52,8 @@ public class Class_Scanner extends Base_Stack {
     }
 
     // Runs Scanner
-    public void go(){
+    @Override
+    public void onCreate(){
         backText = null;
         String text;
         
@@ -73,21 +73,21 @@ public class Class_Scanner extends Base_Stack {
                 backText = null;
             }
 
-            System.out.println( fin.isEndLine() + "___________________"+text );
+            System.out.println( ">>>" + text );
             ((IContext)top).pushPop(text);
         }
         // pop target language handler;
         pop();
         Commons.disp(nodes);
     }
+    @Override
     public void onQuit(){
         //System.out.println( "Scanner onQuit" );
         if(foutName != null && !write_rxlx_file(foutName)){
-            setEr("Failed to write output file for name: " + foutName);
+            er.set("Failed to write output file for name: " + foutName);
         }
     }
     
-    @Override
     public ArrayList<ScanNode> getScanNodeList(){
         return this.nodes;
     }
@@ -146,7 +146,7 @@ public class Class_Scanner extends Base_Stack {
             }
         }
         System.out.println(j);
-        setEr( "Bad CSV file format at: " + text );
+        er.set( "Bad CSV file format at: " + text );
         return null;
     }
 }

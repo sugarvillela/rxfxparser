@@ -10,4 +10,5 @@ public interface IStackComponent {
     public void pop();
     public Base_StackItem getTop();
     public int getStackSize();
+    public void disp();
 }

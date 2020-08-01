@@ -1,7 +1,7 @@
 package tinymaps;
 
-import commons.Erlog;
-import toksource.TokenSourceImpl;
+import erlog.Erlog;
+import toksource.TokenSource;
 import java.util.ArrayList;
 import toksource.TextSource_file;
 import toktools.TK;
@@ -21,8 +21,10 @@ public class TinyJSON {
     
     public TinyJSON(String filename){
         // initialize
-        log = Erlog.getInstance();
         fin = new TextSource_file( filename );
+        log = Erlog.getCurrentInstance();
+        log.setTextStatusReporter(fin);
+        
         if( fin.hasData() ){
             parseLines();
         }
@@ -109,7 +111,7 @@ public class TinyJSON {
                 currMap.put( parseJTerm(keyval[0]), parseJTerm(keyval[1]) );
             }
             catch(ArrayIndexOutOfBoundsException e){
-                log.set( "JSON format: missing semicolon at: " + tok, lineNumber);
+                log.set( "JSON format: missing semicolon at: " + tok);
             }
         }
         objects.add(currMap);
@@ -125,12 +127,12 @@ public class TinyJSON {
 
     private void assertNull(){
         if(opener != '\0'){
-            log.set("Make sure JSON objects start and end on same line", lineNumber);
+            log.set("Make sure JSON objects start and end on same line");
         }
     }
     private void assertOpener(char c){
         if(opener != c){
-            log.set("This parser does not support nested JSON objects", lineNumber);
+            log.set("This parser does not support nested JSON objects");
         }
     }
 }

@@ -8,37 +8,38 @@ function incNumber(){
 }
 
 /*$
-	ATTRIB{ 
-		title=myTitle favoriteMovie=none
-	}
+	ATTRIB
+		KEY=name VAL=Dave KEY=dob VAL=09/18/1964
+	
 	// Boolean
-	ENUB{
-		$POS{ 
-			verb noun adjective adverb linking article determiner 
-		}
-		$STATE{ 
-			begin middle end 
-		}
-		$ANIMAL{ 
+	ENUB
+		$POS 
+			verb noun adjective ...
+			adverb linking article determiner // Comment
+		
+		$STATE 
+			begin middle end
+		
+		$ANIMAL 
 			lion tiger zebra bear deer dog cat 
-		}
-	}
+		
+	
 	//Discrete	
-	ENUD{
-		$PAIN{ 
+	ENUD
+		$PAIN 
 			fine mild moderate severe excrutiating 
-		}
-		$COUNT{ one two three four five six}
-		$ALPHA{ 
+		
+		$COUNT one two three four five six
+		$ALPHA 
 			A B C D E F 
-		}
-	}
-	TARGLANG{
+		
+	
+	*/
 		incNumber();
-	}
-	RX{ 
-		"myPatternIsThis {5-15}" 
-	}
+	/*
+	//RX 
+		//"myPatternIsThis{5-15}" 
+	
 		
 $*/
 

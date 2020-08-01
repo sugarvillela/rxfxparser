@@ -260,7 +260,7 @@ public class TokenTools_ {
     }
     public static void itr_file(){
         // Can change modes on the fly. Doesn't save half-lines
-        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("file01.txt"));
+        TokenSource f =  new TokenSource(new TextSource_file("file01.txt"));
         System.out.println( "hasFile = "+f.hasData());
         int i = 1;
         int last = -1;
@@ -291,7 +291,7 @@ public class TokenTools_ {
     }
     public static void itr_file_word(){
         // Can change modes on the fly. Doesn't save half-lines
-        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("test1.rxfx"));
+        TokenSource f =  new TokenSource(new TextSource_file("test1.rxfx"));
         System.out.println( "hasFile = "+f.hasData());
         int i = 1;
         int row, col;
@@ -312,7 +312,7 @@ public class TokenTools_ {
     }
     public static void itr_file_skips(){
         // Can change modes on the fly. Doesn't save half-lines
-        TokenSourceImpl f =  new TokenSourceImpl(new TextSource_file("file02.txt"));
+        TokenSource f =  new TokenSource(new TextSource_file("file02.txt"));
         System.out.println( "hasFile = "+f.hasData());
         int i = 0;
         f.setWordGetter();
