@@ -20,4 +20,10 @@ public interface Tokens {
     // Complex tokenize methods with multi-delims and skip symbols
     public ArrayList<String> toList( String text );
     public String[] toArr( String text );
+    
+    // initializers before parsing  
+    public void setDelims( String delims );
+    public void setDelims( char delim );
+    public void setMap( String skips );
+    public void setFlags( int flags );
 }

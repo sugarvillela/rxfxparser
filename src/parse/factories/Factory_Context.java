@@ -1,17 +1,20 @@
 
-package parse;
+package parse.factories;
 
 import erlog.Erlog;
+import parse.Base_Context;
 import parse.Keywords.CMD;
 import parse.Keywords.HANDLER;
 import parse.Keywords.KWORD;
+import parse.Util_ScanRX;
 
 import static parse.Keywords.DEFAULT_KEYNAME;
 import static parse.Keywords.EQUAL;
 import static parse.Keywords.HANDLER.*;
+import static parse.Keywords.KWORD.*;
 import static parse.Keywords.SOURCE_OPEN;
-import parse.factories.Factory_Node;
 import parse.interfaces.IContext;
+import parse.ut.ContextRxAction;
 
 /**
  *
@@ -30,11 +33,11 @@ public abstract class Factory_Context {
             case ATTRIB:
                 return new Attrib(h);
             case RX:
-                return new RX_Pattern(h);
-            case RX_ITEM:
-                return new RX_Item(h);
-            case RX_KEYVAL:
-                return new RX_KeyVal(h);
+                return new RxStatement(h);
+            case RX_WORD:
+                return new RxWord(h);
+//            case RX_KEYVAL:
+//                return new RX_KeyVal(h);
             case SRCLANG:
                 return new SourceLanguage(h);
             case TARGLANG_BASE:
@@ -92,7 +95,8 @@ public abstract class Factory_Context {
     public static class SourceLanguage extends Base_Context{
         SourceLanguage( HANDLER setH ){
             this.h = setH;
-            action.setAllowedHandlers(new HANDLER[]{ATTRIB, ENUB, ENUD, RX, FX });
+            System.out.println("SourceLanguage Constructor");
+            setAllowedHandlers(new HANDLER[]{ATTRIB, ENUB, ENUD, RX, FX });
         }
         /**Pushes handler from list, or sets error; no non-keyword input
          * @param text a word, no space
@@ -112,7 +116,7 @@ public abstract class Factory_Context {
             
             // different from pushPopOrErr(): no pop on handler
             HANDLER handler = HANDLER.get(text);
-            if(action.assertGoodHandler(handler)){
+            if(assertGoodHandler(handler)){
                 P.push( get( handler ) );
             }
         }
@@ -145,9 +149,9 @@ public abstract class Factory_Context {
         public void pushPop( String text ){
             if( 
                 action.popAll(text) ||  
-                action.popOnKeyword(text) ||
                 action.pushComment(text) || 
-                action.pushTargLang(text) 
+                action.pushTargLang(text) ||
+                action.popOnKeyword(text)
             ){}
             else{
                 this.addText(text);
@@ -181,7 +185,7 @@ public abstract class Factory_Context {
     public static class Context_nesting extends Base_Context{
         public Context_nesting( HANDLER setH ){
             h = setH;
-            action.setAllowedHandlers(new HANDLER[]{ATTRIB, TARGLANG_INSERT });
+            setAllowedHandlers(new HANDLER[]{ATTRIB, TARGLANG_INSERT });
         }
         /**Allows nested handlers as defined by list and items below
          * @param text a word
@@ -205,7 +209,7 @@ public abstract class Factory_Context {
         protected void addText( String text ){//adds more validation
             String toks[] = text.split("=");
             if( toks.length != 2 ){
-                Erlog.getCurrentInstance().set("key=value format is required at " + text);
+                Erlog.get(this).set("key=value format is required", text);
                 return;
             }
             KWORD key = KWORD.get(toks[0]);
@@ -217,7 +221,7 @@ public abstract class Factory_Context {
                 );
             }
             else{
-                Erlog.getCurrentInstance().set("Unknown keyword "+toks[0]+" at: " + text);
+                Erlog.get(this).set("Unknown keyword: " + toks[0], text);
             }
         }
     }
@@ -257,13 +261,65 @@ public abstract class Factory_Context {
         }
     }
 
+    public static class RxStatement extends Base_Context{
+        public RxStatement( HANDLER setH ){
+            this.h = setH;
+            setAllowedHandlers(new HANDLER[]{ATTRIB, TARGLANG_INSERT, COMMENT });
+        }
+        @Override
+        public void pushPop(String text) {
+            if( 
+                action.popAll(text)        ||
+                action.popOnKeyword(text)  ||
+                action.pushComment(text)   ||
+                action.pushTargLang(text)
+            ){
+                return;
+            }
+            // No point in pushing; just create, run a word and destroy
+            Base_Context rxWord = get(RX_WORD);
+            rxWord.onPush();
+            rxWord.pushPop(text);
+            rxWord.onPop();
+        }
+    }
+    // RX: Sub-scanner for RX space-separated words
+    public static class RxWord extends Base_Context{
+        private final ContextRxAction rxAction;
+        
+        public RxWord( HANDLER setH ){
+            this.h = setH;
+            rxAction = ContextRxAction.getInstance();
+        }
+        @Override
+        public void pushPop(String text) {
+            if(rxAction.RANGE.findAndSetRange(text)){
+                text = rxAction.RANGE.getTruncated();
+            }
+            this.addText(text);
+            nodes.add( Factory_Node.newScanNode( 
+                CMD.SET_ATTRIB, h, LO, rxAction.RANGE.getLowRange())
+            );
+            nodes.add( Factory_Node.newScanNode( 
+                CMD.SET_ATTRIB, h, HI, rxAction.RANGE.getHighRange())
+            );
+            nodes.add( Factory_Node.newScanNode( 
+                CMD.SET_ATTRIB, 
+                h, 
+                PARSE_STATUS, 
+                Erlog.getErlog().getTextStatusReporter().readableStatus())
+            );
+        }
+    }
+    
+    //NOT CORRECT YET
     public static class Var extends Base_Context{
         private final String defName;
         
         public Var(HANDLER setH, String setName){
             this.h = setH;
             this.defName = setName;
-            action.setAllowedHandlers(new HANDLER[]{ SCOPE, RXFX, RX, FX });
+            setAllowedHandlers(new HANDLER[]{ SCOPE, RXFX, RX, FX });
         }
         
         @Override
@@ -279,7 +335,7 @@ public abstract class Factory_Context {
     public static class Scope extends Base_Context{
         public Scope(HANDLER setH ){
             this.h = setH;
-            action.setAllowedHandlers(new HANDLER[]{ ATTRIB, RXFX, RX, FX });
+            setAllowedHandlers(new HANDLER[]{ ATTRIB, RXFX, RX, FX });
         }
         
         @Override
@@ -296,7 +352,7 @@ public abstract class Factory_Context {
         private boolean haveRx, haveFx, haveAntiFx;
         public Rxfx(HANDLER setH ){
             this.h = setH;
-            action.setAllowedHandlers(new HANDLER[]{ ATTRIB });
+            setAllowedHandlers(new HANDLER[]{ ATTRIB });
             haveRx = haveFx = haveAntiFx = false;
         }
         @Override
@@ -310,7 +366,7 @@ public abstract class Factory_Context {
             }
             HANDLER handler = HANDLER.get(text);
             if( handler == null ){
-                Erlog.getCurrentInstance().set( "Unknown keyword: " + text );
+                Erlog.get(this).set( "Unknown keyword", text );
                 return;
             }
             switch(handler){
@@ -322,7 +378,7 @@ public abstract class Factory_Context {
                         P.push( Factory_Context.get(handler) );
                     }
                     else{
-                        Erlog.getCurrentInstance().set( "RXFX must contain one RX" );
+                        Erlog.get(this).set( "RXFX must contain one RX" );
                     }
                     break;
                 case FX:
@@ -332,11 +388,11 @@ public abstract class Factory_Context {
                             P.push( Factory_Context.get(handler) );
                         }
                         else{
-                            Erlog.getCurrentInstance().set( "RXFX must contain one FX" );
+                            Erlog.get(this).set( "RXFX must contain one FX" );
                         }
                     }
                     else{
-                        Erlog.getCurrentInstance().set( "FX must follow RX");
+                        Erlog.get(this).set( "FX must follow RX");
                     }
                     break;
                 default:
@@ -345,7 +401,6 @@ public abstract class Factory_Context {
             
         }
     }
-    // RX: Sub-scanner for RX patterns
     public static class RX_Pattern extends Base_Context{
         public RX_Pattern( HANDLER setH ){
             this.h = setH;
@@ -379,14 +434,14 @@ public abstract class Factory_Context {
             text = range.getPattern();          //remove range
             text = pairMinder.trimSurrounding(text);// remove outer parenth
             if(!pairMinder.validParenth(text)){ // check open-close ratio
-                Erlog.getCurrentInstance().set("Mismatched opening/closing parentheses at: "+text);
+                Erlog.get(this).set("Mismatched opening/closing parentheses", text);
             }
             if(!pairMinder.validQuotes(text)){ // check open-close ratio
-                Erlog.getCurrentInstance().set("Mismatched opening/closing quotes at: "+text);
+                Erlog.get(this).set("Mismatched opening/closing quotes", text);
             }
             char disallowed;
             if( (disallowed = pairMinder.disallowedChar("\"+*?", text)) != '\0' ){
-                Erlog.getCurrentInstance().set( 
+                Erlog.get(this).set( 
                     disallowed + " not allowed here in '" + text + 
                             ")'unless surrounded by single quotes"
                 );
@@ -426,7 +481,7 @@ public abstract class Factory_Context {
                 switch(text.charAt(0)){
                     case EQUAL:
                         if(!haveKey){
-                            Erlog.getCurrentInstance().set("Expected key=value format or 'literal' here: "+text);
+                            Erlog.get(this).set("Expected key=value format or 'literal' here: "+text);
                         }
                         this.clearNegated(text);
                         break;

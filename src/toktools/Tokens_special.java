@@ -11,7 +11,7 @@ package toktools;
 
 import java.util.ArrayList;
 import static toktools.TK.DELIMIN;
-
+import static toktools.TK.IGNORESKIP;
 import static toktools.TK.SYMBOUT;
 
 /**
@@ -25,6 +25,7 @@ public class Tokens_special  implements Tokens{
     protected char cSymb;               // Closing symbol (replace with stack?)
     protected int symbIn;               // leave open/close chars in if 1
     protected boolean delimIn;          // keep delims, skips to separate list
+    protected boolean ignoreSkip;       // 
     
     public Tokens_special( String delims, String skips, int flags ) {
         setDelims( delims );
@@ -32,10 +33,16 @@ public class Tokens_special  implements Tokens{
         setFlags( flags );
     }
     // initializers before parsing  
-    protected final void setDelims( String delims ){
+    @Override
+    public final void setDelims( String delims ){
         this.delims = delims;
     }
-    protected final void setMap( String skips ){
+    @Override
+    public final void setDelims( char delim ){
+        this.delims = String.valueOf(delim);
+    }
+    @Override
+    public final void setMap( String skips ){
         // map openers to closers, using symbols from arg
         // if you want different symbols, edit this or add a strategy pattern
         oMap =  new char[skips.length()];
@@ -51,10 +58,12 @@ public class Tokens_special  implements Tokens{
             }
         }
     }
-    protected final void setFlags( int flags ){
+    @Override
+    public final void setFlags( int flags ){
         // ignores skip out and holdover flags
         symbIn = ( ( flags & SYMBOUT )==0 )? 1 : 0;   // integer for adding index
         delimIn = ( ( flags & DELIMIN )!=0 );
+        ignoreSkip = ( ( flags & IGNORESKIP )!=0 );//IGNORESKIP
     }
     
     // utility for better readability in parse()
@@ -62,7 +71,7 @@ public class Tokens_special  implements Tokens{
         //System.out.printf("\nisDelim symb=%c\n", symb);
         return ( delims.indexOf( symb )!= -1 );
     }
-    protected final boolean isOpening( char symb ){
+    protected final boolean setHolding( char symb ){
         // Set closer to match opener, or null if not an opener
         for(int i=0; i<oMap.length; i++){
             if( symb == oMap[i] ){
@@ -92,21 +101,24 @@ public class Tokens_special  implements Tokens{
         for ( i = 0; i < text.length(); i++) {
             if( isHolding() ){                     // in skip area            
                 if( text.charAt(i) == cSymb ){ // found closing skip symbol
-                    
-                    // if symbIn==1, will keep current symbol, else lose it
-                    addToTokens( text.substring( start, i+symbIn ) );
                     cSymb = 0;                  // leaving skip area
-                    start=i+1;                    // reset for next token
+                    if( !ignoreSkip && i != start ){               // if prev wasn't a delim, dump
+                        // if symbIn==1, will keep current symbol, else lose it
+                        addToTokens( text.substring( start, i+symbIn ) );
+                        start=i+1;                    // reset for next token
+                    }
+
                 }
             }
-            else if( isOpening( text.charAt(i) ) ){// opener
-                if( i != start ){               // if prev wasn't a delim, dump
+            else if( setHolding( text.charAt(i) ) ){// opener
+                if( !ignoreSkip && i != start ){               // if prev wasn't a delim, dump
                     addToTokens( text.substring( start, i ) );
                     start=i;
+                    if(symbIn == 0){                // lose the current symbol
+                        start += 1;
+                    }
                 }
-                if(symbIn == 0){                // lose the current symbol
-                    start += 1;
-                }
+
             }
             else if( isDelim( text.charAt(i) ) ){//delimiter
                 //System.out.printf("yes %c\n", text.charAt(i) );

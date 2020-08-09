@@ -109,4 +109,12 @@ public class Tokens_simple implements Tokens{
     public ArrayList<String> getSkips() {
         throw new UnsupportedOperationException("Use Tokens_wSkipHold!");
     }
+    @Override
+    public void setDelims( String delims ){}
+    @Override
+    public void setDelims( char delim ){}
+    @Override
+    public void setMap( String skips ){}
+    @Override
+    public void setFlags( int flags ){}
 }

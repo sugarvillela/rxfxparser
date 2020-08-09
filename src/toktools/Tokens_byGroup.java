@@ -5,8 +5,6 @@
  */
 package toktools;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author admin
@@ -47,7 +45,7 @@ public class Tokens_byGroup extends Tokens_special{
                     lastGroup = -2;
                 }
             }
-            else if( isOpening( text.charAt(i) ) ){// opener
+            else if( setHolding( text.charAt(i) ) ){// opener
                 if( i != start ){               // if prev wasn't a delim, dump
                     addToTokens( text.substring( start, i ) );
                     start=i;

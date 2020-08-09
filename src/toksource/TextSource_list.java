@@ -65,7 +65,7 @@ public class TextSource_list extends Base_TextSource{
 
             }
             catch(IOException e){
-                Erlog.getCurrentInstance().set(e.getMessage());
+                Erlog.get("TestSource_list").set(e.getMessage());
             }
         }
     }

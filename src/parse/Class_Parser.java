@@ -43,7 +43,7 @@ public class Class_Parser extends Base_Stack {
         setFile(filename, "rxlx");
         fin = new TokenSource( new TextSource_file(filename) );
         if( !fin.hasData() ){
-            er.set( "Bad input file name: "+filename );
+            er.set( "Bad input file name: ", filename );
             return;
         }
         generalInit();
@@ -111,7 +111,7 @@ public class Class_Parser extends Base_Stack {
             case USERDEF:
                 return new Gen_USERDEF(s.data);//don't save the instance
             default:
-                er.set("rxlx file contains unknown handler name: "+s.cmd);
+                er.set("rxlx file contains unknown handler name", s.cmd.toString());
                 return null;//fail loudly
         }
     }
@@ -128,7 +128,7 @@ public class Class_Parser extends Base_Stack {
                 pop();
                 break;
             default:
-                er.set("rxlx file contains unknown command: "+s.cmd);
+                er.set("rxlx file contains unknown command", s.cmd.toString());
                 break;
         }
     }
@@ -166,7 +166,7 @@ public class Class_Parser extends Base_Stack {
                 initRow = Integer.parseInt(strVal);
                 break;
             default:
-                er.set("Parser.setAttrib: unknown attrib: " + key );
+                er.set("Parser.setAttrib: unknown attrib", key );
         }
     }
     public void setAttrib( String key, int val ){
@@ -175,7 +175,7 @@ public class Class_Parser extends Base_Stack {
                 initRow = val;
                 break;
             default:
-                er.set("Parser.setAttrib: unknown attrib: " + key );
+                er.set("Parser.setAttrib: unknown attrib", key );
         }
     }
     public String getAttrib_str( String key ){
@@ -186,7 +186,7 @@ public class Class_Parser extends Base_Stack {
             case "initRow":
                 return initRow;
             default:
-                er.set("Parser.getAttrib_int: unknown attrib: " + key );
+                er.set("Parser.getAttrib_int: unknown attrib", key );
                 return 0;
         }
     }

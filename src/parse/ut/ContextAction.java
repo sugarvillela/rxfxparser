@@ -3,7 +3,7 @@ package parse.ut;
 import erlog.Erlog;
 import java.util.Arrays;
 import parse.Class_Scanner;
-import parse.Factory_Context;
+import parse.factories.Factory_Context;
 import parse.Keywords;
 import static parse.Keywords.COMMENT_TEXT;
 import static parse.Keywords.HANDLER.TARGLANG_INSERT;
@@ -11,26 +11,25 @@ import static parse.Keywords.SOURCE_CLOSE;
 import static parse.Keywords.TARGLANG_INSERT_CLOSE;
 import static parse.Keywords.TARGLANG_INSERT_OPEN;
 import static parse.Keywords.USERDEF_OPEN;
-import toksource.interfaces.ITextStatus;
 
 /**A hodgepodge of actions to make the handlers in Factory_Context more readable
  *
  * @author Dave Swanson
  */
 public class ContextAction {
-    private final Class_Scanner P;
-    private final ITextStatus status;
-    private Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
-
-    public ContextAction(){
-        P = Class_Scanner.getInstance();
-        status = ((Class_Scanner)P).getTokenSource();
+    private static ContextAction instance;
+    
+    public static ContextAction getInstance(){
+        return (instance == null)? (instance = new ContextAction()) : instance;
     }
     
-    public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){
-        this.allowedHandlers = allowedHandlers;
-    }
+    private final Class_Scanner P;
+    private Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
 
+    private ContextAction(){
+        P = Class_Scanner.getInstance();
+    }
+    
     // detect connected symbol; false on symbol alone
     public final boolean TestIsUserDef(String text){
         return text.startsWith(USERDEF_OPEN) && 
@@ -38,22 +37,11 @@ public class ContextAction {
     }
     
     public final boolean TestIsEndLine(){
-        return status.isEndLine();
+        return Erlog.getErlog().getTextStatusReporter().isEndLine();
     }
     
     /*=====Actions that report boolean========================================*/
-    
-    // sets a parse error
-    public final boolean assertGoodHandler(Keywords.HANDLER handler){
-        if(handler != null && Arrays.asList(allowedHandlers).contains(handler)){
-            return true;
-        }
-        else{
-            Erlog.getCurrentInstance().set( handler + " not allowed here");
-            return false;
-        }
-    }
-    
+       
     // push
     public final boolean pushUserDef(Keywords.HANDLER uDefHandler, String text){
         if(TestIsUserDef(text)){
@@ -93,7 +81,7 @@ public class ContextAction {
         return false;
     }
     public final boolean popOnEndLine(){
-        if( status.isEndLine() ){
+        if( Erlog.getErlog().getTextStatusReporter().isEndLine() ){
             P.pop();
             return true;
         }
@@ -132,19 +120,25 @@ public class ContextAction {
     // Err if not keyword; push if allowed; pop if not allowed
     public final boolean pushPopOrErr(String text){
         Keywords.HANDLER keyword = Keywords.HANDLER.get(text);
-        if( keyword != null ){
-            if(Arrays.asList(allowedHandlers).contains(keyword)){
-                P.push( Factory_Context.get(keyword) );
-                return true;
-            }
-            else{
-                P.back(text);
-                P.pop();
-                return false;
-            }
+        if( keyword == null ){
+            Erlog.get(this).set( "Unknown keyword", text );
+            return false;
         }
-        Erlog.getCurrentInstance().set( "Unknown keyword: " + text );
-        return false;
+        System.out.println("pushPopOrErr");
+        if(allowedHandlers == null){
+            System.out.println("allowedHandlers is null");
+        }
+        if(allowedHandlers != null && Arrays.asList(allowedHandlers).contains(keyword)){
+            System.out.println("pushPopOrErr: push "+keyword.toString());
+            P.push( Factory_Context.get(keyword) );
+            return true;
+        }
+        else{
+            System.out.println("pushPopOrErr: pop "+keyword.toString());
+            P.back(text);
+            P.pop();
+            return false;
+        }
     } 
 
 }

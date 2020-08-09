@@ -37,23 +37,27 @@ import java.util.ArrayList;
 public class TK {
     /* Enumerations for tokenizer flags (used by complex tokenizer) */
     
-    /* Make delimiters their own token? default false.
+    /** Make delimiters their own token? default false.
      * Where delim normally removed, delim will be an element in tok array 
      * No dup prevention in this case: Multiple delims make multiple elements */
     public static final int DELIMIN = 0x01;
     
-    /* Remove or keep brackets/quotes defining skipped area? default in. */
+    /** Remove or keep brackets/quotes defining skipped area? default in. */
     public static final int SYMBOUT = 0x02;
     
-    /* Remove or keep skipped text? default in.
+    /** Remove or keep skipped text? default in.
      * If out, skipped text goes in separate array. Call getSkips() to access */
     public static final int SKIPOUT = 0x04;
+    
+    /** Keep skip area attached to surrounding tokens? Default no.
+     * SKIPOUT is incompatible with IGNORESKIP */
+    public static final int IGNORESKIP = 0x08;
     
     /* Let skip areas carry over to the next parse? default no.
      * This is useful for file parsing, where a skip area might continue
      * on the next line. Note: you need to get instance, set map, delim etc,
-     * then setText() and parse() again. setMap() clears the holdover */
-    public static final int HOLDOVER = 0x08;
+     ** then setText() and parse() again. setMap() clears the holdover */
+    public static final int HOLDOVER = 0x10;
     
     /*========================================================================*/
     // Static methods to run tokenizer: 

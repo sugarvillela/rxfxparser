@@ -27,9 +27,9 @@ public class TokenSource implements ITextSource{
     /**Token source with default tokenize on space
      * @param lineGetter list or file */
     public TokenSource( ITextSource lineGetter ){
-        this.er = Erlog.getCurrentInstance();
+        this.er = Erlog.get(this);
         this.gLine = lineGetter;// need this whether line or word mode
-        this.tk = TK.getInstance(" ", "\"'", 0);
+        this.tk = TK.getInstance(" ", "\"", TK.IGNORESKIP);
         this.onCreate();
     }
     
@@ -38,7 +38,7 @@ public class TokenSource implements ITextSource{
      * @param setTokenizer initialize tokenizer to set tokenize behavior
      */
     public TokenSource( ITextSource lineGetter, Tokens setTokenizer ){
-        this.er = Erlog.getCurrentInstance();
+        this.er = Erlog.get(this);
         this.gLine = lineGetter;// need this whether line or word mode
         this.tk = setTokenizer;
         this.onCreate();
@@ -163,7 +163,7 @@ public class TokenSource implements ITextSource{
     @Override
     public String readableStatus(){
         return String.format(
-            "TokenSource: Line %d, Word %d", this.getRow(), this.getCol()
+            "Line %d, Word %d", this.getRow(), this.getCol()
         );
     }
 }

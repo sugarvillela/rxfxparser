@@ -325,4 +325,33 @@ public class TokenTools_ {
         }
     
     }
+/*
+*  Tokens instance = TK.getInstance();
+*  instance.setText(text);
+*  instance.setDelims(delims); 
+*  instance.setMap(skips); 
+*  instance.setFlags(flags);
+*  instance.parse();
+*  instance.get();
+*/
+    public static void tokens_toList(){
+        String text="dru='&'|M=17&LEN()=2";
+        ArrayList<String> t;
+        System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
+        Tokens instance = TK.getInstance(
+            "&",                            //delimiter
+            "('",                          //skip symbol
+            TK.IGNORESKIP                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+        );
+        instance.parse(text);
+        t = instance.getTokens();
+        Commons.disp( t, "\nTokens:" );
+        
+        instance = new Tokens_special(
+                "&","('",TK.IGNORESKIP
+        );
+        instance.parse(text);
+        t = instance.getTokens();
+        Commons.disp( t, "\nTokens:" );
+    }
 }

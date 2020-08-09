@@ -23,7 +23,7 @@ public class RxTest_base {
     protected Erlog er;
     
     public RxTest_base(){
-        er = Erlog.getCurrentInstance();
+        er = Erlog.get(this);
     }
     public void reset(){
         this.count=0;

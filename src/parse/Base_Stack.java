@@ -20,7 +20,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected String backText;   // repeat lines
     
     public Base_Stack(){
-        er = Erlog.getCurrentInstance();
+        er = Erlog.get(this);
     }
     
     /* IStackComponent methods */
@@ -83,12 +83,12 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
 
     public final void setFile(String filename, String ext){
         if(!checkAndSetTitle(filename, ext)){
-            er.set( "Not a ." + ext + " file: " + filename );
+            er.set( "Not a ." + ext + " file", filename );
             return;
         }
         fin = new TokenSource( new TextSource_file(filename) );
         if( !fin.hasData() ){
-            er.set( "Bad input file name: "+filename );
+            er.set( "Bad input file name", filename );
         }
         er.setTextStatusReporter(fin);
     }

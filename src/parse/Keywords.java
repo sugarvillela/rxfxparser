@@ -32,6 +32,8 @@ public final class Keywords {
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
+        RX_STATEMENT, RX_WORD,
+        //replace with above line
         RX_ITEM, RX_KEYVAL, FX_ITEM,
         // handlers whose text indicators are not the same as enum name
         TARGLANG_INSERT, USERDEF, COMMENT,
@@ -52,7 +54,7 @@ public final class Keywords {
     }
     public enum KWORD{
         // Keys for setAttrib()
-        DEF_NAME, LO, HI, KEY, VAL, IF, ELIF, ELSE, NEGATE, ENDLINE
+        DEF_NAME, LO, HI, KEY, VAL, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
         public static KWORD get( String text ){
             for(KWORD k : values()){
@@ -76,4 +78,7 @@ public final class Keywords {
     public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
     public static final char   EQUAL = '=';            // key=value or key:value ?
     public static final String DEFAULT_KEYNAME = "text";// class WORD text field
+    public static final String 	RXAND = "&";            // RX symbol
+    public static final String 	RXOR = "|";             // RX symbol
+    public static final String 	RXNOT = "~";            // RX symbol
 }

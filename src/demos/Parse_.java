@@ -3,7 +3,13 @@ package demos;
 import commons.Commons;
 import java.util.ArrayList;
 import parse.*;
+import static parse.Keywords.HANDLER.RX;
 import parse.factories.Factory_Node.ScanNode;
+import parse.factories.Factory_RxContext;
+import parse.factories.Factory_RxContext.Rx;
+import toktools.TK;
+import toktools.Tokens;
+import toktools.Tokens_special;
 /**
  *
  * @author Dave Swanson
@@ -27,7 +33,27 @@ public class Parse_ {
         P.test_Gen_ENUD();
     }
     public static void scannerRX(){
-        //Util_ScanRX S = new Util_ScanRX(null, null);
+        String text="dru='&'|M=17&LEN()=2";
+        Base_Context rx = Factory_RxContext.get(RX);
+        rx.pushPop(text);
+        
+        ArrayList<String> t;
+        System.out.printf( "\n=============================\nOrig text:\n%s\n", text );
+        Tokens instance = TK.getInstance(
+            "&",                            //delimiter
+            "('",                          //skip symbol
+            TK.IGNORESKIP                      //flag to remove skip symbole, TK.DELIMIN|TK.SYMBOUT
+        );
+        instance.parse(text);
+        t = instance.getTokens();
+        Commons.disp( t, "\nTokens:" );
+        
+        instance = new Tokens_special(
+                "&","('",TK.IGNORESKIP
+        );
+        instance.parse(text);
+        t = instance.getTokens();
+        Commons.disp( t, "\nTokens:" );
         //S.onPush("\"myPatternIsThis{5-15} orThat* orEvenThis\"");
     }
     

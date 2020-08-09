@@ -1,6 +1,7 @@
 
 package parse;
 
+import parse.factories.Factory_Context;
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 import commons.Commons;
@@ -84,7 +85,7 @@ public class Class_Scanner extends Base_Stack {
     public void onQuit(){
         //System.out.println( "Scanner onQuit" );
         if(foutName != null && !write_rxlx_file(foutName)){
-            er.set("Failed to write output file for name: " + foutName);
+            er.set("Failed to write output file", foutName);
         }
     }
     
@@ -113,7 +114,7 @@ public class Class_Scanner extends Base_Stack {
     public ArrayList<ScanNode> read_rxlx_file(String path){
         TextSource_file rxlx = new TextSource_file( path );
         if( !rxlx.hasData() ){
-            er.set( "Reading rxlx file: bad file name: "+path );
+            er.set( "Reading rxlx file: bad file name", path );
         }
         ArrayList<ScanNode> out = new ArrayList<>();
         String cur;
@@ -146,7 +147,7 @@ public class Class_Scanner extends Base_Stack {
             }
         }
         System.out.println(j);
-        er.set( "Bad CSV file format at: " + text );
+        er.set( "Bad CSV file format", text );
         return null;
     }
 }

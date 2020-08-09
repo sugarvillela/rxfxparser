@@ -1,7 +1,6 @@
 package tinymaps;
 
 import erlog.Erlog;
-import toksource.TokenSource;
 import java.util.ArrayList;
 import toksource.TextSource_file;
 import toktools.TK;
@@ -22,14 +21,14 @@ public class TinyJSON {
     public TinyJSON(String filename){
         // initialize
         fin = new TextSource_file( filename );
-        log = Erlog.getCurrentInstance();
+        log = Erlog.get(this);
         log.setTextStatusReporter(fin);
         
         if( fin.hasData() ){
             parseLines();
         }
         else{
-            log.set( "Bad input file name: "+filename );
+            log.set( "Bad input file name", filename );
         }
     }
     public final void parseLines(){
@@ -111,7 +110,7 @@ public class TinyJSON {
                 currMap.put( parseJTerm(keyval[0]), parseJTerm(keyval[1]) );
             }
             catch(ArrayIndexOutOfBoundsException e){
-                log.set( "JSON format: missing semicolon at: " + tok);
+                log.set( "JSON format: missing semicolon", tok);
             }
         }
         objects.add(currMap);

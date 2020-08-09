@@ -13,7 +13,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     
     //public Handler_base(){}
     public Base_StackItem(){
-        this.er = Erlog.getCurrentInstance();
+        this.er = Erlog.get(this);
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
     }
@@ -23,7 +23,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     @Override
     public void push( Base_StackItem nuTop ){
         System.out.printf(
-            "\n Push... oldTop: %s, nuTop: %s\n",
+            "\n Push... %s -> %s\n",
                 this.getClass().getSimpleName(),
                 nuTop.getClass().getSimpleName()
         );
@@ -36,7 +36,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public void pop(){
         String name = this.below == null? "NULL" : this.below.getClass().getSimpleName();
         System.out.printf(
-            "\n Popping... oldTop: %s, nuTop: %s\n",
+            "\n Popping... %s -> %s\n",
                 this.getClass().getSimpleName(),
                 name
         );

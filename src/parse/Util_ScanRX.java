@@ -73,7 +73,7 @@ public class Util_ScanRX{
                 return Integer.parseInt( pattern.substring(start, end) );
             }
             catch(NumberFormatException e){
-                Erlog.getCurrentInstance().set("Bad number format: " + pattern );
+                Erlog.get(this).set("Bad number format", pattern );
                 return 0;
             }
         }
@@ -109,7 +109,7 @@ public class Util_ScanRX{
         public void init( String text){
             words = new TextSource_list( tk.toList(text) );
             if(!words.hasData()){
-                Erlog.getCurrentInstance().set("Err at:"+text);
+                Erlog.get(this).set("Error", text);
             }
         }
         public boolean hasNext(){
