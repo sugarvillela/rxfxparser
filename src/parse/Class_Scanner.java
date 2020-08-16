@@ -1,10 +1,10 @@
 
 package parse;
 
-import parse.factories.Factory_Context;
 import parse.Keywords.HANDLER;
 import parse.Keywords.CMD;
 import commons.Commons;
+import erlog.Erlog;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,41 +12,33 @@ import java.util.ArrayList;
 import static parse.Keywords.CONT_LINE;
 import parse.Keywords.KWORD;
 import parse.factories.Factory_Node.ScanNode;
+import parse.factories.Factory_ScanItem;
 import parse.interfaces.IContext;
 import toksource.TextSource_file;
+import toksource.TokenSource;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
  *
  * @author Dave Swanson
  */
 public class Class_Scanner extends Base_Stack {
-    private ArrayList<ScanNode> nodes;
-    private String foutName;
+    private final ArrayList<ScanNode> nodes;
+    private final String inName, outName;
     
     private static Class_Scanner staticInstance;
     
-    public Class_Scanner(){
+    public Class_Scanner(String inName, String outName ){
+        this.inName = inName + ".rxfx";
+        this.outName = outName + ".rxlx";
         nodes = new ArrayList<>();
-    }
-    public Class_Scanner(String inFileName){
-        this( inFileName, null);
-    }
-    public Class_Scanner(String inFileName, String outFileName ){
-        setFile( inFileName, "rxfx" );//rxfx validates file extension .rxfx
-        nodes = new ArrayList<>();
-        foutName = outFileName;
+        er = Erlog.get(this);
     }
     
-    // Singleton pattern
     public static Class_Scanner getInstance(){
-        return (staticInstance == null )? 
-            (staticInstance = new Class_Scanner()) : staticInstance;
+        return staticInstance;
     }
-    public static Class_Scanner getInstance( String inFileName ){
-        return (staticInstance = new Class_Scanner(inFileName));
-    }
-    public static Class_Scanner getInstance( String inFileName, String outFileName ){
-        return ( staticInstance = new Class_Scanner(inFileName, outFileName ) );
+    public static void init( String inName, String outName ){
+        staticInstance = new Class_Scanner(inName, outName );
     }
     public static void killInstance(){
         staticInstance = null;
@@ -55,11 +47,18 @@ public class Class_Scanner extends Base_Stack {
     // Runs Scanner
     @Override
     public void onCreate(){
+        fin = new TokenSource(new TextSource_file(inName));
+        er.setTextStatusReporter(fin);
+        if( !fin.hasData() ){
+            er.set( "Bad input file name", inName );
+        }
+        
         backText = null;
         String text;
         
         // start with a target language handler
-        push(Factory_Context.get(HANDLER.TARGLANG_BASE));
+        //push(Factory_Context.get(HANDLER.TARGLANG_BASE));//Factory_cxs
+        push(Factory_ScanItem.get(HANDLER.TARGLANG_BASE));//Factory_cxs
         // start in line mode for target language
         fin.setLineGetter();
         while( fin.hasNext() ){
@@ -84,8 +83,8 @@ public class Class_Scanner extends Base_Stack {
     @Override
     public void onQuit(){
         //System.out.println( "Scanner onQuit" );
-        if(foutName != null && !write_rxlx_file(foutName)){
-            er.set("Failed to write output file", foutName);
+        if(outName == null || !write_rxlx_file(outName)){
+            er.set("Failed to write output file", outName);
         }
     }
     
@@ -93,6 +92,10 @@ public class Class_Scanner extends Base_Stack {
         return this.nodes;
     }
 
+    public final void addNode(ScanNode node){
+        node.lineCol = fin.readableStatus();
+        nodes.add(node);
+    }
     // Serialize and deserialize
     public boolean write_rxlx_file(String f){
         f = Commons.assertFileExt(f, "rxlx");
@@ -128,26 +131,26 @@ public class Class_Scanner extends Base_Stack {
         return out;
     }
     public ScanNode read_rxlx_elem( String text){
-        String[] tok = new String[4];
-        int j = 0, start = 0;
-        for( int i=0; i<text.length(); i++ ){
-            if( text.charAt(i) == ',' ){
-                tok[j]=text.substring(start, i);
-                System.out.printf("%d, %d, %d, %s \n", i, j, start, tok[j]);
-                start=i+1;
-                j++;
-            }
-            if(j == 4){
-                return new ScanNode(
-                    CMD.get(tok[0]),
-                    HANDLER.get(tok[1]),
-                    KWORD.get(tok[2]),
-                    tok[3]
-                );
-            }
-        }
-        System.out.println(j);
-        er.set( "Bad CSV file format", text );
+//        String[] tok = new String[4];
+//        int j = 0, start = 0;
+//        for( int i=0; i<text.length(); i++ ){
+//            if( text.charAt(i) == ',' ){
+//                tok[j]=text.substring(start, i);
+//                System.out.printf("%d, %d, %d, %s \n", i, j, start, tok[j]);
+//                start=i+1;
+//                j++;
+//            }
+//            if(j == 4){
+//                return new ScanNode(
+//                    CMD.get(tok[0]),
+//                    HANDLER.get(tok[1]),
+//                    KWORD.get(tok[2]),
+//                    tok[3]
+//                );
+//            }
+//        }
+//        System.out.println(j);
+//        er.set( "Bad CSV file format", text );
         return null;
     }
 }

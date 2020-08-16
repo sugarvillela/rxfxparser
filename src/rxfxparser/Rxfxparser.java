@@ -1,9 +1,8 @@
 package rxfxparser;
 
-import codegen.Widget;
 import commons.Dev;
-import erlog.Erlog;
 import demos.*;
+import parse.ScanParseInitializer;
 
 /**Code generator and translator for ReXFeX language
  *
@@ -13,8 +12,7 @@ public class Rxfxparser {
     public static void main(String[] args) {
         //Itr_file itr = new Itr_file("file01.txt");
         System.out.println("Running...");
-        Widget.setDefaultLanguage(Widget.PHP);
-        Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);//initialize this in main
+        ScanParseInitializer.init("semantic");
 //        int max = 20;
 //        int n = (int)(Math.random()*max);
 //        System.out.println(n);
@@ -23,7 +21,7 @@ public class Rxfxparser {
         //demos.Itr_struct_.itr_file_word();
         //demos.TokenTools_.textSource_list();
         //demos.Stemmer_.stemmer3();
-        demos.Parse_.scanner();
+        Parse_.read_rxlx_file();
         //demos.Parse_.parseStack();
         //RxContextDev rxContextDev = new RxContextDev();
         //rxContextDev.testValidate();

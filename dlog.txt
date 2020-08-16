@@ -1,2 +1,2 @@
-Error: TokenSource: Line 41, Word 0 
-ContextAction: Unknown keyword: myPatternIsThis{5-15}
+Error: TextSource_file: Line 1 
+Erlog: Bad CSV file format: Line 0 Word 0,PUSH,TARGLANG_BASE,NULL,NULL

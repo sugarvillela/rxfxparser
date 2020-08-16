@@ -28,7 +28,12 @@ public final class Keywords {
     // List of handlers to be implemented
     public enum HANDLER {//values() returns H[] array
         // File generating handlers
-        TARGLANG_BASE, ENUB, ENUD, VAR, SCOPE, RXFX, 
+        TARGLANG_BASE, 
+        ENUB, 
+        ENUD, 
+        VAR, 
+        SCOPE, 
+        RXFX, 
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
@@ -36,10 +41,11 @@ public final class Keywords {
         //replace with above line
         RX_ITEM, RX_KEYVAL, FX_ITEM,
         // handlers whose text indicators are not the same as enum name
-        TARGLANG_INSERT, USERDEF, COMMENT,
+        TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // Top enum ordinal gives size of list
         NUM_HANDLERS
         ;
+        
         public static HANDLER get( String text ){
             for(HANDLER h : values()){
                 if(h.toString().equals(text)){

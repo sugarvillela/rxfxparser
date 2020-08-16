@@ -21,14 +21,16 @@ public class Erlog {
         this.className = setClassName;
         erlogCore = ErlogCore.getCurrentInstance(); 
     }
-    public static Erlog getErlog(){
+    public static Erlog get(){
         return new Erlog("Erlog");
     }
-    public static Erlog getErlog(String setClassName){
-        return new Erlog(setClassName);
-    }
     public static Erlog get(Object object){
-        return new Erlog(object.getClass().getSimpleName());
+        if(object instanceof String){
+            return new Erlog((String)object);
+        }
+        else{
+            return new Erlog(object.getClass().getSimpleName());
+        }
     }
     
     public static void initErlog(int setBehavior){

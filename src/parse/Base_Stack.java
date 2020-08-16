@@ -16,12 +16,10 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected int stackSize;     // changes on push, pop
     protected ITextSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
-    protected final Erlog er;    // logs, notifies, quits or all 3
+    protected Erlog er;    // logs, notifies, quits or all 3
     protected String backText;   // repeat lines
     
-    public Base_Stack(){
-        er = Erlog.get(this);
-    }
+    public Base_Stack(){}
     
     /* IStackComponent methods */
     @Override
@@ -81,25 +79,25 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
         fin.setLineGetter();
     }
 
-    public final void setFile(String filename, String ext){
-        if(!checkAndSetTitle(filename, ext)){
-            er.set( "Not a ." + ext + " file", filename );
-            return;
-        }
-        fin = new TokenSource( new TextSource_file(filename) );
-        if( !fin.hasData() ){
-            er.set( "Bad input file name", filename );
-        }
-        er.setTextStatusReporter(fin);
-    }
-    private boolean checkAndSetTitle(String f, String ext){
-        if( f.length() < ext.length() + 2 || !f.endsWith( "." + ext) ){
-            return false;
-        }
-        title = f.substring(0, f.length() - ext.length() - 1 );
-        //System.out.println( "title... " + title );
-        return true;
-    }
+//    public final void setFile(String filename, String ext){
+//        if(!checkAndSetTitle(filename, ext)){
+//            er.set( "Not a ." + ext + " file", filename );
+//            return;
+//        }
+//        fin = new TokenSource( new TextSource_file(filename) );
+//        if( !fin.hasData() ){
+//            er.set( "Bad input file name", filename );
+//        }
+//        er.setTextStatusReporter(fin);
+//    }
+//    private boolean checkAndSetTitle(String f, String ext){
+//        if( f.length() < ext.length() + 2 || !f.endsWith( "." + ext) ){
+//            return false;
+//        }
+//        title = f.substring(0, f.length() - ext.length() - 1 );
+//        //System.out.println( "title... " + title );
+//        return true;
+//    }
     public final void setWordGetter(){
         fin.setWordGetter();
     }

@@ -163,7 +163,7 @@ public class TokenSource implements ITextSource{
     @Override
     public String readableStatus(){
         return String.format(
-            "Line %d, Word %d", this.getRow(), this.getCol()
+            "Line %d Word %d", this.getRow(), this.getCol()
         );
     }
 }

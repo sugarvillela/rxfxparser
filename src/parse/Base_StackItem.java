@@ -8,14 +8,15 @@ import parse.interfaces.IStackComponent;
  */
 public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     protected Erlog er;
-    protected Base_Stack P;                 // containing stack
+    private Base_Stack P;                 // containing stack
     protected Base_StackItem above, below;  // stack links
     
     //public Handler_base(){}
     public Base_StackItem(){
-        this.er = Erlog.get(this);
+        P = Class_Scanner.getInstance();
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
+        this.er = Erlog.get(this);
     }
     
     /*=====IStackComponent methods============================================*/
