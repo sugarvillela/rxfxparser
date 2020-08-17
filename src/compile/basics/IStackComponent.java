@@ -1,7 +1,7 @@
 
-package parse.interfaces;
+package compile.basics;
 
-import parse.Base_StackItem;
+import compile.basics.Base_StackItem;
 
 /**Stack or stack item
  * @author Dave Swanson */
@@ -11,4 +11,5 @@ public interface IStackComponent {
     public Base_StackItem getTop();
     public int getStackSize();
     public void disp();
+    public String getDebugName();
 }

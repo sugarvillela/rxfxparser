@@ -1,7 +1,7 @@
 package codegen;
 
 import java.util.ArrayList;
-import parse.factories.Factory_Node.GroupNode;
+import compile.basics.Factory_Node.GroupNode;
 
 
 /**For RXFX-specific code generation using Widget

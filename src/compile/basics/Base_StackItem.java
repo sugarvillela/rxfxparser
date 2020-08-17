@@ -1,19 +1,19 @@
-package parse;
+package compile.basics;
 import erlog.Erlog;
 import interfaces.ILifeCycle;
-import parse.interfaces.IStackComponent;
+import compile.basics.IStackComponent;
 
 /**For separation of concerns, this class handles the self-stacking of items
  * @author Dave Swanson
  */
 public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
+    protected String debugName;
     protected Erlog er;
-    private Base_Stack P;                 // containing stack
+    protected Base_Stack P;                 // containing stack
     protected Base_StackItem above, below;  // stack links
     
     //public Handler_base(){}
     public Base_StackItem(){
-        P = Class_Scanner.getInstance();
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
         this.er = Erlog.get(this);
@@ -25,8 +25,8 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public void push( Base_StackItem nuTop ){
         System.out.printf(
             "\n Push... %s -> %s\n",
-                this.getClass().getSimpleName(),
-                nuTop.getClass().getSimpleName()
+                this.getDebugName(),
+                nuTop.getDebugName()
         );
         
         nuTop.below = this;
@@ -35,10 +35,10 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     }
     @Override
     public void pop(){
-        String name = this.below == null? "NULL" : this.below.getClass().getSimpleName();
+        String name = this.below == null? "NULL" : this.below.getDebugName();
         System.out.printf(
             "\n Popping... %s -> %s\n",
-                this.getClass().getSimpleName(),
+                this.getDebugName(),
                 name
         );
         this.above = null;
@@ -60,15 +60,15 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     
     @Override
     public void disp(){
-        System.out.println( "My name is "+this.getClass().getSimpleName() ); 
-        if(this.below==null){
-            System.out.println( "display done" ); 
-        }
-        else{
+        System.out.println( "        "+this.getDebugName() ); 
+        if(this.below != null){
             this.below.disp();
         }
     }
-    
+    @Override
+    public String getDebugName(){
+        return this.getClass().getSimpleName() + ": " + debugName;
+    }
     /*======Empty ILifeCycle methods==========================================*/
     
     @Override

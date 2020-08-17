@@ -7,50 +7,38 @@ package toksource;
 
 import erlog.Erlog;
 import java.util.ArrayList;
-import parse.Keywords;
-import parse.factories.Factory_Node.ScanNode;
-import static parse.factories.Factory_Node.ScanNode.NULL_TEXT;
-import static parse.factories.Factory_Node.ScanNode.NUM_FIELDS;
+import compile.basics.Keywords;
+import compile.basics.Factory_Node.ScanNode;
+import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
 import toksource.interfaces.ITextSource;
 
 public class ScanNodeSource implements ITextSource{
     protected final Erlog er;
     TextSource_file fin;
-    private final ArrayList<ScanNode> nodes;
+    ScanNode currNode;
     
-    public ScanNodeSource(String inName){
-        inName += ".rxlx";
+    public ScanNodeSource(String path){
         er = Erlog.get();
-        fin = new TextSource_file(inName);
+        fin = new TextSource_file(path);
         if( !fin.hasData() ){
-            er.set( "Bad input file name", inName );
+            er.set( "Bad input file name", path );
         }
         er.setTextStatusReporter(fin);
-        nodes = new ArrayList<>();
     }
     
     public ScanNode nextNode(){
-        String text = this.next();
-        String[] tok = new String[NUM_FIELDS];
-        int j = 0, start = 0;
-        for( int i=0; i<text.length(); i++ ){
-            if( text.charAt(i) == ',' ){
-                tok[j]=text.substring(start, i);
-                System.out.printf("%d, %d, %d, %s \n", i, j, start, tok[j]);
-                start=i+1;
-                j++;
-            }
-            if(j == NUM_FIELDS){
-                break;
-            }
-        }
-        return new ScanNode(
+        String[] tok = this.next().split(",", NUM_FIELDS);
+        currNode = new ScanNode(
             NULL_TEXT.equals(tok[0])? "" : tok[0],
             NULL_TEXT.equals(tok[1])? null : Keywords.CMD.get(tok[1]),
             NULL_TEXT.equals(tok[2])? null : Keywords.HANDLER.get(tok[2]),
             NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
             NULL_TEXT.equals(tok[4])? "" : tok[4]
         );
+        System.out.print("\ncurrNode = ");
+        System.out.println(currNode);
+        return currNode;
     }
 
     @Override
@@ -85,7 +73,9 @@ public class ScanNodeSource implements ITextSource{
 
     @Override
     public String readableStatus() {
-        return fin.readableStatus();
+        return(currNode == null)? 
+            "interim rxlx file location" + fin.readableStatus() : 
+            "source " + currNode.lineCol + " interim " + fin.readableStatus();
     }
 
     @Override

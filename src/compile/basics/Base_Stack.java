@@ -1,10 +1,8 @@
-package parse;
+package compile.basics;
 
 import erlog.Erlog;
 import interfaces.ILifeCycle;
-import toksource.TokenSource;
-import parse.interfaces.IStackComponent;
-import toksource.TextSource_file;
+import compile.basics.IStackComponent;
 import toksource.interfaces.ITextSource;
 
 /**Abstract base class for Scanner and Parser classes
@@ -12,6 +10,7 @@ import toksource.interfaces.ITextSource;
  * @author Dave Swanson
  */
 public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
+    protected String debugName;
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
     protected ITextSource fin;  // file to be parsed
@@ -64,9 +63,15 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     }
     @Override
     public void disp(){
+        System.out.println("Base_Stack disp(): "+stackSize);
         if( top != null ){
             top.disp();
         }
+        System.out.println("Base_Stack disp done");
+    }
+    @Override
+    public String getDebugName(){
+        return this.getClass().getSimpleName() + ": " + debugName;
     }
     
     // utilities

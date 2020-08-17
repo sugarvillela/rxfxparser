@@ -1,25 +1,26 @@
-package parse.factories;
+package compile.scan.factories;
 
+import compile.basics.Factory_Node;
 import erlog.Erlog;
-import parse.Base_ScanItem;
-import parse.Base_Stack;
-import parse.Class_Scanner;
-import parse.Keywords;
-import static parse.Keywords.COMMENT_TEXT;
-import parse.Keywords.HANDLER;
-import static parse.Keywords.HANDLER.RX_WORD;
-import static parse.Keywords.HANDLER.TARGLANG_INSERT;
-import static parse.Keywords.SOURCE_CLOSE;
-import static parse.Keywords.SOURCE_OPEN;
-import static parse.Keywords.TARGLANG_INSERT_CLOSE;
-import static parse.Keywords.TARGLANG_INSERT_OPEN;
-import static parse.Keywords.USERDEF_OPEN;
-import static parse.Keywords.HANDLER.USER_DEF_LIST;
-import static parse.Keywords.KWORD.HI;
-import static parse.Keywords.KWORD.LO;
-import static parse.Keywords.KWORD.PARSE_STATUS;
-import parse.ut.LineBuffer;
-import parse.ut.RxWordUtil;
+import compile.scan.Base_ScanItem;
+import compile.basics.Base_Stack;
+import compile.scan.Class_Scanner;
+import compile.basics.Keywords;
+import static compile.basics.Keywords.COMMENT_TEXT;
+import compile.basics.Keywords.HANDLER;
+import compile.basics.Keywords.CMD;
+import static compile.basics.Keywords.HANDLER.RX_WORD;
+import static compile.basics.Keywords.HANDLER.TARGLANG_INSERT;
+import static compile.basics.Keywords.SOURCE_CLOSE;
+import static compile.basics.Keywords.SOURCE_OPEN;
+import static compile.basics.Keywords.TARGLANG_INSERT_CLOSE;
+import static compile.basics.Keywords.TARGLANG_INSERT_OPEN;
+import static compile.basics.Keywords.USERDEF_OPEN;
+import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
+import static compile.basics.Keywords.KWORD.HI;
+import static compile.basics.Keywords.KWORD.LO;
+import compile.scan.ut.LineBuffer;
+import compile.scan.ut.RxWordUtil;
 
 /**
  *
@@ -159,7 +160,7 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             context.addNode(
-                Factory_Node.newScanNode( Keywords.CMD.ADD_TO, context.getHandler(), text)
+                Factory_Node.newScanNode( CMD.ADD_TO, context.getHandler(), text)
             );
             return false;
         }
@@ -179,7 +180,7 @@ public abstract class Factory_Strategy{
                 return false;
             }
             context.addNode(
-                Factory_Node.newScanNode(Keywords.CMD.SET_ATTRIB, context.getHandler(), key, val ) 
+                Factory_Node.newScanNode(CMD.SET_ATTRIB, context.getHandler(), key, val ) 
             );
             return true;
         }
@@ -196,7 +197,7 @@ public abstract class Factory_Strategy{
                 System.out.println("linebuffer dump: "+text);
                 context.addNode(
                     Factory_Node.newScanNode( 
-                        Keywords.CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
+                        CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
                     )
                 );
             }
@@ -330,25 +331,18 @@ public abstract class Factory_Strategy{
                 text = rxWordUtil.getTruncated();
             }
             if(rxWordUtil.assertValidRxWord(text)){
-                context.addNode( Factory_Node.newScanNode( Keywords.CMD.PUSH, h ));
+                context.addNode( Factory_Node.newScanNode( CMD.PUSH, h ));
                 
                 context.addNode(
-                    Factory_Node.newScanNode( Keywords.CMD.ADD_TO, h, text)
+                    Factory_Node.newScanNode( CMD.ADD_TO, h, text)
                 );
                 context.addNode( Factory_Node.newScanNode( 
-                    Keywords.CMD.SET_ATTRIB, h, LO, rxWordUtil.getLowRange())
+                    CMD.SET_ATTRIB, h, LO, rxWordUtil.getLowRange())
                 );
                 context.addNode( Factory_Node.newScanNode( 
-                    Keywords.CMD.SET_ATTRIB, h, HI, rxWordUtil.getHighRange())
-                );
-                context.addNode( Factory_Node.newScanNode( 
-                    Keywords.CMD.SET_ATTRIB, 
-                    h, 
-                    PARSE_STATUS, 
-                    Erlog.get().getTextStatusReporter().readableStatus())
-                );
-                
-                context.addNode( Factory_Node.newScanNode( Keywords.CMD.POP, h ));
+                    CMD.SET_ATTRIB, h, HI, rxWordUtil.getHighRange())
+                );                
+                context.addNode( Factory_Node.newScanNode( CMD.POP, h ));
                 return true;
             }
             return false;
@@ -365,7 +359,7 @@ public abstract class Factory_Strategy{
     public static class OnPush extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            context.addNode( Factory_Node.newScanNode( Keywords.CMD.PUSH, context.getHandler() ) );
+            context.addNode( Factory_Node.newScanNode( CMD.PUSH, context.getHandler() ) );
             return false;
         }
     }
@@ -374,7 +368,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             System.out.print("OnPop: ");
             System.out.println(context.getHandler());
-            context.addNode( Factory_Node.newScanNode( Keywords.CMD.POP, context.getHandler() ) );
+            context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
             return false;
         }
     }
@@ -388,7 +382,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             context.addNode(
                 Factory_Node.newScanNode( 
-                    Keywords.CMD.PUSH, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
+                    CMD.PUSH, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
                 )
             );
             return false;
@@ -406,7 +400,7 @@ public abstract class Factory_Strategy{
             System.out.println(context.getHandler());
             context.addNode(
                 Factory_Node.newScanNode( 
-                    Keywords.CMD.POP, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
+                    CMD.POP, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
                 )
             );
             return false;
@@ -424,7 +418,7 @@ public abstract class Factory_Strategy{
             if(!LINEBUFFER.isEmpty()){
                 context.addNode(
                     Factory_Node.newScanNode( 
-                        Keywords.CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
+                        CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
                     )
                 );
             }

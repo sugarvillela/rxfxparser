@@ -1,11 +1,12 @@
-package parse;
+package compile.scan;
 
+import compile.basics.Keywords;
+import compile.basics.Base_StackItem;
 import erlog.Erlog;
 import java.util.Arrays;
-import parse.Keywords.HANDLER;
-import parse.factories.Factory_Node.ScanNode;
-import parse.interfaces.IContext;
-import parse.factories.Factory_Strategy.Strategy;
+import compile.basics.Keywords.HANDLER;
+import compile.basics.Factory_Node.ScanNode;
+import compile.scan.factories.Factory_Strategy.Strategy;
 
 /**Base class provides common tasks
  * Derived classes are handlers for context-sensitive control of stack
@@ -13,7 +14,7 @@ import parse.factories.Factory_Strategy.Strategy;
  * @author Dave Swanson
  */
 
-public abstract class Base_ScanItem extends Base_StackItem implements IContext{
+public abstract class Base_ScanItem extends Base_StackItem{
     protected Class_Scanner P;
     protected HANDLER h;                    // class's own enum
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
@@ -22,12 +23,6 @@ public abstract class Base_ScanItem extends Base_StackItem implements IContext{
     public Base_ScanItem(){
         P = Class_Scanner.getInstance();
     }
-    
-    // stubs: children may override to implement
-    @Override
-    public void add(Object obj){}
-    @Override
-    public void setAttrib(String key, Object value){}
 
     @Override
     public void onPush(){
@@ -58,7 +53,7 @@ public abstract class Base_ScanItem extends Base_StackItem implements IContext{
             }
         }
     }
-    @Override
+
     public void pushPop(String text) {
         if(strategies != null){
             for(Strategy strategy : strategies){

@@ -1,36 +1,37 @@
-package parse.factories;
+package compile.scan.factories;
 
 import erlog.Erlog;
-import parse.Base_ScanItem;
-import static parse.Keywords.HANDLER;
-import static parse.Keywords.HANDLER.ATTRIB;
-import static parse.Keywords.HANDLER.ENUB;
-import static parse.Keywords.HANDLER.ENUD;
-import static parse.Keywords.HANDLER.FX;
-import static parse.Keywords.HANDLER.RX;
-import static parse.Keywords.HANDLER.USER_DEF_LIST;
-import static parse.factories.Factory_Strategy.StrategyEnum.ADD_KEY_VAL_TEXT;
-import static parse.factories.Factory_Strategy.StrategyEnum.ADD_TEXT;
-import static parse.factories.Factory_Strategy.StrategyEnum.ADD_RX_WORD;
-import static parse.factories.Factory_Strategy.StrategyEnum.ADD_FX_WORD;
-import static parse.factories.Factory_Strategy.StrategyEnum.ADD_TO_LINE_BUFFER;
-import static parse.factories.Factory_Strategy.StrategyEnum.DUMP_BUFFER_ON_POP;
-import static parse.factories.Factory_Strategy.StrategyEnum.ERR;
-import static parse.factories.Factory_Strategy.StrategyEnum.NOP;
-import static parse.factories.Factory_Strategy.StrategyEnum.ON_POP;
-import static parse.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
-import static parse.factories.Factory_Strategy.StrategyEnum.POP_ON_ENDLINE;
-import static parse.factories.Factory_Strategy.StrategyEnum.POP_ON_KEYWORD;
-import static parse.factories.Factory_Strategy.StrategyEnum.POP_ON_USERDEF;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_COMMENT;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_SOURCE_LANG;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_TARG_LANG_INSERT;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_VAR;
-import static parse.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_END_SOURCE;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
-import static parse.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_LIST;
-import static parse.factories.Factory_Strategy.StrategyEnum.POP_ON_TARGLANG_INSERT_CLOSE;
-import static parse.factories.Factory_Strategy.getStrategy;
+import compile.scan.Base_ScanItem;
+import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.HANDLER.ATTRIB;
+import static compile.basics.Keywords.HANDLER.ENUB;
+import static compile.basics.Keywords.HANDLER.ENUD;
+import static compile.basics.Keywords.HANDLER.FX;
+import static compile.basics.Keywords.HANDLER.RX;
+import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
+import static compile.basics.Keywords.HANDLER.USER_DEF_VAR;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_KEY_VAL_TEXT;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_TEXT;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_RX_WORD;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_FX_WORD;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_TO_LINE_BUFFER;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.DUMP_BUFFER_ON_POP;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ERR;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.NOP;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_POP;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_ENDLINE;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_KEYWORD;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_USERDEF;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_COMMENT;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_SOURCE_LANG;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_TARG_LANG_INSERT;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_VAR;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_END_SOURCE;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_LIST;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_TARGLANG_INSERT_CLOSE;
+import static compile.scan.factories.Factory_Strategy.getStrategy;
 
 public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( HANDLER h ){
@@ -170,8 +171,9 @@ public class Factory_ScanItem extends Factory_Strategy{
                     setStrategies(text, ON_POP)
                 );
             case VAR:
+            case SCOPE:
                 return new ScanItem(
-                    h, 
+                    USER_DEF_VAR, 
                     new HANDLER[]{RX, FX},
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
@@ -189,11 +191,13 @@ public class Factory_ScanItem extends Factory_Strategy{
 
     public static class ScanItem extends Base_ScanItem{
         public ScanItem( HANDLER setH, HANDLER[] allowedHandlers, Strategy[] strategies){
-            this.h = setH;
-            this.allowedHandlers = allowedHandlers;
-            this.strategies = strategies;
-            this.onPushStrategies = new Strategy[]{getStrategy(ON_PUSH)};
-            this.onPopStrategies = new Strategy[]{getStrategy(ON_POP)};
+            this(
+                setH, 
+                allowedHandlers, 
+                strategies, 
+                new Strategy[]{getStrategy(ON_PUSH)}, 
+                new Strategy[]{getStrategy(ON_POP)}
+            );
         }
         
         public ScanItem( 
@@ -202,11 +206,13 @@ public class Factory_ScanItem extends Factory_Strategy{
             Strategy[] strategies,
             Strategy[] onPopStrategies
         ){
-            this.h = setH;
-            this.allowedHandlers = allowedHandlers;
-            this.strategies = strategies;
-            this.onPushStrategies = new Strategy[]{getStrategy(ON_PUSH)};
-            this.onPopStrategies = onPopStrategies;
+            this(
+                setH, 
+                allowedHandlers, 
+                strategies, 
+                new Strategy[]{getStrategy(ON_PUSH)}, 
+                onPopStrategies
+            );
         }
         
         public ScanItem( 
@@ -217,6 +223,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             Strategy[] onPopStrategies
         ){
             this.h = setH;
+            this.debugName = h.toString();
             this.allowedHandlers = allowedHandlers;
             this.strategies = strategies;
             this.onPushStrategies = onPushStrategies;
@@ -224,26 +231,4 @@ public class Factory_ScanItem extends Factory_Strategy{
         }
     }
     
-//    public static class UserDef extends ScanItem{
-//        private final String defName;
-//        
-//        public UserDef(
-//            String defName,
-//            HANDLER setH, 
-//            HANDLER[] allowedHandlers,
-//            Strategy[] strategies
-//        ){
-//            super(setH, allowedHandlers, strategies);
-//            this.defName = defName;
-//        }
-//        @Override
-//        public void onPush(){
-//            P.addNode( Factory_Node.newScanNode( Keywords.CMD.PUSH, this.h, Keywords.KWORD.DEF_NAME, this.defName ) );
-//        }
-//        
-//        @Override
-//        public void onPop(){
-//            P.addNode( Factory_Node.newScanNode( Keywords.CMD.POP, this.h, Keywords.KWORD.DEF_NAME, this.defName ) );
-//        }
-//    }
 }

@@ -1,6 +1,6 @@
-package parse.factories;
+package compile.basics;
 
-import parse.Keywords;
+import compile.basics.Keywords;
 
 /**
  *

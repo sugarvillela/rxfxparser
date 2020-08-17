@@ -1,4 +1,4 @@
-package parse.ut;
+package compile.scan.ut;
 
 import erlog.Erlog;
 import java.util.regex.Matcher;

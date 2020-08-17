@@ -55,7 +55,7 @@ public class TextSource_file extends Base_TextSource{
     }
     @Override
     public String readableStatus(){
-        return String.format("TextSource_file: Line %d", this.getRow());
+        return String.format("Line %d", this.getRow());
     }
     
     /**Fills empty list with file contents

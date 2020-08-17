@@ -1,19 +1,19 @@
 
-package parse;
+package compile.scan;
 
-import parse.Keywords.HANDLER;
-import parse.Keywords.CMD;
+import compile.basics.Base_Stack;
+import compile.basics.Keywords.HANDLER;
 import commons.Commons;
 import erlog.Erlog;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import static parse.Keywords.CONT_LINE;
-import parse.Keywords.KWORD;
-import parse.factories.Factory_Node.ScanNode;
-import parse.factories.Factory_ScanItem;
-import parse.interfaces.IContext;
+import static compile.basics.Keywords.CONT_LINE;
+import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
+import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
+import compile.basics.Factory_Node.ScanNode;
+import compile.scan.factories.Factory_ScanItem;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 
@@ -28,8 +28,8 @@ public class Class_Scanner extends Base_Stack {
     private static Class_Scanner staticInstance;
     
     public Class_Scanner(String inName, String outName ){
-        this.inName = inName + ".rxfx";
-        this.outName = outName + ".rxlx";
+        this.inName = inName + SOURCE_FILE_EXTENSION;
+        this.outName = outName + INTERIM_FILE_EXTENSION;
         nodes = new ArrayList<>();
         er = Erlog.get(this);
     }
@@ -61,8 +61,8 @@ public class Class_Scanner extends Base_Stack {
         push(Factory_ScanItem.get(HANDLER.TARGLANG_BASE));//Factory_cxs
         // start in line mode for target language
         fin.setLineGetter();
-        while( fin.hasNext() ){
-            if( backText == null ){
+        while(fin.hasNext()){
+            if(backText == null){
                 do{
                     text = fin.next();
                 }
@@ -73,8 +73,8 @@ public class Class_Scanner extends Base_Stack {
                 backText = null;
             }
 
-            System.out.println( ">>>" + text );
-            ((IContext)top).pushPop(text);
+            System.out.println(">>>" + text);
+            ((Base_ScanItem)top).pushPop(text);
         }
         // pop target language handler;
         pop();
@@ -97,10 +97,9 @@ public class Class_Scanner extends Base_Stack {
         nodes.add(node);
     }
     // Serialize and deserialize
-    public boolean write_rxlx_file(String f){
-        f = Commons.assertFileExt(f, "rxlx");
+    public boolean write_rxlx_file(String path){
         try( 
-            BufferedWriter file = new BufferedWriter(new FileWriter(f)) 
+            BufferedWriter file = new BufferedWriter(new FileWriter(path)) 
         ){
             for (ScanNode node: this.nodes) {
                 //System.out.println("node:"+node );

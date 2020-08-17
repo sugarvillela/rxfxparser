@@ -40,7 +40,7 @@ public abstract class Base_TextSource implements ITextSource{
     }
     @Override
     public String readableStatus(){
-        return String.format("TextSource_file: Line %d", this.getRow());
+        return String.format("Line %d", this.getRow());
     }
     
     // Empty ILifeCycle implementions

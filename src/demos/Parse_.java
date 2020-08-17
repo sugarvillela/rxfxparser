@@ -1,10 +1,11 @@
 package demos;
 
+import compile.scan.Class_Scanner;
+import compile.parse.Class_Parser;
 import commons.Commons;
 import java.util.ArrayList;
-import parse.*;
-import static parse.Keywords.HANDLER.RX;
-import parse.factories.Factory_Node.ScanNode;
+import static compile.basics.Keywords.HANDLER.RX;
+import compile.basics.Factory_Node.ScanNode;
 import toksource.ScanNodeSource;
 import toktools.TK;
 import toktools.Tokens;

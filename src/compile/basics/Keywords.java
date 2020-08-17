@@ -3,19 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package parse;
+package compile.basics;
 
 /**Contains the language definition, including enums, constants
  *
  * @author Dave Swanson
  */
 public final class Keywords {
+    public static final String SOURCE_FILE_EXTENSION = ".rxfx";
+    public static final String INTERIM_FILE_EXTENSION = ".rxlx";
+    
     public enum KWORD_TYPE{
         H,C
     }
     // List of commands to instruct parser
     public enum CMD { 
-        PUSH, POP, ADD_TO, SET_ATTRIB, BEGIN, END;
+        PUSH, POP, ADD_TO, SET_ATTRIB;
         public static CMD get( String text ){
             for(CMD cmd : values()){
                 if(cmd.toString().equals(text)){

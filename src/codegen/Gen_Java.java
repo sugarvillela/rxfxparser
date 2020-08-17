@@ -2,7 +2,7 @@ package codegen;
 
 import commons.Commons;
 import java.util.ArrayList;
-import parse.factories.Factory_Node.GroupNode;
+import compile.basics.Factory_Node.GroupNode;
 /**
  *
  * @author Dave Swanson

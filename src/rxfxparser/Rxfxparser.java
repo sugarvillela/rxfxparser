@@ -2,7 +2,7 @@ package rxfxparser;
 
 import commons.Dev;
 import demos.*;
-import parse.ScanParseInitializer;
+import compile.basics.ScanParseInitializer;
 
 /**Code generator and translator for ReXFeX language
  *
@@ -21,7 +21,7 @@ public class Rxfxparser {
         //demos.Itr_struct_.itr_file_word();
         //demos.TokenTools_.textSource_list();
         //demos.Stemmer_.stemmer3();
-        Parse_.read_rxlx_file();
+        Parse_.parser();
         //demos.Parse_.parseStack();
         //RxContextDev rxContextDev = new RxContextDev();
         //rxContextDev.testValidate();

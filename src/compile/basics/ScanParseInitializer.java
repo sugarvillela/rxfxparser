@@ -1,6 +1,8 @@
-package parse;
+package compile.basics;
 
 import codegen.Widget;
+import compile.parse.Class_Parser;
+import compile.scan.Class_Scanner;
 import erlog.Erlog;
 
 /**
