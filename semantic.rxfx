@@ -35,7 +35,7 @@ function incNumber(){
 		
 	
 	*/
-		incNumber();
+		$myNumber = incNumber();
 	/*
 	RX 
 		myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'*

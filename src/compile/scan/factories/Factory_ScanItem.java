@@ -112,7 +112,6 @@ public class Factory_ScanItem extends Factory_Strategy{
                     )
                 );
             case TARGLANG_INSERT:
-                System.out.println("====TARGLANG_INSERT====" + h.toString());
                 return new ScanItem(
                     h, 
                     null,
@@ -124,7 +123,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 );
             case COMMENT:
                 return new ScanItem(
-                    null, 
+                    h, 
                     null,
                     setStrategies(POP_ON_ENDLINE),
                     setStrategies(NOP),

@@ -1,7 +1,7 @@
 package compile.basics;
+import compile.scan.Class_Scanner;
 import erlog.Erlog;
 import interfaces.ILifeCycle;
-import compile.basics.IStackComponent;
 
 /**For separation of concerns, this class handles the self-stacking of items
  * @author Dave Swanson
@@ -73,6 +73,10 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     
     @Override
     public void onCreate(){}
+    @Override
+    public void onBeginStep(){}
+    @Override
+    public void onEndStep(){}
     @Override
     public void onQuit(){}
 }

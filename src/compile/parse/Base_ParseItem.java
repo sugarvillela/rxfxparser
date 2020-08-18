@@ -34,7 +34,7 @@ import compile.basics.Base_StackItem;
 import compile.basics.IParseItem;
 import compile.basics.Keywords.HANDLER;
 
-public abstract class Base_ParseItem extends Base_StackItem{// implements IParseItem
+public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected HANDLER h;
     
     public Base_ParseItem(){
@@ -48,10 +48,10 @@ public abstract class Base_ParseItem extends Base_StackItem{// implements IParse
         return this.h;
     }
     
-    //@Override
-    public void addTo(Object object){}
-    
-    //@Override
-    public void setAttrib(Object key, Object val){}
+//    @Override
+//    public void addTo(Object object){}
+//    
+//    @Override
+//    public void setAttrib(Object key, Object val){}
     
 }

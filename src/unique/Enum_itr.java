@@ -27,9 +27,9 @@ public class Enum_itr implements Iterator<Integer>{
         this.table=setTable;
 
         int wordLen = 32-wrow;
-        System.out.println("Enum_itr wordLen = "+wordLen);
+        //System.out.println("Enum_itr wordLen = "+wordLen);
         //BIT.disp( ((1<<wrow)-1) );
-        System.out.println("fini = "+fini);
+        //System.out.println("fini = "+fini);
         this.row = new Unique();
         this.row.name="row";
         this.row.setInitial( (initi>>wordLen) & ((1<<wrow)-1) );

@@ -36,8 +36,8 @@ public class ScanNodeSource implements ITextSource{
             NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
             NULL_TEXT.equals(tok[4])? "" : tok[4]
         );
-        System.out.print("\ncurrNode = ");
-        System.out.println(currNode);
+        //System.out.print("\ncurrNode = ");
+        //System.out.println(currNode);
         return currNode;
     }
 
@@ -88,7 +88,13 @@ public class ScanNodeSource implements ITextSource{
 
     @Override
     public void onPush() {}
-
+    
+    @Override
+    public void onBeginStep(){}
+    
+    @Override
+    public void onEndStep(){}
+    
     @Override
     public void onPop() {}
 

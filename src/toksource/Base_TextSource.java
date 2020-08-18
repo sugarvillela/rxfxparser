@@ -49,6 +49,10 @@ public abstract class Base_TextSource implements ITextSource{
     @Override
     public void onPush(){}
     @Override
+    public void onBeginStep(){}
+    @Override
+    public void onEndStep(){}
+    @Override
     public void onPop(){}
     @Override
     public void onQuit(){}

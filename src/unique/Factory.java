@@ -329,7 +329,6 @@ public abstract class Factory {
         @Override
         public final void onSubsequent(){
             /* Subsequent iteration uses default init, default fin */
-            Dev.d();
             valInit = 1;
             rewind();
         }

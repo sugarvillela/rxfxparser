@@ -51,7 +51,6 @@ public abstract class Factory_Strategy{
         ERR
     }
     public static Strategy getStrategy(StrategyEnum strategyEnum){
-        System.out.println("====StrategyFactory.getStrategy()====" + strategyEnum.toString());
         switch (strategyEnum){
             case ON_PUSH:
                 return new OnPush();
@@ -146,13 +145,10 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             Keywords.HANDLER keyword = Keywords.HANDLER.get(text);
-            System.out.println("PushGoodHandler keyword: " + keyword);
             if(keyword != null && !context.isBadHandler(keyword)) {
                 P.push(Factory_ScanItem.get(keyword));
-                System.out.println("PushGoodHandler good: " + text);
                 return true;
             }
-            System.out.println("PushGoodHandler bad: " + text);
             return false;
         }
     }
@@ -191,10 +187,8 @@ public abstract class Factory_Strategy{
         }
         @Override
         public boolean go(String text, Base_ScanItem context){
-            System.out.println("LINEBUFFER.add: "+text);
             LINEBUFFER.add(text);
             if(Erlog.get().getTextStatusReporter().isEndLine()){
-                System.out.println("linebuffer dump: "+text);
                 context.addNode(
                     Factory_Node.newScanNode( 
                         CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
@@ -222,7 +216,9 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(text.startsWith(COMMENT_TEXT)){// okay to discard text
-                P.push(Factory_ScanItem.get(Keywords.HANDLER.COMMENT));
+                if(!Erlog.get().getTextStatusReporter().isEndLine()){
+                    P.push(Factory_ScanItem.get(Keywords.HANDLER.COMMENT));
+                }
                 return true;
             }
             return false;
@@ -366,8 +362,6 @@ public abstract class Factory_Strategy{
     public static class OnPop extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            System.out.print("OnPop: ");
-            System.out.println(context.getHandler());
             context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
             return false;
         }
@@ -396,8 +390,6 @@ public abstract class Factory_Strategy{
         
         @Override
         public boolean go(String text, Base_ScanItem context){
-            System.out.print("OnPopUserDef: ");
-            System.out.println(context.getHandler());
             context.addNode(
                 Factory_Node.newScanNode( 
                     CMD.POP, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name

@@ -15,7 +15,6 @@ import compile.scan.factories.Factory_Strategy.Strategy;
  */
 
 public abstract class Base_ScanItem extends Base_StackItem{
-    protected Class_Scanner P;
     protected HANDLER h;                    // class's own enum
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
     protected Strategy[] strategies, onPushStrategies, onPopStrategies;
@@ -31,7 +30,6 @@ public abstract class Base_ScanItem extends Base_StackItem{
         }
         if(onPushStrategies != null){
             for(Strategy strategy : onPushStrategies){
-                System.out.println(strategy);
                 if(strategy.go(null, this)){
                     return;
                 }
@@ -46,7 +44,6 @@ public abstract class Base_ScanItem extends Base_StackItem{
         }
         if(onPopStrategies != null){
             for(Strategy strategy : onPopStrategies){
-                System.out.println(strategy);
                 if(strategy.go(null, this)){
                     return;
                 }
@@ -71,12 +68,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
     }
     
     public final void addNode(ScanNode node){
-        P.addNode(node);
+        ((Class_Scanner)P).addNode(node);
     }
     
     public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){
-        System.out.println("Set Allowed Handlers");
-        System.out.println(Arrays.toString(allowedHandlers));
         this.allowedHandlers = allowedHandlers;
     }
 

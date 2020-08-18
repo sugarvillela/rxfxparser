@@ -3,7 +3,7 @@ package compile.parse.factories;
 import com.sun.istack.internal.NotNull;
 import erlog.Erlog;
 import compile.parse.Base_ParseItem;
-import compile.basics.Keywords;
+import static compile.basics.Keywords.KWORD;
 import static compile.basics.Keywords.HANDLER;
 import static compile.basics.Keywords.HANDLER.ATTRIB;
 import static compile.basics.Keywords.HANDLER.ENUB;
@@ -13,18 +13,20 @@ import static compile.basics.Keywords.HANDLER.RX;
 import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
 import static compile.basics.Keywords.HANDLER.USER_DEF_VAR;
 import compile.basics.Factory_Node.ScanNode;
-import compile.basics.IParseItem;
+
 import compile.parse.ItemENUB;
+import compile.parse.ItemENUD;
+import compile.parse.ItemUserDefList;
 
 public class Factory_ParseItem {
     public static Base_ParseItem get(@NotNull ScanNode node){
-        System.out.println("====Base_ParseItem.get()====" + node.h.toString());
+        //System.out.println("====Base_ParseItem.get()====" + node.h.toString());
         HANDLER h = node.h;
         switch(h){
             case ENUB:
-                return new ParseItem(h, new ItemENUB());
+                return new ItemENUB(h);
             case ENUD:
-                return new ParseItem(h);
+                return new ItemENUD(h);
             case SRCLANG:
                 return new ParseItem(h);
             case RXFX:
@@ -44,7 +46,7 @@ public class Factory_ParseItem {
             case ATTRIB:
                 return new ParseItem(h);
             case USER_DEF_LIST:
-                return new ParseItem(h);
+                return new ItemUserDefList(h, node.data);
             case USER_DEF_VAR:
                 return new ParseItem(h); 
             //========To implement=====================
@@ -56,29 +58,20 @@ public class Factory_ParseItem {
         }
     }
     public static class ParseItem extends Base_ParseItem{
-        protected IParseItem strategy;
 
         public ParseItem(HANDLER h){
             this.h = h;
             this.debugName = h.toString();
         }
-        public ParseItem(HANDLER h, IParseItem strategy){
-            this.h = h;
-            this.debugName = h.toString();
-            this.strategy = strategy;
-        }
         @Override
         public void onPush() {}
         
         @Override
-        public void addTo(Object object){
-            if(strategy != null){
-                strategy.addTo(object);
-            }
+        public void addTo(HANDLER handler, Object object){
         }
 
         @Override
-        public void setAttrib(Object key, Object val){}
+        public void setAttrib(KWORD key, String val){}
         
         @Override
         public void onPop() {}

@@ -3,7 +3,6 @@
 package compile.parse;
 
 import compile.basics.Base_Stack;
-import compile.basics.Keywords.HANDLER;
 
 import erlog.Erlog;
 import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
@@ -45,7 +44,7 @@ public class Class_Parser extends Base_Stack {
         }
         while(fin.hasNext()){
             ScanNode currNode = ((ScanNodeSource)fin).nextNode();
-            System.out.println("\nNode: " + currNode.toString());
+            //System.out.println("\nNode: " + currNode.toString());
             
             if(currNode.cmd == null || currNode.h == null){
                 er.set("onCreate: Null command");
@@ -61,7 +60,7 @@ public class Class_Parser extends Base_Stack {
                     pop();
                     break;
                 case ADD_TO:
-                    ((Base_ParseItem)getTop()).addTo(currNode.data);
+                    ((Base_ParseItem)getTop()).addTo(currNode.h, currNode.data);
                     break;
                 case SET_ATTRIB:
                     if(currNode.k == null){
@@ -72,7 +71,7 @@ public class Class_Parser extends Base_Stack {
                 default:
                     er.set("onCreate: rxlx file improperly edited", currNode.cmd.toString());
             }
-            disp();
+            //disp();
         }
     }
 

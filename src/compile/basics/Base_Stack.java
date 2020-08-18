@@ -32,22 +32,18 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
             stackSize++;
         }
         top.onPush();
-        System.out.println("Push: StackSize = " + this.getStackSize());
     }
     @Override
     public void pop(){
         if(top==null){
             stackSize=0;
             er.set("Blame developer: Stack empty"); 
-            //finish();
-            //System.exit(0);
         }
         else{
             top.onPop();
             top.pop();
             stackSize--;
         }
-        System.out.println("Pop: StackSize = " + this.getStackSize());
     }
     @Override
     public Base_StackItem getTop(){
@@ -76,33 +72,12 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     
     // utilities
     public void popAllSource(){
-        System.out.println("pop all source: "+stackSize);
         while( stackSize > 1 ){
             pop();
-            //System.out.println("after: "+stackSize);
         }
         fin.setLineGetter();
     }
 
-//    public final void setFile(String filename, String ext){
-//        if(!checkAndSetTitle(filename, ext)){
-//            er.set( "Not a ." + ext + " file", filename );
-//            return;
-//        }
-//        fin = new TokenSource( new TextSource_file(filename) );
-//        if( !fin.hasData() ){
-//            er.set( "Bad input file name", filename );
-//        }
-//        er.setTextStatusReporter(fin);
-//    }
-//    private boolean checkAndSetTitle(String f, String ext){
-//        if( f.length() < ext.length() + 2 || !f.endsWith( "." + ext) ){
-//            return false;
-//        }
-//        title = f.substring(0, f.length() - ext.length() - 1 );
-//        //System.out.println( "title... " + title );
-//        return true;
-//    }
     public final void setWordGetter(){
         fin.setWordGetter();
     }
@@ -118,6 +93,10 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     public void onCreate(){}
     @Override
     public void onPush(){}
+    @Override
+    public void onBeginStep(){}
+    @Override
+    public void onEndStep(){}
     @Override
     public void onPop(){}
     @Override

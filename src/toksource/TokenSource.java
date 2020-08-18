@@ -52,6 +52,10 @@ public class TokenSource implements ITextSource{
     @Override
     public void onPush(){}
     @Override
+    public void onBeginStep(){}
+    @Override
+    public void onEndStep(){}
+    @Override
     public void onPop(){}
     @Override
     public void onQuit(){
@@ -88,8 +92,6 @@ public class TokenSource implements ITextSource{
     }
     @Override
     public String next(){
-        //String s =this.getter.next();
-        //System.out.println( "StringSource_FromFile: "+s ); 
         return this.getter.next();
     }
 

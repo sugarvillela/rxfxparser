@@ -2,30 +2,45 @@
 package compile.parse;
 
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
-import compile.basics.IParseItem;
+import static compile.basics.Keywords.KWORD.DEF_NAME;
+import compile.basics.Keywords;
+import compile.basics.Keywords.KWORD;
 import erlog.Erlog;
-import java.util.Iterator;
-import unique.Uq_enumgen;
 
-public class ItemUserDefList implements IParseItem{
-    protected Erlog er;
-    protected Iterator<Integer> itr;
-    //protected Uq_enumgen uq = new Uq_enumgen(5);
+public class ItemUserDefList extends Base_ParseItem{
+    protected String defName;
     
-    public ItemUserDefList(){
+    public ItemUserDefList(Keywords.HANDLER h, String defName){
+        this.h = h;
+        this.debugName = h.toString();
+        this.defName = defName;
         er = Erlog.get(this);
     }
     @Override
-    public void addTo(Object object) {
-        String enubName = (String)object;
-        if(NULL_TEXT.equals(enubName)){
-            er.set("ENUB no variable name", enubName);
-        }
-        int cur = itr.next();
-        System.out.println(enubName + " = " + commons.BIT.str(cur));
+    public void addTo(Keywords.HANDLER handler, Object object) {
+        ((Base_ParseItem)below).addTo(handler, object);
     }
 
     @Override
-    public void setAttrib(Object key, Object val) {}
+    public void setAttrib(KWORD key, String val) {}
+
+    @Override
+    public void onPush() {
+        if(below == null){
+            er.set("Developer: below == null");
+        }
+        else if(NULL_TEXT.equals(defName)){
+            er.set("No list name");
+        }
+        else{
+            ((Base_ParseItem)below).setAttrib(DEF_NAME, defName);
+            below.onBeginStep(); // tell ENUM handler to start this list
+        }
+    }
+
+    @Override
+    public void onPop() {
+        below.onEndStep(); // tell ENUM handler to finish this list
+    }
     
 }

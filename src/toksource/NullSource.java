@@ -44,7 +44,11 @@ public class NullSource implements ITextSource{
 
     @Override
     public void onPush() {}
-
+    @Override
+    public void onBeginStep(){}
+    @Override
+    public void onEndStep(){}
+    
     @Override
     public void onPop() {}
 

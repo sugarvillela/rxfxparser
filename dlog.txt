@@ -1,2 +1,2 @@
-Error: source Line 41 Word 0 interim TextSource_file: Line 70 
-Factory_cxs: Developer error in get(handler): Line 41 Word 0,PUSH,RX_WORD,NULL,NULL
+Error: Line 10 Word 0 
+ScanItem: DONE

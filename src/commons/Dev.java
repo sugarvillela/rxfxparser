@@ -10,7 +10,7 @@ public class Dev {
     private static boolean displayOn = true;
     private static boolean stackTraceOn = true;
     public static final String TAB = "\t|";
-    public static final int TRACE_SKIPS = 4;
+    public static final int TRACE_SKIPS = 8;
     public static final int TRACE_READS = 4;
     
     public static void dispOn(){ displayOn = true; }
@@ -31,22 +31,11 @@ public class Dev {
         if(!displayOn){ return; }
         print_before();
         trace();
-        println( args[0] + ":");
-        for(int i=1; i<args.length; i++){
-            println( args[i] + ", ");
+        for (Object arg : args) {
+            println(arg);
         }
         print_after();
     }
-//    public static void d(String label, int... args){
-//        if(!displayOn){ return; }
-//        print_before();
-//        trace();
-//        println( label + ":");
-//        for(int i : args){
-//            println( i + ", ");
-//        }
-//        print_after();
-//    }
     public static void h(String label, int... args){
         if(!displayOn){ return; }
         print_before();
@@ -75,27 +64,20 @@ public class Dev {
         StackTraceElement[] trace = Thread.currentThread().getStackTrace();
         if( trace==null){
             println("No stack trace" );
-            return;
         }
         else{
             int len = Math.min( trace.length, TRACE_SKIPS + TRACE_READS);
             for(int i = TRACE_SKIPS; i<len; i++){
                 println( "\t" + trace[i] );
             }
-            println();
+            System.out.println();
         }
     }
     
     /*==========Wrapper method to add tab=====================================*/
     
-    private static void print( String text ){
-        System.out.print( TAB + text  );
-    }
-    private static void println(){
-        System.out.println( TAB  );
-    }
-    private static void println( String text ){
-        System.out.println( TAB + text  );
+    private static void println(Object obj){
+        System.out.println(TAB + s(obj));
     }
     private static void print_before(){
         System.out.println( "\n" + TAB + "===========================================================" );
