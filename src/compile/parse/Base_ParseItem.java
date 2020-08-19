@@ -29,29 +29,40 @@ package compile.parse;
     @Override
     public void onQuit() {}
     */
-import compile.basics.Keywords;
 import compile.basics.Base_StackItem;
+import compile.basics.Factory_Node;
+import compile.basics.Factory_Node.ScanNode;
 import compile.basics.IParseItem;
-import compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.KWORD;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
-    protected HANDLER h;
-    
-    public Base_ParseItem(){
+    protected ScanNode node;
+    protected String defName;
+        
+    public Base_ParseItem(Factory_Node.ScanNode node){
+        this.node = node;
+        this.debugName = node.h.toString();
         P = Class_Parser.getInstance();
     }
-    public void setHandler(Keywords.HANDLER h){
-        this.h = h;
+    
+    public ScanNode getNode(){
+        return this.node;
     }
     
-    public Keywords.HANDLER getHandler(){
-        return this.h;
-    }
+    @Override
+    public void addTo(HANDLER handler, KWORD key, String val) {}
     
-//    @Override
-//    public void addTo(Object object){}
-//    
-//    @Override
-//    public void setAttrib(Object key, Object val){}
+    @Override
+    public void setAttrib(KWORD key, String val) {
+        switch (key){
+            case DEF_NAME:
+                defName = val;
+                break;
+            default:
+                //System.out.println(key.toString() + " in Base_ParseItem setAttrib: " + val);
+                ((Base_ParseItem)below).setAttrib(key, val);
+        }
+    }
     
 }

@@ -6,6 +6,7 @@ import static compile.basics.Keywords.HANDLER;
 import static compile.basics.Keywords.HANDLER.ATTRIB;
 import static compile.basics.Keywords.HANDLER.ENUB;
 import static compile.basics.Keywords.HANDLER.ENUD;
+import static compile.basics.Keywords.HANDLER.RXFX;
 import static compile.basics.Keywords.HANDLER.FX;
 import static compile.basics.Keywords.HANDLER.RX;
 import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
@@ -26,7 +27,7 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_USERDE
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_COMMENT;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_SOURCE_LANG;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_TARG_LANG_INSERT;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_VAR;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.SET_USER_DEF_NAME;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_END_SOURCE;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_LIST;
@@ -56,12 +57,11 @@ public class Factory_ScanItem extends Factory_Strategy{
             case SRCLANG:
                 return new ScanItem(
                     h, 
-                    new HANDLER[]{ATTRIB, ENUB, ENUD, RX, FX },
+                    new HANDLER[]{ATTRIB, ENUB, ENUD, RXFX, RX, FX },
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
-                        PUSH_USER_DEF_VAR,
                         PUSH_GOOD_HANDLER,
                         ERR
                     )
@@ -76,6 +76,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_TARG_LANG_INSERT,
                         PUSH_GOOD_HANDLER,
                         POP_ON_KEYWORD,
+                        SET_USER_DEF_NAME,
                         ERR
                     )
                 );
@@ -87,6 +88,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
+                        SET_USER_DEF_NAME,
+                        POP_ON_KEYWORD,
                         ADD_RX_WORD
                     )
                 );
@@ -98,6 +101,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
+                        SET_USER_DEF_NAME,
+                        POP_ON_KEYWORD,
                         ADD_FX_WORD
                     )
                 );

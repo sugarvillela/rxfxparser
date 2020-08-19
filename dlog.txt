@@ -1,2 +1,2 @@
-Error: Line 10 Word 0 
-ScanItem: DONE
+Error: Line 42 Word 0 
+ScanItem: Disallowed handler!!: : RXFX

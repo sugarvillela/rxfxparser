@@ -21,7 +21,7 @@ public class Class_Parser extends Base_Stack {
     private Class_Parser(String inName, String outName){
         this.inName = inName + INTERIM_FILE_EXTENSION;
         this.outName = outName;
-        er = Erlog.get(this);
+        //er = Erlog.get(this);
     }
     
     // Singleton pattern
@@ -54,13 +54,13 @@ public class Class_Parser extends Base_Stack {
                     push(Factory_ParseItem.get(currNode));
                     break;
                 case POP://   
-                    if(!currNode.h.equals(((Base_ParseItem)getTop()).getHandler())){
+                    if(!currNode.h.equals(((Base_ParseItem)getTop()).getNode().h)){
                         er.set("POP: Stack mismatch, check source file", currNode.h.toString());
                     }
                     pop();
                     break;
                 case ADD_TO:
-                    ((Base_ParseItem)getTop()).addTo(currNode.h, currNode.data);
+                    ((Base_ParseItem)getTop()).addTo(currNode.h, currNode.k, currNode.data);
                     break;
                 case SET_ATTRIB:
                     if(currNode.k == null){

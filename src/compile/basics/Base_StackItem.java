@@ -1,5 +1,4 @@
 package compile.basics;
-import compile.scan.Class_Scanner;
 import erlog.Erlog;
 import interfaces.ILifeCycle;
 
@@ -16,7 +15,11 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public Base_StackItem(){
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
-        this.er = Erlog.get(this);
+        init();
+    }
+    
+    protected final void init(){
+        er = Erlog.get(this);
     }
     
     /*=====IStackComponent methods============================================*/

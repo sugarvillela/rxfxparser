@@ -10,7 +10,7 @@ public class Dev {
     private static boolean displayOn = true;
     private static boolean stackTraceOn = true;
     public static final String TAB = "\t|";
-    public static final int TRACE_SKIPS = 8;
+    public static final int TRACE_SKIPS = 7;
     public static final int TRACE_READS = 4;
     
     public static void dispOn(){ displayOn = true; }

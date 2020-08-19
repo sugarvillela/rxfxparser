@@ -9,6 +9,7 @@ import compile.basics.Keywords;
 import static compile.basics.Keywords.COMMENT_TEXT;
 import compile.basics.Keywords.HANDLER;
 import compile.basics.Keywords.CMD;
+import static compile.basics.Keywords.HANDLER.FX_WORD;
 import static compile.basics.Keywords.HANDLER.RX_WORD;
 import static compile.basics.Keywords.HANDLER.TARGLANG_INSERT;
 import static compile.basics.Keywords.SOURCE_CLOSE;
@@ -17,6 +18,7 @@ import static compile.basics.Keywords.TARGLANG_INSERT_CLOSE;
 import static compile.basics.Keywords.TARGLANG_INSERT_OPEN;
 import static compile.basics.Keywords.USERDEF_OPEN;
 import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
+import static compile.basics.Keywords.KWORD.DEF_NAME;
 import static compile.basics.Keywords.KWORD.HI;
 import static compile.basics.Keywords.KWORD.LO;
 import compile.scan.ut.LineBuffer;
@@ -42,6 +44,7 @@ public abstract class Factory_Strategy{
         PUSH_TARG_LANG_INSERT,
         PUSH_USER_DEF_LIST,
         PUSH_USER_DEF_VAR,
+        SET_USER_DEF_NAME,
         POP_ON_TARGLANG_INSERT_CLOSE,
         POP_ON_ENDLINE,
         POP_ON_USERDEF,
@@ -76,8 +79,8 @@ public abstract class Factory_Strategy{
                 return new PushTargLangInsert();
             case PUSH_USER_DEF_LIST:
                 return new PushUserDefList();
-            case PUSH_USER_DEF_VAR:
-                return new PushUserDefVar();
+            case SET_USER_DEF_NAME:
+                return new setUserDefName();
             case POP_ON_TARGLANG_INSERT_CLOSE:
                 return new PopOnTargLangClose();
             case POP_ON_ENDLINE:
@@ -185,6 +188,7 @@ public abstract class Factory_Strategy{
         public AddToLineBuffer(){
             LINEBUFFER.clear();
         }
+        
         @Override
         public boolean go(String text, Base_ScanItem context){
             LINEBUFFER.add(text);
@@ -247,17 +251,22 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class PushUserDefVar extends Strategy{
+    public static class setUserDefName extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-//            if(isUserDef(text)){
-//                P.push( 
-//                    Factory_csx.get(
-//                        USERDEF, text.substring(USERDEF_OPEN.length())
-//                    )
-//                );
-//                return true;
-//            }
+            System.out.println("setUserDefName: " + text + " ... " + context.getDebugName());
+            if(text.startsWith(USERDEF_OPEN) && !text.equals(USERDEF_OPEN)){
+                System.out.println("found userDef!!!: " + text);
+                context.addNode(
+                    Factory_Node.newScanNode(
+                        CMD.SET_ATTRIB, 
+                        context.getHandler(), 
+                        DEF_NAME, 
+                        text.substring(USERDEF_OPEN.length()) 
+                    )
+                );
+                return true;
+            }
             return false;
         }
     }
@@ -347,8 +356,13 @@ public abstract class Factory_Strategy{
     public static class AddFxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-
-            return false;
+            HANDLER h = FX_WORD;
+            context.addNode( Factory_Node.newScanNode( CMD.PUSH, h ));
+            context.addNode(
+                Factory_Node.newScanNode( CMD.ADD_TO, h, text)
+            );
+            context.addNode( Factory_Node.newScanNode( CMD.POP, h ));
+            return true;
         }
         
     }

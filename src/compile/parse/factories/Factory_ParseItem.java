@@ -1,6 +1,7 @@
 package compile.parse.factories;
 
-import com.sun.istack.internal.NotNull;
+
+import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.parse.Base_ParseItem;
 import static compile.basics.Keywords.KWORD;
@@ -16,42 +17,45 @@ import compile.basics.Factory_Node.ScanNode;
 
 import compile.parse.ItemENUB;
 import compile.parse.ItemENUD;
+import compile.parse.ItemRxWord;
+import compile.parse.ItemTargLang;
+import compile.parse.ItemTargLangInsert;
 import compile.parse.ItemUserDefList;
 
 public class Factory_ParseItem {
-    public static Base_ParseItem get(@NotNull ScanNode node){
+    public static Base_ParseItem get(ScanNode node){
         //System.out.println("====Base_ParseItem.get()====" + node.h.toString());
         HANDLER h = node.h;
         switch(h){
             case ENUB:
-                return new ItemENUB(h);
+                return new ItemENUB(node);
             case ENUD:
-                return new ItemENUD(h);
+                return new ItemENUD(node);
             case SRCLANG:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case RXFX:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case RX_WORD:
-                return new ParseItem(h);
+                return new ItemRxWord(node);
             case RX:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case FX:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case TARGLANG_BASE:
-                return new ParseItem(h);
+                return new ItemTargLang(node);
             case TARGLANG_INSERT:
-                return new ParseItem(h);
+                return new ItemTargLangInsert(node);
             case COMMENT:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case ATTRIB:
-                return new ParseItem(h);
+                return new ParseItem(node);
             case USER_DEF_LIST:
-                return new ItemUserDefList(h, node.data);
+                return new ItemUserDefList(node);
             case USER_DEF_VAR:
-                return new ParseItem(h); 
+                return new ParseItem(node); 
             //========To implement=====================
             case SCOPE:
-                return null;//new Scope(h);
+                return null;//new Scope(node);
             default:
                 Erlog.get("Factory_cxs").set("Developer error in get(handler)", node.toString());
                 return null;
@@ -59,19 +63,18 @@ public class Factory_ParseItem {
     }
     public static class ParseItem extends Base_ParseItem{
 
-        public ParseItem(HANDLER h){
-            this.h = h;
-            this.debugName = h.toString();
+        public ParseItem(Factory_Node.ScanNode node){
+            super(node);
         }
         @Override
         public void onPush() {}
         
         @Override
-        public void addTo(HANDLER handler, Object object){
+        public void addTo(HANDLER handler, KWORD key, String val){
         }
 
-        @Override
-        public void setAttrib(KWORD key, String val){}
+//        @Override
+//        public void setAttrib(KWORD key, String val){}
         
         @Override
         public void onPop() {}

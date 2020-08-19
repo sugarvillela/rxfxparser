@@ -18,7 +18,13 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected Erlog er;    // logs, notifies, quits or all 3
     protected String backText;   // repeat lines
     
-    public Base_Stack(){}
+    public Base_Stack(){
+        init();
+    }
+    
+    protected final void init(){
+        er = Erlog.get(this);
+    }
     
     /* IStackComponent methods */
     @Override

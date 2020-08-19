@@ -1,28 +1,26 @@
-
 package compile.parse;
 
+import compile.basics.Factory_Node;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.KWORD.DEF_NAME;
-import compile.basics.Keywords;
-import compile.basics.Keywords.KWORD;
-import erlog.Erlog;
+import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.KWORD;
 
 public class ItemUserDefList extends Base_ParseItem{
-    protected String defName;
     
-    public ItemUserDefList(Keywords.HANDLER h, String defName){
-        this.h = h;
-        this.debugName = h.toString();
-        this.defName = defName;
-        er = Erlog.get(this);
+    public ItemUserDefList(Factory_Node.ScanNode node){
+        super(node);
+        this.defName = node.data;
     }
     @Override
-    public void addTo(Keywords.HANDLER handler, Object object) {
-        ((Base_ParseItem)below).addTo(handler, object);
+    public void addTo(HANDLER handler, KWORD key, String val) {
+        ((Base_ParseItem)below).addTo(handler, key, val);
     }
 
-    @Override
-    public void setAttrib(KWORD key, String val) {}
+//    @Override
+//    public void setAttrib(KWORD key, String val) {
+//        ((Base_ParseItem)below).setAttrib(key, val);
+//    }
 
     @Override
     public void onPush() {

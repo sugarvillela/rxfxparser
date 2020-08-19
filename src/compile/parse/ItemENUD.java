@@ -1,22 +1,20 @@
 package compile.parse;
 
+
 import compile.basics.CompileInitializer;
-import compile.basics.Keywords;
-import erlog.Erlog;
+import compile.basics.Factory_Node;
 import unique.Enum_itr;
 import unique.Uq_enumgen;
 
 public class ItemENUD extends ItemENUB{
-    public ItemENUD(Keywords.HANDLER h){
-        this.h = h;
-        this.debugName = h.toString();
+    public ItemENUD(Factory_Node.ScanNode node){
+        super(node);
         itr = (Enum_itr)(
             new Uq_enumgen(
-                CompileInitializer.getWRow(), 
-                CompileInitializer.getWVal()
+                CompileInitializer.getInstance().getWRow(), 
+                CompileInitializer.getInstance().getWVal()
             )
         ).iterator();
-        er = Erlog.get(this);
     }
     @Override
     public void onPush() {
@@ -28,11 +26,11 @@ public class ItemENUD extends ItemENUB{
             itr.newCol();
         }
         count++;
-        System.out.println("ENUD onBeginStep: name = " + defName);
+        System.out.println("ENUD onBeginStep: name = " + node.data);
     }
     @Override
     public void onEndStep(){
-        System.out.println("ENUD onEndStep: name = " + defName);
+        System.out.println("ENUD onEndStep: name = " + node.data);
     }
     @Override
     public void onPop() {

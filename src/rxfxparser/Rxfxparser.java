@@ -11,7 +11,9 @@ public class Rxfxparser {
     public static void main(String[] args) {
         //Itr_file itr = new Itr_file("file01.txt");
         System.out.println("Running...");
-        CompileInitializer.init("semantic");
+        String inName = (args.length > 1)? args[1] : "semantic";
+        String outName = (args.length > 2)? args[2] : inName;
+        CompileInitializer.getInstance().init(inName, outName);
 //        int max = 20;
 //        int n = (int)(Math.random()*max);
 //        System.out.println(n);
@@ -20,6 +22,7 @@ public class Rxfxparser {
         //demos.Itr_struct_.itr_file_word();
         //demos.TokenTools_.textSource_list();
         //demos.Stemmer_.stemmer3();
+        //Parse_.scanner();
         Parse_.parser();
         //demos.Parse_.parseStack();
         //RxContextDev rxContextDev = new RxContextDev();

@@ -4,7 +4,7 @@ package compile.scan;
 import compile.basics.Base_Stack;
 import compile.basics.Keywords.HANDLER;
 import commons.Commons;
-import erlog.Erlog;
+import compile.basics.CompileInitializer;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -23,15 +23,14 @@ import toksource.TokenSource;
  */
 public class Class_Scanner extends Base_Stack {
     private final ArrayList<ScanNode> nodes;
-    private final String inName, outName;
+    private final String inName;//, outName;
     
     private static Class_Scanner staticInstance;
     
     public Class_Scanner(String inName, String outName ){
         this.inName = inName + SOURCE_FILE_EXTENSION;
-        this.outName = outName + INTERIM_FILE_EXTENSION;
         nodes = new ArrayList<>();
-        er = Erlog.get(this);
+        //er = Erlog.get(this);
     }
     
     public static Class_Scanner getInstance(){
@@ -83,8 +82,9 @@ public class Class_Scanner extends Base_Stack {
     @Override
     public void onQuit(){
         //System.out.println( "Scanner onQuit" );
-        if(outName == null || !write_rxlx_file(outName)){
-            er.set("Failed to write output file", outName);
+        //String outName = CompileInitializer.getInstance().getProjName();
+        if(inName == null || !write_rxlx_file(inName + INTERIM_FILE_EXTENSION)){
+            er.set("Failed to write output file", inName);
         }
     }
     

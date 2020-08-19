@@ -9,7 +9,7 @@ function incNumber(){
 
 /*$
 	ATTRIB
-		KEY=name VAL=Dave KEY=dob VAL=09/18/1964
+		PROJ_NAME=semantic99
 	
 	// Boolean
 	ENUB
@@ -30,17 +30,18 @@ function incNumber(){
 			fine mild moderate severe excrutiating 
 		
 		$COUNT one two three four five six
-		$ALPHA 
-			A B C D E F 
-		
 	
 	*/
-		$myNumber = incNumber();
+		$myNumber =   incNumber();
+		$yourNumber= subtract();
+		booby();
 	/*
-	RX 
-		myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'*
-	
-		
+	RXFX $myScope 
+		RX myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'*
+		FX fxCommand1 fxCommand2
+	ENUD
+		$ALPHA 
+			A B C D E F 
 $*/
 
 
