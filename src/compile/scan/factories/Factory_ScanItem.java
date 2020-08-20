@@ -17,6 +17,7 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_RX_WORD;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_FX_WORD;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_TO_LINE_BUFFER;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.DUMP_BUFFER_ON_POP;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.RXFX_ERR_ON_POP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ERR;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.NOP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_POP;
@@ -78,7 +79,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ON_KEYWORD,
                         SET_USER_DEF_NAME,
                         ERR
-                    )
+                    ),
+                    setStrategies(RXFX_ERR_ON_POP, ON_POP)
                 );
             case RX:
                 return new ScanItem(

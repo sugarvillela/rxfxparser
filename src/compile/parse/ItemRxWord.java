@@ -39,6 +39,9 @@ public class ItemRxWord extends Base_ParseItem{
     @Override
     public void setAttrib(KWORD key, String val) {
         switch(key){
+            case DEF_NAME:
+                defName = val;
+                break;
             case LO:
                 low = val;
                 break;

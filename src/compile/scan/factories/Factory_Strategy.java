@@ -22,7 +22,9 @@ import static compile.basics.Keywords.KWORD.DEF_NAME;
 import static compile.basics.Keywords.KWORD.HI;
 import static compile.basics.Keywords.KWORD.LO;
 import compile.scan.ut.LineBuffer;
+import compile.scan.ut.RxFxUtil;
 import compile.scan.ut.RxWordUtil;
+import compile.scan.ut.UserDefUtil;
 
 /**
  *
@@ -38,7 +40,6 @@ public abstract class Factory_Strategy{
         ADD_RX_WORD,
         ADD_FX_WORD,
         ADD_TO_LINE_BUFFER,
-        DUMP_BUFFER_ON_POP,
         PUSH_SOURCE_LANG,
         PUSH_COMMENT,
         PUSH_TARG_LANG_INSERT,
@@ -50,6 +51,8 @@ public abstract class Factory_Strategy{
         POP_ON_USERDEF,
         POP_ON_KEYWORD,
         POP_ALL_ON_END_SOURCE,
+        DUMP_BUFFER_ON_POP,
+        RXFX_ERR_ON_POP,
         NOP,
         ERR
     }
@@ -95,6 +98,8 @@ public abstract class Factory_Strategy{
                 return new Err();
             case DUMP_BUFFER_ON_POP:
                 return new DumpBufferOnPop();
+            case RXFX_ERR_ON_POP:
+                return new RxFxErrOnPop();
             case NOP:
                 return new Nop();
             default:
@@ -128,6 +133,8 @@ public abstract class Factory_Strategy{
     }
     
     private static final LineBuffer LINEBUFFER = new LineBuffer();
+    private static final UserDefUtil USERDEF_UTIL = new UserDefUtil();
+    private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     
     public static abstract class Strategy{
         Base_Stack P;
@@ -255,7 +262,7 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             System.out.println("setUserDefName: " + text + " ... " + context.getDebugName());
-            if(text.startsWith(USERDEF_OPEN) && !text.equals(USERDEF_OPEN)){
+            if(USERDEF_UTIL.isNewUserDef(text)){
                 System.out.println("found userDef!!!: " + text);
                 context.addNode(
                     Factory_Node.newScanNode(
@@ -270,7 +277,25 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    
+    public static class popPushOnVar extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            System.out.println("accessUserDefName: " + text + " ... " + context.getDebugName());
+            if(USERDEF_UTIL.isOldUserDef(text)){
+                System.out.println("found userDef!!!: " + text);
+                context.addNode(
+                    Factory_Node.newScanNode(
+                        CMD.SET_ATTRIB, 
+                        context.getHandler(), 
+                        DEF_NAME, 
+                        text.substring(USERDEF_OPEN.length()) 
+                    )
+                );
+                return true;
+            }
+            return false;
+        }
+    }
     public static class PopOnTargLangClose extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -429,6 +454,12 @@ public abstract class Factory_Strategy{
                 );
             }
             return false;
+        }
+    }
+    public static class RxFxErrOnPop extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            return RXFX_UTIL.errOnPop();
         }
     }
 }

@@ -8,7 +8,6 @@ import static compile.basics.Keywords.HANDLER.FX;
 
 public class ItemRxFx extends Base_ParseItem{
     protected HANDLER toggle;
-    protected int count;
     
     public ItemRxFx(Factory_Node.ScanNode node){
         super(node);
@@ -23,7 +22,6 @@ public class ItemRxFx extends Base_ParseItem{
     }
     @Override
     public void addTo(HANDLER handler, KWORD key, String val) {
-        count++;
         if(key == KWORD.ABOVE){
             switch(handler){
                 case RX:
