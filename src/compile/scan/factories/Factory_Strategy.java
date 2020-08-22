@@ -4,6 +4,7 @@ import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.basics.Base_Stack;
+import compile.basics.Base_StackItem;
 import compile.scan.Class_Scanner;
 import compile.basics.Keywords;
 import static compile.basics.Keywords.COMMENT_TEXT;
@@ -24,7 +25,7 @@ import static compile.basics.Keywords.KWORD.LO;
 import compile.scan.ut.LineBuffer;
 import compile.scan.ut.RxFxUtil;
 import compile.scan.ut.RxWordUtil;
-import compile.scan.ut.UserDefUtil;
+import compile.scan.ut.ScannerSymbolTable;
 
 /**
  *
@@ -52,7 +53,9 @@ public abstract class Factory_Strategy{
         POP_ON_KEYWORD,
         POP_ALL_ON_END_SOURCE,
         DUMP_BUFFER_ON_POP,
+        RX_ON_PUSH,
         RXFX_ERR_ON_POP,
+        ON_LAST_POP,
         NOP,
         ERR
     }
@@ -98,8 +101,12 @@ public abstract class Factory_Strategy{
                 return new Err();
             case DUMP_BUFFER_ON_POP:
                 return new DumpBufferOnPop();
+            case RX_ON_PUSH:
+                return new RxOnPush();
             case RXFX_ERR_ON_POP:
                 return new RxFxErrOnPop();
+            case ON_LAST_POP:
+                return new OnLastPop();
             case NOP:
                 return new Nop();
             default:
@@ -133,7 +140,7 @@ public abstract class Factory_Strategy{
     }
     
     private static final LineBuffer LINEBUFFER = new LineBuffer();
-    private static final UserDefUtil USERDEF_UTIL = new UserDefUtil();
+    private static final ScannerSymbolTable SCANNER_SYMBOL_TABLE = new ScannerSymbolTable();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     
     public static abstract class Strategy{
@@ -250,9 +257,7 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(text.startsWith(USERDEF_OPEN) && !text.equals(USERDEF_OPEN)){
-                P.push(Factory_ScanItem.get(USER_DEF_LIST, text.substring(USERDEF_OPEN.length())
-                    )
-                );
+                P.push(Factory_ScanItem.get(USER_DEF_LIST, text.substring(USERDEF_OPEN.length())));
                 return true;
             }
             return false;
@@ -262,7 +267,8 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             System.out.println("setUserDefName: " + text + " ... " + context.getDebugName());
-            if(USERDEF_UTIL.isNewUserDef(text)){
+            HANDLER handler = context.getHandler();
+            if(SCANNER_SYMBOL_TABLE.isNewUserDef(text, handler)){
                 System.out.println("found userDef!!!: " + text);
                 context.addNode(
                     Factory_Node.newScanNode(
@@ -281,7 +287,8 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             System.out.println("accessUserDefName: " + text + " ... " + context.getDebugName());
-            if(USERDEF_UTIL.isOldUserDef(text)){
+            HANDLER handler = context.getHandler();
+            if(SCANNER_SYMBOL_TABLE.isOldUserDef(text, handler)){
                 System.out.println("found userDef!!!: " + text);
                 context.addNode(
                     Factory_Node.newScanNode(
@@ -413,12 +420,19 @@ public abstract class Factory_Strategy{
         
         @Override
         public boolean go(String text, Base_ScanItem context){
+            addToSymbolTable(context);
             context.addNode(
                 Factory_Node.newScanNode( 
                     CMD.PUSH, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
                 )
             );
             return false;
+        }
+        private void addToSymbolTable(Base_ScanItem context){
+            Base_ScanItem below = (Base_ScanItem)context.getBelow();
+            if(below != null){
+                SCANNER_SYMBOL_TABLE.assertNew(this.name, below.getHandler());
+            }
         }
     }
     public static class OnPopUserDef extends Strategy{
@@ -456,10 +470,23 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+    public static class RxOnPush extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            return RXFX_UTIL.assertGoodToggle(context.getHandler());
+        }
+    }
     public static class RxFxErrOnPop extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             return RXFX_UTIL.errOnPop();
+        }
+    }
+    public static class OnLastPop extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            context.prependNodes(SCANNER_SYMBOL_TABLE.getSymbolTable());
+            return false;
         }
     }
 }

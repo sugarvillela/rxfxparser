@@ -1,5 +1,6 @@
 package toksource;
 
+import static compile.basics.Factory_Node.ScanNode.STATUS_FORMAT;
 import toksource.interfaces.ITextSource;
 
 /**Placeholder class
@@ -36,7 +37,7 @@ public class NullSource implements ITextSource{
 
     @Override
     public String readableStatus() {
-        return "";
+        return String.format(STATUS_FORMAT, 0, 0);
     }
 
     @Override

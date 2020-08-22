@@ -24,6 +24,7 @@ public class Factory_Node {
     public static class ScanNode{
         public static final String NULL_TEXT = "NULL";
         public static final int NUM_FIELDS = 5;
+        public static final String STATUS_FORMAT = "Line %d Word %d";
         public String lineCol;
         public Keywords.CMD cmd;
         public Keywords.HANDLER h;

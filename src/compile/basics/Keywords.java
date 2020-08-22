@@ -40,7 +40,7 @@ public final class Keywords {
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
-        RX_WORD, FX_WORD, //RX_STATEMENT, 
+        SYMBOL_TABLE, RX_WORD, FX_WORD, //RX_STATEMENT, 
         //replace with above line
         RX_ITEM, RX_KEYVAL, FX_ITEM,
         // handlers whose text indicators are not the same as enum name
@@ -66,7 +66,7 @@ public final class Keywords {
         // keywords that can be specified in language
         PROJ_NAME, KEY, VAL, WROW, WVAL,
         // Internal keywords for communicating between components
-        DEF_NAME, LO, HI, ABOVE;//, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
+        DEF_NAME, LO, HI//, ABOVE;//, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
         public static KWORD get( String text ){
             for(KWORD k : values()){

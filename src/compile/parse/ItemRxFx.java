@@ -22,23 +22,23 @@ public class ItemRxFx extends Base_ParseItem{
     }
     @Override
     public void addTo(HANDLER handler, KWORD key, String val) {
-        if(key == KWORD.ABOVE){
-            switch(handler){
-                case RX:
-                    if(toggle != FX){
-                        setErr();
-                    }
-                    break;
-                case FX:
-                    if(toggle != RX){
-                        setErr();
-                    }
-                    break;
-            }
-        }
-        else{
-            er.set("Err in " + node.h.toString());
-        }
+//        if(key == KWORD.ABOVE){
+//            switch(handler){
+//                case RX:
+//                    if(toggle != FX){
+//                        setErr();
+//                    }
+//                    break;
+//                case FX:
+//                    if(toggle != RX){
+//                        setErr();
+//                    }
+//                    break;
+//            }
+//        }
+//        else{
+//            er.set("Err in " + node.h.toString());
+//        }
     }
     
     @Override

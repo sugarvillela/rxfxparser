@@ -96,6 +96,9 @@ public class Class_Scanner extends Base_Stack {
         node.lineCol = fin.readableStatus();
         nodes.add(node);
     }
+    public final void prependNodes(ArrayList<ScanNode> prepend){
+        nodes.addAll(0, prepend);
+    }
     // Serialize and deserialize
     public boolean write_rxlx_file(String path){
         try( 

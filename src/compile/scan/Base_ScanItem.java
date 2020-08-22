@@ -7,6 +7,7 @@ import java.util.Arrays;
 import compile.basics.Keywords.HANDLER;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_Strategy.Strategy;
+import java.util.ArrayList;
 
 /**Base class provides common tasks
  * Derived classes are handlers for context-sensitive control of stack
@@ -69,6 +70,9 @@ public abstract class Base_ScanItem extends Base_StackItem{
     
     public final void addNode(ScanNode node){
         ((Class_Scanner)P).addNode(node);
+    }
+    public final void prependNodes(ArrayList<ScanNode> prepend){
+        ((Class_Scanner)P).prependNodes(prepend);
     }
     
     public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){

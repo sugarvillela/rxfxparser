@@ -23,7 +23,7 @@ public class Rxfxparser {
         //demos.TokenTools_.textSource_list();
         //demos.Stemmer_.stemmer3();
         //Parse_.scanner();
-        Parse_.parser();
+        Parse_.scanner();
         //demos.Parse_.parseStack();
         //RxContextDev rxContextDev = new RxContextDev();
         //rxContextDev.testValidate();

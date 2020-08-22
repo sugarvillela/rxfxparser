@@ -20,6 +20,7 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.DUMP_BUFFER_O
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.RXFX_ERR_ON_POP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ERR;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.NOP;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_LAST_POP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_POP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_ENDLINE;
@@ -33,13 +34,13 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_EN
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_LIST;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_TARGLANG_INSERT_CLOSE;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.RX_ON_PUSH;
 import static compile.scan.factories.Factory_Strategy.getStrategy;
 
 public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( HANDLER h ){
         System.out.println("====Factory_cxs.get()====" + h.toString());
         switch(h){
-            // push only
             case ENUB:
             case ENUD:
                 return new ScanItem(
@@ -93,7 +94,9 @@ public class Factory_ScanItem extends Factory_Strategy{
                         SET_USER_DEF_NAME,
                         POP_ON_KEYWORD,
                         ADD_RX_WORD
-                    )
+                    ),
+                    setStrategies(ON_PUSH, RX_ON_PUSH),
+                    setStrategies(ON_POP)
                 );
             case FX:
                 return new ScanItem(
@@ -106,7 +109,9 @@ public class Factory_ScanItem extends Factory_Strategy{
                         SET_USER_DEF_NAME,
                         POP_ON_KEYWORD,
                         ADD_FX_WORD
-                    )
+                    ),
+                    setStrategies(ON_PUSH, RX_ON_PUSH),
+                    setStrategies(ON_POP)
                 );
             // Copy and wait
             case TARGLANG_BASE:
@@ -116,7 +121,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                     setStrategies(
                         PUSH_SOURCE_LANG,
                         ADD_TEXT
-                    )
+                    ),
+                    setStrategies(ON_LAST_POP, ON_POP)
                 );
             case TARGLANG_INSERT:
                 return new ScanItem(

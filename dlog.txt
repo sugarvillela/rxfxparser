@@ -1,2 +1,2 @@
-Error: Line 42 Word 0 
-ScanItem: Disallowed handler!!: : RXFX
+Error: Line 25 Word 0 
+ScannerSymbolTable: POS already exists...ENUB definitions must be uniquely named

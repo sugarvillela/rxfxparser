@@ -82,4 +82,11 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public void onEndStep(){}
     @Override
     public void onQuit(){}
+    
+    public Base_StackItem getAbove(){
+        return above;
+    }
+    public Base_StackItem getBelow(){
+        return below;
+    }
 }

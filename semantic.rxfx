@@ -22,7 +22,6 @@ function incNumber(){
 		
 		$ANIMAL 
 			lion tiger zebra bear deer dog cat 
-		
 	
 	//Discrete	
 	ENUD
@@ -37,11 +36,13 @@ function incNumber(){
 		booby();
 	/*
 	RXFX $myScope 
-		RX myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'*
+		RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
+			~(E=e&F=f)&'G'*
 		FX fxCommand1 fxCommand2
 	ENUD
 		$ALPHA 
 			A B C D E F 
+	//$myScope
 $*/
 
 

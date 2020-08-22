@@ -1,5 +1,6 @@
 package toksource;
 
+import static compile.basics.Factory_Node.ScanNode.STATUS_FORMAT;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class TextSource_file extends Base_TextSource{
     }
     @Override
     public String readableStatus(){
-        return String.format("Line %d", this.getRow());
+        return String.format(STATUS_FORMAT, this.getRow(), 0);
     }
     
     /**Fills empty list with file contents
