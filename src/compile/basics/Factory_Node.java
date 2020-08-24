@@ -1,13 +1,21 @@
 package compile.basics;
 
 import compile.basics.Keywords;
+import static compile.basics.Keywords.CHAR_AND;
+import static compile.basics.Keywords.CHAR_OR;
+import static compile.basics.Keywords.CMD.POP;
+import static compile.basics.Keywords.CMD.PUSH;
+import static compile.basics.Keywords.HANDLER.RX_BUILDER;
+import static compile.basics.Keywords.HANDLER.RX_WORD;
+import static compile.basics.Keywords.KWORD.RX_NEGATE;
+import demos.RxTree.TreeNode;
 
 /**
  *
  * @author Dave Swanson
  */
 public class Factory_Node {
-
+    /* factory access for scan node */
     public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler){
         return new ScanNode(null, setCommand, setHandler, null, "");
     }
@@ -59,6 +67,85 @@ public class Factory_Node {
         }
     }
     
+    public static ScanNode newRxPush(String lineCol,TreeNode treeNode){
+        return new RxScanNode(lineCol, PUSH, treeNode);
+    }
+    public static ScanNode newRxPop(String lineCol){
+        return new RxScanNode(lineCol, POP, null);
+    }
+    /** node for rx-specific input and output list items */
+    public static class RxScanNode extends ScanNode{
+        public static final int NUM_RX_FIELDS = 7;
+        public final boolean not;
+        public final int id;
+
+        public RxScanNode(
+                String lineCol, 
+                Keywords.CMD setCommand, 
+                Keywords.HANDLER setHandler, 
+                Keywords.KWORD setKWord, 
+                String setData, 
+                boolean negate, 
+                int id
+        ) {
+            super(lineCol, setCommand, setHandler, setKWord, setData);
+            this.not = negate;
+            this.id = id;
+        }
+        
+        public RxScanNode(
+                String lineCol, 
+                Keywords.CMD setCommand, 
+                TreeNode treeNode
+        ) {
+            super(
+                lineCol, 
+                setCommand, 
+                RX_BUILDER, 
+                (treeNode==null)? null : treeNode.connector, 
+                (treeNode==null || treeNode.data==null)? NULL_TEXT : treeNode.data
+            );
+            this.not = (treeNode==null)? false: treeNode.not;
+            this.id = (treeNode==null)? -1: treeNode.id;
+        }
+        /**Data to string for writing to file
+         * @return one line of a csv file */
+        @Override
+        public String toString(){//one line of a csv file
+            return String.format(
+                "%s,%s,%s,%s,%s,%b,%d",
+                nullSafe(lineCol), 
+                nullSafe(cmd),      //push or pop
+                nullSafe(h),        // RX_BUILDER
+                nullSafe(k),        // connector
+                nullSafe(data),     // text payload
+                not,
+                id
+            );  
+        }
+        public TreeNode toTreeNode(){
+            TreeNode treeNode = new TreeNode();
+            treeNode.data = this.data;
+            treeNode.not = this.not;
+            treeNode.id = this.id;
+            treeNode.level = 0;
+            if(this.k == null){
+                treeNode.op = 'v';
+            }
+            else{
+                switch(this.k){
+                    case RX_AND:
+                        treeNode.op = CHAR_AND;
+                        break;
+                    case RX_OR:
+                        treeNode.op = CHAR_OR;
+                        break;
+                }
+            }
+
+            return treeNode;
+        }
+    }
     /*========================================================================*/
     
     public static GroupNode newGroupNode(String name, int n){

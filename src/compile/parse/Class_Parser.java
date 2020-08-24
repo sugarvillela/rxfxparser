@@ -9,6 +9,7 @@ import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import toksource.ScanNodeSource;
 import compile.basics.Factory_Node.ScanNode;
 import compile.parse.factories.Factory_ParseItem;
+import toksource.TextSource_file;
 
 /**
  * @author Dave Swanson
@@ -37,7 +38,7 @@ public class Class_Parser extends Base_Stack {
     
     @Override
     public void onCreate(){
-        fin = new ScanNodeSource(inName);
+        fin = new ScanNodeSource(new TextSource_file(inName));
         er.setTextStatusReporter(fin);
         if( !fin.hasData() ){
             return;

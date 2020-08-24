@@ -1,2 +1,2 @@
-Error: Line 25 Word 0 
-ScannerSymbolTable: POS already exists...ENUB definitions must be uniquely named
+Error: Line 38 Word 1 
+ScanItem: Disallowed handler!!: : $myScope

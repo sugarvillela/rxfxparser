@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import static compile.basics.Keywords.HANDLER.RX;
 import compile.basics.Factory_Node.ScanNode;
 import toksource.ScanNodeSource;
+import toksource.TextSource_file;
 import toktools.TK;
 import toktools.Tokens;
 import toktools.Tokens_special;
@@ -24,7 +25,7 @@ public class Parse_ {
         S.onQuit();
     }
     public static void read_rxlx_file(){
-        ScanNodeSource source = new ScanNodeSource("semantic");
+        ScanNodeSource source = new ScanNodeSource(new TextSource_file("semantic"));
         ArrayList<ScanNode> out = new ArrayList<>();
         if( source.hasData() ){
             while(source.hasNext()){

@@ -12,6 +12,7 @@ import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.SYMBOL_TABLE;
 import static compile.basics.Keywords.USERDEF_OPEN;
 import erlog.Erlog;
+import unique.Unique;
 
 /**
  *
@@ -19,10 +20,13 @@ import erlog.Erlog;
  */
 public class ScannerSymbolTable {
     private final String nullStatus;
+    private final Unique uq;
     private final ArrayList<ScanNode> symbolTable;
+    
     
     public ScannerSymbolTable(){
         nullStatus = String.format(STATUS_FORMAT, 0, 0);
+        uq = new Unique();
         symbolTable = new ArrayList<>();
         symbolTable.add(new ScanNode(nullStatus, PUSH, SYMBOL_TABLE, null, null));
     }
@@ -47,14 +51,14 @@ public class ScannerSymbolTable {
             );
             return true;
         }
-        else if(symbolTable.get(index).h != type){
-            Erlog.get(this).set(
-                String.format(
-                    "%s exists, of type %s; New var, same name, of type %s",
-                    text, symbolTable.get(index).h.toString(), type.toString()
-                )
-            );
-        }
+//        else if(symbolTable.get(index).h != type){
+//            Erlog.get(this).set(
+//                String.format(
+//                    "%s exists, of type %s; New var, same name, of type %s",
+//                    text, symbolTable.get(index).h.toString(), type.toString()
+//                )
+//            );
+//        }
         return false;
     }
     public boolean assertNew(String text, HANDLER type){
@@ -69,11 +73,11 @@ public class ScannerSymbolTable {
         }
         return true;
     }
-    public boolean isNewUserDef(String text, HANDLER type){
-        return isUserDef(text) && addIfNew(text, type);
-    }
-    public boolean isOldUserDef(String text, HANDLER type){
-        return isUserDef(text) && !addIfNew(text, type);
+
+    public String genAnonName(HANDLER type){
+        String anon = String.format("Anon_%s_%s", type.toString(), uq.toString());
+        assertNew(anon, type);//unlikely fail
+        return anon;
     }
     public ArrayList<ScanNode> getSymbolTable(){
         if(symbolTable.size() > 1){

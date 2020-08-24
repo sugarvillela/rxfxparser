@@ -19,6 +19,7 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected HANDLER h;                    // class's own enum
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
     protected Strategy[] strategies, onPushStrategies, onPopStrategies;
+    protected String defName;
     
     public Base_ScanItem(){
         P = Class_Scanner.getInstance();
@@ -61,11 +62,19 @@ public abstract class Base_ScanItem extends Base_StackItem{
             }
         }
     }
+    
     public void setHandler(HANDLER h){
         this.h = h;
     }
     public HANDLER getHandler(){
         return this.h;
+    }
+    
+    public void setDefName(String defName){
+        this.defName = defName;
+    }
+    public String getDefName(){
+        return this.defName;
     }
     
     public final void addNode(ScanNode node){
@@ -78,20 +87,11 @@ public abstract class Base_ScanItem extends Base_StackItem{
     public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){
         this.allowedHandlers = allowedHandlers;
     }
-
-    public final boolean isBadHandler(Keywords.HANDLER handler){
+    public final boolean isGoodHandler(Keywords.HANDLER handler){
         return(
-            allowedHandlers == null || 
-            !Arrays.asList(allowedHandlers).contains(handler)
+            allowedHandlers != null && 
+            Arrays.asList(allowedHandlers).contains(handler)
         );
-    }
-    
-    public final boolean assertGoodHandler(Keywords.HANDLER handler){
-        if(isBadHandler(handler)){
-            Erlog.get(this).set( "Disallowed handler: ", handler.toString());
-            return false;
-        }
-        return true;
     }
 }
     

@@ -40,9 +40,8 @@ public final class Keywords {
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
-        SYMBOL_TABLE, RX_WORD, FX_WORD, //RX_STATEMENT, 
-        //replace with above line
-        RX_ITEM, RX_KEYVAL, FX_ITEM,
+        SYMBOL_TABLE, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
+
         // handlers whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // Top enum ordinal gives size of list
@@ -66,7 +65,12 @@ public final class Keywords {
         // keywords that can be specified in language
         PROJ_NAME, KEY, VAL, WROW, WVAL,
         // Internal keywords for communicating between components
-        DEF_NAME, LO, HI//, ABOVE;//, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
+        DEF_NAME, ANON_NAME, // named and anonymous variables
+        LO, HI, // RX ranges
+        //rx
+        RX_AND, RX_OR, RX_DATA, RX_NEGATE,
+        BRANCH, LEAF //tree structure roles
+        //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
         public static KWORD get( String text ){
             for(KWORD k : values()){
@@ -88,9 +92,12 @@ public final class Keywords {
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined heading
     public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
-    public static final char   EQUAL = '=';            // key=value or key:value ?
+    public static final char   CHAR_EQUAL = '=';            // key=value or key:value ?
+    public static final char   CHAR_AND = '&';            // RX symbol
+    public static final char   CHAR_OR = '|';             // RX symbol
+    public static final char   CHAR_NOT = '~';            // RX symbol
+    public static final char   CHAR_OPAR = '(';
+    public static final char   CHAR_CPAR = ')';
+    public static final char   CHAR_SQUOTE = '\'';
     public static final String DEFAULT_KEYNAME = "text";// class WORD text field
-    public static final String 	RXAND = "&";            // RX symbol
-    public static final String 	RXOR = "|";             // RX symbol
-    public static final String 	RXNOT = "~";            // RX symbol
 }

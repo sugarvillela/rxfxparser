@@ -28,7 +28,7 @@ public class Class_Scanner extends Base_Stack {
     private static Class_Scanner staticInstance;
     
     public Class_Scanner(String inName, String outName ){
-        this.inName = inName + SOURCE_FILE_EXTENSION;
+        this.inName = inName;
         nodes = new ArrayList<>();
         //er = Erlog.get(this);
     }
@@ -46,10 +46,10 @@ public class Class_Scanner extends Base_Stack {
     // Runs Scanner
     @Override
     public void onCreate(){
-        fin = new TokenSource(new TextSource_file(inName));
+        fin = new TokenSource(new TextSource_file(inName + SOURCE_FILE_EXTENSION));
         er.setTextStatusReporter(fin);
         if( !fin.hasData() ){
-            er.set( "Bad input file name", inName );
+            er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
         
         backText = null;

@@ -15,7 +15,7 @@ public class RxFxUtil {
     public RxFxUtil(){
         toggle = FX;
     }
-    public final boolean assertGoodToggle(Keywords.HANDLER handler){
+    public final boolean assertToggle(Keywords.HANDLER handler){
         switch(handler){
             case RX:
                 if(toggle != FX){

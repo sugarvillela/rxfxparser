@@ -5,42 +5,94 @@
  */
 package toksource;
 
+import compile.basics.Factory_Node.RxScanNode;
+import static compile.basics.Factory_Node.RxScanNode.NUM_RX_FIELDS;
 import erlog.Erlog;
 import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.basics.Factory_Node.ScanNode;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
+import static compile.basics.Keywords.HANDLER.RX_BUILDER;
 import toksource.interfaces.ITextSource;
 
 public class ScanNodeSource implements ITextSource{
-    protected final Erlog er;
-    TextSource_file fin;
+    protected Erlog er;
+    ITextSource fin;
     ScanNode currNode;
+    private NodeGen nodeGen;
+    private final NodeGen standard, rx;
     
-    public ScanNodeSource(String path){
-        er = Erlog.get();
-        fin = new TextSource_file(path);
-        if( !fin.hasData() ){
-            er.set( "Bad input file name", path );
-        }
+    public ScanNodeSource(ITextSource lineGetter){
+        this.fin = lineGetter;
+        standard = new StandardNodeGen();
+        rx = new RxNodeGen();
+        nodeGen = standard;
+        init();
+    }
+    private void init(){
+        er = Erlog.get(this);
         er.setTextStatusReporter(fin);
+    }
+    private void toggleNodeGen(){
+        if(nodeGen == standard){
+            nodeGen = rx;
+        }
+        else{
+            nodeGen = standard;
+        }
     }
     
     public ScanNode nextNode(){
-        String[] tok = this.next().split(",", NUM_FIELDS);
-        currNode = new ScanNode(
-            NULL_TEXT.equals(tok[0])? "" : tok[0],
-            NULL_TEXT.equals(tok[1])? null : Keywords.CMD.get(tok[1]),
-            NULL_TEXT.equals(tok[2])? null : Keywords.HANDLER.get(tok[2]),
-            NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
-            NULL_TEXT.equals(tok[4])? "" : tok[4]
-        );
-        //System.out.print("\ncurrNode = ");
-        //System.out.println(currNode);
+        String next = next();
+        currNode = nodeGen.nextNode(next);
+        if(currNode == null){
+            toggleNodeGen();
+            currNode = nodeGen.nextNode(next);
+        }
         return currNode;
     }
-
+    
+    private interface NodeGen{
+        ScanNode nextNode(String next);
+    }
+    private class StandardNodeGen implements NodeGen{
+        @Override
+        public ScanNode nextNode(String next){
+            String[] tok = next.split(",", NUM_FIELDS);
+            Keywords.HANDLER handler = Keywords.HANDLER.get(tok[2]);
+            if(RX_BUILDER.equals(handler)){
+                return null;
+            }
+            return new ScanNode(
+                tok[0],
+                Keywords.CMD.get(tok[1]),
+                handler,
+                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
+                NULL_TEXT.equals(tok[4])? "" : tok[4]
+            );
+        }
+    }
+    private class RxNodeGen implements NodeGen{
+        @Override
+        public ScanNode nextNode(String next){
+            String[] tok = next.split(",", NUM_RX_FIELDS);
+            Keywords.HANDLER handler = Keywords.HANDLER.get(tok[2]);
+            if(!RX_BUILDER.equals(handler)){
+                return null;
+            }
+            return new RxScanNode(
+                tok[0],
+                Keywords.CMD.get(tok[1]),
+                handler,
+                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
+                NULL_TEXT.equals(tok[4])? "" : tok[4], 
+                Boolean.parseBoolean(tok[5]), 
+                NULL_TEXT.equals(tok[6])? -1 : Integer.parseInt(tok[6])
+            );
+        }
+    }
+    
     @Override
     public void rewind() {fin.rewind();}
 
@@ -101,8 +153,8 @@ public class ScanNodeSource implements ITextSource{
     @Override
     public void onQuit() {}
     
-    public static ArrayList<ScanNode> readAll(String name){
-        ScanNodeSource source = new ScanNodeSource( name );
+    public static ArrayList<ScanNode> readAll(String path){
+        ScanNodeSource source = new ScanNodeSource(new TextSource_file(path));
         ArrayList<ScanNode> out = new ArrayList<>();
         if( source.hasData() ){
             while(source.hasNext()){

@@ -10,8 +10,7 @@ import static compile.basics.Keywords.HANDLER.RXFX;
 import static compile.basics.Keywords.HANDLER.FX;
 import static compile.basics.Keywords.HANDLER.RX;
 import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
-import static compile.basics.Keywords.HANDLER.USER_DEF_VAR;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_KEY_VAL_TEXT;
+import static compile.basics.Keywords.HANDLER.SCOPE;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_TEXT;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_RX_WORD;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_FX_WORD;
@@ -25,17 +24,17 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_POP;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_ENDLINE;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_KEYWORD;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_USERDEF;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_COMMENT;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_SOURCE_LANG;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_TARG_LANG_INSERT;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.SET_USER_DEF_NAME;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_END_SOURCE;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_USER_DEF_LIST;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_TARGLANG_INSERT_CLOSE;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.RX_ON_PUSH;
-import static compile.scan.factories.Factory_Strategy.getStrategy;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.SET_ENU_NAME;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_KEY_VAL_ATTRIB;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ASSERT_TOGGLE;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
 
 public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( HANDLER h ){
@@ -53,13 +52,14 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
                         POP_ON_KEYWORD,
-                        PUSH_USER_DEF_LIST
+                        SET_ENU_NAME,
+                        ADD_TEXT
                     )
                 );
             case SRCLANG:
                 return new ScanItem(
                     h, 
-                    new HANDLER[]{ATTRIB, ENUB, ENUD, RXFX, RX, FX },
+                    new HANDLER[]{ATTRIB, ENUB, ENUD, RXFX, RX, FX, SCOPE },
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
@@ -76,12 +76,12 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
+                        SET_USER_DEF_NAME,
                         PUSH_GOOD_HANDLER,
                         POP_ON_KEYWORD,
-                        SET_USER_DEF_NAME,
                         ERR
                     ),
-                    setStrategies(RXFX_ERR_ON_POP, ON_POP)
+                    setPopStrategies(RXFX_ERR_ON_POP, ON_POP)
                 );
             case RX:
                 return new ScanItem(
@@ -95,8 +95,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ON_KEYWORD,
                         ADD_RX_WORD
                     ),
-                    setStrategies(ON_PUSH, RX_ON_PUSH),
-                    setStrategies(ON_POP)
+                    setPushStrategies(ON_PUSH, ASSERT_TOGGLE),
+                    setPopStrategies(ON_POP)
                 );
             case FX:
                 return new ScanItem(
@@ -110,8 +110,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ON_KEYWORD,
                         ADD_FX_WORD
                     ),
-                    setStrategies(ON_PUSH, RX_ON_PUSH),
-                    setStrategies(ON_POP)
+                    setPushStrategies(ON_PUSH, ASSERT_TOGGLE),
+                    setPopStrategies(ON_POP)
                 );
             // Copy and wait
             case TARGLANG_BASE:
@@ -122,7 +122,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_SOURCE_LANG,
                         ADD_TEXT
                     ),
-                    setStrategies(ON_LAST_POP, ON_POP)
+                    setPopStrategies(ON_LAST_POP, ON_POP)
                 );
             case TARGLANG_INSERT:
                 return new ScanItem(
@@ -132,28 +132,27 @@ public class Factory_ScanItem extends Factory_Strategy{
                         POP_ON_TARGLANG_INSERT_CLOSE,
                         ADD_TO_LINE_BUFFER
                     ),
-                    setStrategies(DUMP_BUFFER_ON_POP, ON_POP)
+                    setPopStrategies(DUMP_BUFFER_ON_POP, ON_POP)
                 );
             case COMMENT:
                 return new ScanItem(
                     h, 
                     null,
                     setStrategies(POP_ON_ENDLINE),
-                    setStrategies(NOP),
-                    setStrategies(NOP)
-                        
+                    setPushStrategies(NOP),// silent push pop
+                    setPopStrategies(NOP) 
                 );
             case ATTRIB:
                 return new ScanItem(
                     h, 
                     null,
-                    setStrategies(
-                        POP_ALL_ON_END_SOURCE,
+                    setStrategies(POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         POP_ON_KEYWORD,
-                        POP_ON_USERDEF,
-                        ADD_KEY_VAL_TEXT
-                    )
+                        ADD_KEY_VAL_ATTRIB
+                    ),
+                    setPushStrategies(NOP),// silent push pop
+                    setPopStrategies(NOP)
                 );
                 
             //========To implement=====================
@@ -164,42 +163,6 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return null;
         }
     }
-    public static Base_ScanItem get( HANDLER h, String text ){
-        System.out.println("====Factory_cxs.get()====" + h.toString());
-        switch(h){
-            case USER_DEF_LIST://                action.popAll(text)        || 
-                return new ScanItem(
-                    h, 
-                    null,
-                    setStrategies(
-                        POP_ALL_ON_END_SOURCE,
-                        PUSH_COMMENT,
-                        POP_ON_USERDEF,
-                        POP_ON_KEYWORD,
-                        ADD_TEXT,
-                        POP_ON_ENDLINE
-                    ),
-                    setStrategies(text, ON_PUSH),
-                    setStrategies(text, ON_POP)
-                );
-            case VAR:
-            case SCOPE:
-                return new ScanItem(
-                    USER_DEF_VAR, 
-                    new HANDLER[]{RX, FX},
-                    setStrategies(
-                        POP_ALL_ON_END_SOURCE,
-                        PUSH_COMMENT,
-                        PUSH_GOOD_HANDLER,
-                        POP_ON_KEYWORD,
-                        ERR
-                    ),
-                    setStrategies(text, ON_PUSH),
-                    setStrategies(text, ON_POP)
-                );
-        }
-        return null;
-    }
 
     public static class ScanItem extends Base_ScanItem{
         public ScanItem( HANDLER setH, HANDLER[] allowedHandlers, Strategy[] strategies){
@@ -207,8 +170,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                 setH, 
                 allowedHandlers, 
                 strategies, 
-                new Strategy[]{getStrategy(ON_PUSH)}, 
-                new Strategy[]{getStrategy(ON_POP)}
+                setPushStrategies(ON_PUSH), 
+                setPopStrategies(ON_POP)
             );
         }
         
@@ -222,7 +185,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 setH, 
                 allowedHandlers, 
                 strategies, 
-                new Strategy[]{getStrategy(ON_PUSH)}, 
+                setPushStrategies(ON_PUSH), 
                 onPopStrategies
             );
         }
