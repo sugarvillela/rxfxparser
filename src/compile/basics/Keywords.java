@@ -5,6 +5,8 @@
  */
 package compile.basics;
 
+import java.util.ArrayList;
+
 /**Contains the language definition, including enums, constants
  *
  * @author Dave Swanson
@@ -69,7 +71,7 @@ public final class Keywords {
         LO, HI, // RX ranges
         //rx
         RX_AND, RX_OR, RX_DATA, RX_NEGATE,
-        BRANCH, LEAF //tree structure roles
+        //BRANCH, LEAF //tree structure roles
         //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
         public static KWORD get( String text ){
@@ -81,7 +83,26 @@ public final class Keywords {
             return null;
         }
     }
-
+    public enum FUNCT{
+        // Keys for setAttrib()
+        FIRST, LAST, LEN
+        ;
+        public static FUNCT get( String text ){
+            for(FUNCT f : values()){
+                if(f.toString().equals(text)){
+                    return f;
+                }
+            }
+            return null;
+        }
+        public static String toRegexList(){
+            ArrayList<String> list = new ArrayList<>();
+            for(FUNCT f : values()){
+                list.add(f.toString());
+            }
+            return String.join("|", list);
+        }
+    }
     // String constants for switches: defines language behavior
     public static final String CONT_LINE = "...";      // Matlab-like extension
     public static final String SOURCE_OPEN = "/*$";    // pushes source handler
@@ -99,5 +120,5 @@ public final class Keywords {
     public static final char   CHAR_OPAR = '(';
     public static final char   CHAR_CPAR = ')';
     public static final char   CHAR_SQUOTE = '\'';
-    public static final String DEFAULT_KEYNAME = "text";// class WORD text field
+    public static final String TEXT_FIELD_NAME = "text";// class WORD text field
 }

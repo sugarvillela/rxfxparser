@@ -17,7 +17,7 @@ public class Rxfxparser {
 
         //Parse_.scanner();
         RxTreeUtil u = RxTreeUtil.getInstance();
-        u.test1();
+        u.test3();
         //demos.Parse_.parseStack();
         //RxContextDev rxContextDev = new RxContextDev();
         //rxContextDev.testValidate();

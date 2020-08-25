@@ -6,8 +6,6 @@ import static compile.basics.Keywords.CHAR_OR;
 import static compile.basics.Keywords.CHAR_OPAR;
 import static compile.basics.Keywords.CHAR_CPAR;
 import static compile.basics.Keywords.CHAR_SQUOTE;
-import static compile.basics.Keywords.KWORD.BRANCH;
-import static compile.basics.Keywords.KWORD.LEAF;
 import static compile.basics.Keywords.KWORD.RX_AND;
 import static compile.basics.Keywords.KWORD.RX_DATA;
 import static compile.basics.Keywords.KWORD.RX_OR;
@@ -100,7 +98,7 @@ public class RxTree {
         public int level, id;
         
         public TreeNode(){
-            nodes = new ArrayList<>();
+            this.op = 'v';
         }
         
         public TreeNode(String data, int level, TreeNode parent){
@@ -115,7 +113,6 @@ public class RxTree {
         public boolean split(char delim){
             if(data == null){
                 if(nodes != null){
-                    
                     boolean more = false;
                     for(TreeNode node : nodes){
                         more |= node.split(delim);
@@ -127,13 +124,11 @@ public class RxTree {
                 }
             }
             else{
-                //System.out.println(level + ": split: " + delim + ": " + data);
                 nodes = new ArrayList<>();
                 T.setDelims(delim);
                 T.parse(data);
                 ArrayList<String> tokens = T.getTokens();
                 if(tokens.size() > 1){
-                    role = BRANCH;
                     op = delim;
                     if(op == CHAR_AND){
                         connector = RX_AND;
@@ -145,14 +140,11 @@ public class RxTree {
                     for(String token : tokens){
                         this.addChild(new TreeNode(token, level + 1, this));
                     }
-                    //System.out.println(this);
                     return true;
                 }
                 else{
-                    role = LEAF;
                     nodes = null;
                     connector = RX_DATA;
-                    //System.out.println(this);
                 }
             }
             return false;
@@ -198,14 +190,22 @@ public class RxTree {
         }
         
         public void addChild(TreeNode node){
-            //System.out.println(level + ": addChild: " + node.data);
             nodes.add(node);
+            //System.out.print(nodes.size() + " addChild: ");
+            //System.out.println(node);
         }
-        
+        public void addChildExternal(TreeNode node){
+            if(nodes == null){
+                nodes = new ArrayList<>();
+            }
+            nodes.add(node);
+            //System.out.print(nodes.size() + " addChild: ");
+            //System.out.println(node);
+        }
         //=======Access functions===========================================
         
         public int treeDepth(int max){
-            if(role == LEAF){
+            if(nodes == null){
                 return (level > max)? level : max;
             }
             else{
@@ -220,7 +220,7 @@ public class RxTree {
         }
         
         public void leaves(ArrayList<TreeNode> leaves){
-            if(role == LEAF){
+            if(nodes == null){
                 leaves.add(this);
             }
             else{
@@ -241,7 +241,7 @@ public class RxTree {
         
         public void preOrder(ArrayList<TreeNode> leaves){
             leaves.add(this);
-            if(role == BRANCH){
+            if(nodes != null){
                 for(TreeNode node : nodes){
                     node.preOrder(leaves);
                 }
@@ -253,21 +253,22 @@ public class RxTree {
             String dispNot = not? "!" : " ";
             return String.format("%s%c%d", dispNot, op, id);
         }
+        
         @Override
         public String toString(){
-            String dispRole = (role == null)? "none" : role.toString();
+            String dispRole;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
-            if(role == BRANCH){
+            if(nodes == null){
+                dispRole = "LEAF " + data;
+            }
+            else{
                 String[] childNodes = new String[nodes.size()];
                 int i = 0;
                 for(TreeNode node : nodes){
                     childNodes[i++] = node.readableId();
                 }
                 String children = String.join(", ", childNodes);
-                dispRole += String.format(" %d children: %s", nodes.size(), children);
-            }
-            else{
-                dispRole += " " + data;
+                dispRole = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
             return String.format("%d: parent %s -> %s: role = %s", 
                 level, dispParent, this.readableId(), dispRole
