@@ -9,7 +9,9 @@ package toktools;
 *  return instance.get();
 */
 
+import commons.Commons;
 import java.util.ArrayList;
+import java.util.Stack;
 import static toktools.TK.DELIMIN;
 import static toktools.TK.IGNORESKIP;
 import static toktools.TK.SYMBOUT;
@@ -22,7 +24,7 @@ public class Tokens_special  implements Tokens{
     protected  String delims;     // input text, list of delimiters text, 
     protected char[] oMap, cMap;        // matched open/close skip char arrays
     protected ArrayList<String> tokens; // output
-    protected char cSymb;               // Closing symbol (replace with stack?)
+    protected Stack<Character> cSymb;               // Closing symbol (replace with stack?)
     protected int symbIn;               // leave open/close chars in if 1
     protected boolean delimIn;          // keep delims, skips to separate list
     protected boolean ignoreSkip;       // 
@@ -57,6 +59,8 @@ public class Tokens_special  implements Tokens{
                 to++;
             }
         }
+        //Commons.disp(oMap, "oMap");
+        //Commons.disp(cMap, "cMap");
     }
     @Override
     public final void setFlags( int flags ){
@@ -75,15 +79,24 @@ public class Tokens_special  implements Tokens{
         // Set closer to match opener, or null if not an opener
         for(int i=0; i<oMap.length; i++){
             if( symb == oMap[i] ){
-                this.cSymb = cMap[i];// important side effect
+                this.cSymb.push(cMap[i]);// = cMap[i];// important side effect
+                //System.out.println("\nsetHolding: "+symb);
+                //System.out.println(cSymb);
                 return true;
             }
         }
         return false;
     }
+    protected final boolean clearHolding(){
+        //System.out.println("\nclearHolding: "+cSymb.peek());
+        cSymb.pop();
+        //System.out.println(cSymb);
+        //System.out.println(cSymb.empty());
+        return cSymb.empty();
+    }
     // override these two for more complex behavior in Tokens_wSkipHold
     protected void initParse(){
-        cSymb = 0;
+        cSymb = new Stack<>();
         this.tokens = new ArrayList<>();     // for main tokenized output
     }
     protected void addToTokens(String txt){
@@ -99,15 +112,17 @@ public class Tokens_special  implements Tokens{
         int start=0;        // beginning of substring
         int i;              // for current char being checked
         for ( i = 0; i < text.length(); i++) {
+            //System.out.println(i + ": " + text.charAt(i));
             if( isHolding() ){                     // in skip area            
-                if( text.charAt(i) == cSymb ){ // found closing skip symbol
-                    cSymb = 0;                  // leaving skip area
-                    if( !ignoreSkip && i != start ){               // if prev wasn't a delim, dump
+                if( cSymb.peek().equals(text.charAt(i))){ // found closing skip symbol
+                    if( clearHolding() && !ignoreSkip && i != start ){               // if prev wasn't a delim, dump
                         // if symbIn==1, will keep current symbol, else lose it
                         addToTokens( text.substring( start, i+symbIn ) );
                         start=i+1;                    // reset for next token
                     }
 
+                }
+                else if( setHolding( text.charAt(i) ) ){// opener
                 }
             }
             else if( setHolding( text.charAt(i) ) ){// opener
@@ -145,7 +160,7 @@ public class Tokens_special  implements Tokens{
     // get state: in a skip area or not
     @Override
     public final boolean isHolding(){
-        return cSymb != 0;
+        return !cSymb.isEmpty();
     }
     
     // Complex tokenize methods with multi-delims and skip symbols

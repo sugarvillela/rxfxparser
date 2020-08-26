@@ -106,6 +106,14 @@ public class TokenTools_ {
         Commons.disp(TK.toArr(' ', 2, text), text );
     }
     public static void tokens_special(){
+        Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
+        String text = "~((A=a&B='b')&(C=c&D=d))&~(E=e&F=f)&'G'";
+        T.setDelims('&');
+        T.parse(text);
+        ArrayList<String> tokens = T.getTokens();
+        Commons.disp(tokens, "tokens_special");
+    }
+    public static void tokens_special1(){
         boolean keepSkip1 =     true;
         boolean keepSkip2 =     true;
         boolean keepSkip3 =     true;

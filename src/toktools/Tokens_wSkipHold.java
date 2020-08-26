@@ -1,6 +1,7 @@
 package toktools;
 
 import java.util.ArrayList;
+import java.util.Stack;
 import static toktools.TK.DELIMIN;
 import static toktools.TK.HOLDOVER;
 import static toktools.TK.SKIPOUT;
@@ -64,7 +65,7 @@ public class Tokens_wSkipHold extends Tokens_special{
         }
         @Override
         public void add( String skipText ){
-            if(cSymb == 0){
+            if(cSymb.empty()){
                 tokens.add( skipText );
             }
             else{
@@ -85,7 +86,7 @@ public class Tokens_wSkipHold extends Tokens_special{
         // always resets
         @Override
         public void initParse(){
-            cSymb = 0;
+            cSymb = new Stack<>();
             tokens = new ArrayList<>();    // for main tokenized output
             skipBehavior.newList();        // to put skips in
         }
@@ -103,7 +104,7 @@ public class Tokens_wSkipHold extends Tokens_special{
         @Override
         public void initParse(){
             if(!isHolding()){
-                cSymb = 0;
+                cSymb = new Stack<>();
                 tokens = new ArrayList<>();     // for main tokenized output
                 skipBehavior.newList();        // to put skips in
             }

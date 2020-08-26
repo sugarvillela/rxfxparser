@@ -70,7 +70,7 @@ public final class Keywords {
         DEF_NAME, ANON_NAME, // named and anonymous variables
         LO, HI, // RX ranges
         //rx
-        RX_AND, RX_OR, RX_DATA, RX_NEGATE,
+        RX_AND, RX_OR, RX_EQUAL, RX_DATA, RX_NEGATE,
         //BRANCH, LEAF //tree structure roles
         //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;

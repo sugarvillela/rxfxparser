@@ -38,9 +38,8 @@ public class Tokens_byGroup extends Tokens_special{
         
         for ( i = 1; i < text.length(); i++) {
             if( isHolding() ){                     // in skip area            
-                if( text.charAt(i) == cSymb ){ // found closing skip symbol
+                if( text.charAt(i) == cSymb.peek() && clearHolding() ){ // found closing skip symbol
                     addToTokens( text.substring( start, i+symbIn ) );
-                    cSymb = 0;                  // leaving skip area
                     start=i;                    // reset for next token
                     lastGroup = -2;
                 }

@@ -1,2 +1,2 @@
-Error: Line 38 Word 1 
-ScanItem: Disallowed handler!!: : $myScope
+Error: Line 0 Word 0 
+TreeNode: -1: Symbol mismatch: : (

@@ -15,13 +15,14 @@ public class RxTreeUtil {
     }
     protected RxTreeUtil(){
         rxTree = RxTree.getInstance();
+        rxLeafUtil = new RxLeafUtil();
     }
     
     private final RxTree rxTree;
+    private final RxLeafUtil rxLeafUtil;
     private final String lineCol = "line 0 word 0";
     
     public void test1(){
-        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.toTree(text);
         rxTree.dispBreadthFirst(root);
@@ -45,16 +46,18 @@ public class RxTreeUtil {
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.toTree(text);
-        //rxTree.dispPreOrder(root);
-        //rxTree.dispLeaves(root);
-        //rxTree.dispBreadthFirst(root);
         ArrayList<RxScanNode> cmdList = genScanNodes(root);
-        //Commons.disp(cmdList, "\nCommandList");
         ArrayList<String> strList = scanNodesToString(cmdList);
         TreeNode reroot = rebuild(strList);
         assertEqual(root, reroot);
-        //rxTree.dispPreOrder(reroot);
-        //rxTree.dispBreadthFirst(root);
+    }
+    public void test4(){
+        String text = "~((A=a&B='b')&(C=c&D=d))&~(E=e&F=f)&'G'";
+        //String text = "~(~(A=a&B=~'b'))";//&(C=c)&'D'='d'|~(E=e&F=f)&'G'
+        TreeNode root = rxTree.toTree(text);
+        rxTree.dispBreadthFirst(root);
+//        rxLeafUtil.go(root);
+//        rxTree.dispBreadthFirst(root);
     }
     public boolean assertEqual(TreeNode root1, TreeNode root2){
         ArrayList<TreeNode>[] levels1 = rxTree.breadthFirst(root1);

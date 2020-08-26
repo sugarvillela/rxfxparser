@@ -10,6 +10,8 @@ import static compile.basics.Keywords.KWORD.RX_AND;
 import static compile.basics.Keywords.KWORD.RX_DATA;
 import static compile.basics.Keywords.KWORD.RX_OR;
 import commons.Commons;
+import static compile.basics.Keywords.CHAR_EQUAL;
+import static compile.basics.Keywords.KWORD.RX_EQUAL;
 import erlog.Erlog;
 import java.util.ArrayList;
 import toktools.TK;
@@ -80,9 +82,9 @@ public class RxTree {
             more |= root.split(CHAR_AND);
             more |= root.split(CHAR_OR);
 //            more |= root.split(CHAR_EQUAL);
-            root.negate();
-            root.unwrap(CHAR_OPAR, CHAR_CPAR);
-            root.unwrap(CHAR_SQUOTE, CHAR_SQUOTE);
+            more |= root.negate();
+            more |= root.unwrap(CHAR_OPAR, CHAR_CPAR);
+            more |= root.unquote(CHAR_SQUOTE);
         }while(more);
         return root;
     }
@@ -90,7 +92,6 @@ public class RxTree {
     public static class TreeNode{
         public ArrayList<TreeNode> nodes;
         public TreeNode parent;
-        public KWORD role;
         public KWORD connector;
         public String data;
         public char op;//, parentOp;
@@ -107,21 +108,18 @@ public class RxTree {
             this.parent = parent;
             this.id = UQ.next();
             this.op = 'v';
+            connector = RX_DATA;
             this.not = false;
         }
 
         public boolean split(char delim){
+            System.out.println(delim + "=delim, data=" + data);
             if(data == null){
-                if(nodes != null){
-                    boolean more = false;
-                    for(TreeNode node : nodes){
-                        more |= node.split(delim);
-                    }
-                    return more;
+                boolean more = false;
+                for(TreeNode node : nodes){
+                    more |= node.split(delim);
                 }
-                else{
-                    Erlog.get(this).set("nodes == null");
-                }
+                return more;
             }
             else{
                 nodes = new ArrayList<>();
@@ -129,14 +127,19 @@ public class RxTree {
                 T.parse(data);
                 ArrayList<String> tokens = T.getTokens();
                 if(tokens.size() > 1){
-                    op = delim;
-                    if(op == CHAR_AND){
-                        connector = RX_AND;
-                    }
-                    else if(op == CHAR_OR){
-                        connector = RX_OR;
-                    }
                     data = null;
+                    op = delim;
+                    switch(op){
+                        case CHAR_AND:
+                            connector = RX_AND;
+                            break;
+                        case CHAR_OR:
+                            connector = RX_OR;
+                            break;
+                        case CHAR_EQUAL:
+                            connector = RX_EQUAL;
+                            break;
+                    }
                     for(String token : tokens){
                         this.addChild(new TreeNode(token, level + 1, this));
                     }
@@ -144,13 +147,13 @@ public class RxTree {
                 }
                 else{
                     nodes = null;
-                    connector = RX_DATA;
+                    
                 }
             }
             return false;
         }
         
-        public void negate(){
+        public boolean negate(){
             if(data != null){
                 int i = 0;
                 while(data.charAt(i) == '~'){
@@ -160,47 +163,101 @@ public class RxTree {
                 if(i > 0){
                     data = data.substring(i);
                     //System.out.println(level + ": negate: " + not + ": data = " + data);
+                    return true;
                 }
+                return false;
             }
-            if(nodes != null){
+            else {//if(nodes != null)
+                boolean more = false;
                 for(TreeNode node : nodes){
-                    node.negate();
+                    more |= node.negate();
                 }
+                return more;
             }
         }
         
-        public void unwrap(char first, char last){
-            if(data != null){
-                int i = 0, len = data.length();
-                //System.out.println(data);
-                while(data.charAt(i) == first && last == data.charAt(len - i - 1)){
-                    //System.out.println(i + " : " + (len - i) + " : " + data.charAt(i) + " : " + data.charAt(len - i));
-                    i++;
-                }
-                if(i > 0){
-                    data = data.substring(i, len - i);
-                    //System.out.println(level + ": unwrap: " + data);
-                }
-            }
+        public boolean unwrap(char first, char last){
             if(nodes != null){
+                boolean more = false;
                 for(TreeNode node : nodes){
-                    node.unwrap(first, last);
+                    more |= node.unwrap(first, last);
+                }
+                return more;
+            }
+            return data != null && unwrap(false, first, last);
+        }
+        private boolean unwrap(boolean changed, char first, char last){
+            int brace = 0, len = data.length();
+            boolean outer = true;
+            for(int i = 0; i<len; i++){
+                if(data.charAt(i) == first){
+                    brace++;
+                }
+                else if(data.charAt(i) == last){
+                    brace--;
+                    if(brace == 0 && i != len - 1){// {a}&{b}
+                        outer = false;
+                    }
                 }
             }
+            if(brace != 0){// {a}}
+                Erlog.get(this).set("Symbol mismatch", data);
+                return false;
+            }
+            if(outer && data.charAt(0) == first && last == data.charAt(len - 1)){
+                data = data.substring(1, len-1);
+                return unwrap(true, first, last);
+            }
+            return changed;
         }
-        
+        public boolean unquote(char quote){
+            if(nodes != null){
+                boolean more = false;
+                for(TreeNode node : nodes){
+                    more |= node.unquote(quote);
+                }
+                return more;
+            }
+            if(data == null){
+                return false;
+            }
+            int len = data.length(), count = 0;
+            for(int i = 0; i<len; i++){
+                if(data.charAt(i) == quote){
+                    count++;
+                }
+            }
+            if(count % 2 != 0){// ''a' mismatch
+                System.out.println(data);
+                Erlog.get(this).set("Unclosed quote", data);
+                return false;
+            }
+            if(count > 2){// 'a'='b' ignore until later
+                return false;
+            }
+            int j = 0;
+            while(data.charAt(j) == quote && quote == data.charAt(len - j - 1)){
+                //System.out.println(i + " : " + (len - i) + " : " + data.charAt(i) + " : " + data.charAt(len - i));
+                j++;
+            }
+            if(j > 0){
+                data = data.substring(j, len - j);
+                //System.out.println(level + ": unwrap: " + data);
+                return true;
+            }
+            return false;
+        }
         public void addChild(TreeNode node){
             nodes.add(node);
-            //System.out.print(nodes.size() + " addChild: ");
-            //System.out.println(node);
         }
+        
+        //=======Rebuild====================================================
+        
         public void addChildExternal(TreeNode node){
             if(nodes == null){
                 nodes = new ArrayList<>();
             }
             nodes.add(node);
-            //System.out.print(nodes.size() + " addChild: ");
-            //System.out.println(node);
         }
         //=======Access functions===========================================
         
@@ -256,10 +313,11 @@ public class RxTree {
         
         @Override
         public String toString(){
-            String dispRole;// = (nodes == null)? "none" : role.toString();
+            String position;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
+            String dispRole = (connector == null)? "NULL CONNECTOR" : connector.toString();
             if(nodes == null){
-                dispRole = "LEAF " + data;
+                position = "LEAF " + data;
             }
             else{
                 String[] childNodes = new String[nodes.size()];
@@ -268,10 +326,10 @@ public class RxTree {
                     childNodes[i++] = node.readableId();
                 }
                 String children = String.join(", ", childNodes);
-                dispRole = String.format("BRANCH %d children: %s", nodes.size(), children);
+                position = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
-            return String.format("%d: parent %s -> %s: role = %s", 
-                level, dispParent, this.readableId(), dispRole
+            return String.format("%d: parent %s -> %s, role = %s, position = %s", 
+                level, dispParent, this.readableId(), dispRole, position
             );
         }
     }
