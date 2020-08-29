@@ -70,7 +70,7 @@ public final class Keywords {
         DEF_NAME, ANON_NAME, // named and anonymous variables
         LO, HI, // RX ranges
         //rx
-        RX_AND, RX_OR, RX_EQUAL, RX_DATA, RX_NEGATE,
+        RX_AND, RX_OR, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,
         //BRANCH, LEAF //tree structure roles
         //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
@@ -84,7 +84,7 @@ public final class Keywords {
         }
     }
     public enum FUNCT{
-        // Keys for setAttrib()
+        // function names for Rx logic
         FIRST, LAST, LEN
         ;
         public static FUNCT get( String text ){
@@ -94,13 +94,6 @@ public final class Keywords {
                 }
             }
             return null;
-        }
-        public static String toRegexList(){
-            ArrayList<String> list = new ArrayList<>();
-            for(FUNCT f : values()){
-                list.add(f.toString());
-            }
-            return String.join("|", list);
         }
     }
     // String constants for switches: defines language behavior
@@ -113,12 +106,17 @@ public final class Keywords {
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined heading
     public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
-    public static final char   CHAR_EQUAL = '=';            // key=value or key:value ?
+    public static final char   CHAR_EQUAL = '=';       // key=value or key:value ?
+    public static final char   CHAR_GT = '>';          // 
+    public static final char   CHAR_LT = '<';          // 
     public static final char   CHAR_AND = '&';            // RX symbol
     public static final char   CHAR_OR = '|';             // RX symbol
     public static final char   CHAR_NOT = '~';            // RX symbol
     public static final char   CHAR_OPAR = '(';
     public static final char   CHAR_CPAR = ')';
     public static final char   CHAR_SQUOTE = '\'';
+    public static final char   CHAR_PAYLOAD = 'p';
     public static final String TEXT_FIELD_NAME = "text";// class WORD text field
+    
+
 }

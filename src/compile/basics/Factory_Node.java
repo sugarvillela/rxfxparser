@@ -1,13 +1,14 @@
 package compile.basics;
 
-import compile.basics.Keywords;
 import static compile.basics.Keywords.CHAR_AND;
+import static compile.basics.Keywords.CHAR_EQUAL;
+import static compile.basics.Keywords.CHAR_GT;
+import static compile.basics.Keywords.CHAR_LT;
 import static compile.basics.Keywords.CHAR_OR;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.RX_BUILDER;
-import static compile.basics.Keywords.HANDLER.RX_WORD;
-import static compile.basics.Keywords.KWORD.RX_NEGATE;
+import static compile.basics.Keywords.CHAR_PAYLOAD;
 import demos.RxTree.TreeNode;
 
 /**
@@ -130,7 +131,7 @@ public class Factory_Node {
             treeNode.id = this.id;
             treeNode.level = 0;
             if(this.k == null){
-                treeNode.op = 'v';
+                treeNode.op = CHAR_PAYLOAD;
             }
             else{
                 switch(this.k){
@@ -139,6 +140,18 @@ public class Factory_Node {
                         break;
                     case RX_OR:
                         treeNode.op = CHAR_OR;
+                        break;
+                    case RX_EQUAL:
+                        treeNode.op = CHAR_EQUAL;
+                        break;
+                    case RX_GT:
+                        treeNode.op = CHAR_GT;
+                        break;
+                    case RX_LT:
+                        treeNode.op = CHAR_LT;
+                        break;
+                    case RX_PAYLOAD:
+                        treeNode.op = CHAR_PAYLOAD;
                         break;
                 }
             }

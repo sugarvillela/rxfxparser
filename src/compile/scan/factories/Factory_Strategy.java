@@ -27,7 +27,8 @@ import static compile.basics.Keywords.KWORD.HI;
 import static compile.basics.Keywords.KWORD.LO;
 import compile.scan.ut.LineBuffer;
 import compile.scan.ut.RxFxUtil;
-import compile.scan.ut.RxWordUtil;
+import compile.scan.ut.RxRangeUtil;
+import compile.scan.ut.RxValidator;
 import compile.scan.ut.ScannerSymbolTable;
 
 /**
@@ -279,7 +280,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             
             if(text.startsWith(USERDEF_OPEN) && !text.equals(USERDEF_OPEN)){
-                System.out.println("is userdef");
+                //System.out.println("is userdef");
                 HANDLER h = context.getHandler();
                 text = text.substring(USERDEF_OPEN.length());
                 
@@ -419,23 +420,23 @@ public abstract class Factory_Strategy{
     public static class AddRxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            RxWordUtil rxWordUtil = RxWordUtil.getInstance();
+            RxRangeUtil rxRangeUtil = RxRangeUtil.getInstance();
             HANDLER h = RX_WORD;
 
-            if(rxWordUtil.findAndSetRange(text)){
-                text = rxWordUtil.getTruncated();
+            if(rxRangeUtil.findAndSetRange(text)){
+                text = rxRangeUtil.getTruncated();
             }
-            if(rxWordUtil.assertValidRxWord(text)){
+            if(RxValidator.getInstance().assertValidRxWord(text)){
                 context.addNode( Factory_Node.newScanNode( CMD.PUSH, h ));
                 
                 context.addNode(
                     Factory_Node.newScanNode( CMD.ADD_TO, h, text)
                 );
                 context.addNode( Factory_Node.newScanNode( 
-                    CMD.SET_ATTRIB, h, LO, rxWordUtil.getLowRange())
+                    CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
                 );
                 context.addNode( Factory_Node.newScanNode( 
-                    CMD.SET_ATTRIB, h, HI, rxWordUtil.getHighRange())
+                    CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
                 );                
                 context.addNode( Factory_Node.newScanNode( CMD.POP, h ));
                 return true;

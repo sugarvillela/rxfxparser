@@ -4,18 +4,17 @@ import erlog.Erlog;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RxWordUtil {
-    private static RxWordUtil instance;
+public class RxRangeUtil {
+    private static RxRangeUtil instance;
     
-    private RxWordUtil(){}
+    private RxRangeUtil(){}
     
-    public static RxWordUtil getInstance(){
-        return (instance == null)? (instance = new RxWordUtil()) : instance;
+    public static RxRangeUtil getInstance(){
+        return (instance == null)? (instance = new RxRangeUtil()) : instance;
     }
 
     private final Pattern RANGE_PATTERN = Pattern.compile("\\{[0-9]+((-[0-9]+)?|-?)\\}$");
-    private final Pattern DUP_SYMBOLS = Pattern.compile(".*(&&|\\|\\||==|~~).*");
-    private final Pattern BAD_BRACKET = Pattern.compile(".*(\\)\\(|\\}\\{).*");
+
     private final String MAX = "1024";
     private String truncated, low, high;
     
@@ -86,15 +85,5 @@ public class RxWordUtil {
             return false;
         }
     }
-    public boolean assertValidRxWord(String text){
-        if(DUP_SYMBOLS.matcher(text).matches()){
-            Erlog.get(this).set( "Single & | ~ required", text);
-            return false;
-        }
-        if(BAD_BRACKET.matcher(text).matches()){
-            Erlog.get(this).set( "Invalid parentheses or braces", text);
-            return false;
-        }
-        return true;
-    }
+
 }
