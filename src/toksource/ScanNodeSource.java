@@ -60,7 +60,7 @@ public class ScanNodeSource implements ITextSource{
         @Override
         public ScanNode nextNode(String next){
             String[] tok = next.split(",", NUM_FIELDS);
-            Keywords.HANDLER handler = Keywords.HANDLER.get(tok[2]);
+            Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
             if(RX_BUILDER.equals(handler)){
                 return null;
             }
@@ -68,7 +68,7 @@ public class ScanNodeSource implements ITextSource{
                 tok[0],
                 Keywords.CMD.get(tok[1]),
                 handler,
-                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
+                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
             );
         }
@@ -77,15 +77,22 @@ public class ScanNodeSource implements ITextSource{
         @Override
         public ScanNode nextNode(String next){
             String[] tok = next.split(",", NUM_RX_FIELDS);
-            Keywords.HANDLER handler = Keywords.HANDLER.get(tok[2]);
+            Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
             if(!RX_BUILDER.equals(handler)){
                 return null;
             }
+//                String lineCol, 
+//                Keywords.CMD setCommand, 
+//                Keywords.HANDLER setHandler, 
+//                Keywords.OP setOp, 
+//                String setData, 
+//                boolean negate, 
+//                int id
             return new RxScanNode(
                 tok[0],
                 Keywords.CMD.get(tok[1]),
                 handler,
-                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.get(tok[3]),
+                NULL_TEXT.equals(tok[3])? null : Keywords.OP.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4], 
                 Boolean.parseBoolean(tok[5]), 
                 NULL_TEXT.equals(tok[6])? -1 : Integer.parseInt(tok[6])
@@ -96,8 +103,19 @@ public class ScanNodeSource implements ITextSource{
     @Override
     public void rewind() {fin.rewind();}
 
+    /**This one ignores comment lines that start with #
+     * @return first non-comment string encountered */
     @Override
-    public String next() {return fin.next();}
+    public String next() {
+        String next = null;
+        while(fin.hasNext()){
+            next = fin.next();
+            if(!next.startsWith("#")){
+                break;
+            }
+        }
+        return next;
+    }
 
     @Override
     public boolean hasNext() {return fin.hasNext();}

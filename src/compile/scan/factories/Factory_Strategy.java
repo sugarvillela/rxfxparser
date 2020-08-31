@@ -4,7 +4,7 @@ import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.basics.Base_Stack;
-import compile.basics.Base_StackItem;
+import compile.basics.CompileInitializer;
 import compile.scan.Class_Scanner;
 import compile.basics.Keywords;
 import static compile.basics.Keywords.COMMENT_TEXT;
@@ -14,22 +14,23 @@ import static compile.basics.Keywords.HANDLER.FX_WORD;
 import static compile.basics.Keywords.HANDLER.RXFX;
 import static compile.basics.Keywords.HANDLER.RX_WORD;
 import static compile.basics.Keywords.HANDLER.SCOPE;
+import static compile.basics.Keywords.HANDLER.SYMBOL_TABLE;
 import static compile.basics.Keywords.HANDLER.TARGLANG_INSERT;
 import static compile.basics.Keywords.SOURCE_CLOSE;
 import static compile.basics.Keywords.SOURCE_OPEN;
 import static compile.basics.Keywords.TARGLANG_INSERT_CLOSE;
 import static compile.basics.Keywords.TARGLANG_INSERT_OPEN;
 import static compile.basics.Keywords.USERDEF_OPEN;
-import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
 import static compile.basics.Keywords.KWORD.ANON_NAME;
 import static compile.basics.Keywords.KWORD.DEF_NAME;
 import static compile.basics.Keywords.KWORD.HI;
 import static compile.basics.Keywords.KWORD.LO;
+import compile.scan.ut.ScanSymbolTableEnu;
 import compile.scan.ut.LineBuffer;
 import compile.scan.ut.RxFxUtil;
 import compile.scan.ut.RxRangeUtil;
 import compile.scan.ut.RxValidator;
-import compile.scan.ut.ScannerSymbolTable;
+import compile.scan.ut.ScanSymbolTableAll;
 
 /**
  *
@@ -47,7 +48,7 @@ public abstract class Factory_Strategy{
         ADD_FX_WORD,                // FX only
         PUSH_TARG_LANG_INSERT,      // Symbol != HANDLER
         ADD_TO_LINE_BUFFER,         // TARGLANG_INSERT background function
-        SET_ENU_NAME,               // ENUB, ENUD set name attribute
+        MANAGE_ENU_LISTS,               // ENUB, ENUD set name attribute
         SET_ENU_KEYWORD,            // Define SCOPE presets
         SET_USER_DEF_NAME,          // Set name attribute
         POP_ON_TARGLANG_INSERT_CLOSE,//Symbol != HANDLER
@@ -83,8 +84,8 @@ public abstract class Factory_Strategy{
                 return new PushComment();
             case PUSH_TARG_LANG_INSERT:
                 return new PushTargLangInsert();
-            case SET_ENU_NAME:
-                return new SetEnuName();
+            case MANAGE_ENU_LISTS:
+                return new ManageEnuLists();
             case SET_USER_DEF_NAME:
                 return new SetUserDefName();
             case POP_ON_TARGLANG_INSERT_CLOSE:
@@ -157,7 +158,8 @@ public abstract class Factory_Strategy{
     }
     
     private static final LineBuffer LINEBUFFER = new LineBuffer();
-    private static final ScannerSymbolTable SCANNER_SYMBOL_TABLE = new ScannerSymbolTable();
+    private static final ScanSymbolTableAll SCAN_SYMBOL_TABLE_ALL = new ScanSymbolTableAll();
+    private static final ScanSymbolTableEnu SCAN_SYMBOL_TABLE_ENU = new ScanSymbolTableEnu();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     
     public static abstract class Strategy{
@@ -178,7 +180,7 @@ public abstract class Factory_Strategy{
     public static class PushGoodHandler extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            Keywords.HANDLER keyword = Keywords.HANDLER.get(text);
+            Keywords.HANDLER keyword = Keywords.HANDLER.fromString(text);
             if(keyword != null && context.isGoodHandler(keyword)) {
                 P.push(Factory_ScanItem.get(keyword));
                 return true;
@@ -203,7 +205,7 @@ public abstract class Factory_Strategy{
                 Erlog.get(this).set("key=value format is required", text);
                 return false;
             }
-            Keywords.KWORD key = Keywords.KWORD.get(toks[0]);
+            Keywords.KWORD key = Keywords.KWORD.fromString(toks[0]);
             String val = toks[1];
             if(key == null){
                 Erlog.get(this).set("Unknown keyword: " + toks[0], text);
@@ -275,53 +277,36 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class SetEnuName extends Strategy{
+    /**Disburses data two ways
+     * SCAN_SYMBOL_TABLE_ENU handles uniqueness, saves as map and writes enum file
+     * Set defName and items for current context */
+    public static class ManageEnuLists extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            
-            if(text.startsWith(USERDEF_OPEN) && !text.equals(USERDEF_OPEN)){
-                //System.out.println("is userdef");
+            if(SCAN_SYMBOL_TABLE_ALL.isUserDef(text)){
                 HANDLER h = context.getHandler();
-                text = text.substring(USERDEF_OPEN.length());
+                String defName = text.substring(USERDEF_OPEN.length());
                 
-                if(SCANNER_SYMBOL_TABLE.assertNew(text, h)){
-                    System.out.println("assertNew");
-                    if(context.getDefName() != null){// if not the first list defined, pop current and push another one
-                        context = Factory_ScanItem.get(h);
-                        P.pop();
-                        P.push(context);
-                    }
-                    context.setDefName(text);
-                    context.addNode(
-                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, text )
-                    );
-                    return true;
+                // Add defName to enum map
+                SCAN_SYMBOL_TABLE_ENU.addCategory(defName, h);
+                
+                // if not the first list defined, pop current and push another one
+                if(context.getDefName() != null){
+                    context = Factory_ScanItem.get(h);
+                    P.pop();
+                    P.push(context);
                 }
+                context.setDefName(defName);
+                context.addNode(
+                    Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+                );
+
+                System.out.println("name: "+defName + ", handler: "+context.getHandler());
+                return true;
             }
-            return false;
-        }
-    }
-    public static class SetEnuKeyword extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            
-            if(text.equals(SCOPE.toString())){
-                HANDLER h = context.getHandler();
-                text = text.substring(USERDEF_OPEN.length());
-                
-                if(SCANNER_SYMBOL_TABLE.assertNew(text, h)){
-                    System.out.println("assertNew");
-                    if(context.getDefName() != null){// if not the first list defined, pop current and push another one
-                        context = Factory_ScanItem.get(h);
-                        P.pop();
-                        P.push(context);
-                    }
-                    context.setDefName(text);
-                    context.addNode(
-                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, text )
-                    );
-                    return true;
-                }
+            else{// is an item
+                System.out.printf("     : %s: %s \n", context.getDefName(), text);
+                SCAN_SYMBOL_TABLE_ENU.add(text);
             }
             return false;
         }
@@ -330,9 +315,9 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             HANDLER h = context.getHandler();
-            if(SCANNER_SYMBOL_TABLE.isUserDef(text)){
+            if(SCAN_SYMBOL_TABLE_ALL.isUserDef(text)){
                 text = text.substring(USERDEF_OPEN.length());
-                if(SCANNER_SYMBOL_TABLE.addIfNew(text, h)){
+                if(SCAN_SYMBOL_TABLE_ALL.addIfNew(text, h)){
                     context.addNode(
                         Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, text)
                     );
@@ -396,8 +381,8 @@ public abstract class Factory_Strategy{
     public static class PopOnKeyword extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            Keywords.HANDLER keyword = Keywords.HANDLER.get(text);
-            if( Keywords.HANDLER.get(text) != null){
+            Keywords.HANDLER keyword = Keywords.HANDLER.fromString(text);
+            if( Keywords.HANDLER.fromString(text) != null){
                 P.back(text);//repeat keyword so next handler can push it
                 P.pop();
                 return true;
@@ -469,7 +454,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             if(context.getDefName() == null){
                 HANDLER h = context.getHandler();
-                String anon = SCANNER_SYMBOL_TABLE.genAnonName(h);//
+                String anon = SCAN_SYMBOL_TABLE_ALL.genAnonName(h);//
                 context.addNode(
                     Factory_Node.newScanNode(CMD.SET_ATTRIB, h, ANON_NAME, anon)
                 );
@@ -517,7 +502,12 @@ public abstract class Factory_Strategy{
     public static class OnLastPop extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            context.prependNodes(SCANNER_SYMBOL_TABLE.getSymbolTable());
+            SCAN_SYMBOL_TABLE_ALL.write_rxlx_file(
+                Keywords.fileName_symbolTableAll()
+            );
+            SCAN_SYMBOL_TABLE_ENU.write_rxlx_file(
+                Keywords.fileName_symbolTableEnu()
+            );
             return false;
         }
     }

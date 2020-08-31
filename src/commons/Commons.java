@@ -2,14 +2,19 @@
  */
 package commons;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**Very simple functions for stuff Java does not do well, or do at all
  *
  * @author Dave Swanson
  */
 public class Commons {
-    private Commons(){}
+    public static String timeString(){
+        return (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")).format(new Date());
+    }
+    //private Commons(){}
 //    private static Commons C=null;
 //    public static Commons getInstance(){
 //        return (C==null)? ( C = new Commons() ) : C;

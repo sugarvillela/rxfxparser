@@ -2,46 +2,40 @@
 package demos;
 
 import compile.basics.Factory_Node.RxScanNode;
-import compile.basics.Keywords;
-import static compile.basics.Keywords.CHAR_AND;
-import static compile.basics.Keywords.CHAR_EQUAL;
-import static compile.basics.Keywords.CHAR_GT;
-import static compile.basics.Keywords.CHAR_LT;
-import static compile.basics.Keywords.CHAR_OR;
-import static compile.basics.Keywords.CHAR_PAYLOAD;
-import static compile.basics.Keywords.KWORD.RX_AND;
-import static compile.basics.Keywords.KWORD.RX_EQUAL;
-import static compile.basics.Keywords.KWORD.RX_GT;
-import static compile.basics.Keywords.KWORD.RX_LT;
-import static compile.basics.Keywords.KWORD.RX_OR;
-import static compile.basics.Keywords.KWORD.RX_PAYLOAD;
+import compile.basics.Keywords.OP;
+import static compile.basics.Keywords.OP.AND;
+import static compile.basics.Keywords.OP.OR;
+import static compile.basics.Keywords.OP.EQUAL;
+import static compile.basics.Keywords.OP.GT;
+import static compile.basics.Keywords.OP.LT;
+import static compile.basics.Keywords.OP.PAYLOAD;
 import erlog.Erlog;
 import flagged.FlagObject;
 import java.util.ArrayList;
 
 public abstract class Factory_RxLogicNode {
     public static LogicNode getLogicNode(RxScanNode scanNode){
-        switch (scanNode.k){
-            case RX_AND:
+        switch (scanNode.op){
+            case AND:
                 return new RxAnd(scanNode);
-            case RX_OR:
+            case OR:
                 return new RxOr(scanNode);
-            case RX_EQUAL:
+            case EQUAL:
                 return new RxEqual(scanNode);
-            case RX_GT:
+            case GT:
                 return new RxGT(scanNode);
-            case RX_LT:
+            case LT:
                 return new RxLT(scanNode);
-            case RX_PAYLOAD:
+            case PAYLOAD:
                 return new RxPayload(scanNode);
         }
         return null;
     }
     public static abstract class LogicNode{
         public LogicNode parent;
-        public Keywords.KWORD connector;
+        //public Keywords.KWORD connector;
         public String data;
-        public char op;
+        public OP op;
         public int level, id;
         
         public LogicNode(RxScanNode scanNode){
@@ -84,8 +78,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxAnd extends Connector{
         public RxAnd(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_AND;
-            this.connector = RX_AND;
+            this.op = AND;
         }
         @Override
         public boolean go(FlagObject flagObject){
@@ -101,8 +94,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxOr extends Connector{
         public RxOr(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_OR;
-            this.connector = RX_OR;
+            this.op = OR;
         }
         @Override
         public boolean go(FlagObject flagObject){
@@ -144,8 +136,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxEqual extends Comparator{
         public RxEqual(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_EQUAL;
-            this.connector = RX_EQUAL;
+            this.op = EQUAL;
         }
         @Override
         public boolean go(FlagObject flagObject){
@@ -173,8 +164,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxGT extends IntegerOnly{
         public RxGT(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_GT;
-            this.connector = RX_GT;
+            this.op = GT;
         }
         @Override
         public boolean go(FlagObject flagObject){
@@ -191,8 +181,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxLT extends IntegerOnly{
         public RxLT(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_LT;
-            this.connector = RX_LT;
+            this.op = LT;
         }
         @Override
         public boolean go(FlagObject flagObject){
@@ -209,8 +198,7 @@ public abstract class Factory_RxLogicNode {
     public static class RxPayload extends Comparator{
         public RxPayload(RxScanNode scanNode){
             super(scanNode);
-            this.op = CHAR_PAYLOAD;
-            this.connector = RX_PAYLOAD;
+            this.op = PAYLOAD;
         }
         @Override
         public boolean go(FlagObject flagObject) {

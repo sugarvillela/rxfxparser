@@ -1,5 +1,6 @@
 package compile.scan.ut;
 
+import compile.basics.CompileInitializer;
 import java.util.ArrayList;
 
 import compile.basics.Factory_Node.ScanNode;
@@ -12,19 +13,17 @@ import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.SYMBOL_TABLE;
 import static compile.basics.Keywords.USERDEF_OPEN;
 import erlog.Erlog;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import unique.Unique;
 
-/**
- *
- * @author newAdmin
- */
-public class ScannerSymbolTable {
+public class ScanSymbolTableAll {
     private final String nullStatus;
     private final Unique uq;
     private final ArrayList<ScanNode> symbolTable;
     
-    
-    public ScannerSymbolTable(){
+    public ScanSymbolTableAll(){
         nullStatus = String.format(STATUS_FORMAT, 0, 0);
         uq = new Unique();
         symbolTable = new ArrayList<>();
@@ -51,14 +50,6 @@ public class ScannerSymbolTable {
             );
             return true;
         }
-//        else if(symbolTable.get(index).h != type){
-//            Erlog.get(this).set(
-//                String.format(
-//                    "%s exists, of type %s; New var, same name, of type %s",
-//                    text, symbolTable.get(index).h.toString(), type.toString()
-//                )
-//            );
-//        }
         return false;
     }
     public boolean assertNew(String text, HANDLER type){
@@ -79,13 +70,30 @@ public class ScannerSymbolTable {
         assertNew(anon, type);//unlikely fail
         return anon;
     }
-    public ArrayList<ScanNode> getSymbolTable(){
-        if(symbolTable.size() > 1){
-            symbolTable.add(new ScanNode(nullStatus, POP, SYMBOL_TABLE, null, null));
-            return symbolTable;
+    public boolean write_rxlx_file(String path){
+        if(symbolTable.size() == 1){
+            return false;
         }
-        else{
-            return new ArrayList<>();
+        try(BufferedWriter file = new BufferedWriter(new FileWriter(path)) 
+        ){
+            file.write("# Generated file, do not edit");
+            file.newLine();
+            file.write("# Last write: " + CompileInitializer.getInstance().getInitTime());
+            file.newLine();
+            file.write("# Lists all top-level identifiers defined in .rxfx source file");
+            file.newLine();
+            for (ScanNode node: symbolTable) {
+                //System.out.println("node:"+node );
+                file.write(node.toString());
+                file.newLine();
+            }
+            file.write((new ScanNode(nullStatus, POP, SYMBOL_TABLE, null, null)).toString());
+            file.newLine();
+            file.close();
+            return true;
+        }
+        catch(IOException e){
+            return false;
         }
     }
 }

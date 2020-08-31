@@ -1,25 +1,20 @@
 package demos;
 
+import compile.basics.Keywords.OP;
 import compile.basics.Keywords.KWORD;
-import static compile.basics.Keywords.CHAR_AND;
-import static compile.basics.Keywords.CHAR_OR;
-import static compile.basics.Keywords.KWORD.RX_AND;
-import static compile.basics.Keywords.KWORD.RX_OR;
+import static compile.basics.Keywords.OP.AND;
+import static compile.basics.Keywords.OP.OR;
+import static compile.basics.Keywords.OP.EQUAL;
+import static compile.basics.Keywords.OP.GT;
+import static compile.basics.Keywords.OP.LT;
+import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
 import compile.basics.Factory_Node;
-import static compile.basics.Keywords.CHAR_EQUAL;
-import static compile.basics.Keywords.CHAR_GT;
-import static compile.basics.Keywords.CHAR_LT;
-import static compile.basics.Keywords.CHAR_PAYLOAD;
-import static compile.basics.Keywords.KWORD.RX_EQUAL;
-import static compile.basics.Keywords.KWORD.RX_GT;
-import static compile.basics.Keywords.KWORD.RX_LT;
 import erlog.Erlog;
 import java.util.ArrayList;
 import toktools.TK;
 import toktools.Tokens_special;
 import unique.Unique;
-import static compile.basics.Keywords.KWORD.RX_PAYLOAD;
 
 public abstract class RxTree {
 
@@ -78,20 +73,20 @@ public abstract class RxTree {
         private static final Unique UQ = new Unique();
         public ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
-        public KWORD connector;     //--
+        //public KWORD connector;     //--
         public String data;         //--
-        public char op;//, parentOp;//--
+        public OP op;//, parentOp;//--
         public boolean not;         //--
         public int level, id;       //--
         
         public TreeNode(){
-            this.op = CHAR_PAYLOAD;
-            connector = RX_PAYLOAD;
+            this.op = PAYLOAD;
+            //connector = RX_PAYLOAD;
         }
         
         public TreeNode(String data, int level, TreeNode parent){
-            this.op = CHAR_PAYLOAD;
-            connector = RX_PAYLOAD;
+            this.op = PAYLOAD;
+            //connector = RX_PAYLOAD;
             this.id = UQ.next();
             this.not = false;
             this.data = data;
@@ -115,8 +110,8 @@ public abstract class RxTree {
                 ArrayList<String> tokens = T.getTokens();
                 if(tokens.size() > 1){
                     data = null;
-                    op = delim;
-                    setConnector();
+                    op = OP.fromChar(delim);
+                    //setConnector();
                     for(String token : tokens){
                         this.addChild(new TreeNode(token, level + 1, this));
                     }
@@ -129,25 +124,25 @@ public abstract class RxTree {
             }
             return false;
         }
-        public void setConnector(){
-            switch(op){
-                case CHAR_AND:
-                    connector = RX_AND;
-                    break;
-                case CHAR_OR:
-                    connector = RX_OR;
-                    break;
-                case CHAR_EQUAL:
-                    connector = RX_EQUAL;
-                    break;
-                case CHAR_GT:
-                    connector = RX_GT;
-                    break;
-                case CHAR_LT:
-                    connector = RX_LT;
-                    break;
-            }
-        }
+//        public void setConnector(){
+//            switch(op){
+//                case CHAR_AND:
+//                    connector = RX_AND1;
+//                    break;
+//                case CHAR_OR:
+//                    connector = RX_OR1;
+//                    break;
+//                case CHAR_EQUAL:
+//                    connector = RX_EQUAL;
+//                    break;
+//                case CHAR_GT:
+//                    connector = RX_GT;
+//                    break;
+//                case CHAR_LT:
+//                    connector = RX_LT;
+//                    break;
+//            }
+//        }
         public boolean negate(){
             if(data != null){
                 int i = 0;
@@ -249,11 +244,8 @@ public abstract class RxTree {
         //=======Rebuild====================================================
         
         public void addChildExternal(TreeNode node){
-            System.out.println("addChildExternal: "+node.op);
-            node.setConnector();
-            System.out.println("                : "+node.connector);
+            //System.out.println("addChildExternal: "+node.op);
             if(nodes == null){
-                //System.out.print("nodes == null: ");
                 nodes = new ArrayList<>();
             }
             nodes.add(node);
@@ -307,14 +299,14 @@ public abstract class RxTree {
         //=======Display functions===========================================
         public String readableId(){
             String dispNot = not? "!" : " ";
-            return String.format("%s%c%d", dispNot, op, id);
+            return String.format("%s%c%d", dispNot, op.asChar, id);
         }
         
         @Override
         public String toString(){
             String position;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
-            String dispRole = (connector == null)? "NULL CONNECTOR" : connector.toString();
+            String dispRole = (op == null)? "NULL OP" : op.toString();
             if(nodes == null){
                 position = "LEAF " + data;
             }

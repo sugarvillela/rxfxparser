@@ -42,15 +42,15 @@ public final class Keywords {
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, 
         // sub-handlers not actually in the language
-        SYMBOL_TABLE, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
-
+        RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
+        SYMBOL_TABLE, 
         // handlers whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // Top enum ordinal gives size of list
         NUM_HANDLERS
         ;
         
-        public static HANDLER get( String text ){
+        public static HANDLER fromString( String text ){
             for(HANDLER h : values()){
                 if(h.toString().equals(text)){
                     return h;
@@ -68,16 +68,53 @@ public final class Keywords {
         PROJ_NAME, KEY, VAL, WROW, WVAL,
         // Internal keywords for communicating between components
         DEF_NAME, ANON_NAME, // named and anonymous variables
-        LO, HI, // RX ranges
+        LO, HI // RX ranges
         //rx
-        RX_AND, RX_OR, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,
+        //RX_AND1, RX_OR1, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,
         //BRANCH, LEAF //tree structure roles
         //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
-        public static KWORD get( String text ){
+        public static KWORD fromString( String text ){
             for(KWORD k : values()){
                 if(k.toString().equals(text)){
                     return k;
+                }
+            }
+            return null;
+        }
+    }
+    public enum OP{
+        AND     ('&'),
+        OR      ('|'),
+        EQUAL   ('='),
+        GT      ('>'),
+        LT      ('<'),
+        NOT     ('~'),
+        PAYLOAD ('P'),
+        OPAR    ('('),
+        CPAR    (')'),
+        SQUOTE  ('\'')
+        ;
+        
+        public final char asChar;
+        private OP(char asChar){
+            this.asChar = asChar;
+        }
+        public char toChar(){
+            return asChar;
+        }
+        public static OP fromChar(char ch){
+            for(OP op : values()){
+                if(op.asChar == ch){
+                    return op;
+                }
+            }
+            return null;
+        }
+        public static OP fromString( String text ){
+            for(OP  op : values()){
+                if(op.toString().equals(text)){
+                    return op;
                 }
             }
             return null;
@@ -106,17 +143,20 @@ public final class Keywords {
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined heading
     public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
-    public static final char   CHAR_EQUAL = '=';       // key=value or key:value ?
-    public static final char   CHAR_GT = '>';          // 
-    public static final char   CHAR_LT = '<';          // 
-    public static final char   CHAR_AND = '&';            // RX symbol
-    public static final char   CHAR_OR = '|';             // RX symbol
-    public static final char   CHAR_NOT = '~';            // RX symbol
-    public static final char   CHAR_OPAR = '(';
-    public static final char   CHAR_CPAR = ')';
-    public static final char   CHAR_SQUOTE = '\'';
-    public static final char   CHAR_PAYLOAD = 'p';
     public static final String TEXT_FIELD_NAME = "text";// class WORD text field
     
-
+    public static String fileName_symbolTableAll(){
+        return String.format(
+            "%s_%s_%s", 
+            HANDLER.SYMBOL_TABLE, 
+            "ALL", 
+            CompileInitializer.getInstance().getProjName()) + INTERIM_FILE_EXTENSION;
+    }
+    public static String fileName_symbolTableEnu(){
+        return String.format(
+            "%s_%s_%s", 
+            HANDLER.SYMBOL_TABLE, 
+            "ENU", 
+            CompileInitializer.getInstance().getProjName()) + INTERIM_FILE_EXTENSION;
+    }
 }

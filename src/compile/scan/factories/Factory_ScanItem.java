@@ -31,10 +31,9 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.SET_USER_DEF_
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ALL_ON_END_SOURCE;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.PUSH_GOOD_HANDLER;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.POP_ON_TARGLANG_INSERT_CLOSE;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.SET_ENU_NAME;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ADD_KEY_VAL_ATTRIB;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.ASSERT_TOGGLE;
-import static compile.scan.factories.Factory_Strategy.StrategyEnum.ON_PUSH;
+import static compile.scan.factories.Factory_Strategy.StrategyEnum.MANAGE_ENU_LISTS;
 
 public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( HANDLER h ){
@@ -47,12 +46,11 @@ public class Factory_ScanItem extends Factory_Strategy{
                     new HANDLER[]{
                         ATTRIB, USER_DEF_LIST
                     },
-                    setStrategies(
-                        POP_ALL_ON_END_SOURCE,
+                    setStrategies(POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
                         POP_ON_KEYWORD,
-                        SET_ENU_NAME,
+                        MANAGE_ENU_LISTS,
                         ADD_TEXT
                     )
                 );

@@ -42,7 +42,7 @@ public class RxTree_ {
         String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.treeFromRxWord(text);
         ArrayList<RxScanNode> cmdList = rxTree.treeToScanNodeList(root);
-        //Commons.disp(cmdList);
+        Commons.disp(cmdList);
         ArrayList<String> strList = scanNodesToString(cmdList);
         TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
         assertEqual(root, reroot);
@@ -72,9 +72,10 @@ public class RxTree_ {
             for(int j = 0; j < len1; j++){
                 String node1 = levels1[i].get(j).toString();
                 String node2 = levels2[i].get(j).toString();
-                System.out.printf("\n%d:%d: \n    %s \n    %s \n", i, j, node1, node2);
-                if(!node1.equals(node2)){
-                    System.out.println("NOT EQUAL");
+                boolean equal = node1.equals(node2);
+                System.out.printf("\n%d:%d: equal: %b\n    %s \n    %s \n", i, j, equal, node1, node2);
+                if(!equal){
+                    //Error!
                 }
             }
         }

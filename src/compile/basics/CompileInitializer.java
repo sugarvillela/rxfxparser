@@ -5,6 +5,8 @@ import commons.Dev;
 import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import erlog.Erlog;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -27,6 +29,7 @@ public class CompileInitializer {
     
     private int wrow, wval;
     private String inName, projName;
+    private String initTime;
     public void initFromProperties(String path){// TODO load from properties file
     
     }
@@ -35,7 +38,9 @@ public class CompileInitializer {
         this.projName = projName;
         Class_Scanner.init(this.inName, this.inName);
         Class_Parser.init(this.inName, this.projName);
+        initTime = (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")).format(new Date());
     }
+    public String getInitTime(){ return this.initTime; }
     public void setWRow(int wrow){ this.wrow = wrow; }
     public int  getWRow(){ return wrow; }
     public void setWVal(int wval){ this.wval = wval; }

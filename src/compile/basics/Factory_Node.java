@@ -1,14 +1,9 @@
 package compile.basics;
 
-import static compile.basics.Keywords.CHAR_AND;
-import static compile.basics.Keywords.CHAR_EQUAL;
-import static compile.basics.Keywords.CHAR_GT;
-import static compile.basics.Keywords.CHAR_LT;
-import static compile.basics.Keywords.CHAR_OR;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.RX_BUILDER;
-import static compile.basics.Keywords.CHAR_PAYLOAD;
+import compile.basics.Keywords.OP;
 import demos.RxTree.TreeNode;
 
 /**
@@ -77,6 +72,7 @@ public class Factory_Node {
     /** node for rx-specific input and output list items */
     public static class RxScanNode extends ScanNode{
         public static final int NUM_RX_FIELDS = 7;
+        public final OP op;
         public final boolean not;
         public final int id;
 
@@ -84,12 +80,13 @@ public class Factory_Node {
                 String lineCol, 
                 Keywords.CMD setCommand, 
                 Keywords.HANDLER setHandler, 
-                Keywords.KWORD setKWord, 
+                Keywords.OP setOp, 
                 String setData, 
                 boolean negate, 
                 int id
         ) {
-            super(lineCol, setCommand, setHandler, setKWord, setData);
+            super(lineCol, setCommand, setHandler, null, setData);
+            this.op = setOp;
             this.not = negate;
             this.id = id;
         }
@@ -103,9 +100,10 @@ public class Factory_Node {
                 lineCol, 
                 setCommand, 
                 RX_BUILDER, 
-                (treeNode==null)? null : treeNode.connector, 
+                null,
                 (treeNode==null || treeNode.data==null)? NULL_TEXT : treeNode.data
             );
+            this.op = (treeNode==null)? null : treeNode.op;
             this.not = (treeNode==null)? false: treeNode.not;
             this.id = (treeNode==null)? -1: treeNode.id;
         }
@@ -118,7 +116,7 @@ public class Factory_Node {
                 nullSafe(lineCol), 
                 nullSafe(cmd),      //push or pop
                 nullSafe(h),        // RX_BUILDER
-                nullSafe(k),        // connector
+                nullSafe(op),        //operation
                 nullSafe(data),     // text payload
                 not,
                 id
@@ -130,32 +128,8 @@ public class Factory_Node {
             treeNode.not = this.not;
             treeNode.id = this.id;
             treeNode.level = 0;
-            if(this.k == null){
-                treeNode.op = CHAR_PAYLOAD;
-            }
-            else{
-                switch(this.k){
-                    case RX_AND:
-                        treeNode.op = CHAR_AND;
-                        break;
-                    case RX_OR:
-                        treeNode.op = CHAR_OR;
-                        break;
-                    case RX_EQUAL:
-                        treeNode.op = CHAR_EQUAL;
-                        break;
-                    case RX_GT:
-                        treeNode.op = CHAR_GT;
-                        break;
-                    case RX_LT:
-                        treeNode.op = CHAR_LT;
-                        break;
-                    case RX_PAYLOAD:
-                        treeNode.op = CHAR_PAYLOAD;
-                        break;
-                }
-            }
-
+            treeNode.op = this.op;
+            //System.out.printf("\n===== \n%s \n%s \n", this.toString(), treeNode.toString());
             return treeNode;
         }
     }

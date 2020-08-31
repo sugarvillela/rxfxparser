@@ -184,36 +184,6 @@ public class Unique_ {
         }
     }
     
-    public static void uqx(){
-        System.out.println("===Demo Uqx===");
-        int wrow=8;
-        int wval=3;
-        //int rowinc=1<<(32-wrow);
-        Uqx row = new Uqx( 0 );
-        row.name="row";
-        row.setInitial(2);
-        row.setFinal(5);
-        row.n();
-        
-        Uqx col = new Uqx( Uqx.GTE );
-        col.name="col";
-        col.setInitial(wval*2);
-        col.setFinal(32-wrow-wval);
-        col.setIncrement(wval);
-        //col.setInitial2(0);
-        int i=0;
-        for(int c : col){
-            System.out.println( i+": "+c);
-            if(10<i++){ break;}
-        }
-//        int i=0;
-//        for(int r : row){
-//            System.out.println( i+": "+r);
-//            if(10<i++){ break;}
-//        }
-        
-
-    }
 
     public static void sequential(){
         Factory.setPrefix(4, "sequential_");

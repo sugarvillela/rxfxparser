@@ -1,13 +1,13 @@
 package demos;
 
+import static compile.basics.Keywords.OP.AND;
+import static compile.basics.Keywords.OP.OR;
+import static compile.basics.Keywords.TEXT_FIELD_NAME;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
-import static compile.basics.Keywords.CHAR_AND;
-import static compile.basics.Keywords.CHAR_CPAR;
-import static compile.basics.Keywords.CHAR_OPAR;
-import static compile.basics.Keywords.CHAR_OR;
-import static compile.basics.Keywords.CHAR_SQUOTE;
-import static compile.basics.Keywords.TEXT_FIELD_NAME;
+import static compile.basics.Keywords.OP.CPAR;
+import static compile.basics.Keywords.OP.OPAR;
+import static compile.basics.Keywords.OP.SQUOTE;
 import java.util.ArrayList;
 import toksource.ScanNodeSource;
 import toksource.TextSource_list;
@@ -29,12 +29,12 @@ public class RxLogicTree extends RxTree{
         boolean more;
         do{
             more = false;
-            more |= root.split(CHAR_AND);
-            more |= root.split(CHAR_OR);
+            more |= root.split(AND.asChar);
+            more |= root.split(OR.asChar);
 //            more |= root.split(CHAR_EQUAL);
             more |= root.negate();
-            more |= root.unwrap(CHAR_OPAR, CHAR_CPAR);
-            more |= root.unquote(CHAR_SQUOTE);
+            more |= root.unwrap(OPAR.asChar, CPAR.asChar);
+            more |= root.unquote(SQUOTE.asChar);
         }while(more);
         balanceLeaves(root);
         return root;
@@ -74,7 +74,6 @@ public class RxLogicTree extends RxTree{
                     else{
                         TreeNode treeNode = scanNode.toTreeNode();
                         treeNode.level = head.level + 1;
-                        treeNode.op = head.op;
                         treeNode.parent = head;
                         head.addChildExternal(treeNode);
                         head = treeNode;
@@ -101,8 +100,8 @@ public class RxLogicTree extends RxTree{
             }
             leaf.split(splitChar);
             leaf.negate();
-            leaf.unwrap(CHAR_OPAR, CHAR_CPAR);
-            leaf.unquote(CHAR_SQUOTE);
+            leaf.unwrap(OPAR.asChar, CPAR.asChar);
+            leaf.unquote(SQUOTE.asChar);
         }
     }
     private char findSplitChar(String text){
@@ -110,7 +109,7 @@ public class RxLogicTree extends RxTree{
         char[] splitChars = new char[]{'=', '<', '>'};
         for(int i = 0; i < splitChars.length; i++){
             for(int j = 0; j < text.length()-1; j++){//stops early for abc= nonsense
-                if(text.charAt(j) == CHAR_SQUOTE){
+                if(text.charAt(j) == SQUOTE.asChar){
                     ignore = !ignore;
                 }
                 else if(!ignore && text.charAt(j) == splitChars[i]){
