@@ -1,10 +1,10 @@
 package compile.scan.factories;
 
+import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.basics.Base_Stack;
-import compile.basics.CompileInitializer;
 import compile.scan.Class_Scanner;
 import compile.basics.Keywords;
 import static compile.basics.Keywords.COMMENT_TEXT;
@@ -13,8 +13,6 @@ import compile.basics.Keywords.CMD;
 import static compile.basics.Keywords.HANDLER.FX_WORD;
 import static compile.basics.Keywords.HANDLER.RXFX;
 import static compile.basics.Keywords.HANDLER.RX_WORD;
-import static compile.basics.Keywords.HANDLER.SCOPE;
-import static compile.basics.Keywords.HANDLER.SYMBOL_TABLE;
 import static compile.basics.Keywords.HANDLER.TARGLANG_INSERT;
 import static compile.basics.Keywords.SOURCE_CLOSE;
 import static compile.basics.Keywords.SOURCE_OPEN;
@@ -64,6 +62,7 @@ public abstract class Factory_Strategy{
         ON_LAST_POP,                // OnPop: cleanup activities on TargLangBase pop
         NOP                         // OnPush, OnPop, not added to node
     }
+
     private static Strategy getStrategy(StrategyEnum strategyEnum){
         switch (strategyEnum){
             case PUSH_GOOD_HANDLER:
@@ -103,6 +102,7 @@ public abstract class Factory_Strategy{
                 return null;
         }
     }
+
     private static Strategy getPushStrategy(StrategyEnum strategyEnum){
         switch (strategyEnum){
             case ON_PUSH:
@@ -116,6 +116,7 @@ public abstract class Factory_Strategy{
                 return null;
         }
     }
+
     private static Strategy getPopStrategy(StrategyEnum strategyEnum){
         switch (strategyEnum){
             case ON_POP:
@@ -149,6 +150,7 @@ public abstract class Factory_Strategy{
         }
         return currentActions;
     }
+
     public static Strategy[] setPopStrategies( StrategyEnum... enums){
         Strategy[] currentActions = new Strategy[enums.length];
         for(int i = 0; i < enums.length; i++){
@@ -163,10 +165,10 @@ public abstract class Factory_Strategy{
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     
     public static abstract class Strategy{
-        Base_Stack P;
+        Class_Scanner P;
         
         public Strategy(){
-            P = Class_Scanner.getInstance();
+            P = (Class_Scanner)CompileInitializer.getInstance().getCurrParserStack();
         }
         public abstract boolean go(String text, Base_ScanItem context);
     }
@@ -288,7 +290,7 @@ public abstract class Factory_Strategy{
                 String defName = text.substring(USERDEF_OPEN.length());
                 
                 // Add defName to enum map
-                SCAN_SYMBOL_TABLE_ENU.addCategory(defName, h);
+                SCAN_SYMBOL_TABLE_ENU.addScannedCategory(defName, h);
                 
                 // if not the first list defined, pop current and push another one
                 if(context.getDefName() != null){
@@ -306,7 +308,7 @@ public abstract class Factory_Strategy{
             }
             else{// is an item
                 System.out.printf("     : %s: %s \n", context.getDefName(), text);
-                SCAN_SYMBOL_TABLE_ENU.add(text);
+                SCAN_SYMBOL_TABLE_ENU.addIfNew(text);
             }
             return false;
         }
@@ -454,7 +456,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             if(context.getDefName() == null){
                 HANDLER h = context.getHandler();
-                String anon = SCAN_SYMBOL_TABLE_ALL.genAnonName(h);//
+                String anon = CompileInitializer.getInstance().genAnonName(h);
                 context.addNode(
                     Factory_Node.newScanNode(CMD.SET_ATTRIB, h, ANON_NAME, anon)
                 );

@@ -29,7 +29,7 @@ public class ScanSymbolTableAll {
         symbolTable = new ArrayList<>();
         symbolTable.add(new ScanNode(nullStatus, PUSH, SYMBOL_TABLE, null, null));
     }
-    public int indexOf(String text){
+    private int indexOf(String text){
         int i = 0;
         for(ScanNode node : symbolTable){
             if(text.equals(node.data)){
@@ -65,11 +65,6 @@ public class ScanSymbolTableAll {
         return true;
     }
 
-    public String genAnonName(HANDLER type){
-        String anon = String.format("Anon_%s_%s", type.toString(), uq.toString());
-        assertNew(anon, type);//unlikely fail
-        return anon;
-    }
     public boolean write_rxlx_file(String path){
         if(symbolTable.size() == 1){
             return false;

@@ -1,4 +1,5 @@
 package compile.basics;
+import compile.parse.Class_Parser;
 import erlog.Erlog;
 import interfaces.ILifeCycle;
 
@@ -15,10 +16,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public Base_StackItem(){
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
-        init();
-    }
-    
-    protected final void init(){
+        P = CompileInitializer.getInstance().getCurrParserStack();
         er = Erlog.get(this);
     }
     
@@ -45,6 +43,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
                 name
         );
         this.above = null;
+        System.out.println(P);
         P.top = this.below;
         if( this.below != null){
             this.below.above = null;

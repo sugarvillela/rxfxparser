@@ -23,21 +23,23 @@ import toksource.TokenSource;
  */
 public class Class_Scanner extends Base_Stack {
     private final ArrayList<ScanNode> nodes;
-    private final String inName;//, outName;
-    
+    private final String inName;
+    protected String backText;   // repeat lines
+
     private static Class_Scanner staticInstance;
     
-    public Class_Scanner(String inName, String outName ){
-        this.inName = inName;
+    public Class_Scanner(TokenSource fin){
+        this.inName = CompileInitializer.getInstance().getInName();
+        this.fin = fin;
+        er.setTextStatusReporter(fin);
         nodes = new ArrayList<>();
-        //er = Erlog.get(this);
     }
     
     public static Class_Scanner getInstance(){
         return staticInstance;
     }
-    public static void init( String inName, String outName ){
-        staticInstance = new Class_Scanner(inName, outName );
+    public static void init(TokenSource fin){
+        staticInstance = new Class_Scanner(fin);
     }
     public static void killInstance(){
         staticInstance = null;
@@ -46,12 +48,10 @@ public class Class_Scanner extends Base_Stack {
     // Runs Scanner
     @Override
     public void onCreate(){
-        fin = new TokenSource(new TextSource_file(inName + SOURCE_FILE_EXTENSION));
-        er.setTextStatusReporter(fin);
         if( !fin.hasData() ){
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
-        
+        CompileInitializer.getInstance().setCurrParserStack(this);
         backText = null;
         String text;
         
@@ -87,7 +87,9 @@ public class Class_Scanner extends Base_Stack {
             er.set("Failed to write output file", inName);
         }
     }
-    
+    public void back( String repeatThis ){// if backText not null, use it
+        backText = repeatThis;
+    }
     public ArrayList<ScanNode> getScanNodeList(){
         return this.nodes;
     }

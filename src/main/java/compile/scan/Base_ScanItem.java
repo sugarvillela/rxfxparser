@@ -22,7 +22,6 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected String defName;
     
     public Base_ScanItem(){
-        P = Class_Scanner.getInstance();
     }
 
     @Override

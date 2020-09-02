@@ -1,7 +1,6 @@
 # Generated file, do not edit
 # Last write: 31/08/2020 17:50:09
 # Lists ENUB and ENUD group names and items
-Line 0 Word 0,PUSH,SYMBOL_TABLE,NULL,NULL
 Line 0 Word 0,PUSH,ENUB,NULL,NULL
 Line 0 Word 0,SET_ATTRIB,ENUB,DEF_NAME,STATE
 Line 0 Word 0,ADD_TO,ENUB,NULL,begin
@@ -54,4 +53,3 @@ Line 0 Word 0,ADD_TO,ENUD,NULL,moderate
 Line 0 Word 0,ADD_TO,ENUD,NULL,severe
 Line 0 Word 0,ADD_TO,ENUD,NULL,excrutiating
 Line 0 Word 0,POP,ENUD,NULL,NULL
-Line 0 Word 0,POP,SYMBOL_TABLE,NULL,NULL

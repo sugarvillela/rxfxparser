@@ -81,13 +81,6 @@ public class ScanNodeSource implements ITextSource{
             if(!RX_BUILDER.equals(handler)){
                 return null;
             }
-//                String lineCol, 
-//                Keywords.CMD setCommand, 
-//                Keywords.HANDLER setHandler, 
-//                Keywords.OP setOp, 
-//                String setData, 
-//                boolean negate, 
-//                int id
             return new RxScanNode(
                 tok[0],
                 Keywords.CMD.get(tok[1]),

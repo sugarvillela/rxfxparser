@@ -36,7 +36,7 @@ public class Rxfxparser {
         String outName = (args.length > 2)? args[2] : inName;
         CompileInitializer.getInstance().init(inName, outName);
 
-        Parse_.scanner();
+        //Parse_.scanner();
 //        RxTree_ u = RxTree_.getInstance();
 //        u.test3();
         //TokenTools_.tokens_special();

@@ -16,7 +16,7 @@ public class ItemTargLang extends Base_ParseItem{
     public void addTo(HANDLER handler, KWORD key, String val) {}
 
     @Override
-    public void setAttrib(KWORD key, String val) {
+    public void setAttrib(HANDLER handler, KWORD key, String val) {
         switch(key){
             case PROJ_NAME:
                 CompileInitializer.getInstance().setProjName(val);

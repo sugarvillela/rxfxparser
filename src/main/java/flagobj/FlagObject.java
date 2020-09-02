@@ -1,4 +1,4 @@
-package flagged;
+package flagobj;
 
 public interface FlagObject {
     

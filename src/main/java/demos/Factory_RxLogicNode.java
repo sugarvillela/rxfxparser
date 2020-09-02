@@ -10,7 +10,7 @@ import static compile.basics.Keywords.OP.GT;
 import static compile.basics.Keywords.OP.LT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import erlog.Erlog;
-import flagged.FlagObject;
+import flagobj.FlagObject;
 import java.util.ArrayList;
 
 public abstract class Factory_RxLogicNode {

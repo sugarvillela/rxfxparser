@@ -43,7 +43,6 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     public Base_ParseItem(Factory_Node.ScanNode node){
         this.node = node;
         this.debugName = node.h.toString();
-        P = Class_Parser.getInstance();
     }
     
     public ScanNode getNode(){
@@ -54,14 +53,14 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     public void addTo(HANDLER handler, KWORD key, String val) {}
     
     @Override
-    public void setAttrib(KWORD key, String val) {
+    public void setAttrib(HANDLER handler, KWORD key, String val) {
         switch (key){
             case DEF_NAME:
                 defName = val;
                 break;
             default:
                 //System.out.println(key.toString() + " in Base_ParseItem setAttrib: " + val);
-                ((Base_ParseItem)below).setAttrib(key, val);
+                ((Base_ParseItem)below).setAttrib(handler, key, val);
         }
     }
     

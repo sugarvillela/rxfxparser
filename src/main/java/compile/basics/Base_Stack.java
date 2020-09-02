@@ -16,13 +16,9 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected ITextSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
     protected Erlog er;    // logs, notifies, quits or all 3
-    protected String backText;   // repeat lines
+
     
     public Base_Stack(){
-        init();
-    }
-    
-    protected final void init(){
         er = Erlog.get(this);
     }
     
@@ -41,7 +37,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     }
     @Override
     public void pop(){
-        if(top==null){
+        if(stackSize < 1){
             stackSize=0;
             er.set("Blame developer: Stack empty"); 
         }
@@ -90,9 +86,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     public final void setLineGetter(){
         fin.setLineGetter();
     }
-    public void back( String repeatThis ){// if backText not null, use it 
-        backText = repeatThis;
-    }
+
     
     // Empty ILifeCycle implementions
     @Override

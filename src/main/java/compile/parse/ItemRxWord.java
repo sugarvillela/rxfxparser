@@ -37,7 +37,7 @@ public class ItemRxWord extends Base_ParseItem{
     }
 
     @Override
-    public void setAttrib(KWORD key, String val) {
+    public void setAttrib(HANDLER handler, KWORD key, String val) {
         switch(key){
             case DEF_NAME:
                 defName = val;
@@ -49,7 +49,7 @@ public class ItemRxWord extends Base_ParseItem{
                 high = val;
                 break;//PROJ_NAME
             default:
-                ((Base_ParseItem)below).setAttrib(key, val);
+                ((Base_ParseItem)below).setAttrib(handler, key, val);
         }
     }
 }

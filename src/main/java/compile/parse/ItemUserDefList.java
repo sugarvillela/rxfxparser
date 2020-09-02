@@ -31,7 +31,7 @@ public class ItemUserDefList extends Base_ParseItem{
             er.set("No list name");
         }
         else{
-            ((Base_ParseItem)below).setAttrib(DEF_NAME, defName);
+            ((Base_ParseItem)below).setAttrib(null, DEF_NAME, defName);
             below.onBeginStep(); // tell ENUM handler to start this list
         }
     }

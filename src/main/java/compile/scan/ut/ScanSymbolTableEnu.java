@@ -35,7 +35,8 @@ public class ScanSymbolTableEnu {
         table.put(ENUB, new HashMap<>(8));
         table.put(ENUD, new HashMap<>(8));
     }
-    public void addCategory(String defName, HANDLER type){
+
+    public void addScannedCategory(String defName, HANDLER type){
         currName = defName;
         currHandler = type;
         if(table.get(currHandler).containsKey(defName)){
@@ -50,7 +51,8 @@ public class ScanSymbolTableEnu {
             table.get(currHandler).put(defName, new ArrayList<>());
         }
     }
-    public void add(String text){
+
+    public void addIfNew(String text){
         if(table.get(currHandler).get(currName).contains(text)){
             Erlog.get(this).set(
                 String.format(
@@ -63,7 +65,15 @@ public class ScanSymbolTableEnu {
             table.get(currHandler).get(currName).add(text);
         }
     }
-       
+
+    public void addTo(Keywords.HANDLER handler, Keywords.KWORD key, String val) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setAttrib(Keywords.KWORD key, String val) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     public boolean write_rxlx_file(String path){
         ArrayList<ScanNode> scanNodes = new ArrayList<>();
         scanNodes.add(new ScanNode(nullStatus, PUSH, SYMBOL_TABLE, null, null));
