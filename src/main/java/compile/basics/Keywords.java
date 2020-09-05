@@ -14,7 +14,8 @@ import java.util.ArrayList;
 public final class Keywords {
     public static final String SOURCE_FILE_EXTENSION = ".rxfx";
     public static final String INTERIM_FILE_EXTENSION = ".rxlx";
-    
+    public static final String STATUS_FORMAT = "%s line %d word %d";
+
     public enum KWORD_TYPE{
         H,C
     }
@@ -40,7 +41,7 @@ public final class Keywords {
         SCOPE, 
         RXFX, 
         // Non-file-generating handlers
-        RX, FX, SRCLANG, ATTRIB, 
+        RX, FX, SRCLANG, ATTRIB, INCLUDE, FUN,
         // sub-handlers not actually in the language
         RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
         SYMBOL_TABLE, 
@@ -65,7 +66,7 @@ public final class Keywords {
     public enum KWORD{
         // Keys for setAttrib()
         // keywords that can be specified in language
-        PROJ_NAME, KEY, VAL, WROW, WVAL,
+        PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_ENUM_SET,
         // Internal keywords for communicating between components
         DEF_NAME, ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges

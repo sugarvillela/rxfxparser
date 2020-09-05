@@ -37,7 +37,8 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     }
     @Override
     public void pop(){
-        if(stackSize < 1){
+
+        if(top == null || stackSize < 1){
             stackSize=0;
             er.set("Blame developer: Stack empty"); 
         }

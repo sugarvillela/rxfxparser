@@ -4,14 +4,14 @@ import compile.basics.CompileInitializer;
 import java.util.ArrayList;
 
 import compile.basics.Factory_Node.ScanNode;
-import static compile.basics.Factory_Node.ScanNode.STATUS_FORMAT;
+import static compile.basics.Keywords.STATUS_FORMAT;
 import compile.basics.Keywords;
 import compile.basics.Keywords.HANDLER;
 import static compile.basics.Keywords.CMD.ADD_TO;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.SYMBOL_TABLE;
-import static compile.basics.Keywords.USERDEF_OPEN;
+
 import erlog.Erlog;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -24,7 +24,7 @@ public class ScanSymbolTableAll {
     private final ArrayList<ScanNode> symbolTable;
     
     public ScanSymbolTableAll(){
-        nullStatus = String.format(STATUS_FORMAT, 0, 0);
+        nullStatus = String.format(STATUS_FORMAT, "", 0, 0);
         uq = new Unique();
         symbolTable = new ArrayList<>();
         symbolTable.add(new ScanNode(nullStatus, PUSH, SYMBOL_TABLE, null, null));
@@ -39,9 +39,7 @@ public class ScanSymbolTableAll {
         }
         return -1;
     }
-    public boolean isUserDef(String text){
-        return (text.startsWith(USERDEF_OPEN) && text.length() > 1);
-    }
+
     public boolean addIfNew(String text, HANDLER type){
         int index = this.indexOf(text);
         if(index == -1){

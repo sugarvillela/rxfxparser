@@ -1,5 +1,6 @@
 package compile.scan;
 
+import commons.Commons;
 import compile.basics.Keywords;
 import compile.basics.Base_StackItem;
 import erlog.Erlog;
@@ -20,15 +21,17 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
     protected Strategy[] strategies, onPushStrategies, onPopStrategies;
     protected String defName;
+    protected int loIndex, hiIndex;
     
     public Base_ScanItem(){
+
     }
 
     @Override
     public void onPush(){
-        if(h != null){
-            System.out.println("onPush: " + h.toString());
-        }
+        loIndex = ((Class_Scanner)P).getScanNodeList().size();
+//        String handlerStr = (h == null)? "Null Handler" : h.toString();
+//        System.out.println("Base_ScanItem onPush: " + handlerStr + ", loIndex: " + loIndex);
         if(onPushStrategies != null){
             for(Strategy strategy : onPushStrategies){
                 if(strategy.go(null, this)){
@@ -40,16 +43,20 @@ public abstract class Base_ScanItem extends Base_StackItem{
     
     @Override
     public void onPop(){
-        if(h != null){
-            System.out.println("onPop: " + h.toString());
-        }
         if(onPopStrategies != null){
             for(Strategy strategy : onPopStrategies){
                 if(strategy.go(null, this)){
-                    return;
+                    break;
                 }
             }
         }
+        hiIndex = ((Class_Scanner)P).getScanNodeList().size();
+//        String handlerStr = (h == null)? "Null Handler" : h.toString();
+//        System.out.println("Base_ScanItem onPop: " + handlerStr + ", loIndex: " + hiIndex);
+//        if(defName != null){
+//            ArrayList<ScanNode> sublist = new ArrayList<>(((Class_Scanner)P).getScanNodeList().subList(loIndex, hiIndex));
+//            Commons.disp(sublist, "Base_ScanItem onPop: " + handlerStr);
+//        }
     }
 
     public void pushPop(String text) {
@@ -79,13 +86,17 @@ public abstract class Base_ScanItem extends Base_StackItem{
     public final void addNode(ScanNode node){
         ((Class_Scanner)P).addNode(node);
     }
-    public final void prependNodes(ArrayList<ScanNode> prepend){
-        ((Class_Scanner)P).prependNodes(prepend);
+
+    public final ArrayList<ScanNode> getScanNodeList(){
+        hiIndex = ((Class_Scanner)P).getScanNodeList().size();
+        return new ArrayList<>(((Class_Scanner)P).getScanNodeList().subList(loIndex, hiIndex));
     }
-    
+
+
     public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){
         this.allowedHandlers = allowedHandlers;
     }
+
     public final boolean isGoodHandler(Keywords.HANDLER handler){
         return(
             allowedHandlers != null && 

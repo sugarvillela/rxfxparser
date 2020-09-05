@@ -1,2 +1,1 @@
-Error: Line 0 Word 0 
-TreeNode: -1: Symbol mismatch: : (
+Error: semantic.rxfx line 42 word 0: SouceLanguage: Expected '}' after function definition: $*/

@@ -1,0 +1,11 @@
+	//Boolean
+	ENUB
+		$POS 
+			verb noun adjective ...
+			adverb linking article determiner modal // Comment
+		
+		$STATE 
+			begin middle end
+		
+		$ANIMAL 
+			lion tiger zebra bear deer dog cat

@@ -1,12 +1,7 @@
 # Generated file, do not edit
-# Last write: 31/08/2020 17:50:09
+# Last write: 09/03/2020 21:17:09
 # Lists all top-level identifiers defined in .rxfx source file
 Line 0 Word 0,PUSH,SYMBOL_TABLE,NULL,NULL
-Line 0 Word 0,ADD_TO,TARGLANG_INSERT,DEF_NAME,Anon_TARGLANG_INSERT_000
 Line 0 Word 0,ADD_TO,RXFX,DEF_NAME,myScope
 Line 0 Word 0,ADD_TO,RX,DEF_NAME,myRx
-Line 0 Word 0,ADD_TO,RX,DEF_NAME,Anon_RX_001
-Line 0 Word 0,ADD_TO,FX,DEF_NAME,Anon_FX_002
-Line 0 Word 0,ADD_TO,RXFX,DEF_NAME,Anon_RXFX_003
-Line 0 Word 0,ADD_TO,SRCLANG,DEF_NAME,Anon_SRCLANG_004
 Line 0 Word 0,POP,SYMBOL_TABLE,NULL,NULL

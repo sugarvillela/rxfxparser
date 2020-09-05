@@ -2,7 +2,7 @@ package erlog;
 
 import toksource.interfaces.ITextStatus;
 
-/**A quiet logger or a verbose quitter, depending on behavior chosen.
+/** Decorator pattern for ErlogCore: adds
  * @author Dave Swanson*/
 public class Erlog {
     
@@ -24,7 +24,7 @@ public class Erlog {
     public static Erlog get(){
         return new Erlog("Erlog");
     }
-    public static Erlog get(Object object){
+    public static Erlog get(Object object){// same erasure for string and object
         if(object instanceof String){
             return new Erlog((String)object);
         }

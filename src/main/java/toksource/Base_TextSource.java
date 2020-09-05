@@ -1,6 +1,6 @@
 package toksource;
 
-import static compile.basics.Factory_Node.ScanNode.STATUS_FORMAT;
+import static compile.basics.Keywords.STATUS_FORMAT;
 import toksource.interfaces.ITextSource;
 
 /**
@@ -41,7 +41,7 @@ public abstract class Base_TextSource implements ITextSource{
     }
     @Override
     public String readableStatus(){
-        return String.format(STATUS_FORMAT, this.getRow(), 0);
+        return String.format(STATUS_FORMAT, "Text", this.getRow(), 0);
     }
     
     // Empty ILifeCycle implementions

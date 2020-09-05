@@ -1,6 +1,6 @@
 package toksource;
 
-import static compile.basics.Factory_Node.ScanNode.STATUS_FORMAT;
+import static compile.basics.Keywords.STATUS_FORMAT;
 import erlog.Erlog;
 import toksource.interfaces.ITextSource;
 import java.util.ArrayList;
@@ -166,7 +166,7 @@ public class TokenSource implements ITextSource{
     @Override
     public String readableStatus(){
         return String.format(
-            STATUS_FORMAT, this.getRow(), this.getCol()
+            STATUS_FORMAT, this.gLine.toString(), this.getRow(), this.getCol()
         );
     }
 }

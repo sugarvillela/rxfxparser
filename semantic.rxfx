@@ -10,19 +10,16 @@ function incNumber(){
 /*$
 	ATTRIB
 		PROJ_NAME=semantic99
+		NEW_ENUM_SET=true
 	
-	// Boolean
-	ENUB
-		$POS 
-			verb noun adjective ...
-			adverb linking article determiner // Comment
-		
-		$STATE 
-			begin middle end
-		
-		$ANIMAL 
-			lion tiger zebra bear deer dog cat 
+	INCLUDE semanticENUB 
 	
+	FUN $myFun{
+		RXFX $myScope 
+		RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
+		 ~(E=e&F=f)&'G'*
+		FX fxCommand1 fxCommand2
+	}
 	//Discrete	
 	ENUD
 		$PAIN 

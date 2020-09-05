@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import toksource.NullSource;
 import toksource.interfaces.ITextStatus;
 
-/**
- *
+/** Package-private class to provide core functions for logging, notifying and terminating program
+ *  A quiet logger or a verbose quitter, depending on behavior chosen.
  * @author Dave Swanson
  */
 class ErlogCore {//package private class
@@ -75,7 +75,9 @@ class ErlogCore {//package private class
     
     /** @param textStatus provides line, col status for error report */
     public void setTextStatusReporter(ITextStatus textStatus){
-        this.textStatus = textStatus;
+        if(textStatus != null){
+            this.textStatus = textStatus;
+        }
     }
     
     /** @return object to report parsing status, if any */
@@ -138,7 +140,7 @@ class ErlogCore {//package private class
         // Utility for adding to error text if position info supplied
         protected String errText( String text, String className ){
             return String.format(
-                "Error: %s \n%s: %s", 
+                "Error: %s: %s: %s",
                 textStatus.readableStatus(), 
                 className,
                 text
