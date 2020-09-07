@@ -1,13 +1,16 @@
 package toksource;
 
 import static compile.basics.Keywords.STATUS_FORMAT;
+
+import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
+import toksource.interfaces.ITextWordOrLine;
 
 /**
  *
  * @author Dave Swanson
  */
-public abstract class Base_TextSource implements ITextSource{
+public abstract class Base_TextSource implements ITextSource, ITextWordOrLine, ILifeCycle {
     protected String text;
     protected boolean good;
     protected boolean done;

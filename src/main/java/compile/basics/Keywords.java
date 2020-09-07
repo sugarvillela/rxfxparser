@@ -41,7 +41,7 @@ public final class Keywords {
         SCOPE, 
         RXFX, 
         // Non-file-generating handlers
-        RX, FX, SRCLANG, ATTRIB, INCLUDE, FUN,
+        RX, FX, SRCLANG, ATTRIB, INCLUDE, FUN, RAW_TEXT,
         // sub-handlers not actually in the language
         RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
         SYMBOL_TABLE, 

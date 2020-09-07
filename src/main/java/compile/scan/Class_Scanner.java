@@ -17,9 +17,9 @@ import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
+import toksource.Base_TextSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
-import toksource.interfaces.ITextSource;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
  *
@@ -29,10 +29,10 @@ public class Class_Scanner extends Base_Stack {
     private final ArrayList<ScanNode> nodes;
     private final String inName;
     protected String backText;   // repeat lines
-    private Stack<ITextSource> fileStack;
+    private Stack<Base_TextSource> fileStack;
     private static Class_Scanner instance;
     
-    public Class_Scanner(TokenSource fin){
+    public Class_Scanner(Base_TextSource fin){
         this.inName = CompileInitializer.getInstance().getInName();
         this.fin = fin;
 

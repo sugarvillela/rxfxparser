@@ -14,16 +14,19 @@ import compile.basics.Factory_Node.ScanNode;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
 import static compile.basics.Keywords.HANDLER.RX_BUILDER;
-import toksource.interfaces.ITextSource;
 
-public class ScanNodeSource implements ITextSource{
+import interfaces.ILifeCycle;
+import toksource.interfaces.ITextSource;
+import toksource.interfaces.ITextWordOrLine;
+
+public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle {
     protected Erlog er;
-    ITextSource fin;
+    Base_TextSource fin;
     ScanNode currNode;
     private NodeGen nodeGen;
     private final NodeGen standard, rx;
     
-    public ScanNodeSource(ITextSource lineGetter){
+    public ScanNodeSource(Base_TextSource lineGetter){
         this.fin = lineGetter;
         standard = new StandardNodeGen();
         rx = new RxNodeGen();

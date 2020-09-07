@@ -1,11 +1,14 @@
 package toksource;
 
 import static compile.basics.Keywords.STATUS_FORMAT;
+
+import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
+import toksource.interfaces.ITextWordOrLine;
 
 /**Placeholder class
  * @author Dave Swanson */
-public class NullSource implements ITextSource{
+public class NullSource implements ITextSource, ITextWordOrLine, ILifeCycle {
 
     @Override
     public void rewind() {}

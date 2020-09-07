@@ -3,10 +3,8 @@ package compile.scan;
 import compile.basics.Base_Stack;
 import compile.basics.Base_StackItem;
 import compile.basics.CompileInitializer;
-import compile.basics.Keywords;
-import compile.scan.factories.Factory_ScanItem;
-import compile.scan.factories.Factory_Strategy;
-import erlog.Erlog;
+import compile.symboltable.SymbolTable_Fun;
+import toksource.Base_TextSource;
 import toksource.TokenSource;
 
 import java.util.regex.Pattern;
@@ -16,15 +14,12 @@ import static compile.basics.Keywords.HANDLER.FUN;
 
 
 public class PreScanner extends Base_Stack {
-    private final String inName;
-    private final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
-    private final Pattern OPENER = Pattern.compile("^["+ITEM_OPEN+"]");
-
     private static PreScanner instance;
 
-    public PreScanner(TokenSource fin){
+    public PreScanner(Base_TextSource fin){
         this.inName = CompileInitializer.getInstance().getInName();
         this.fin = fin;
+        this.symbolTable_fun = SymbolTable_Fun.getInstance();
     }
 
     public static PreScanner getInstance(){
@@ -36,6 +31,12 @@ public class PreScanner extends Base_Stack {
     public static void killInstance(){
         instance = null;
     }
+
+    private final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
+    private final Pattern OPENER = Pattern.compile("^["+ITEM_OPEN+"]");
+
+    private SymbolTable_Fun symbolTable_fun;
+    private final String inName;
 
     @Override
     public void onCreate(){
@@ -61,6 +62,8 @@ public class PreScanner extends Base_Stack {
             ((Base_PreScanItem)top).pushPop(text);
         }
         pop();
+        System.out.println("/n===symbolTable_fun===");
+        System.out.println(symbolTable_fun.toString());
     }
     private abstract class Base_PreScanItem extends Base_StackItem {
 
@@ -104,6 +107,7 @@ public class PreScanner extends Base_Stack {
                 case WAIT:
                     if(FUN.toString().equals(text)){
                         System.out.println("found FUN: "+text);
+                        symbolTable_fun.newFun(inName, fin.getRow());
                         state = IDENTIFY;
                     }
                     break;
@@ -112,11 +116,11 @@ public class PreScanner extends Base_Stack {
                         int len = text.length();
                         //System.out.println(text.substring(len - 1));
                         if(ITEM_OPEN.equals(text.substring(len - 1))){
-                            setAttrib(text.substring(1, len - 1));
+                            symbolTable_fun.setName(text.substring(1, len - 1));
                             state = PARSE;
                         }
                         else{
-                            setAttrib(text.substring(1));
+                            symbolTable_fun.setName(text.substring(1));
                             state = OPEN;
                         }
                     }else{
@@ -127,7 +131,7 @@ public class PreScanner extends Base_Stack {
                     if(OPENER.matcher(text).find()){
                         System.out.println("parse: " + text);
                         if(text.length() > 1){
-                            addTo(text.substring(1));
+                            symbolTable_fun.addWord(fin.getRow(), text.substring(1));
                         }
                         state = PARSE;
                     }
@@ -135,20 +139,15 @@ public class PreScanner extends Base_Stack {
                 case PARSE:
                     if(ITEM_CLOSE.equals(text)){
                         System.out.println("end function: " + text);
+                        symbolTable_fun.endFun();
                         state = WAIT;
                     }
                     else{
-                        addTo(text);
+                        symbolTable_fun.addWord(fin.getRow(), text);
                     }
                     break;
             }
 
-        }
-        private void setAttrib(String defName){
-            System.out.println("setAttrib: " + defName);
-        }
-        private void addTo(String text){
-            System.out.println("addTo: " + text);
         }
     }
 }

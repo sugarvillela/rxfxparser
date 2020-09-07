@@ -38,6 +38,7 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
     public boolean contains(Keywords.HANDLER handler, String val){
         return symbolTable.get(handler).containsKey(val);
     }
+
     @Override
     protected Base_ParseItem get(ScanNode node){
         return new SymbolTableNode(node, this.symbolTable);
@@ -71,7 +72,7 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
 
     public static class SymbolTableNode extends Base_ParseItem{
         private final ArrayList<String> list;
-        private final Map <Keywords.HANDLER, Map<String, Base_ParseItem>> parentTable;
+        private final Map <Keywords.HANDLER, Map<String, Base_ParseItem>> parentTable;//reference to same obj in surrounding class
 
         public SymbolTableNode(ScanNode node, Map <Keywords.HANDLER, Map<String, Base_ParseItem>> parentTable) {
             super(node);
@@ -112,7 +113,7 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
                 node.data = val;
             }
             else{
-                Erlog.get(this).set("Bad rxlx file");
+                Erlog.get(this).set(String.format("Expected keyword %s", DEF_NAME));
             }
         }
         public boolean contains(String val){

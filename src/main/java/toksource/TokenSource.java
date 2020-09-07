@@ -2,15 +2,18 @@ package toksource;
 
 import static compile.basics.Keywords.STATUS_FORMAT;
 import erlog.Erlog;
+import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
 import java.util.ArrayList;
+
+import toksource.interfaces.ITextWordOrLine;
 import toktools.*;
 
 /** Word/line iterator; changes modes on the fly; doesn't preserve half-lines
  *
  * @author Dave Swanson
  */
-public class TokenSource implements ITextSource{
+public class TokenSource extends Base_TextSource {
     /*  For text file input;
         Returns one word or line with each next() call.
         isEndLn() true if word mode, end line reached and no extension '...'
@@ -21,13 +24,13 @@ public class TokenSource implements ITextSource{
     protected Erlog er;  
     protected Tokens tk;
     private boolean endLn;
-    protected ITextSource getter;// current getter
-    protected ITextSource gLine;
-    protected ITextSource gWord;
+    protected Base_TextSource getter;// current getter
+    protected Base_TextSource gLine;
+    protected Base_TextSource gWord;
     
     /**Token source with default tokenize on space
      * @param lineGetter list or file */
-    public TokenSource( ITextSource lineGetter ){
+    public TokenSource( Base_TextSource lineGetter ){
         this.er = Erlog.get(this);
         this.gLine = lineGetter;// need this whether line or word mode
         this.tk = TK.getInstance(" ", "\"", TK.IGNORESKIP);
@@ -38,7 +41,7 @@ public class TokenSource implements ITextSource{
      * @param lineGetter list or file
      * @param setTokenizer initialize tokenizer to set tokenize behavior
      */
-    public TokenSource( ITextSource lineGetter, Tokens setTokenizer ){
+    public TokenSource( Base_TextSource lineGetter, Tokens setTokenizer ){
         this.er = Erlog.get(this);
         this.gLine = lineGetter;// need this whether line or word mode
         this.tk = setTokenizer;

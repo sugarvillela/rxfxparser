@@ -5,7 +5,7 @@ import compile.basics.Keywords;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 
-public class SymbolTable_Enu extends RxlxReader_Enu{//
+public class SymbolTable_Enu extends RxlxReader_Enu {//
     private static SymbolTable_Enu instance;
 
     public static SymbolTable_Enu getInstance(){

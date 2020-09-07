@@ -2,8 +2,7 @@ package compile.basics;
 
 import erlog.Erlog;
 import interfaces.ILifeCycle;
-import compile.basics.IStackComponent;
-import toksource.interfaces.ITextSource;
+import toksource.Base_TextSource;
 
 /**Abstract base class for Scanner and Parser classes
  *
@@ -13,7 +12,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     protected String debugName;
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
-    protected ITextSource fin;  // file to be parsed
+    protected Base_TextSource fin;  // file to be parsed
     protected String title;      // outFile name = title_handler.extension
     protected Erlog er;    // logs, notifies, quits or all 3
 
@@ -57,7 +56,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
         return this.stackSize;
     }
 
-    public ITextSource getTokenSource(){
+    public Base_TextSource getTokenSource(){
         return fin;
     }
     @Override

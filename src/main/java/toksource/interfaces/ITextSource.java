@@ -16,10 +16,10 @@ public interface ITextSource extends ITextStatus{
     boolean hasNext();
     boolean hasData();
 
-    void setLineGetter();
-    void setWordGetter();
-    boolean isLineGetter();
-    boolean isWordGetter();
+//    void setLineGetter();
+//    void setWordGetter();
+//    boolean isLineGetter();
+//    boolean isWordGetter();
     
 
 }
