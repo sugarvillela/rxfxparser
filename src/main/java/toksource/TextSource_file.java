@@ -54,9 +54,10 @@ public class TextSource_file extends Base_TextSource{
         }
         return this.prev;
     }
+
     @Override
-    public String readableStatus(){
-        return String.format(STATUS_FORMAT, this.fileName, this.getRow(), 0);
+    public String getFileName() {
+         return fileName;
     }
 
     @Override

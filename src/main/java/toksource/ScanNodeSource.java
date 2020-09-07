@@ -138,6 +138,11 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
     public int getCol() {return fin.getCol();}
 
     @Override
+    public String getFileName() {
+        return fin.getFileName();
+    }
+
+    @Override
     public String readableStatus() {
         return(currNode == null)? 
             "interim rxlx file location" + fin.readableStatus() : 

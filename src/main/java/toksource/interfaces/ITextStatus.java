@@ -8,6 +8,7 @@ import interfaces.ILifeCycle;
 public interface ITextStatus{
     int getRow();
     int getCol();
+    String getFileName();
     String readableStatus();
     boolean isEndLine();
 }

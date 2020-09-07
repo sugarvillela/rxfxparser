@@ -1,7 +1,9 @@
 package compile.symboltable;
 
-import compile.parse.Base_ParseItem;
+import commons.Commons;
+import compile.basics.CompileInitializer;
 import erlog.Erlog;
+import toksource.Base_TextSource;
 import toksource.interfaces.ITextSource;
 
 import java.util.ArrayList;
@@ -21,21 +23,19 @@ public class SymbolTable_Fun {
         return (instance == null)? (instance = new SymbolTable_Fun()) : instance;
     }
 
-    private Map<String, FunNode> symbolTable;
+    private Map<String, Base_FunNode> symbolTable;
     //        funName   FunNode with RawTextNodes
 
-    private FunNode currFun;
+    private Base_FunNode currFun;
     private String currName;
 
-    public boolean isFun(String funName){
-        return symbolTable.containsKey(funName);
+
+
+    public void newFun(Base_TextSource textSource){
+        currFun = new FunNode(textSource);
     }
 
-    public void newFun(String fileName, int row){
-        currFun = new FunNode(fileName, row);
-    }
-
-    public void setName(String funName){
+    public void setFunName(String funName){
         if(symbolTable.containsKey(currName)){
             Erlog.get(this).set("Duplicate function name");
         }
@@ -44,43 +44,155 @@ public class SymbolTable_Fun {
         }
     }
 
-    public void addWord(int row, String text){
-        currFun.addWord(row, text);
+    public void addWord(String text){
+        currFun.addWord(text);
     }
 
     public void endFun(){
-        if(currName == null || currFun == null){
-            Erlog.get(this).set("Expected function identifier");
-        }
-        else{
-            symbolTable.put(currName, currFun);
-            currFun = null;
-            currName = null;
-        }
+        currFun.endFun();
+        symbolTable.put(currName, currFun);
+    }
+
+    public boolean isFun(String funName){
+        return symbolTable.containsKey(funName);
+    }
+    public Base_FunNode getFun(String funName){
+        return symbolTable.get(funName);
     }
 
     @Override
     public String toString(){
         ArrayList<String> out = new ArrayList<>();
-        for (Map.Entry<String, FunNode> entry : symbolTable.entrySet()) {
+        for (Map.Entry<String, Base_FunNode> entry : symbolTable.entrySet()) {
             System.out.println("function name: " + entry.getKey());
             out.add(entry.getValue().toString());
         }
         return String.join("\n", out);
     }
+    public void testItr(){
+        currFun.testItr();
+    }
 
-    public static abstract class Base_FunNode  implements ITextSource{
+    /** Takes care of loading the object with data, endLine logging */
+    public static abstract class Base_FunNode extends Base_TextSource{
+        protected final ArrayList<Integer> endLines;
+        protected ArrayList<String> words;
+        protected Base_TextSource fin;
+        protected int initialRow, index;
+
+        public Base_FunNode(Base_TextSource textSource){
+            fin = textSource;
+            endLines = new ArrayList<>();
+        }
+
+        public void addWord(String text){
+            if(words == null){// initialize at first line of relevant data
+                words = new ArrayList<>();
+                this.initialRow = fin.getRow();
+                this.index = 0;
+            }
+            if(fin.isEndLine()){// keep track of line endings
+                endLines.add(index);
+            }
+            words.add(text);
+            index ++;
+        }
+
+        @Override
+        public boolean isEndLine(){
+            return endLines.indexOf(index) != -1;
+        }
+
+        @Override
+        public String toString(){
+            return String.join(" ", words);
+        }
+        public void endFun(){
+            //Commons.disp(endLines, "endFun()");
+            fin = null;
+            rewind();
+        }
+        public abstract void testItr();
+    }
+
+    /** Takes care of Token Source iteration */
+    public static class FunNode extends Base_FunNode{
+
+        protected final String inName;
+        protected int rowStart;
+        protected boolean newLine;
+
+        public FunNode(Base_TextSource textSource) {
+            super(textSource);
+            this.inName = fin.getFileName();
+        }
+
+        @Override
+        public final void rewind() {
+            index = rowStart = 0;
+            row = initialRow;
+            newLine = false;
+            done = false;
+        }
+
+        @Override
+        public String next() {
+            if(newLine){
+                newLine = false;
+                row ++;
+                rowStart = index;
+            }
+            if(this.isEndLine()){
+                newLine = true;
+            }
+            String s = words.get(index);
+            //System.out.printf("     %s, newLine=%b, index=%d, rowStart=%d, row=%d\n", s, isEndLine(), index, rowStart, row);
+            index ++;
+            this.done = !(index < words.size());
+            return words.get(index -1);
+        }
+        @Override
+        public boolean hasData(){
+            return !words.isEmpty();
+        }
+
+        @Override
+        public int getCol(){
+            return index - rowStart - 1;
+        }
+
+        @Override
+        public String getFileName() {
+            return inName;
+        }
+
+        @Override
+        public void testItr(){
+            System.out.println("\n===testItr===");
+            this.rewind();
+            int i = 0;
+            while(this.hasNext() && 10 > i++){
+                String next = this.next();
+                System.out.printf("%s: %b, %s\n", this.readableStatus(), isEndLine(), next);
+            }
+        }
+
+    }
+
+    public static abstract class Base_FunNode1  implements ITextSource{
         protected int row, col, index, initRow;
         protected String fileName;
+        protected Base_TextSource fin;
 
-        public Base_FunNode(){
+        public Base_FunNode1(){
             initRow = 0;
             rewind();
         }
 
-        public Base_FunNode(String fileName, int initRow){
+        public Base_FunNode1(String fileName, Base_TextSource textSource){
             this.fileName = fileName;
-            this.initRow = initRow;
+            this.fin = textSource;
+            this.initRow = fin.getRow();
             rewind();
         }
         @Override
@@ -101,106 +213,4 @@ public class SymbolTable_Fun {
         }
     }
 
-    public static class FunNode extends Base_FunNode{
-        private ArrayList<RawTextNode> lines;
-        private RawTextNode currLine;
-        private int prevRow;
-
-        public FunNode(String fileName, int row){
-            lines = new ArrayList<>();
-            prevRow = -1;
-        }
-        public void addWord(int row, String text){
-            if(row != prevRow){
-                currLine = new RawTextNode(row);
-                lines.add(currLine);
-                prevRow = row;
-            }
-            currLine.addWord(text);
-        }
-        public String toString(){
-            ArrayList<String> out = new ArrayList<>();
-            for(RawTextNode line : lines){
-                out.add(line.toString());
-            }
-            return String.join("\n", out);
-        }
-
-        @Override
-        public String next() {
-            if(!lines.get(index).hasNext()){
-                index++;
-                lines.get(index).rewind();
-            }
-            return lines.get(index).next();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return index < lines.size()-1 || lines.get(index).hasNext();
-        }
-
-        @Override
-        public boolean hasData() {
-            return !lines.isEmpty();
-        }
-
-        @Override
-        public boolean isEndLine() {
-            return lines.get(index).isEndLine();
-        }
-        @Override
-        public int getCol() {
-            return lines.get(index).getCol();
-        }
-    }
-
-    public static class RawTextNode extends Base_FunNode{
-        private final ArrayList<String> line;
-        private final int row;
-
-        public RawTextNode(int row) {
-            this.row = row;
-            line = new ArrayList<>();
-        }
-
-        public void addWord(String text) {
-            line.add(text);
-        }
-
-        @Override
-        public String toString(){
-            return String.format("row %d: %s", row, String.join(" ", line));
-        }
-
-        public void disp(){
-            System.out.println(this.toString());
-        }
-
-        @Override
-        public String next() {
-            col++;
-            return line.get(col - 1);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return col < line.size();
-        }
-
-        @Override
-        public boolean hasData() {
-            return !line.isEmpty();
-        }
-
-        @Override
-        public boolean isEndLine() {
-            return col == line.size();
-        }
-
-        @Override
-        public int getCol() {
-            return col;
-        }
-    }
 }

@@ -44,7 +44,7 @@ public abstract class Base_TextSource implements ITextSource, ITextWordOrLine, I
     }
     @Override
     public String readableStatus(){
-        return String.format(STATUS_FORMAT, "Text", this.getRow(), 0);
+        return String.format(STATUS_FORMAT, this.getFileName(), this.getRow(), this.getCol());
     }
     
     // Empty ILifeCycle implementions

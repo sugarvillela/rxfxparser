@@ -17,6 +17,7 @@ import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
+import compile.symboltable.SymbolTable_Fun;
 import toksource.Base_TextSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
@@ -128,6 +129,15 @@ public class Class_Scanner extends Base_Stack {
         }
         else{
             er.set("INCLUDE: bad file name", fileName);
+        }
+    }
+    public void includeFunNode(SymbolTable_Fun.Base_FunNode funNode){
+        if(funNode != null && funNode.hasData()){
+            fileStack.push(fin);
+            fin = funNode;
+        }
+        else{
+            er.set("INCLUDE: bad funNode");
         }
     }
     public ArrayList<ScanNode> getScanNodeList(){

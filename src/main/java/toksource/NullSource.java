@@ -39,6 +39,11 @@ public class NullSource implements ITextSource, ITextWordOrLine, ILifeCycle {
     }
 
     @Override
+    public String getFileName() {
+        return "No fileName";
+    }
+
+    @Override
     public String readableStatus() {
         return String.format(STATUS_FORMAT, "", 0, 0);
     }

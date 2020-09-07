@@ -71,14 +71,14 @@ public class CompileInitializer {
         );
         PreScanner preScanner = PreScanner.getInstance();
         preScanner.onCreate();
-//        Class_Scanner.init(
-//            new TokenSource(
-//                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-//            )
-//        );
-//        Class_Scanner scanner = Class_Scanner.getInstance();
-//        scanner.onCreate();
-//        scanner.onQuit();
+        Class_Scanner.init(
+            new TokenSource(
+                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+            )
+        );
+        Class_Scanner scanner = Class_Scanner.getInstance();
+        scanner.onCreate();
+        scanner.onQuit();
 //        Class_Parser.init(
 //            new ScanNodeSource(
 //                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)

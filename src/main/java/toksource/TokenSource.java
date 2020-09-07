@@ -94,6 +94,11 @@ public class TokenSource extends Base_TextSource {
     public boolean isEndLine(){ 
         return this.endLn;
     }
+
+    @Override
+    public String getFileName() {
+        return gLine.getFileName();
+    }
     @Override
     public String next(){
         return this.getter.next();
@@ -144,7 +149,10 @@ public class TokenSource extends Base_TextSource {
             this.tokens = null;
             this.col = 0;
         }
-
+        @Override
+        public String getFileName() {
+            return null;
+        }
     }
     
     @Override
@@ -165,11 +173,4 @@ public class TokenSource extends Base_TextSource {
     public boolean isLineGetter(){ return getter == gLine; }
     @Override
     public boolean isWordGetter(){ return getter == gWord; }
-    
-    @Override
-    public String readableStatus(){
-        return String.format(
-            STATUS_FORMAT, this.gLine.toString(), this.getRow(), this.getCol()
-        );
-    }
 }

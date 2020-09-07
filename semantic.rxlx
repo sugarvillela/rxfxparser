@@ -1,5 +1,5 @@
 # Generated file, do not edit
-# Last write: 09/03/2020 23:47:07
+# Last write: 09/07/2020 11:06:02
 # Interim file containing parser instructions
 semantic.rxfx line 0 word 0,PUSH,TARGLANG_BASE,NULL,NULL
 semantic.rxfx line 1 word 0,ADD_TO,TARGLANG_BASE,NULL,<?php
@@ -33,76 +33,106 @@ semanticENUB.rxfx line 10 word 0,POP,ENUB,NULL,NULL
 semanticENUB.rxfx line 10 word 0,PUSH,ENUB,NULL,ANIMAL
 semanticENUB.rxfx line 10 word 0,SET_ATTRIB,ENUB,DEF_NAME,ANIMAL
 semanticENUB.rxfx line 11 word 0,ADD_TO,ENUB,NULL,lion
-semantic.rxfx line 18 word 0,POP,ENUB,NULL,NULL
-semantic.rxfx line 18 word 0,PUSH,ENUD,NULL,PAIN
-semantic.rxfx line 19 word 0,SET_ATTRIB,ENUD,DEF_NAME,PAIN
-semantic.rxfx line 20 word 0,ADD_TO,ENUD,NULL,fine
-semantic.rxfx line 20 word 1,ADD_TO,ENUD,NULL,mild
-semantic.rxfx line 20 word 2,ADD_TO,ENUD,NULL,moderate
-semantic.rxfx line 20 word 3,ADD_TO,ENUD,NULL,severe
-semantic.rxfx line 20 word 4,ADD_TO,ENUD,NULL,excrutiating
-semantic.rxfx line 22 word 0,POP,ENUD,NULL,NULL
-semantic.rxfx line 22 word 0,PUSH,ENUD,NULL,COUNT
-semantic.rxfx line 22 word 0,SET_ATTRIB,ENUD,DEF_NAME,COUNT
-semantic.rxfx line 22 word 1,ADD_TO,ENUD,NULL,one
-semantic.rxfx line 22 word 2,ADD_TO,ENUD,NULL,two
-semantic.rxfx line 22 word 3,ADD_TO,ENUD,NULL,three
-semantic.rxfx line 22 word 4,ADD_TO,ENUD,NULL,four
-semantic.rxfx line 22 word 5,ADD_TO,ENUD,NULL,five
-semantic.rxfx line 22 word 6,ADD_TO,ENUD,NULL,six
-semantic.rxfx line 24 word 0,POP,ENUD,NULL,NULL
-semantic.rxfx line 24 word 0,PUSH,TARGLANG_INSERT,NULL,NULL
-semantic.rxfx line 25 word 2,ADD_TO,TARGLANG_INSERT,NULL,$myNumber = incNumber();
-semantic.rxfx line 26 word 1,ADD_TO,TARGLANG_INSERT,NULL,$yourNumber= subtract();
-semantic.rxfx line 27 word 0,ADD_TO,TARGLANG_INSERT,NULL,booby();
-semantic.rxfx line 28 word 0,POP,TARGLANG_INSERT,NULL,NULL
-semantic.rxfx line 29 word 0,PUSH,RXFX,NULL,NULL
-semantic.rxfx line 29 word 1,SET_ATTRIB,RXFX,DEF_NAME,myScope
-semantic.rxfx line 30 word 0,PUSH,RX,NULL,NULL
-semantic.rxfx line 30 word 1,SET_ATTRIB,RX,DEF_NAME,myRx
-semantic.rxfx line 30 word 2,PUSH,RX_WORD,NULL,NULL
-semantic.rxfx line 30 word 2,ADD_TO,RX_WORD,NULL,myPatternIsThis
-semantic.rxfx line 30 word 2,SET_ATTRIB,RX_WORD,LO,5
-semantic.rxfx line 30 word 2,SET_ATTRIB,RX_WORD,HI,15
-semantic.rxfx line 30 word 2,POP,RX_WORD,NULL,NULL
-semantic.rxfx line 30 word 3,PUSH,RX_WORD,NULL,NULL
-semantic.rxfx line 30 word 3,ADD_TO,RX_WORD,NULL,~(A=a&B='b')&(C=c&D=d)
-semantic.rxfx line 30 word 3,SET_ATTRIB,RX_WORD,LO,1
-semantic.rxfx line 30 word 3,SET_ATTRIB,RX_WORD,HI,1
-semantic.rxfx line 30 word 3,POP,RX_WORD,NULL,NULL
-semantic.rxfx line 31 word 0,PUSH,RX_WORD,NULL,NULL
-semantic.rxfx line 31 word 0,ADD_TO,RX_WORD,NULL,~(E=e&F=f)&'G'
-semantic.rxfx line 31 word 0,SET_ATTRIB,RX_WORD,LO,0
-semantic.rxfx line 31 word 0,SET_ATTRIB,RX_WORD,HI,1024
-semantic.rxfx line 31 word 0,POP,RX_WORD,NULL,NULL
-semantic.rxfx line 32 word 0,POP,RX,NULL,NULL
-semantic.rxfx line 32 word 0,PUSH,FX,NULL,NULL
-semantic.rxfx line 32 word 1,PUSH,FX_WORD,NULL,NULL
-semantic.rxfx line 32 word 1,ADD_TO,FX_WORD,NULL,fxCommand1
-semantic.rxfx line 32 word 1,POP,FX_WORD,NULL,NULL
-semantic.rxfx line 32 word 2,PUSH,FX_WORD,NULL,NULL
-semantic.rxfx line 32 word 2,ADD_TO,FX_WORD,NULL,fxCommand2
-semantic.rxfx line 32 word 2,POP,FX_WORD,NULL,NULL
-semantic.rxfx line 33 word 0,POP,FX,NULL,NULL
-semantic.rxfx line 33 word 0,POP,RXFX,NULL,NULL
-semantic.rxfx line 33 word 0,PUSH,ENUD,NULL,ALPHA
-semantic.rxfx line 34 word 0,SET_ATTRIB,ENUD,DEF_NAME,ALPHA
-semantic.rxfx line 35 word 0,ADD_TO,ENUD,NULL,A
-semantic.rxfx line 35 word 1,ADD_TO,ENUD,NULL,B
-semantic.rxfx line 35 word 2,ADD_TO,ENUD,NULL,C
-semantic.rxfx line 35 word 3,ADD_TO,ENUD,NULL,D
-semantic.rxfx line 35 word 4,ADD_TO,ENUD,NULL,E
-semantic.rxfx line 35 word 5,ADD_TO,ENUD,NULL,F
-semantic.rxfx line 37 word 0,POP,ENUD,NULL,NULL
-semantic.rxfx line 37 word 0,POP,SRCLANG,NULL,NULL
-semantic.rxfx line 38 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
-semantic.rxfx line 39 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
-semantic.rxfx line 40 word 0,ADD_TO,TARGLANG_BASE,NULL,function anotherFunction(){
-semantic.rxfx line 41 word 0,ADD_TO,TARGLANG_BASE,NULL,	$number+=2;
-semantic.rxfx line 42 word 0,ADD_TO,TARGLANG_BASE,NULL,}
-semantic.rxfx line 43 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXAND = "&";// RX symbol
-semantic.rxfx line 44 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXOR = "|";// RX symbol
-semantic.rxfx line 45 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXNOT = "~";// RX symbol
-semantic.rxfx line 46 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
-semantic.rxfx line 47 word 0,ADD_TO,TARGLANG_BASE,NULL,?>
-semantic.rxfx line 47 word 0,POP,TARGLANG_BASE,NULL,NULL
+semantic.rxfx line 17 word 0,POP,ENUB,NULL,NULL
+semantic.rxfx line 24 word 0,PUSH,ENUD,NULL,PAIN
+semantic.rxfx line 25 word 0,SET_ATTRIB,ENUD,DEF_NAME,PAIN
+semantic.rxfx line 26 word 0,ADD_TO,ENUD,NULL,fine
+semantic.rxfx line 26 word 1,ADD_TO,ENUD,NULL,mild
+semantic.rxfx line 26 word 2,ADD_TO,ENUD,NULL,moderate
+semantic.rxfx line 26 word 3,ADD_TO,ENUD,NULL,severe
+semantic.rxfx line 26 word 4,ADD_TO,ENUD,NULL,excrutiating
+semantic.rxfx line 28 word 0,POP,ENUD,NULL,NULL
+semantic.rxfx line 28 word 0,PUSH,ENUD,NULL,COUNT
+semantic.rxfx line 28 word 0,SET_ATTRIB,ENUD,DEF_NAME,COUNT
+semantic.rxfx line 28 word 1,ADD_TO,ENUD,NULL,one
+semantic.rxfx line 28 word 2,ADD_TO,ENUD,NULL,two
+semantic.rxfx line 28 word 3,ADD_TO,ENUD,NULL,three
+semantic.rxfx line 28 word 4,ADD_TO,ENUD,NULL,four
+semantic.rxfx line 28 word 5,ADD_TO,ENUD,NULL,five
+semantic.rxfx line 28 word 6,ADD_TO,ENUD,NULL,six
+semantic.rxfx line 30 word 0,POP,ENUD,NULL,NULL
+semantic.rxfx line 30 word 0,PUSH,TARGLANG_INSERT,NULL,NULL
+semantic.rxfx line 31 word 2,ADD_TO,TARGLANG_INSERT,NULL,$myNumber = incNumber();
+semantic.rxfx line 32 word 1,ADD_TO,TARGLANG_INSERT,NULL,$yourNumber= subtract();
+semantic.rxfx line 33 word 0,ADD_TO,TARGLANG_INSERT,NULL,booby();
+semantic.rxfx line 34 word 0,POP,TARGLANG_INSERT,NULL,NULL
+semantic.rxfx line 18 word 0,PUSH,RXFX,NULL,NULL
+semantic.rxfx line 19 word 0,PUSH,RX,NULL,NULL
+semantic.rxfx line 19 word 1,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 19 word 1,ADD_TO,RX_WORD,NULL,funPatternA
+semantic.rxfx line 19 word 1,SET_ATTRIB,RX_WORD,LO,1
+semantic.rxfx line 19 word 1,SET_ATTRIB,RX_WORD,HI,1
+semantic.rxfx line 19 word 1,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 19 word 2,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 19 word 2,ADD_TO,RX_WORD,NULL,funPatternB
+semantic.rxfx line 19 word 2,SET_ATTRIB,RX_WORD,LO,1
+semantic.rxfx line 19 word 2,SET_ATTRIB,RX_WORD,HI,1
+semantic.rxfx line 19 word 2,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 20 word 0,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 20 word 0,ADD_TO,RX_WORD,NULL,funPatternC
+semantic.rxfx line 20 word 0,SET_ATTRIB,RX_WORD,LO,1
+semantic.rxfx line 20 word 0,SET_ATTRIB,RX_WORD,HI,1
+semantic.rxfx line 20 word 0,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 21 word 0,POP,RX,NULL,NULL
+semantic.rxfx line 21 word 0,PUSH,FX,NULL,NULL
+semantic.rxfx line 21 word 1,PUSH,FX_WORD,NULL,NULL
+semantic.rxfx line 21 word 1,ADD_TO,FX_WORD,NULL,funCommandA
+semantic.rxfx line 21 word 1,POP,FX_WORD,NULL,NULL
+semantic.rxfx line 21 word 2,PUSH,FX_WORD,NULL,NULL
+semantic.rxfx line 21 word 2,ADD_TO,FX_WORD,NULL,funCommandB
+semantic.rxfx line 21 word 2,POP,FX_WORD,NULL,NULL
+semantic.rxfx line 21 word 3,PUSH,FX_WORD,NULL,NULL
+semantic.rxfx line 21 word 3,ADD_TO,FX_WORD,NULL,funCommandC
+semantic.rxfx line 21 word 3,POP,FX_WORD,NULL,NULL
+semantic.rxfx line 38 word 0,POP,FX,NULL,NULL
+semantic.rxfx line 38 word 0,POP,RXFX,NULL,NULL
+semantic.rxfx line 38 word 0,PUSH,RXFX,NULL,NULL
+semantic.rxfx line 38 word 1,SET_ATTRIB,RXFX,DEF_NAME,myScope
+semantic.rxfx line 39 word 0,PUSH,RX,NULL,NULL
+semantic.rxfx line 39 word 1,SET_ATTRIB,RX,DEF_NAME,myRx
+semantic.rxfx line 39 word 2,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 39 word 2,ADD_TO,RX_WORD,NULL,myPatternIsThis
+semantic.rxfx line 39 word 2,SET_ATTRIB,RX_WORD,LO,5
+semantic.rxfx line 39 word 2,SET_ATTRIB,RX_WORD,HI,15
+semantic.rxfx line 39 word 2,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 39 word 3,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 39 word 3,ADD_TO,RX_WORD,NULL,~(A=a&B='b')&(C=c&D=d)
+semantic.rxfx line 39 word 3,SET_ATTRIB,RX_WORD,LO,1
+semantic.rxfx line 39 word 3,SET_ATTRIB,RX_WORD,HI,1
+semantic.rxfx line 39 word 3,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 40 word 0,PUSH,RX_WORD,NULL,NULL
+semantic.rxfx line 40 word 0,ADD_TO,RX_WORD,NULL,~(E=e&F=f)&'G'
+semantic.rxfx line 40 word 0,SET_ATTRIB,RX_WORD,LO,0
+semantic.rxfx line 40 word 0,SET_ATTRIB,RX_WORD,HI,1024
+semantic.rxfx line 40 word 0,POP,RX_WORD,NULL,NULL
+semantic.rxfx line 41 word 0,POP,RX,NULL,NULL
+semantic.rxfx line 41 word 0,PUSH,FX,NULL,NULL
+semantic.rxfx line 41 word 1,PUSH,FX_WORD,NULL,NULL
+semantic.rxfx line 41 word 1,ADD_TO,FX_WORD,NULL,fxCommand1
+semantic.rxfx line 41 word 1,POP,FX_WORD,NULL,NULL
+semantic.rxfx line 41 word 2,PUSH,FX_WORD,NULL,NULL
+semantic.rxfx line 41 word 2,ADD_TO,FX_WORD,NULL,fxCommand2
+semantic.rxfx line 41 word 2,POP,FX_WORD,NULL,NULL
+semantic.rxfx line 42 word 0,POP,FX,NULL,NULL
+semantic.rxfx line 42 word 0,POP,RXFX,NULL,NULL
+semantic.rxfx line 42 word 0,PUSH,ENUD,NULL,ALPHA
+semantic.rxfx line 43 word 0,SET_ATTRIB,ENUD,DEF_NAME,ALPHA
+semantic.rxfx line 44 word 0,ADD_TO,ENUD,NULL,A
+semantic.rxfx line 44 word 1,ADD_TO,ENUD,NULL,B
+semantic.rxfx line 44 word 2,ADD_TO,ENUD,NULL,C
+semantic.rxfx line 44 word 3,ADD_TO,ENUD,NULL,D
+semantic.rxfx line 44 word 4,ADD_TO,ENUD,NULL,E
+semantic.rxfx line 44 word 5,ADD_TO,ENUD,NULL,F
+semantic.rxfx line 46 word 0,POP,ENUD,NULL,NULL
+semantic.rxfx line 46 word 0,POP,SRCLANG,NULL,NULL
+semantic.rxfx line 47 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic.rxfx line 48 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic.rxfx line 49 word 0,ADD_TO,TARGLANG_BASE,NULL,function anotherFunction(){
+semantic.rxfx line 50 word 0,ADD_TO,TARGLANG_BASE,NULL,	$number+=2;
+semantic.rxfx line 51 word 0,ADD_TO,TARGLANG_BASE,NULL,}
+semantic.rxfx line 52 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXAND = "&";// RX symbol
+semantic.rxfx line 53 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXOR = "|";// RX symbol
+semantic.rxfx line 54 word 0,ADD_TO,TARGLANG_BASE,NULL,public static final String 	RXNOT = "~";// RX symbol
+semantic.rxfx line 55 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic.rxfx line 56 word 0,ADD_TO,TARGLANG_BASE,NULL,?>
+semantic.rxfx line 56 word 0,POP,TARGLANG_BASE,NULL,NULL

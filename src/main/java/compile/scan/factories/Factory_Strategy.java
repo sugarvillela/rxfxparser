@@ -4,6 +4,7 @@ import commons.Commons;
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
 import compile.symboltable.SymbolTable_Enu;
+import compile.symboltable.SymbolTable_Fun;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.scan.Class_Scanner;
@@ -22,8 +23,6 @@ import compile.scan.ut.RxValidator;
 import compile.scan.ut.ScanSymbolTableAll;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
-
-import java.util.regex.Pattern;
 
 /**
  *
@@ -45,9 +44,11 @@ public abstract class Factory_Strategy{
         MANAGE_ENU_LISTS,               // ENUB, ENUD set name attribute
         ON_INCLUDE,                 // Add a file to the file stack
         SET_USER_DEF_NAME,          // Set name attribute
+        HANDLE_IDENTIFIER,          // Unroll symbol table data
         POP_ON_TARGLANG_INSERT_CLOSE,//Symbol != HANDLER
         PUSH_COMMENT,               // Symbol != HANDLER, Silent push pop and ignore
         POP_ON_ENDLINE,             // Comment
+        POP_ON_ITEM_CLOSE,          // Used by function definitions
         ERR,                        // Last on list, should not be reached
         
         ON_PUSH,                    // PUSH message
@@ -88,12 +89,16 @@ public abstract class Factory_Strategy{
                 return new ManageEnuLists();
             case SET_USER_DEF_NAME:
                 return new SetUserDefName();
+            case HANDLE_IDENTIFIER:
+                return new HandleIdentifier();
             case POP_ON_TARGLANG_INSERT_CLOSE:
                 return new PopOnTargLangInsertClose();
             case POP_ON_ENDLINE:
                 return new PopOnEndLine();
             case POP_ON_KEYWORD:
                 return new PopOnKeyword();
+            case POP_ON_ITEM_CLOSE:
+                return new PopOnItemClose();
             case POP_ALL_ON_END_SOURCE:
                 return new PopAllOnEndSource();
             case ERR:
@@ -165,7 +170,8 @@ public abstract class Factory_Strategy{
     //private static final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
     private static final LineBuffer LINEBUFFER = new LineBuffer();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
-    private static final ScanSymbolTableAll SCAN_SYMBOL_TABLE_ALL = new ScanSymbolTableAll();
+    private static final ScanSymbolTableAll SYMBOL_TABLE_ALL = new ScanSymbolTableAll();
+    private static final SymbolTable_Fun SYMBOL_TABLE_FUN = SymbolTable_Fun.getInstance();
     private static SymbolTable_Enu SYMBOL_TABLE_ENU = null;
 
     public static abstract class Strategy{
@@ -180,7 +186,7 @@ public abstract class Factory_Strategy{
     public static class Err extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            Erlog.get(context).set( "Disallowed handler!!: ", text);
+            Erlog.get(context).set( "Disallowed handler!!", text);
             return true;
         }
     }
@@ -348,7 +354,6 @@ public abstract class Factory_Strategy{
         }
     }
 
-
     public static class ManageEnuLists extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -410,12 +415,28 @@ public abstract class Factory_Strategy{
             HANDLER h = context.getHandler();
             if(text.startsWith(USERDEF_OPEN) && text.length() > 1){
                 String defName = text.substring(USERDEF_OPEN.length());
-                if(SCAN_SYMBOL_TABLE_ALL.addIfNew(defName, h)){
+                if(SYMBOL_TABLE_ALL.addIfNew(defName, h)){
                     context.setDefName(defName);
                     context.addNode(
                         Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName)
                     );
                     return true;
+                }
+            }
+            return false;
+        }
+    }
+    public static class HandleIdentifier extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(text.startsWith(USERDEF_OPEN) && text.length() > 1){
+                String identifier = text.substring(USERDEF_OPEN.length());
+                if(SYMBOL_TABLE_FUN.isFun(identifier)){
+                    P.includeFunNode(SYMBOL_TABLE_FUN.getFun(identifier));
+                    return true;
+                }
+                else{
+                    Erlog.get(this).set("Unknown identifier", text);
                 }
             }
             return false;
@@ -447,6 +468,16 @@ public abstract class Factory_Strategy{
             Keywords.HANDLER keyword = Keywords.HANDLER.fromString(text);
             if( Keywords.HANDLER.fromString(text) != null){
                 P.back(text);//repeat keyword so next handler can push it
+                P.pop();
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class PopOnItemClose extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(ITEM_CLOSE.equals(text)){
                 P.pop();
                 return true;
             }
@@ -591,7 +622,7 @@ public abstract class Factory_Strategy{
     public static class OnLastPop extends Strategy{// Target Language Base
         @Override
         public boolean go(String text, Base_ScanItem context){
-            SCAN_SYMBOL_TABLE_ALL.write_rxlx_file(
+            SYMBOL_TABLE_ALL.write_rxlx_file(
                 Keywords.fileName_symbolTableAll()
             );
             if(SYMBOL_TABLE_ENU != null){

@@ -15,10 +15,10 @@ function incNumber(){
 	INCLUDE semanticENUB 
 	
 	FUN $myFun{
-		RXFX $myScope 
-		RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
-		 ~(E=e&F=f)&'G'*
-		FX fxCommand1 fxCommand2
+		RXFX 
+			RX funPatternA funPatternB
+			 funPatternC
+			FX funCommandA funCommandB funCommandC
 	}
 	//Discrete	
 	ENUD
@@ -32,6 +32,9 @@ function incNumber(){
 		$yourNumber= subtract();
 		booby();
 	/*
+	
+	$myFun
+	
 	RXFX $myScope 
 		RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
 		 ~(E=e&F=f)&'G'*
@@ -46,8 +49,5 @@ $*/
 function anotherFunction(){
 	$number+=2;
 }
-public static final String 	RXAND = "&";// RX symbol
-public static final String 	RXOR = "|";// RX symbol
-public static final String 	RXNOT = "~";// RX symbol
 
 ?>

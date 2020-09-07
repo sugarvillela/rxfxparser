@@ -28,11 +28,12 @@ public class Factory_ScanItem extends Factory_Strategy{
             case SRCLANG:
                 return new ScanItem(
                     h, 
-                    new HANDLER[]{ATTRIB, ENUB, ENUD, INCLUDE, RXFX, RX, FX, SCOPE },
+                    new HANDLER[]{ATTRIB, ENUB, ENUD, INCLUDE, FUN, RXFX, RX, FX, SCOPE },
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
+                        HANDLE_IDENTIFIER,
                         PUSH_GOOD_HANDLER,
                         ERR
                     )
@@ -133,6 +134,14 @@ public class Factory_ScanItem extends Factory_Strategy{
                     ),
                     setPushStrategies(NOP),// silent push pop
                     setPopStrategies(NOP)
+                );
+            case FUN:
+                return new ScanItem(
+                        h,
+                        null,
+                        setStrategies(POP_ON_ITEM_CLOSE),
+                        setPushStrategies(NOP),// silent push pop
+                        setPopStrategies(NOP)
                 );
                 
             //========To implement=====================

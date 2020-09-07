@@ -19,7 +19,7 @@ public class PreScanner extends Base_Stack {
     public PreScanner(Base_TextSource fin){
         this.inName = CompileInitializer.getInstance().getInName();
         this.fin = fin;
-        this.symbolTable_fun = SymbolTable_Fun.getInstance();
+
     }
 
     public static PreScanner getInstance(){
@@ -43,7 +43,10 @@ public class PreScanner extends Base_Stack {
         if( !fin.hasData() ){
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
+        er.setTextStatusReporter(fin);
         CompileInitializer.getInstance().setCurrParserStack(this);
+        this.symbolTable_fun = SymbolTable_Fun.getInstance();
+
         String text;
 
         // start with a target language handler
@@ -51,19 +54,20 @@ public class PreScanner extends Base_Stack {
 
         // start in line mode for target language
         fin.setLineGetter();
-        er.setTextStatusReporter(fin);
+
         while(fin.hasNext()){// inner loop on current file
             do{
                 text = fin.next();
             }
             while(fin.isEndLine() && CONT_LINE.equals(text));// skip "..."
 
-            System.out.println(fin.readableStatus() + ">>>" + text);
+            //System.out.println(fin.readableStatus() + ">>>" + text);
             ((Base_PreScanItem)top).pushPop(text);
         }
         pop();
-        System.out.println("/n===symbolTable_fun===");
-        System.out.println(symbolTable_fun.toString());
+        //System.out.println("\n===symbolTable_fun===");
+        //System.out.println(symbolTable_fun.toString());
+        //symbolTable_fun.testItr();
     }
     private abstract class Base_PreScanItem extends Base_StackItem {
 
@@ -91,7 +95,7 @@ public class PreScanner extends Base_Stack {
         private int state;
 
         public SouceLanguage(){
-            System.out.println("source language");
+            //System.out.println("source language");
             state = 0;
         }
         @Override
@@ -106,8 +110,8 @@ public class PreScanner extends Base_Stack {
             switch(state){
                 case WAIT:
                     if(FUN.toString().equals(text)){
-                        System.out.println("found FUN: "+text);
-                        symbolTable_fun.newFun(inName, fin.getRow());
+                        //System.out.println("found FUN: "+text);
+                        symbolTable_fun.newFun(fin);
                         state = IDENTIFY;
                     }
                     break;
@@ -116,11 +120,11 @@ public class PreScanner extends Base_Stack {
                         int len = text.length();
                         //System.out.println(text.substring(len - 1));
                         if(ITEM_OPEN.equals(text.substring(len - 1))){
-                            symbolTable_fun.setName(text.substring(1, len - 1));
+                            symbolTable_fun.setFunName(text.substring(1, len - 1));
                             state = PARSE;
                         }
                         else{
-                            symbolTable_fun.setName(text.substring(1));
+                            symbolTable_fun.setFunName(text.substring(1));
                             state = OPEN;
                         }
                     }else{
@@ -129,21 +133,21 @@ public class PreScanner extends Base_Stack {
                     break;
                 case OPEN:
                     if(OPENER.matcher(text).find()){
-                        System.out.println("parse: " + text);
+                        //System.out.println("parse: " + text);
                         if(text.length() > 1){
-                            symbolTable_fun.addWord(fin.getRow(), text.substring(1));
+                            symbolTable_fun.addWord(text.substring(1));
                         }
                         state = PARSE;
                     }
                     break;
                 case PARSE:
                     if(ITEM_CLOSE.equals(text)){
-                        System.out.println("end function: " + text);
+                        //System.out.println("end function: " + text);
                         symbolTable_fun.endFun();
                         state = WAIT;
                     }
                     else{
-                        symbolTable_fun.addWord(fin.getRow(), text);
+                        symbolTable_fun.addWord(text);
                     }
                     break;
             }

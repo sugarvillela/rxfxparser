@@ -46,7 +46,11 @@ public class TextSource_list extends Base_TextSource{
         this.done = (row >= content.size());
         return content.get(row-1);
     }
-    
+
+    @Override
+    public String getFileName() {
+        return "Text source: list";
+    }
     /**Writes or overwrites fileName with list content
      * @param fileName valid path
      * @param param a list reference, the data to write to file
