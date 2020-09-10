@@ -1,5 +1,5 @@
 # Generated file, do not edit
-# Last write: 09/07/2020 11:06:02
+# Last write: 09/10/2020 11:54:22
 # Lists ENUB, ENUD group names and items
 semanticENUB.rxfx line 7 word 0,PUSH,ENUB,NULL,NULL
 semanticENUB.rxfx line 7 word 0,SET_ATTRIB,ENUB,DEF_NAME,STATE
@@ -21,7 +21,6 @@ semanticENUB.rxfx line 2 word 0,ADD_TO,ENUB,NULL,linking
 semanticENUB.rxfx line 2 word 0,ADD_TO,ENUB,NULL,article
 semanticENUB.rxfx line 2 word 0,ADD_TO,ENUB,NULL,determiner
 semanticENUB.rxfx line 2 word 0,ADD_TO,ENUB,NULL,modal
-semanticENUB.rxfx line 2 word 0,ADD_TO,ENUB,NULL,Comment
 semanticENUB.rxfx line 2 word 0,POP,ENUB,NULL,NULL
 semantic.rxfx line 42 word 0,PUSH,ENUD,NULL,NULL
 semantic.rxfx line 42 word 0,SET_ATTRIB,ENUD,DEF_NAME,ALPHA

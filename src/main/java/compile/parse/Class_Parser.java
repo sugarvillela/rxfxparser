@@ -44,11 +44,11 @@ public class Class_Parser extends RxlxReader {
     
     @Override
     public void onCreate(){
-        fin = new ScanNodeSource(new TextSource_file(inName + INTERIM_FILE_EXTENSION));
-        er.setTextStatusReporter(fin);
+        //fin = new ScanNodeSource(new TextSource_file(inName + INTERIM_FILE_EXTENSION));
         if( !fin.hasData() ){
             return;
         }
+        this.onTextSourceChange(fin);
         while(fin.hasNext()){
             ScanNode currNode = ((ScanNodeSource)fin).nextNode();
             //System.out.println("\nNode: " + currNode.toString());

@@ -1,25 +1,29 @@
 package compile.scan;
 
-import compile.basics.Base_Stack;
 import compile.basics.Base_StackItem;
 import compile.basics.CompileInitializer;
-import compile.symboltable.SymbolTable_Fun;
+import compile.symboltable.Factory_TextNode;
+import compile.symboltable.SymbolTest;
 import toksource.Base_TextSource;
+import toksource.TextSource_file;
 import toksource.TokenSource;
-
-import java.util.regex.Pattern;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.HANDLER.FUN;
+import static compile.basics.Keywords.HANDLER.INCLUDE;
 
-
-public class PreScanner extends Base_Stack {
+/** A stripped down scanner that only sees target language, source language,
+ * include statements and function definitions.
+ * Pre-scans function text to an iterable node to use as text source during scanning
+ *
+ */
+public class PreScanner extends Base_Scanner {
     private static PreScanner instance;
 
     public PreScanner(Base_TextSource fin){
-        this.inName = CompileInitializer.getInstance().getInName();
+        super(fin);
+        this.symbolTest = SymbolTest.getInstance();
         this.fin = fin;
-
     }
 
     public static PreScanner getInstance(){
@@ -32,20 +36,20 @@ public class PreScanner extends Base_Stack {
         instance = null;
     }
 
-    private final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
-    private final Pattern OPENER = Pattern.compile("^["+ITEM_OPEN+"]");
+    //private final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
+    //private final Pattern OPENER = Pattern.compile("^["+ITEM_OPEN+"]");
 
-    private SymbolTable_Fun symbolTable_fun;
-    private final String inName;
+    private Factory_TextNode factoryTextNode;
+    private final SymbolTest symbolTest;
 
     @Override
     public void onCreate(){
         if( !fin.hasData() ){
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
-        er.setTextStatusReporter(fin);
+        this.onTextSourceChange(fin);
         CompileInitializer.getInstance().setCurrParserStack(this);
-        this.symbolTable_fun = SymbolTable_Fun.getInstance();
+        this.factoryTextNode = Factory_TextNode.getInstance();
 
         String text;
 
@@ -54,23 +58,47 @@ public class PreScanner extends Base_Stack {
 
         // start in line mode for target language
         fin.setLineGetter();
+        while(true){// outer loop on INCLUDE file stack level
+            er.setTextStatusReporter(fin);
+            while(fin.hasNext()){// inner loop on current file
+                do{
+                    text = fin.next();
+                }
+                while(fin.isEndLine() && CONT_LINE.equals(text));// skip "..."
 
-        while(fin.hasNext()){// inner loop on current file
-            do{
-                text = fin.next();
+                //System.out.println(fin.readableStatus() + ">>>" + text);
+                ((Base_PreScanItem)top).pushPop(text);
             }
-            while(fin.isEndLine() && CONT_LINE.equals(text));// skip "..."
 
-            //System.out.println(fin.readableStatus() + ">>>" + text);
-            ((Base_PreScanItem)top).pushPop(text);
+            if(!restoreTextSource()){
+                System.out.println("stack empty");
+                break;
+            }
+            System.out.println("not empty: "+fin.readableStatus());
+            //System.exit(0);
         }
         pop();
         //System.out.println("\n===symbolTable_fun===");
         //System.out.println(symbolTable_fun.toString());
         //symbolTable_fun.testItr();
     }
-    private abstract class Base_PreScanItem extends Base_StackItem {
 
+    public void include(String fileName){
+        if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
+            fileName += SOURCE_FILE_EXTENSION;
+        }
+        TokenSource newFile = new TokenSource(new TextSource_file(fileName));
+        if(newFile.hasData()){
+            fileStack.push(fin);
+            fin = newFile;
+            //CompileInitializer.getInstance().onTextSourceChange(fin, this);
+        }
+        else{
+            er.set("INCLUDE: bad file name", fileName);
+        }
+    }
+
+    private abstract class Base_PreScanItem extends Base_StackItem {
         @Override
         public void onPush() {}
 
@@ -80,23 +108,20 @@ public class PreScanner extends Base_Stack {
         public abstract void pushPop(String text);
     }
     private class TargetLanguage extends Base_PreScanItem {
-
         @Override
         public void pushPop(String text) {
-            //System.out.println("TargetLanguage");
             if(SOURCE_OPEN.equals(text)){
                 fin.setWordGetter();
-                push(new SouceLanguage());
+                push(new SourceLanguage());
             }
         }
     }
-    private class SouceLanguage extends Base_PreScanItem {
-        private static final int WAIT = 0, IDENTIFY = 1, OPEN = 2, PARSE = 3;
+    private class SourceLanguage extends Base_PreScanItem {
+        private static final int TO_INCLUDE = 0, WAIT = 1, IDENTIFY = 2, OPEN = 3, PARSE = 4;
         private int state;
 
-        public SouceLanguage(){
-            //System.out.println("source language");
-            state = 0;
+        public SourceLanguage(){
+            state = WAIT;
         }
         @Override
         public void pushPop(String text) {
@@ -108,46 +133,57 @@ public class PreScanner extends Base_Stack {
                 popAllSource();
             }
             switch(state){
-                case WAIT:
-                    if(FUN.toString().equals(text)){
+                case TO_INCLUDE:// Changing text source to read file as predicted
+                    state = WAIT;
+                    include(text);
+                    break;
+                case WAIT:// Wait for function keyword or include keyword
+                    if(INCLUDE.toString().equals(text)){
+                        state = TO_INCLUDE;
+                    }
+                    else if(FUN.toString().equals(text)){
                         //System.out.println("found FUN: "+text);
-                        symbolTable_fun.newFun(fin);
+                        factoryTextNode.startTextNode(FUN);
                         state = IDENTIFY;
                     }
                     break;
-                case IDENTIFY:
-                    if(FUN_IDENTIFIER.matcher(text).find()){
-                        int len = text.length();
+                case IDENTIFY:// Function keyword must be followed by a user def identifier
+                    if(symbolTest.isUserDef(text)){
+                        String defName;
                         //System.out.println(text.substring(len - 1));
-                        if(ITEM_OPEN.equals(text.substring(len - 1))){
-                            symbolTable_fun.setFunName(text.substring(1, len - 1));
+                        if(text.endsWith(ITEM_OPEN)){
+                            defName = text.substring(1, text.length() - 1);
                             state = PARSE;
                         }
                         else{
-                            symbolTable_fun.setFunName(text.substring(1));
+                            defName = text.substring(1);
                             state = OPEN;
                         }
+                        symbolTest.assertNew(defName);
+                        factoryTextNode.setTextName(defName);
                     }else{
-                        er.set("Expected " + USERDEF_OPEN + "identifier", text);
+                        er.set("Expected " + USERDEF_OPEN + "identifier here", text);
                     }
                     break;
-                case OPEN:
-                    if(OPENER.matcher(text).find()){
+                case OPEN:// look for opening symbol
+                    if(text.startsWith(ITEM_OPEN)){
                         //System.out.println("parse: " + text);
-                        if(text.length() > 1){
-                            symbolTable_fun.addWord(text.substring(1));
+                        if(text.length() > ITEM_OPEN.length()){
+                            factoryTextNode.addWord(text.substring(ITEM_OPEN.length()));
                         }
                         state = PARSE;
+                    }else{
+                        er.set("Expected " + ITEM_OPEN + "identifier here", text);
                     }
                     break;
-                case PARSE:
+                case PARSE:// have opening symbol; add words until closing symbol
                     if(ITEM_CLOSE.equals(text)){
                         //System.out.println("end function: " + text);
-                        symbolTable_fun.endFun();
+                        factoryTextNode.finishTextNode();
                         state = WAIT;
                     }
                     else{
-                        symbolTable_fun.addWord(text);
+                        factoryTextNode.addWord(text);
                     }
                     break;
             }

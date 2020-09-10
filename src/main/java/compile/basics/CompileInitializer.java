@@ -4,11 +4,17 @@ import codegen.Widget;
 import commons.Dev;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
+import compile.symboltable.Factory_TextNode;
 import compile.symboltable.SymbolTable_Enu;
+import compile.symboltable.TextSniffer;
 import erlog.Erlog;
+import toksource.Base_TextSource;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
+import toksource.interfaces.ChangeListener;
+import toksource.interfaces.ChangeNotifier;
+import toksource.interfaces.ITextStatus;
 import unique.Unique;
 
 import java.text.SimpleDateFormat;
@@ -21,7 +27,7 @@ import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
  *
  * @author Dave Swanson
  */
-public class CompileInitializer {
+public class CompileInitializer implements ChangeListener {
     private static CompileInitializer instance;
     
     public static CompileInitializer getInstance(){
@@ -35,11 +41,13 @@ public class CompileInitializer {
         initTime = (new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")).format(new Date());
         unique = new Unique();
         er = Erlog.get(this);
+        listeners = new ArrayList<>();
         newEnumSet = false;
         wrow = 8;
         wval = 4;
     }
 
+    private final ArrayList<ChangeListener> listeners;
     private final Erlog er;
     private final Unique unique;
     private Base_Stack currStack;
@@ -47,6 +55,7 @@ public class CompileInitializer {
     private String inName, projName;
     private String initTime;
     private int wrow, wval;
+
 
     public void initFromProperties(String path){// TODO load from properties file
 
@@ -64,6 +73,9 @@ public class CompileInitializer {
         }
         System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newEnumSet);
 
+        this.addChangeListener(er);
+        this.addChangeListener(Factory_TextNode.getInstance());
+
         PreScanner.init(
             new TokenSource(
                 new TextSource_file(inName + SOURCE_FILE_EXTENSION)
@@ -71,6 +83,7 @@ public class CompileInitializer {
         );
         PreScanner preScanner = PreScanner.getInstance();
         preScanner.onCreate();
+        //System.out.println(Factory_TextNode.getInstance());
         Class_Scanner.init(
             new TokenSource(
                 new TextSource_file(inName + SOURCE_FILE_EXTENSION)
@@ -79,6 +92,10 @@ public class CompileInitializer {
         Class_Scanner scanner = Class_Scanner.getInstance();
         scanner.onCreate();
         scanner.onQuit();
+//
+//        Factory_TextNode.killInstance();
+//        TextSniffer.killInstance();
+
 //        Class_Parser.init(
 //            new ScanNodeSource(
 //                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
@@ -127,6 +144,20 @@ public class CompileInitializer {
         return currStack;
     }
 
+    public void addChangeListener(ChangeListener listener){
+        listeners.add(listener);
+    }
+    public void removeChangeListener(ChangeListener listener){
+        listeners.remove(listener);
+    }
+    @Override
+    public void onTextSourceChange(ITextStatus textStatus, ChangeNotifier caller){
+        for(ChangeListener listener : listeners){
+            if(listener != null){
+                listener.onTextSourceChange(textStatus, caller);
+            }
+        }
+    }
     public void setNewEnumSet(boolean newEnumSet){
         this.newEnumSet = newEnumSet;
     }

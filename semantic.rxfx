@@ -33,16 +33,16 @@ function incNumber(){
 		booby();
 	/*
 	
-	$myFun
-	
-	RXFX $myScope 
-		RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
+
+		RX myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
 		 ~(E=e&F=f)&'G'*
-		FX fxCommand1 fxCommand2
+		FX fxCommand1 fxCommand2 fxCommandWow
+		
+		
 	ENUD
 		$ALPHA 
 			A B C D E F 
-	//$myScope
+
 $*/
 
 

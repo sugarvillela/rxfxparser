@@ -3,12 +3,14 @@ package compile.basics;
 import erlog.Erlog;
 import interfaces.ILifeCycle;
 import toksource.Base_TextSource;
+import toksource.interfaces.ChangeNotifier;
+import toksource.interfaces.ITextStatus;
 
 /**Abstract base class for Scanner and Parser classes
  *
  * @author Dave Swanson
  */
-public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
+public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeNotifier {
     protected String debugName;
     protected Base_StackItem top;  // stack; handlers are linked nodes
     protected int stackSize;     // changes on push, pop
@@ -102,5 +104,11 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent{//
     @Override
     public void onQuit(){
         er.clearTextStatusReporter();
+    }
+
+    // ChangeNotifier implementation
+    @Override
+    public void onTextSourceChange(ITextStatus textStatus) {
+        CompileInitializer.getInstance().onTextSourceChange(textStatus, this);
     }
 }

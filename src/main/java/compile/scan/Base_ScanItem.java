@@ -3,6 +3,7 @@ package compile.scan;
 import commons.Commons;
 import compile.basics.Keywords;
 import compile.basics.Base_StackItem;
+import compile.symboltable.TextSniffer;
 import erlog.Erlog;
 import java.util.Arrays;
 import compile.basics.Keywords.HANDLER;
@@ -22,9 +23,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected Strategy[] strategies, onPushStrategies, onPopStrategies;
     protected String defName;
     protected int loIndex, hiIndex;
+    protected final TextSniffer textSniffer;
     
     public Base_ScanItem(){
-
+        textSniffer = TextSniffer.getInstance();
     }
 
     @Override
@@ -60,6 +62,9 @@ public abstract class Base_ScanItem extends Base_StackItem{
     }
 
     public void pushPop(String text) {
+        if(textSniffer.isSniffing()){
+            textSniffer.sniff(text);
+        }
         if(strategies != null){
             for(Strategy strategy : strategies){
                 if(strategy.go(text, this)){
@@ -68,7 +73,9 @@ public abstract class Base_ScanItem extends Base_StackItem{
             }
         }
     }
-    
+    public void back(){
+        textSniffer.back();
+    }
     public void setHandler(HANDLER h){
         this.h = h;
     }

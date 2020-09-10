@@ -1,10 +1,9 @@
 package compile.scan.factories;
 
-import commons.Commons;
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
-import compile.symboltable.SymbolTable_Enu;
-import compile.symboltable.SymbolTable_Fun;
+import compile.scan.ut.*;
+import compile.symboltable.*;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.scan.Class_Scanner;
@@ -16,11 +15,6 @@ import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.HANDLER.*;
 import static compile.basics.Keywords.KWORD.*;
 
-import compile.scan.ut.LineBuffer;
-import compile.scan.ut.RxFxUtil;
-import compile.scan.ut.RxRangeUtil;
-import compile.scan.ut.RxValidator;
-import compile.scan.ut.ScanSymbolTableAll;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 
@@ -38,13 +32,15 @@ public abstract class Factory_Strategy{
         ADD_KEY_VAL_ATTRIB,         // SET_ATTRIB with key = val text
         ADD_RX_WORD,                // RX only
         ADD_FX_WORD,                // FX only
-        POP_ON_TARG_LANG_INSERT,  // Disallow in certain contexts
+        POP_ON_TARG_LANG_INSERT,    // Disallow in certain contexts
         PUSH_TARG_LANG_INSERT,      // Symbol != HANDLER
         ADD_TO_LINE_BUFFER,         // TARGLANG_INSERT background function
-        MANAGE_ENU_LISTS,               // ENUB, ENUD set name attribute
+        MANAGE_ENU_LISTS,           // ENUB, ENUD set name attribute
         ON_INCLUDE,                 // Add a file to the file stack
         SET_USER_DEF_NAME,          // Set name attribute
-        HANDLE_IDENTIFIER,          // Unroll symbol table data
+        READ_FUN,                   // Unroll function symbol table data
+        READ_VAR,                   // Unroll VAR symbol table data
+        POP_ON_VAR,                 // Where nested var not allowed, pop instead
         POP_ON_TARGLANG_INSERT_CLOSE,//Symbol != HANDLER
         PUSH_COMMENT,               // Symbol != HANDLER, Silent push pop and ignore
         POP_ON_ENDLINE,             // Comment
@@ -53,9 +49,11 @@ public abstract class Factory_Strategy{
         
         ON_PUSH,                    // PUSH message
         ON_POP,                     // generate name if not set, POP message
-        ON_POP_ENU,                 // Dump pushPop history to SymbolTable_Enu
+        ON_PUSH_NO_SNIFF,           // Same as ON_PUSH but doesn't call TextSniffer
+        ON_POP_NO_SNIFF,            // Same as ON_POP but doesn't call TextSniffer
+        ON_POP_ENU,                 // Dump pushPop history to SymbolTable_Enu; no TextSniffer
         DUMP_BUFFER_ON_POP,         // OnPop: TARGLANG_INSERT cleanup function
-        ASSERT_TOGGLE,              // OnPush: RXFX assert RX -> FX -> RX -> FX etc
+        ASSERT_TOGGLE_ON_PUSH,      // OnPush: RXFX assert RX -> FX, IF_ELSE asserts IF -> ELSE or IF
         RXFX_ERR_ON_POP,            // OnPop: RXFX ends with FX
         ON_LAST_POP,                // OnPop: cleanup activities on TargLangBase pop
         NOP                         // OnPush, OnPop, not added to node
@@ -89,8 +87,12 @@ public abstract class Factory_Strategy{
                 return new ManageEnuLists();
             case SET_USER_DEF_NAME:
                 return new SetUserDefName();
-            case HANDLE_IDENTIFIER:
-                return new HandleIdentifier();
+            case READ_FUN:
+                return new ReadFun();
+            case READ_VAR:
+                return new ReadVar();
+            case POP_ON_VAR:
+                return new PopOnVar();
             case POP_ON_TARGLANG_INSERT_CLOSE:
                 return new PopOnTargLangInsertClose();
             case POP_ON_ENDLINE:
@@ -115,8 +117,10 @@ public abstract class Factory_Strategy{
                 return new OnPush();
             case NOP:
                 return new Nop();
-            case ASSERT_TOGGLE:
-                return new AssertToggle();
+            case ON_PUSH_NO_SNIFF:
+                return new OnPushNoSniff();
+            case ASSERT_TOGGLE_ON_PUSH:
+                return new AssertToggleOnPush();
             default:
                 Erlog.get("getPushStrategy").set("Bad strategy enum", strategyEnum.toString());
                 return null;
@@ -129,6 +133,8 @@ public abstract class Factory_Strategy{
                 return new OnPop();
             case NOP:
                 return new Nop();
+            case ON_POP_NO_SNIFF:
+                return new OnPopNoSniff();
             case ON_POP_ENU:
                 return new OnPop_Enu();
             case ON_LAST_POP:
@@ -167,12 +173,13 @@ public abstract class Factory_Strategy{
         return currentActions;
     }
 
-    //private static final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
     private static final LineBuffer LINEBUFFER = new LineBuffer();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
-    private static final ScanSymbolTableAll SYMBOL_TABLE_ALL = new ScanSymbolTableAll();
-    private static final SymbolTable_Fun SYMBOL_TABLE_FUN = SymbolTable_Fun.getInstance();
+    private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
+    private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
+    private static final Factory_TextNode SYMBOL_TABLE = Factory_TextNode.getInstance();
     private static SymbolTable_Enu SYMBOL_TABLE_ENU = null;
+    private static HANDLER lastPopped = null;
 
     public static abstract class Strategy{
         Class_Scanner P;
@@ -194,16 +201,40 @@ public abstract class Factory_Strategy{
     public static class PushGoodHandler extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            Keywords.HANDLER keyword = Keywords.HANDLER.fromString(text);
-            if(keyword != null && context.isGoodHandler(keyword)) {
-                P.push(Factory_ScanItem.get(keyword));
+            Keywords.HANDLER newHandler = Keywords.HANDLER.fromString(text);
+            if(newHandler != null && context.isGoodHandler(newHandler)) {
+                if(!addContainer(text, context, newHandler)){
+                    P.push(Factory_ScanItem.get(newHandler));
+                }
                 return true;
             }
-            //Erlog.get(this).set("Disallowed Handler", text);
+            return false;
+        }
+        private boolean addContainer(String text, Base_ScanItem context, HANDLER newHandler){
+            HANDLER topHandler;
+            switch(newHandler){
+                case IF:
+                    topHandler = ((Base_ScanItem)P.getTop()).getHandler();
+                    if(!IF_ELSE.equals(topHandler) && !ELSE.equals(topHandler)){
+                        P.push(Factory_ScanItem.get(IF_ELSE));
+                        P.back(text);
+                        context.back();
+                        return true;
+                    }
+                    return false;
+                case RX:
+                    topHandler = ((Base_ScanItem)P.getTop()).getHandler();
+                    if(!RXFX.equals(topHandler)){
+                        P.push(Factory_ScanItem.get(RXFX));
+                        P.back(text);
+                        context.back();
+                        return true;
+                    }
+                    return false;
+            }
             return false;
         }
     }
-
     public static class AddText extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -322,20 +353,11 @@ public abstract class Factory_Strategy{
         }
     }
 
-    public static class ErrOnBadSymbol extends Strategy{//to be included in every scan item
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            if(text.length() == 1 && !Character.isLetter(text.charAt(0))){
-                Erlog.get(this).set("Disallowed Handler", text);
-                return true;
-            }
-            return false;
-        }
-    }
     public static class PopOnTargLangInsert extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(TARGLANG_INSERT_OPEN.equals(text)){
+                context.back();//don't sniff keyword because it will be repeated
                 P.back(text);
                 P.pop();
                 return true;
@@ -359,7 +381,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             HANDLER h = context.getHandler();
 
-            if(text.startsWith(USERDEF_OPEN) && text.length() > 1){
+            if(SYMBOL_TEST.isUserDef(text)){
 
                 // Lazy init allows specifying in attrib whether to use new enum set or add to existing
                 if(SYMBOL_TABLE_ENU == null){
@@ -412,13 +434,12 @@ public abstract class Factory_Strategy{
     public static class SetUserDefName extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            HANDLER h = context.getHandler();
-            if(text.startsWith(USERDEF_OPEN) && text.length() > 1){
+            if(SYMBOL_TEST.isUserDef(text) && context.getDefName() == null){
                 String defName = text.substring(USERDEF_OPEN.length());
-                if(SYMBOL_TABLE_ALL.addIfNew(defName, h)){
+                if(SYMBOL_TEST.isNew(defName)){
                     context.setDefName(defName);
                     context.addNode(
-                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName)
+                        Factory_Node.newScanNode(CMD.SET_ATTRIB, context.getHandler(), DEF_NAME, defName)
                     );
                     return true;
                 }
@@ -426,17 +447,34 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class HandleIdentifier extends Strategy{
+    public static class ReadVar extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(text.startsWith(USERDEF_OPEN) && text.length() > 1){
-                String identifier = text.substring(USERDEF_OPEN.length());
-                if(SYMBOL_TABLE_FUN.isFun(identifier)){
-                    P.includeFunNode(SYMBOL_TABLE_FUN.getFun(identifier));
+            //System.out.println("ReadVar: " + context.getHandler());
+            if(SYMBOL_TEST.isUserDef(text)){
+                //System.out.println("isUserDef" + text);
+                String defName = text.substring(USERDEF_OPEN.length());
+                Factory_TextNode.Base_TextNode node = SYMBOL_TABLE.getTextNode(defName);
+                if(node != null && context.isGoodHandler(node.getType())){
+                    //System.out.println("goodType: " + defName);
+                    P.changeTextSource(node);
                     return true;
                 }
-                else{
-                    Erlog.get(this).set("Unknown identifier", text);
+                //System.out.println(" not goodType: " + defName);
+                return false;
+            }
+            //System.out.println("not UserDef: " + text);
+            return false;
+        }
+    }
+    public static class ReadFun extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(SYMBOL_TEST.isUserDef(text)){
+                String identifier = text.substring(USERDEF_OPEN.length());
+                Factory_TextNode.Base_TextNode node = SYMBOL_TABLE.getTextNode(identifier, FUN);
+                if(node != null){
+                    P.changeTextSource(node);
                 }
             }
             return false;
@@ -465,12 +503,28 @@ public abstract class Factory_Strategy{
     public static class PopOnKeyword extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            Keywords.HANDLER keyword = Keywords.HANDLER.fromString(text);
             if( Keywords.HANDLER.fromString(text) != null){
+                context.back();//don't sniff keyword because it will be repeated
+                P.back(text);//repeat keyword so next handler can push it
+                P.pop();
+
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class PopOnVar extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            //System.out.println("PopOnVar: " + context.getHandler());
+            if(SYMBOL_TEST.isUserDef(text) && SYMBOL_TABLE.isTextNode(text.substring(USERDEF_OPEN.length()))){
+                //System.out.println("isUserDef and isNode: " + text);
+                context.back();//don't sniff keyword because it will be repeated
                 P.back(text);//repeat keyword so next handler can push it
                 P.pop();
                 return true;
             }
+            System.out.println("not UserDef: " + text);
             return false;
         }
     }
@@ -536,7 +590,6 @@ public abstract class Factory_Strategy{
         }
         
     }
-
     public static class OnInclude extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -548,6 +601,7 @@ public abstract class Factory_Strategy{
     public static class OnPush extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
+            TextSniffer.getInstance().onPush(context);
             context.addNode( Factory_Node.newScanNode( CMD.PUSH, context.getHandler() ) );
             return false;
         }
@@ -555,19 +609,24 @@ public abstract class Factory_Strategy{
     public static class OnPop extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-//            if(context.getDefName() == null){
-//                HANDLER h = context.getHandler();
-//                String anon = CompileInitializer.getInstance().genAnonName(h);
-//                context.addNode(
-//                    Factory_Node.newScanNode(CMD.SET_ATTRIB, h, ANON_NAME, anon)
-//                );
-//            }
+            TextSniffer.getInstance().onPop(context);
             context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
-//            String defName = context.getDefName();
-//            if(defName != null){
-//                SYMBOL_TABLE_ENU.readList(context.getScanNodeList());
-//            }
-
+            lastPopped = context.getHandler();
+            return false;
+        }
+    }
+    public static class OnPushNoSniff extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            context.addNode( Factory_Node.newScanNode( CMD.PUSH, context.getHandler() ) );
+            return false;
+        }
+    }
+    public static class OnPopNoSniff extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
+            lastPopped = context.getHandler();
             return false;
         }
     }
@@ -576,10 +635,11 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
             String defName = context.getDefName();
-            Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
+            //Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
             if(defName != null){
                 SYMBOL_TABLE_ENU.readList(context.getScanNodeList());
             }
+            lastPopped = context.getHandler();
             return false;
         }
     }
@@ -603,12 +663,20 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class AssertToggle extends Strategy{// RXFX toggle
+    public static class AssertToggleOnPush extends Strategy{// RXFX toggle
         @Override
         public boolean go(String text, Base_ScanItem context){
             Base_ScanItem below = (Base_ScanItem)context.getBelow();
-            if(below != null && RXFX.equals(below.getHandler())){
-                RXFX_UTIL.assertToggle(context.getHandler());
+            if(below != null){
+                HANDLER handler = below.getHandler();
+                switch(handler){
+                    case RXFX:
+                        RXFX_UTIL.assertToggle(context.getHandler());
+                        break;
+                    case IF_ELSE:
+                        IF_ELSE_UTIL.assertToggle(context.getHandler());
+                        break;
+                }
             }
             return false;
         }
@@ -622,12 +690,13 @@ public abstract class Factory_Strategy{
     public static class OnLastPop extends Strategy{// Target Language Base
         @Override
         public boolean go(String text, Base_ScanItem context){
-            SYMBOL_TABLE_ALL.write_rxlx_file(
-                Keywords.fileName_symbolTableAll()
-            );
+//            SYMBOL_TABLE_VAR.write_rxlx_file(
+//                Keywords.fileName_symbolTableAll()
+//            );
             if(SYMBOL_TABLE_ENU != null){
                 SYMBOL_TABLE_ENU.onQuit();
             }
+            SYMBOL_TABLE.killInstance();
             return false;
         }
     }

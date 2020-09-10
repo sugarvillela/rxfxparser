@@ -190,7 +190,7 @@ public class Commons {
     }
     public static <T> void disp( ArrayList<T> arr, String label ){
         if( arr==null || arr.isEmpty() ){
-            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:");
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.size() );
@@ -205,7 +205,7 @@ public class Commons {
     }
     public static <T> void disp( T[] arr, String label ){
         if( arr==null || arr.length==0 ){
-            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:");
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.length );
@@ -220,7 +220,7 @@ public class Commons {
     }
     public static void disp( char[] arr, String label ){
         if( arr==null || arr.length==0 ){
-            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:");
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.length );
@@ -234,7 +234,7 @@ public class Commons {
     }
     public static void disp( int[] arr, String label ){
         if( arr==null || arr.length==0 ){
-            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:" + label );
+            System.out.println("\nDisplay: " + label + ": NULL or EMPTY array:");
             return;
         }
         System.out.println("\nDisplay: " + label + ": " + arr.length );

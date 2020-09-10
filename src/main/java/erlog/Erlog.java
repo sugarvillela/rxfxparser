@@ -1,10 +1,14 @@
 package erlog;
 
+import compile.basics.CompileInitializer;
+import toksource.Base_TextSource;
+import toksource.interfaces.ChangeListener;
+import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
 
-/** Decorator pattern for ErlogCore: adds
- * @author Dave Swanson*/
-public class Erlog {
+/** Decorator pattern for ErlogCore: adds per-instance caller class name
+ * @author Dave Swanson */
+public class Erlog implements ChangeListener {
     
     /*=====Behavior Options: you can OR the non-exclusive ones================*/
     
@@ -78,5 +82,10 @@ public class Erlog {
     /** No line, column status in error report */
     public void clearTextStatusReporter(){
         erlogCore.clearTextStatusReporter();
+    }
+
+    @Override
+    public void onTextSourceChange(ITextStatus textStatus, ChangeNotifier caller) {
+        erlogCore.setTextStatusReporter(textStatus);
     }
 }

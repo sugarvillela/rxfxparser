@@ -76,10 +76,10 @@ public class Factory_Node {
             );
         }
         public String nullSafe(Object obj){//safe toString() for nullable object
-            return(obj==null)? NULL_TEXT : obj.toString();
+            return (obj==null)? NULL_TEXT : obj.toString();
         }
         public String nullSafe(String str){//safe toString() for nullable object
-            return(str == null || str.isEmpty())? NULL_TEXT : str;
+            return (str == null || str.isEmpty())? NULL_TEXT : str;
         }
     }
     

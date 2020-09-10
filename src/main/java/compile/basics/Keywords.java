@@ -39,14 +39,18 @@ public final class Keywords {
         ENUD, 
         VAR, 
         SCOPE, 
-        RXFX, 
+        RXFX,
+        FOR,
+        IF, ELSE,
         // Non-file-generating handlers
         RX, FX, SRCLANG, ATTRIB, INCLUDE, FUN, RAW_TEXT,
         // sub-handlers not actually in the language
-        RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT, 
+        IF_ELSE, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT,
         SYMBOL_TABLE, 
         // handlers whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
+        // error indicator
+        //UNKNOWN_HANDLER,
         // Top enum ordinal gives size of list
         NUM_HANDLERS
         ;
@@ -68,7 +72,7 @@ public final class Keywords {
         // keywords that can be specified in language
         PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_ENUM_SET,
         // Internal keywords for communicating between components
-        DEF_NAME, ANON_NAME, // named and anonymous variables
+        DEF_NAME, //ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges
         //rx
         //RX_AND1, RX_OR1, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,
@@ -134,6 +138,10 @@ public final class Keywords {
             return null;
         }
     }
+
+    public enum TABLE_TYPE{
+        VAR_TABLE, FUN_TABLE, ENUD_TABLE, ENUB_TABLE, UNKNOWN_TABLE
+    }
     // String constants for switches: defines language behavior
     public static final String CONT_LINE = "...";      // Matlab-like extension
     public static final String SOURCE_OPEN = "/*$";    // pushes source handler
@@ -143,7 +151,7 @@ public final class Keywords {
     public static final String ITEM_OPEN = "{";        // surrounds item content
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined heading
-    public static final String COMMENT_TEXT = "//";    // Widget.getCommentSymbol() TODO
+    public static final String COMMENT_TEXT = "//";    //
     public static final String TEXT_FIELD_NAME = "text";// class WORD text field
     
     public static String fileName_symbolTableAll(){

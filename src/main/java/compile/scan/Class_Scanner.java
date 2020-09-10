@@ -1,14 +1,10 @@
 
 package compile.scan;
 
-import compile.basics.Base_Stack;
 import compile.basics.Factory_Node;
 import compile.basics.Keywords.HANDLER;
-import commons.Commons;
 import compile.basics.CompileInitializer;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -17,7 +13,7 @@ import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
-import compile.symboltable.SymbolTable_Fun;
+import compile.symboltable.Factory_TextNode;
 import toksource.Base_TextSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
@@ -26,19 +22,16 @@ import toksource.TokenSource;
  *
  * @author Dave Swanson
  */
-public class Class_Scanner extends Base_Stack {
+public class Class_Scanner extends Base_Scanner {
     private final ArrayList<ScanNode> nodes;
-    private final String inName;
+
     protected String backText;   // repeat lines
-    private Stack<Base_TextSource> fileStack;
+
     private static Class_Scanner instance;
     
     public Class_Scanner(Base_TextSource fin){
-        this.inName = CompileInitializer.getInstance().getInName();
-        this.fin = fin;
-
+        super(fin);
         nodes = new ArrayList<>();
-        fileStack = new Stack<>();
     }
     
     public static Class_Scanner getInstance(){
@@ -57,6 +50,7 @@ public class Class_Scanner extends Base_Stack {
         if( !fin.hasData() ){
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
+        this.onTextSourceChange(fin);
         CompileInitializer.getInstance().setCurrParserStack(this);
         backText = null;
         String text;
@@ -66,7 +60,6 @@ public class Class_Scanner extends Base_Stack {
         // start in line mode for target language
         fin.setLineGetter();
         while(true){// outer loop on INCLUDE file stack level
-            er.setTextStatusReporter(fin);
             while(fin.hasNext()){// inner loop on current file
                 if(backText == null){
                     do{
@@ -84,11 +77,10 @@ public class Class_Scanner extends Base_Stack {
             }
 
             //
-            if(fileStack.empty()){
+            if(!restoreTextSource()){
                 System.out.println("stack empty");
                 break;
             }
-            fin = fileStack.pop();
             System.out.println("not empty: "+fin.readableStatus());
             //System.exit(0);
         }
@@ -122,23 +114,7 @@ public class Class_Scanner extends Base_Stack {
         if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
             fileName += SOURCE_FILE_EXTENSION;
         }
-        TokenSource newFile = new TokenSource(new TextSource_file(fileName));
-        if(newFile.hasData()){
-            fileStack.push(fin);
-            fin = newFile;
-        }
-        else{
-            er.set("INCLUDE: bad file name", fileName);
-        }
-    }
-    public void includeFunNode(SymbolTable_Fun.Base_FunNode funNode){
-        if(funNode != null && funNode.hasData()){
-            fileStack.push(fin);
-            fin = funNode;
-        }
-        else{
-            er.set("INCLUDE: bad funNode");
-        }
+        changeTextSource(new TokenSource(new TextSource_file(fileName)));
     }
     public ArrayList<ScanNode> getScanNodeList(){
         return this.nodes;

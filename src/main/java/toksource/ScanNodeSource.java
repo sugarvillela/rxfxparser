@@ -20,7 +20,6 @@ import toksource.interfaces.ITextSource;
 import toksource.interfaces.ITextWordOrLine;
 
 public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle {
-    protected Erlog er;
     Base_TextSource fin;
     ScanNode currNode;
     private NodeGen nodeGen;
@@ -31,11 +30,6 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
         standard = new StandardNodeGen();
         rx = new RxNodeGen();
         nodeGen = standard;
-        init();
-    }
-    private void init(){
-        er = Erlog.get(this);
-        er.setTextStatusReporter(fin);
     }
     private void toggleNodeGen(){
         if(nodeGen == standard){
