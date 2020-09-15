@@ -212,7 +212,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_COMMENT,
                         READ_VAR,
                         PUSH_GOOD_HANDLER,
-                            BACK_POP_ON_ANY_HANDLER,
+                        BACK_POP_ON_ANY_HANDLER,
                         ERR
                     )
                 );
@@ -256,7 +256,7 @@ public class Factory_ScanItem extends Factory_Strategy{
     }
 
     public static class ScanItem extends Base_ScanItem{
-        public ScanItem( HANDLER setH, HANDLER[] allowedHandlers, Strategy[] strategies){
+        public ScanItem( HANDLER setH, HANDLER[] allowedHandlers, StrategyEnum[] strategies){
             this(
                 setH, 
                 allowedHandlers, 
@@ -269,8 +269,8 @@ public class Factory_ScanItem extends Factory_Strategy{
         public ScanItem( 
             HANDLER setH, 
             HANDLER[] allowedHandlers,
-            Strategy[] strategies,
-            Strategy[] onPopStrategies
+            StrategyEnum[] strategies,
+            StrategyEnum[] onPopStrategies
         ){
             this(
                 setH, 
@@ -284,9 +284,9 @@ public class Factory_ScanItem extends Factory_Strategy{
         public ScanItem( 
             HANDLER setH, 
             HANDLER[] allowedHandlers,
-            Strategy[] strategies,
-            Strategy[] onPushStrategies,
-            Strategy[] onPopStrategies
+            StrategyEnum[] strategies,
+            StrategyEnum[] onPushStrategies,
+            StrategyEnum[] onPopStrategies
         ){
             this.h = setH;
             this.debugName = h.toString();

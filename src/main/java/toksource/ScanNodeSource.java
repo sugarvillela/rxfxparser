@@ -63,7 +63,7 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
             }
             return new ScanNode(
                 tok[0],
-                Keywords.CMD.get(tok[1]),
+                Keywords.CMD.fromString(tok[1]),
                 handler,
                 NULL_TEXT.equals(tok[3])? null : Keywords.FIELD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
@@ -75,17 +75,21 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
         public ScanNode nextNode(String next){
             String[] tok = next.split(",", NUM_RX_FIELDS);
             Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
+
             if(!RX_BUILDER.equals(handler)){
                 return null;
             }
-            return new RxScanNode(
-                tok[0],
-                Keywords.CMD.get(tok[1]),
-                handler,
-                NULL_TEXT.equals(tok[3])? null : Keywords.OP.fromString(tok[3]),
-                NULL_TEXT.equals(tok[4])? "" : tok[4], 
-                Boolean.parseBoolean(tok[5]), 
-                NULL_TEXT.equals(tok[6])? -1 : Integer.parseInt(tok[6])
+
+            return new RxScanNode(// 0 text status, 1 push or pop, 2 RX_BUILDER, 3 negate, 4 operation, 5 data format in leaf, 6 text payload, 7 function parameter, 8 unique id
+                tok[0], // text status
+                Keywords.CMD.fromString(tok[1]),   // push or pop
+                handler,                    // RX_BUILDER
+                Boolean.parseBoolean(tok[3]),// negate
+                NULL_TEXT.equals(tok[4])? null : Keywords.OP.fromString(tok[4]),    // operation
+                NULL_TEXT.equals(tok[5])? null : Keywords.RX_PARAM_TYPE.fromString(tok[5]),// param type (data format)
+                tok[6],                    // text payload
+                NULL_TEXT.equals(tok[7])? null : tok[7],    // param
+                NULL_TEXT.equals(tok[8])? -1 : Integer.parseInt(tok[8]) // id
             );
         }
     }

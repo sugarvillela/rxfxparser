@@ -22,7 +22,7 @@ public final class Keywords {
     // List of commands to instruct parser
     public enum CMD { 
         PUSH, POP, ADD_TO, SET_ATTRIB;
-        public static CMD get( String text ){
+        public static CMD fromString(String text ){
             for(CMD cmd : values()){
                 if(cmd.toString().equals(text)){
                     return cmd;
@@ -132,7 +132,7 @@ public final class Keywords {
         // function names for Rx logic
         FIRST, LAST, LEN
         ;
-        public static FUNCT get( String text ){
+        public static FUNCT fromString(String text ){
             for(FUNCT f : values()){
                 if(f.toString().equals(text)){
                     return f;
@@ -151,7 +151,9 @@ public final class Keywords {
         ALPHA_NUM_PARAM (3, true,  Pattern.compile("\\([A-Za-z0-9_]+\\)$")),
         CONST_PARAM     (4, true,  Pattern.compile("\\([$][A-Za-z][A-Za-z0-9_]*\\)$")),
         SINGLE_FIELD    (5, false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
-        DOTTED_FIELD    (6, false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$"))
+        DOTTED_FIELD    (6, false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),
+        CATEGORY        (7, false, null),
+        CATEGORY_ITEM   (8, false, null)
         ;
 
         public final int asInt;
@@ -171,7 +173,7 @@ public final class Keywords {
             }
             return null;
         }
-        public static RX_PARAM_TYPE get( String text ){
+        public static RX_PARAM_TYPE fromString(String text ){
             for(RX_PARAM_TYPE f : values()){
                 if(f.toString().equals(text)){
                     return f;

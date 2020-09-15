@@ -3,6 +3,7 @@ package compile.scan;
 import commons.Commons;
 import compile.basics.Keywords;
 import compile.basics.Base_StackItem;
+import compile.scan.factories.Factory_Strategy;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 public abstract class Base_ScanItem extends Base_StackItem{
     protected HANDLER h;                    // class's own enum
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
-    protected Strategy[] strategies, onPushStrategies, onPopStrategies;
+    protected Factory_Strategy.StrategyEnum[] strategies, onPushStrategies, onPopStrategies;
     protected String defName;
     protected int state, loIndex, hiIndex;
     protected final TextSniffer textSniffer;
@@ -36,8 +37,8 @@ public abstract class Base_ScanItem extends Base_StackItem{
 //        String handlerStr = (h == null)? "Null Handler" : h.toString();
 //        System.out.println("Base_ScanItem onPush: " + handlerStr + ", loIndex: " + loIndex);
         if(onPushStrategies != null){
-            for(Strategy strategy : onPushStrategies){
-                if(strategy.go(null, this)){
+            for(Factory_Strategy.StrategyEnum strategyEnum : onPushStrategies){
+                if(strategyEnum.strategy.go(null, this)){
                     return;
                 }
             }
@@ -47,8 +48,8 @@ public abstract class Base_ScanItem extends Base_StackItem{
     @Override
     public void onPop(){
         if(onPopStrategies != null){
-            for(Strategy strategy : onPopStrategies){
-                if(strategy.go(null, this)){
+            for(Factory_Strategy.StrategyEnum strategyEnum : onPopStrategies){
+                if(strategyEnum.strategy.go(null, this)){
                     break;
                 }
             }
@@ -63,8 +64,8 @@ public abstract class Base_ScanItem extends Base_StackItem{
             textSniffer.sniff(text);
         }
         if(strategies != null){
-            for(Strategy strategy : strategies){
-                if(strategy.go(text, this)){
+            for(Factory_Strategy.StrategyEnum strategyEnum : strategies){
+                if(strategyEnum.strategy.go(text, this)){
                     return;
                 }
             }

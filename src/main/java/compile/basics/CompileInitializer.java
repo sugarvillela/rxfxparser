@@ -100,6 +100,11 @@ public class CompileInitializer implements ChangeListener {
 //                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
 //            )
 //        );
+//        System.out.println("test types...");
+//        System.out.println(SymbolTable_Enu.getInstance().getDataType("SCOPES"));
+//        System.out.println(SymbolTable_Enu.getInstance().getDataType("POS"));
+//        System.out.println(SymbolTable_Enu.getInstance().getDataType("verb"));
+//        System.out.println(SymbolTable_Enu.getInstance().getCategory("verb"));
         Erlog.finish();
     }
     private void readArgs(String[] args){

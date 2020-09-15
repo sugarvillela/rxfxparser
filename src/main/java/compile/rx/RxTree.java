@@ -3,6 +3,7 @@ package compile.rx;
 import compile.basics.Keywords;
 import compile.basics.Keywords.OP;
 
+import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
@@ -74,7 +75,9 @@ public abstract class RxTree {
         public OP op;//, parentOp;//--
         public boolean not;         //--
         public int level, id;       //--
-        public Payload payload;
+        public Keywords.RX_PARAM_TYPE paramType;
+        public String param;
+        public Keywords.HANDLER dataType;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -276,7 +279,8 @@ public abstract class RxTree {
         public String toString(){
             String position;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
-            String dispRole = (op == null)? "NULL OP" : op.toString();
+            String dispRole = (op == null)? NULL_TEXT : op.toString();
+            String paramTypeString = (paramType == null)? NULL_TEXT : paramType.toString();
             if(nodes == null){
                 position = "LEAF " + data;
             }
@@ -289,13 +293,9 @@ public abstract class RxTree {
                 String children = String.join(", ", childNodes);
                 position = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
-            return String.format("%d: parent %s -> %s, role = %s, position = %s", 
-                level, dispParent, this.readableId(), dispRole, position
+            return String.format("%d: parent %s -> %s, role = %s, position = %s, paramType=%s, param=%s",
+                level, dispParent, this.readableId(), dispRole, position, paramTypeString, param
             );
         }
-    }
-    public static class Payload{
-        public Keywords.RX_PARAM_TYPE paramType;
-        public String param;
     }
 }

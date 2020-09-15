@@ -11,9 +11,13 @@ $number = 0;
 	CONSTANT $const2 bonkers
 	
 	
-	ENUB	
+	ENUD	
 		$SCOPES sen phrase word char
-	
+		
+	ENUB	
+		$POS 
+			verb noun adjective ...
+			adverb linking article determiner modal // Comment
 
 	RX $myRx ~(LEN(1-6)=true&pos='pos.verb')&(C=c&$const1)|~(E=e&FIRST($const2)=f)&'G'{5-15} 
 		~(H=h&I='i')&(J=j&K=k) 

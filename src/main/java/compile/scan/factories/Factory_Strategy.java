@@ -27,169 +27,65 @@ import toksource.TextSource_file;
  */
 public abstract class Factory_Strategy{ 
     public enum StrategyEnum{       // === added to nodes array ====
-        PUSH_SOURCE_LANG,           // Symbol != HANDLER, setWordGetter
-        POP_ALL_ON_END_SOURCE,      // Symbol != HANDLER, leave target lang on stack
-        PUSH_GOOD_HANDLER,          // PUSH handler if on allowed handler list
-        BACK_POP_ON_ANY_HANDLER,             // The main stack transition: pop current, add new
-        ADD_TEXT,                   // ADD_TO command with text
-        ADD_KEY_VAL_ATTRIB,         // SET_ATTRIB with key = val text
-        ADD_RX_WORD,                // RX only
-        ADD_FX_WORD,                // FX only
-        BACK_POP_ON_TARG_LANG_INSERT,    // Disallow in certain contexts
-        PUSH_TARG_LANG_INSERT,      // Symbol != HANDLER
-        MANAGE_TARG_LANG_INSERT,         // TARGLANG_INSERT background function
-        MANAGE_ENU_LISTS,           // ENUB, ENUD set name attribute
-        MANAGE_IF,                  // State machine to manage if, boolTest,
-        MANAGE_ELSE,                // State machine to manage else,
-        ON_INCLUDE,                 // Add a file to the file stack
-        SET_USER_DEF_NAME,          // Set name attribute
-        READ_CONSTANT,              // Get a single word from ConstantTable
-        READ_VAR,                   // Unroll VAR symbol table data
-        IGNORE_CONSTANT,                 // For ignoring CONSTANT definition
-        BACK_POP_ON_ANY_VAR,        // Where nested var not allowed, pop instead
-        BACK_POP_ON_BAD_VAR,        // Var exists but handler type not allowed
-        PUSH_COMMENT,               // Symbol != HANDLER, Silent push pop and ignore
-        POP_ON_ENDLINE,             // Comment
-        BACK_POP_ON_ITEM_OPEN,      // for IF ELSE
-        BACK_POP_ON_ITEM_CLOSE,     // for IF ELSE
-        POP_ON_ITEM_CLOSE,          // Used by function definitions
-        ERR,                        // Last on list, should not be reached
+        PUSH_SOURCE_LANG        (new PushSourceLang()),                 // Symbol != HANDLER, setWordGetter
+        POP_ALL_ON_END_SOURCE   (new PopAllOnEndSource()),              // Symbol != HANDLER, leave target lang on stack
+        PUSH_GOOD_HANDLER       (new PushGoodHandler()),                // PUSH handler if on allowed handler list
+        BACK_POP_ON_ANY_HANDLER (new BackPopOnAnyHandler()),            // The main stack transition: pop current, add new
+        ADD_TEXT                (new AddText()),                        // ADD_TO command with text
+        ADD_KEY_VAL_ATTRIB      (new AddKeyValAttrib()),                // SET_ATTRIB with key = val text
+        ADD_RX_WORD             (new AddRxWord()),                      // RX only
+        ADD_FX_WORD             (new AddFxWord()),                      // FX only
+        BACK_POP_ON_TARG_LANG_INSERT(new BackPopOnTargLangInsert()),    // Disallow in certain contexts
+        PUSH_TARG_LANG_INSERT   (new PushTargLangInsert()),             // Symbol != HANDLER
+        MANAGE_TARG_LANG_INSERT (new ManageTargLangInsert()),           // TARGLANG_INSERT background function
+        MANAGE_ENU_LISTS        (new ManageEnuLists()),                 // ENUB, ENUD set name attribute
+        MANAGE_IF               (new ManageIf()),                       // State machine to manage if, boolTest,
+        MANAGE_ELSE             (new ManageElse()),                     // State machine to manage else,
+        ON_INCLUDE              (new OnInclude()),                      // Add a file to the file stack
+        SET_USER_DEF_NAME       (new SetUserDefName()),                 // Set name attribute
+        READ_CONSTANT           (new ReadConstant()),                   // Get a single word from ConstantTable
+        READ_VAR                (new ReadVar()),                        // Unroll VAR symbol table data
+        IGNORE_CONSTANT         (new IgnoreConstant()),                 // For ignoring CONSTANT definition
+        BACK_POP_ON_ANY_VAR     (new BackPopOnAnyVar()),                // Where nested var not allowed, pop instead
+        BACK_POP_ON_BAD_VAR     (new BackPopOnBadVar()),                // Var exists but handler type not allowed
+        PUSH_COMMENT            (new PushComment()),                    // Symbol != HANDLER, Silent push pop and ignore
+        POP_ON_ENDLINE          (new PopOnEndLine()),                   // Comment
+        BACK_POP_ON_ITEM_OPEN   (new BackPopOnItemOpen()),              // for IF ELSE
+        BACK_POP_ON_ITEM_CLOSE  (new BackPopOnItemClose()),             // for IF ELSE
+        POP_ON_ITEM_CLOSE       (new PopOnItemClose()),                 // Used by function definitions
+        ERR                     (new Err()),                            // Last on list, should not be reached
         
-        ON_PUSH,                    // PUSH message
-        ON_PUSH_NO_SNIFF,           // Same as ON_PUSH but doesn't call TextSniffer
+        ON_PUSH                 (new OnPush()),                         // PUSH message
+        ON_PUSH_NO_SNIFF        (new OnPushNoSniff()),                  // Same as ON_PUSH but doesn't call TextSniffer
 
-        ON_POP,                     // generate name if not set, POP message
-        ON_POP_NO_SNIFF,            // Same as ON_POP but doesn't call TextSniffer
-        ON_POP_ENU,                 // Dump pushPop history to SymbolTable_Enu; no TextSniffer
-        ASSERT_TOGGLE_ON_PUSH,      // OnPush: RXFX assert RX -> FX, IF_ELSE asserts IF -> ELSE or IF
-        RXFX_ERR_ON_POP,            // OnPop: RXFX ends with FX
-        ON_LAST_POP,                // OnPop: cleanup activities on TargLangBase pop
-        NOP                         // OnPush, OnPop, not added to node
-    }
+        ON_POP                  (new OnPop()),                          // generate name if not set, POP message
+        ON_POP_NO_SNIFF         (new OnPopNoSniff()),                   // Same as ON_POP but doesn't call TextSniffer
+        ON_POP_ENU              (new OnPop_Enu()),                      // Dump pushPop history to SymbolTable_Enu; no TextSniffer
+        ASSERT_TOGGLE_ON_PUSH   (new AssertToggleOnPush()),             // OnPush: RXFX assert RX -> FX, IF_ELSE asserts IF -> ELSE or IF
+        RXFX_ERR_ON_POP         (new RxFxErrOnPop()),                   // OnPop: RXFX ends with FX
+        ON_LAST_POP             (new OnLastPop()),                      // OnPop: cleanup activities on TargLangBase pop
+        NOP                     (new Nop())                             // OnPush, OnPop, not added to node
+        ;
 
-    private static Strategy getStrategy(StrategyEnum strategyEnum){
-        switch (strategyEnum){
-            case PUSH_GOOD_HANDLER:
-                return new PushGoodHandler();
-            case ADD_TEXT:
-                return new AddText();
-            case ADD_KEY_VAL_ATTRIB:
-                return new AddKeyValAttrib();
-            case ADD_RX_WORD:
-                return new AddRxWord();
-            case ADD_FX_WORD:
-                return new AddFxWord();
-            case MANAGE_TARG_LANG_INSERT:
-                return new ManageTargLangInsert();
-            case ON_INCLUDE:
-                return new OnInclude();
-            case PUSH_SOURCE_LANG:
-                return new PushSourceLang();
-            case PUSH_COMMENT:
-                return new PushComment();
-            case BACK_POP_ON_TARG_LANG_INSERT:
-                return new BackPopOnTargLangInsert();
-            case PUSH_TARG_LANG_INSERT:
-                return new PushTargLangInsert();
-            case MANAGE_ENU_LISTS:
-                return new ManageEnuLists();
-            case MANAGE_IF:
-                return new ManageIf();
-            case MANAGE_ELSE:
-                return new ManageElse();
-            case SET_USER_DEF_NAME:
-                return new SetUserDefName();
-            case READ_CONSTANT:
-                return new ReadConstant();
-            case READ_VAR:
-                return new ReadVar();
-            case IGNORE_CONSTANT:
-                return new IgnoreConstant();
-            case BACK_POP_ON_ANY_VAR:
-                return new BackPopOnAnyVar();
-            case BACK_POP_ON_BAD_VAR:
-                return new BackPopOnBadVar();
-            case POP_ON_ENDLINE:
-                return new PopOnEndLine();
-            case BACK_POP_ON_ANY_HANDLER:
-                return new BackPopOnAnyHandler();
-            case BACK_POP_ON_ITEM_OPEN:
-                return new BackPopOnItemOpen();
-            case BACK_POP_ON_ITEM_CLOSE:
-                return new BackPopOnItemClose();
-            case POP_ON_ITEM_CLOSE:
-                return new PopOnItemClose();
-            case POP_ALL_ON_END_SOURCE:
-                return new PopAllOnEndSource();
-            case ERR:
-                return new Err();
-            default:
-                Erlog.get("Strategy").set("Bad strategy enum", strategyEnum.toString());
-                return null;
-        }
-    }
+        public final Strategy strategy;
 
-    private static Strategy getPushStrategy(StrategyEnum strategyEnum){
-        switch (strategyEnum){
-            case ON_PUSH:
-                return new OnPush();
-            case NOP:
-                return new Nop();
-            case ON_PUSH_NO_SNIFF:
-                return new OnPushNoSniff();
-            case ASSERT_TOGGLE_ON_PUSH:
-                return new AssertToggleOnPush();
-            default:
-                Erlog.get("getPushStrategy").set("Bad strategy enum", strategyEnum.toString());
-                return null;
-        }
-    }
-
-    private static Strategy getPopStrategy(StrategyEnum strategyEnum){
-        switch (strategyEnum){
-            case ON_POP:
-                return new OnPop();
-            case NOP:
-                return new Nop();
-            case ON_POP_NO_SNIFF:
-                return new OnPopNoSniff();
-            case ON_POP_ENU:
-                return new OnPop_Enu();
-            case ON_LAST_POP:
-                return new OnLastPop();
-            case RXFX_ERR_ON_POP:
-                return new RxFxErrOnPop();
-            default:
-                Erlog.get("getPopStrategy").set("Bad strategy enum", strategyEnum.toString());
-                return null;
+        StrategyEnum(Strategy strategy) {
+            this.strategy = strategy;
         }
     }
     
-    public static Strategy[] setStrategies( StrategyEnum... enums){
-        Strategy[] currentActions = new Strategy[enums.length];
-        for(int i = 0; i < enums.length; i++){
-            currentActions[i] = getStrategy(enums[i]);
-        }
-        return currentActions;
+    public static StrategyEnum[] setStrategies( StrategyEnum... enums){
+        return enums;
     }
 
-    public static Strategy[] setPushStrategies( StrategyEnum... enums){
-        Strategy[] currentActions = new Strategy[enums.length];
-        for(int i = 0; i < enums.length; i++){
-            currentActions[i] = getPushStrategy(enums[i]);
-        }
-        return currentActions;
+    public static StrategyEnum[] setPushStrategies( StrategyEnum... enums){
+        return enums;
     }
 
-    public static Strategy[] setPopStrategies( StrategyEnum... enums){
-        Strategy[] currentActions = new Strategy[enums.length];
-        for(int i = 0; i < enums.length; i++){
-            currentActions[i] = getPopStrategy(enums[i]);
-        }
-        return currentActions;
+    public static StrategyEnum[] setPopStrategies( StrategyEnum... enums){
+        return enums;
     }
 
-    //vate static final LineBuffer LINEBUFFER = new LineBuffer();
     private static final RxTree RX_TREE = RxLogicTree.getInstance();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
@@ -220,11 +116,17 @@ public abstract class Factory_Strategy{
 
         /**Every scan item has a loop of strategies it calls;
          * A strategy should break the loop if it changes something.
-         * Except for pop actions, each strategy should be temporally uncoupled from other strategies,
-         * meaning that a test performed by one should not affect the actions of another.
-         * Accept non-optimization for encapsulation (may perform the same test twice).
+         *
+         * 1. Strategies are singleton and state-less. Can borrow the state variable in ScanItem, making it
+         *    possible to run multiple state machines with the same strategy.
+         * 2. Except for pop actions, each strategy should be temporally uncoupled from other strategies,
+         *    meaning that a test performed by one should not affect the actions of another.
+         *    Accept non-optimization for encapsulation (may perform the same test twice).
+         * 3. ManageTargLangInsert breaks the no-state rule, but it cleans up before popping.
+         *    TargLangInsert does not allow nesting.
+         *
          * @param text The current word from iterator
-         * @param context The scan item has a loop of strategies it calls
+         * @param context The scan item using the strategy
          * @return True if context should break the loop; true if this object changed something
          */
         public abstract boolean go(String text, Base_ScanItem context);
@@ -436,22 +338,6 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class ReadFun extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            SymbolTable.Base_TextNode node = SYMBOL_TABLE.readVar(text);
-            if(node != null && node.getType().equals(FUN)){
-                if(context.isGoodHandler(FUN)){
-                    P.changeTextSource(node);
-                }
-                else{
-                    Erlog.get(this).set(FUN + " dereference not allowed here", text);
-                }
-                return true;
-            }
-            return false;
-        }
-    }
     public static class IgnoreConstant extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -465,6 +351,7 @@ public abstract class Factory_Strategy{
             return true;
         }
     }
+
     public static class PopOnEndLine extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -615,7 +502,7 @@ public abstract class Factory_Strategy{
         }
     }
     public static class ManageTargLangInsert extends Strategy{
-        private static final LineBuffer LINEBUFFER = new LineBuffer();
+        private static final LineBuffer LINEBUFFER = new LineBuffer();//lineBuffer clears itself on dump
 
         @Override
         public boolean go(String text, Base_ScanItem context){

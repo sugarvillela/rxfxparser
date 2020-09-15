@@ -39,6 +39,26 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
         return symbolTable.get(handler).containsKey(val);
     }
 
+    public Keywords.HANDLER getDataType(String category){
+        for (Map.Entry<Keywords.HANDLER, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+            if(outer.getValue().containsKey(category)){
+                return outer.getKey();
+            }
+        }
+        return null;
+    }
+    public String getCategory(String val){
+        for (Map.Entry<Keywords.HANDLER, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+            for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
+                System.out.println("key: " + inner.getValue());
+                if(((SymbolTableNode)inner.getValue()).contains(val)){
+                    return inner.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     protected Base_ParseItem get(ScanNode node){
         return new SymbolTableNode(node, this.symbolTable);

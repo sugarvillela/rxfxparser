@@ -2,6 +2,8 @@ package compile.rx;
 
 import static compile.basics.Keywords.OP.AND;
 import static compile.basics.Keywords.OP.OR;
+import static compile.basics.Keywords.RX_PARAM_TYPE.CATEGORY;
+import static compile.basics.Keywords.RX_PARAM_TYPE.CATEGORY_ITEM;
 import static compile.basics.Keywords.TEXT_FIELD_NAME;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
@@ -10,8 +12,10 @@ import static compile.basics.Keywords.OP.OPAR;
 import static compile.basics.Keywords.OP.SQUOTE;
 import java.util.ArrayList;
 
+import compile.basics.Keywords;
 import compile.rx.ut.RxParamUtil;
 import compile.symboltable.ConstantTable;
+import compile.symboltable.SymbolTable_Enu;
 import toksource.ScanNodeSource;
 import toksource.TextSource_list;
 
@@ -41,10 +45,13 @@ public class RxLogicTree extends RxTree{
             more |= root.unwrap(OPAR.asChar, CPAR.asChar);
             more |= root.unquote(SQUOTE.asChar);
         }while(more);
-        readConstants(root);    // read constants before extend
-        extendLeaves(root);     // fix, split and unwrap
-        readConstants(root);    // read constants again after extend
-        setFunReferences(root);
+        ArrayList<TreeNode> leaves = leaves(root);
+        readConstants(leaves);    // read constants before extend
+        extendLeaves(leaves);     // fix, split and unwrap
+        leaves = leaves(root);    // recalculate after extend
+        readConstants(leaves);    // read constants again after extend
+        setPayloads(leaves);
+        setDataTypes(leaves);
         return root;
     }
     
@@ -98,8 +105,7 @@ public class RxLogicTree extends RxTree{
         return reroot;
     }
 
-    private void readConstants(TreeNode root){
-        ArrayList<TreeNode> leaves = leaves(root);
+    private void readConstants(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
             String read = CONSTANT_TABLE.readConstant(leaf.data);
             if(read != null){
@@ -107,8 +113,7 @@ public class RxLogicTree extends RxTree{
             }
         }
     }
-    private void extendLeaves(TreeNode root){
-        ArrayList<TreeNode> leaves = leaves(root);
+    private void extendLeaves(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
             char splitChar = findSplitChar(leaf.data);
             if(splitChar == '\0'){  // The field name is optional; add default text field name
@@ -137,20 +142,49 @@ public class RxLogicTree extends RxTree{
         return '\0';
     }
 
-    private void setFunReferences(TreeNode root){
-        ArrayList<TreeNode> leaves = leaves(root);
+    private void setPayloads(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
-            leaf.payload = new Payload();
+
             PARAM_UTIL.findAndSetParam(leaf.data);
-            leaf.payload.paramType = PARAM_UTIL.getParamType();
+            leaf.paramType = PARAM_UTIL.getParamType();
+
             if(PARAM_UTIL.isFun()){
                 leaf.data = PARAM_UTIL.getTruncated();
-                leaf.payload.param = PARAM_UTIL.getParam();
-                System.out.print("found rx function:" + leaf.data);
+                leaf.param = PARAM_UTIL.getParam();
+                //System.out.print("found rx function:" + leaf.data);
             }
-            System.out.printf(":  %s: %s - %s : %s \n",
-                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
-            );
+//            System.out.printf(":  %s: %s - %s : %s \n",
+//                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
+//            );
+        }
+    }
+    private void setDataTypes(ArrayList<TreeNode> leaves){
+        SymbolTable_Enu symbolTableEnu = SymbolTable_Enu.getInstance();
+        if(symbolTableEnu == null){
+            return;
+        }
+        Keywords.HANDLER dataType;
+        Keywords.RX_PARAM_TYPE prevParamType = null, currParamType = null;
+        String category;
+        for(TreeNode leaf : leaves){
+            if(leaf.paramType == null){
+                System.out.println("missing param type: " + leaf.data);
+                continue;
+            }
+            if(!leaf.paramType.isFun){
+                if((dataType = symbolTableEnu.getDataType(leaf.data)) != null){
+                    leaf.dataType = dataType;
+                    currParamType = CATEGORY;
+                }
+                else if((category = symbolTableEnu.getCategory(leaf.data)) != null){
+                    //leaf.dataType = dataType;
+                    currParamType = CATEGORY_ITEM;
+                }
+            }
+
+//            System.out.printf(":  %s: %s - %s : %s \n",
+//                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
+//            );
         }
     }
 }

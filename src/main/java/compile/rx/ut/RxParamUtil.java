@@ -56,6 +56,9 @@ public class RxParamUtil {
     private void identifyPattern(String text){
         Matcher matcher;
         for(paramType = 0; paramType < types.length; paramType++){
+            if(types[paramType].pattern == null){
+                continue;
+            }
             matcher = types[paramType].pattern.matcher(text);
             if(matcher.find()){
                 if(types[paramType].isFun){
