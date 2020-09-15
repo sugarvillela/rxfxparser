@@ -1,12 +1,9 @@
-package demos;
+package compile.rx;
 
+import compile.basics.Keywords;
 import compile.basics.Keywords.OP;
-import compile.basics.Keywords.KWORD;
-import static compile.basics.Keywords.OP.AND;
-import static compile.basics.Keywords.OP.OR;
-import static compile.basics.Keywords.OP.EQUAL;
-import static compile.basics.Keywords.OP.GT;
-import static compile.basics.Keywords.OP.LT;
+
+import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
 import compile.basics.Factory_Node;
@@ -65,7 +62,7 @@ public abstract class RxTree {
     }
     
     public abstract TreeNode treeFromRxWord(String text);
-    public abstract ArrayList<Factory_Node.RxScanNode> treeToScanNodeList(TreeNode root);
+    public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root, String lineCol);
     public abstract TreeNode treeFromScanNodeSource(ArrayList<String> cmdList);
     
     public static class TreeNode{
@@ -73,11 +70,11 @@ public abstract class RxTree {
         private static final Unique UQ = new Unique();
         public ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
-        //public KWORD connector;     //--
         public String data;         //--
         public OP op;//, parentOp;//--
         public boolean not;         //--
         public int level, id;       //--
+        public Payload payload;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -124,29 +121,11 @@ public abstract class RxTree {
             }
             return false;
         }
-//        public void setConnector(){
-//            switch(op){
-//                case CHAR_AND:
-//                    connector = RX_AND1;
-//                    break;
-//                case CHAR_OR:
-//                    connector = RX_OR1;
-//                    break;
-//                case CHAR_EQUAL:
-//                    connector = RX_EQUAL;
-//                    break;
-//                case CHAR_GT:
-//                    connector = RX_GT;
-//                    break;
-//                case CHAR_LT:
-//                    connector = RX_LT;
-//                    break;
-//            }
-//        }
+
         public boolean negate(){
             if(data != null){
                 int i = 0;
-                while(data.charAt(i) == '~'){
+                while(data.charAt(i) == NOT.asChar){
                     not = !not;
                     i++;
                 }
@@ -157,7 +136,7 @@ public abstract class RxTree {
                 }
                 return false;
             }
-            else {//if(nodes != null)
+            else {
                 boolean more = false;
                 for(TreeNode node : nodes){
                     more |= node.negate();
@@ -178,19 +157,19 @@ public abstract class RxTree {
         }
         private boolean unwrap(boolean changed, char first, char last){
             int brace = 0, len = data.length();
-            boolean outer = true;
+            boolean outer = true;                   // Stays true if {a=b} or {{a=b}&{c=d}}
             for(int i = 0; i<len; i++){
                 if(data.charAt(i) == first){
                     brace++;
                 }
                 else if(data.charAt(i) == last){
                     brace--;
-                    if(brace == 0 && i != len - 1){// {a}&{b}
+                    if(brace == 0 && i != len - 1){// Finds {a}&{b}
                         outer = false;
                     }
                 }
             }
-            if(brace != 0){// {a}}
+            if(brace != 0){// Finds {a}}
                 Erlog.get(this).set("Symbol mismatch", data);
                 return false;
             }
@@ -208,33 +187,24 @@ public abstract class RxTree {
                 }
                 return more;
             }
-            if(data == null){
-                return false;
-            }
-            int len = data.length(), count = 0;
-            for(int i = 0; i<len; i++){
-                if(data.charAt(i) == quote){
-                    count++;
+            if(data != null){
+                int len = data.length(), count = 0;
+                for(int i = 0; i<len; i++){
+                    if(data.charAt(i) == quote){
+                        count++;
+                    }
                 }
-            }
-            if(count % 2 != 0){// ''a' mismatch
-                System.out.println(data);
-                Erlog.get(this).set("Unclosed quote", data);
-                return false;
-            }
-            if(count > 2){// 'a'='b' ignore until later
-                return false;
-            }
-            int j = 0;
-            while(data.charAt(j) == quote && quote == data.charAt(len - j - 1)){
-                //System.out.println(i + " : " + (len - i) + " : " + data.charAt(i) + " : " + data.charAt(len - i));
-                j++;
-            }
-            if(j > 0){
-                data = data.substring(j, len - j);
-                //System.out.println(level + ": unwrap: " + data);
+                if(count % 2 != 0){// ''a' mismatch
+                    Erlog.get(this).set("Unclosed quote", data);
+                    return false;
+                }
+                if(count != 2 || data.charAt(0) != quote || quote != data.charAt(len - 1)){// 'a'='b' ignore until later
+                    return false;
+                }
+                data = data.substring(1, len - 1);
                 return true;
             }
+
             return false;
         }
         public void addChild(TreeNode node){
@@ -323,5 +293,9 @@ public abstract class RxTree {
                 level, dispParent, this.readableId(), dispRole, position
             );
         }
+    }
+    public static class Payload{
+        public Keywords.RX_PARAM_TYPE paramType;
+        public String param;
     }
 }

@@ -34,7 +34,7 @@ import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.ScanNode;
 import compile.basics.IParseItem;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected ScanNode node;
@@ -50,10 +50,10 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     }
     
     @Override
-    public void addTo(HANDLER handler, KWORD key, String val) {}
+    public void addTo(HANDLER handler, FIELD key, String val) {}
     
     @Override
-    public void setAttrib(HANDLER handler, KWORD key, String val) {
+    public void setAttrib(HANDLER handler, FIELD key, String val) {
         switch (key){
             case DEF_NAME:
                 defName = val;

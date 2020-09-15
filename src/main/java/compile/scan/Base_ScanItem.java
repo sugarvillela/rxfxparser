@@ -22,11 +22,12 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
     protected Strategy[] strategies, onPushStrategies, onPopStrategies;
     protected String defName;
-    protected int loIndex, hiIndex;
+    protected int state, loIndex, hiIndex;
     protected final TextSniffer textSniffer;
     
     public Base_ScanItem(){
         textSniffer = TextSniffer.getInstance();
+        state = 0;
     }
 
     @Override
@@ -55,10 +56,6 @@ public abstract class Base_ScanItem extends Base_StackItem{
         hiIndex = ((Class_Scanner)P).getScanNodeList().size();
 //        String handlerStr = (h == null)? "Null Handler" : h.toString();
 //        System.out.println("Base_ScanItem onPop: " + handlerStr + ", loIndex: " + hiIndex);
-//        if(defName != null){
-//            ArrayList<ScanNode> sublist = new ArrayList<>(((Class_Scanner)P).getScanNodeList().subList(loIndex, hiIndex));
-//            Commons.disp(sublist, "Base_ScanItem onPop: " + handlerStr);
-//        }
     }
 
     public void pushPop(String text) {
@@ -89,9 +86,26 @@ public abstract class Base_ScanItem extends Base_StackItem{
     public String getDefName(){
         return this.defName;
     }
-    
+
+    public void setState(int state){
+        this.state = state;
+    }
+    public int getState(){
+        return this.state;
+    }
+    public boolean isDoneState(){
+        return state == 0;
+    }
+    public void assertDoneState(){
+        if(state != 0){
+            er.set("A language structure is incomplete");
+        }
+    }
     public final void addNode(ScanNode node){
         ((Class_Scanner)P).addNode(node);
+    }
+    public final void addNodes(ArrayList<ScanNode> newNodes){
+        ((Class_Scanner)P).addNodes(newNodes);
     }
 
     public final ArrayList<ScanNode> getScanNodeList(){

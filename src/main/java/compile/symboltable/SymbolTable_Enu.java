@@ -21,7 +21,7 @@ public class SymbolTable_Enu extends RxlxReader_Enu {//
     }
 
     @Override
-    public void addTo(Keywords.HANDLER handler, Keywords.KWORD key, String val) {
+    public void addTo(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
         SymbolTableNode symbolTableNode = ((SymbolTableNode)symbolTable.get(handler).get(currName));
         if(symbolTableNode.contains(val)){
             Erlog.get(this).set(
@@ -37,7 +37,7 @@ public class SymbolTable_Enu extends RxlxReader_Enu {//
     }
 
     @Override
-    public void setAttrib(Keywords.HANDLER handler, Keywords.KWORD key, String val) {
+    public void setAttrib(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
         currName = val;
         if(symbolTable.get(handler).containsKey(val)){
             Erlog.get(this).set(
@@ -52,7 +52,7 @@ public class SymbolTable_Enu extends RxlxReader_Enu {//
                     currName,
                     this.get(
                         new Factory_Node.ScanNode(
-                            er.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, handler, key, val
+                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, handler, key, val
                         )
                     )
             );

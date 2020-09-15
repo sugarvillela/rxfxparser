@@ -6,7 +6,7 @@ import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.HANDLER.RX_BUILDER;
 import compile.basics.Keywords.OP;
-import demos.RxTree.TreeNode;
+import compile.rx.RxTree.TreeNode;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -28,7 +28,7 @@ public class Factory_Node {
                 tok[0],
                 Keywords.CMD.get(tok[1]),
                 handler,
-                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.fromString(tok[3]),
+                NULL_TEXT.equals(tok[3])? null : Keywords.FIELD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
         );
     }
@@ -39,10 +39,10 @@ public class Factory_Node {
     public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, String setData){
         return new ScanNode(null, setCommand, setHandler, null, setData);
     }
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.KWORD setKWord){
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord){
         return new ScanNode(null, setCommand, setHandler, setKWord, "");
     }
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.KWORD setKWord, String setData){
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord, String setData){
         return new ScanNode(null, setCommand, setHandler, setKWord, setData);
     }
     /** node for input and output list */
@@ -52,10 +52,10 @@ public class Factory_Node {
         public String lineCol;
         public Keywords.CMD cmd;
         public Keywords.HANDLER h;
-        public Keywords.KWORD k;
+        public Keywords.FIELD k;
         public String data;
         
-        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.KWORD setKWord, String setData){
+        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord, String setData){
             this.lineCol = lineCol;
             h = setHandler;
             cmd = setCommand;

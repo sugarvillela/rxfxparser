@@ -1,4 +1,4 @@
-package compile.scan.ut;
+package compile.rx.ut;
 
 import compile.basics.Keywords.FUNCT;
 import erlog.Erlog;
@@ -19,7 +19,7 @@ public class RxValidator {
     private final Pattern FUNCT_BRACES = Pattern.compile("\\([0-9]*\\)$");
     private String truncated, param;
     
-    public boolean assertValidRxWord(String text){
+    public boolean assertValidRxWord(String text){// Early test on whole word
         if(DUP_SYMBOLS.matcher(text).matches()){
             Erlog.get(this).set( "Single & | ~ required", text);
             return false;
@@ -30,44 +30,27 @@ public class RxValidator {
         }
         return true;
     }
-    
-    public boolean findAndSetParam(String text){
-        return(
-            getParamFromBraces(text) && assertRxFunction(truncated)
-        );
-    }
-    public String getTruncated(){
-        return truncated;
-    }
-    public String getParam(){
-        return param;
-    }
-    public boolean getParamFromBraces(String text){
-        Matcher matcher = FUNCT_BRACES.matcher(text);
-        if(matcher.find()){
-            truncated = matcher.replaceFirst("");
-            String braces = matcher.group();
-            if(braces.length() > 2){
-                param = braces.substring(1, braces.length() - 1);
-            }
-            else{
-                param = null; 
-            }
-            System.out.println(truncated);
-            System.out.println(param);
-            return true;
-        }
-        System.out.println("nope");
-        return false;
-    }
+
     public boolean assertRxFunction(String text){
-        for(FUNCT f : FUNCT.values()){
-            if(f.toString().equals(text)){
-                return true;
-            }
+        FUNCT f = FUNCT.get(text);
+        if(f == null){
+            Erlog.get(this).set( "Invalid RX Function name", text);
+            return false;
         }
-        Erlog.get(this).set( "Invalid RX Function name", text);
-        return false;
+        return true;
+    }
+    public boolean assertValidRange(String range){
+        String[] toks = range.split("-");
+        boolean good = false;
+        if(toks.length == 2){
+            try{
+                good = Integer.parseInt(toks[0]) < Integer.parseInt(toks[1]);
+            }catch(NumberFormatException e){ }
+        }
+        if(!good){
+            Erlog.get(this).set( "Invalid RX Function range", range);
+        }
+        return good;
     }
     
     // TODO

@@ -1,11 +1,11 @@
 package compile.basics;
 
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 
 public interface IParseItem {
     
-    void addTo(HANDLER handler, KWORD key, String val);
-    void setAttrib(HANDLER handler, KWORD key, String val);
+    void addTo(HANDLER handler, FIELD key, String val);
+    void setAttrib(HANDLER handler, FIELD key, String val);
     
 }

@@ -9,7 +9,7 @@ public class TextSniffer {
 
     private TextSniffer(){
         symbolTest = SymbolTest.getInstance();
-        factoryTextNode = Factory_TextNode.getInstance();
+        factoryTextNode = SymbolTable.getInstance();
         state = WAIT;
     }
 
@@ -25,7 +25,7 @@ public class TextSniffer {
     private int popCount;
 
     private final SymbolTest symbolTest;
-    private final Factory_TextNode factoryTextNode;
+    private final SymbolTable factoryTextNode;
     Base_ScanItem scanItem;
 
     public void onPush(Base_ScanItem scanItem){

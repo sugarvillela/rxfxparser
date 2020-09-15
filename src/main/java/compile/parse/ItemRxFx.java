@@ -2,7 +2,7 @@ package compile.parse;
 
 import compile.basics.Factory_Node;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 import static compile.basics.Keywords.HANDLER.RX;
 import static compile.basics.Keywords.HANDLER.FX;
 
@@ -21,8 +21,8 @@ public class ItemRxFx extends Base_ParseItem{
         );
     }
     @Override
-    public void addTo(HANDLER handler, KWORD key, String val) {
-//        if(key == KWORD.ABOVE){
+    public void addTo(HANDLER handler, FIELD key, String val) {
+//        if(key == FIELD.ABOVE){
 //            switch(handler){
 //                case RX:
 //                    if(toggle != FX){

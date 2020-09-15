@@ -1,7 +1,0 @@
-# Generated file, do not edit
-# Last write: 09/03/2020 21:17:09
-# Lists all top-level identifiers defined in .rxfx source file
-Line 0 Word 0,PUSH,SYMBOL_TABLE,NULL,NULL
-Line 0 Word 0,ADD_TO,RXFX,DEF_NAME,myScope
-Line 0 Word 0,ADD_TO,RX,DEF_NAME,myRx
-Line 0 Word 0,POP,SYMBOL_TABLE,NULL,NULL

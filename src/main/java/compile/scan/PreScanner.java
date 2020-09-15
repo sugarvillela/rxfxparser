@@ -2,15 +2,15 @@ package compile.scan;
 
 import compile.basics.Base_StackItem;
 import compile.basics.CompileInitializer;
-import compile.symboltable.Factory_TextNode;
+import compile.symboltable.ConstantTable;
+import compile.symboltable.SymbolTable;
 import compile.symboltable.SymbolTest;
+import erlog.Erlog;
 import toksource.Base_TextSource;
-import toksource.TextSource_file;
 import toksource.TokenSource;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.HANDLER.FUN;
-import static compile.basics.Keywords.HANDLER.INCLUDE;
 
 /** A stripped down scanner that only sees target language, source language,
  * include statements and function definitions.
@@ -39,7 +39,8 @@ public class PreScanner extends Base_Scanner {
     //private final Pattern FUN_IDENTIFIER = Pattern.compile("^\\"+USERDEF_OPEN+"[a-zA-z]+["+ITEM_OPEN+"]?$");
     //private final Pattern OPENER = Pattern.compile("^["+ITEM_OPEN+"]");
 
-    private Factory_TextNode factoryTextNode;
+    private SymbolTable factoryTextNode;
+    private ConstantTable constantTable;
     private final SymbolTest symbolTest;
 
     @Override
@@ -49,7 +50,8 @@ public class PreScanner extends Base_Scanner {
         }
         this.onTextSourceChange(fin);
         CompileInitializer.getInstance().setCurrParserStack(this);
-        this.factoryTextNode = Factory_TextNode.getInstance();
+        this.factoryTextNode = SymbolTable.getInstance();
+        this.constantTable = ConstantTable.getInstance();
 
         String text;
 
@@ -59,7 +61,7 @@ public class PreScanner extends Base_Scanner {
         // start in line mode for target language
         fin.setLineGetter();
         while(true){// outer loop on INCLUDE file stack level
-            er.setTextStatusReporter(fin);
+            Erlog.setTextStatusReporter(fin);
             while(fin.hasNext()){// inner loop on current file
                 do{
                     text = fin.next();
@@ -83,22 +85,24 @@ public class PreScanner extends Base_Scanner {
         //symbolTable_fun.testItr();
     }
 
-    public void include(String fileName){
-        if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
-            fileName += SOURCE_FILE_EXTENSION;
-        }
-        TokenSource newFile = new TokenSource(new TextSource_file(fileName));
-        if(newFile.hasData()){
-            fileStack.push(fin);
-            fin = newFile;
-            //CompileInitializer.getInstance().onTextSourceChange(fin, this);
-        }
-        else{
-            er.set("INCLUDE: bad file name", fileName);
-        }
-    }
+//    public void include(String fileName){
+//        if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
+//            fileName += SOURCE_FILE_EXTENSION;
+//        }
+//        TokenSource newFile = new TokenSource(new TextSource_file(fileName));
+//        if(newFile.hasData()){
+//            fileStack.push(fin);
+//            fin = newFile;
+//            //CompileInitializer.getInstance().onTextSourceChange(fin, this);
+//        }
+//        else{
+//            er.set("INCLUDE: bad file name", fileName);
+//        }
+//    }
 
     private abstract class Base_PreScanItem extends Base_StackItem {
+        protected static final int WAIT = 0, IDENTIFY = 1, OPEN = 2, PARSE = 3, TO_INCLUDE = 4;
+
         @Override
         public void onPush() {}
 
@@ -117,7 +121,6 @@ public class PreScanner extends Base_Scanner {
         }
     }
     private class SourceLanguage extends Base_PreScanItem {
-        private static final int TO_INCLUDE = 0, WAIT = 1, IDENTIFY = 2, OPEN = 3, PARSE = 4;
         private int state;
 
         public SourceLanguage(){
@@ -133,44 +136,39 @@ public class PreScanner extends Base_Scanner {
                 popAllSource();
             }
             switch(state){
-                case TO_INCLUDE:// Changing text source to read file as predicted
+                case TO_INCLUDE:// Changing text source to read file as expected by scanner
                     state = WAIT;
                     include(text);
                     break;
                 case WAIT:// Wait for function keyword or include keyword
-                    if(INCLUDE.toString().equals(text)){
-                        state = TO_INCLUDE;
-                    }
-                    else if(FUN.toString().equals(text)){
-                        //System.out.println("found FUN: "+text);
-                        factoryTextNode.startTextNode(FUN);
-                        state = IDENTIFY;
+                    HANDLER handler = HANDLER.fromString(text);
+                    if(handler != null){
+                        switch(handler){
+                            case FUN:
+                                factoryTextNode.startTextNode(FUN);
+                                state = IDENTIFY;
+                                break;
+                            case INCLUDE:
+                                push(new IncludeHandler());
+                                break;
+                            case CONSTANT:
+                                push(new ConstantHandler());
+                                break;
+                        }
                     }
                     break;
                 case IDENTIFY:// Function keyword must be followed by a user def identifier
                     if(symbolTest.isUserDef(text)){
-                        String defName;
-                        //System.out.println(text.substring(len - 1));
-                        if(text.endsWith(ITEM_OPEN)){
-                            defName = text.substring(1, text.length() - 1);
-                            state = PARSE;
-                        }
-                        else{
-                            defName = text.substring(1);
-                            state = OPEN;
-                        }
+                        String defName = symbolTest.stripUserDef(text);
                         symbolTest.assertNew(defName);
                         factoryTextNode.setTextName(defName);
+                        state = OPEN;
                     }else{
                         er.set("Expected " + USERDEF_OPEN + "identifier here", text);
                     }
                     break;
                 case OPEN:// look for opening symbol
-                    if(text.startsWith(ITEM_OPEN)){
-                        //System.out.println("parse: " + text);
-                        if(text.length() > ITEM_OPEN.length()){
-                            factoryTextNode.addWord(text.substring(ITEM_OPEN.length()));
-                        }
+                    if(ITEM_OPEN.equals(text)){
                         state = PARSE;
                     }else{
                         er.set("Expected " + ITEM_OPEN + "identifier here", text);
@@ -188,6 +186,47 @@ public class PreScanner extends Base_Scanner {
                     break;
             }
 
+        }
+    }
+    private class IncludeHandler extends Base_PreScanItem {
+        @Override
+        public void pushPop(String text) {
+            if(symbolTest.isUserDef(text)){
+                String defName = symbolTest.stripUserDef(text);
+                if(constantTable.isConstant(defName)){
+                    include(constantTable.getValue(defName));
+                }
+            }else{
+                include(text);
+            }
+            pop();
+        }
+    }
+    private class ConstantHandler extends Base_PreScanItem {
+        private int state;
+
+        public ConstantHandler(){
+            state = IDENTIFY;
+        }
+        @Override
+        public void pushPop(String text) {
+            switch(state){
+                case IDENTIFY:
+                    if(symbolTest.isUserDef(text)){
+                        constantTable.startConstant();
+                        String defName = symbolTest.stripUserDef(text);
+                        symbolTest.assertNew(defName);
+                        constantTable.setConstantName(defName);
+                        state = PARSE;
+                    }else{
+                        er.set("Expected " + USERDEF_OPEN + "identifier here", text);
+                    }
+                    break;
+                case PARSE:
+                    constantTable.setValue(text);
+                default:
+                    pop();
+            }
         }
     }
 }

@@ -59,35 +59,35 @@ class ErlogCore {//package private class
     
     /**Set error, let current instance of ITextSource provide line, col number
      * @param text describes the error */
-    public void set( String text, String className ){
-        this.behavior.set( text, className );
+    public static void set( String text, String className ){
+        instance.behavior.set( text, className );
     }
     
     /**Writes accumulated errors to file */
-    public void finish(){
-        this.behavior.finish();
+    public static void finish(){
+        instance.behavior.finish();
     }
     
     /**Displays accumulated errors */
-    public void disp(){
-        this.behavior.disp();
+    public static void disp(){
+        instance.behavior.disp();
     }
     
     /** @param textStatus provides line, col status for error report */
-    public void setTextStatusReporter(ITextStatus textStatus){
+    public static void setTextStatusReporter(ITextStatus textStatus){
         if(textStatus != null){
-            this.textStatus = textStatus;
+            instance.textStatus = textStatus;
         }
     }
     
     /** @return object to report parsing status, if any */
-    public ITextStatus getTextStatusReporter(){
-        return textStatus;
+    public static ITextStatus getTextStatusReporter(){
+        return instance.textStatus;
     }
     
     /** No line, column status in error report */
-    public void clearTextStatusReporter(){
-        textStatus = nullStatus;
+    public static void clearTextStatusReporter(){
+        instance.textStatus = instance.nullStatus;
     }
     
     /*=====Singleton Pattern Implementation===================================*/
@@ -97,14 +97,14 @@ class ErlogCore {//package private class
     public static void init(int setBehavior){
         instance = new ErlogCore(setBehavior);
     }
-    public static ErlogCore getCurrentInstance(){
-        if(instance == null){
-            throw new IllegalStateException(
-                "Erlog must be initialized before use"
-            );
-        }
-        return instance;
-    }
+//    public static ErlogCore getInstance(){
+//        if(instance == null){
+//            throw new IllegalStateException(
+//                "Erlog must be initialized before use"
+//            );
+//        }
+//        return instance;
+//    }
     
     /*=====Behavior strategy implementations==================================*/
     

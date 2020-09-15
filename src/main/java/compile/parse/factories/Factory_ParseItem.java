@@ -4,15 +4,9 @@ package compile.parse.factories;
 import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.parse.Base_ParseItem;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.HANDLER.ATTRIB;
-import static compile.basics.Keywords.HANDLER.ENUB;
-import static compile.basics.Keywords.HANDLER.ENUD;
-import static compile.basics.Keywords.HANDLER.FX;
-import static compile.basics.Keywords.HANDLER.RX;
-import static compile.basics.Keywords.HANDLER.USER_DEF_LIST;
-import static compile.basics.Keywords.HANDLER.USER_DEF_VAR;
+
 import compile.basics.Factory_Node.ScanNode;
 
 import compile.parse.ItemENUB;
@@ -70,11 +64,11 @@ public class Factory_ParseItem {
         public void onPush() {}
         
         @Override
-        public void addTo(HANDLER handler, KWORD key, String val){
+        public void addTo(HANDLER handler, FIELD key, String val){
         }
 
 //        @Override
-//        public void setAttrib(KWORD key, String val){}
+//        public void setAttrib(FIELD key, String val){}
         
         @Override
         public void onPop() {}

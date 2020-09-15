@@ -6,16 +6,13 @@ import compile.basics.Keywords.HANDLER;
 import compile.basics.CompileInitializer;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 import static compile.basics.Keywords.CONT_LINE;
 import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
-import compile.symboltable.Factory_TextNode;
 import toksource.Base_TextSource;
-import toksource.TextSource_file;
 import toksource.TokenSource;
 
 /**Does the language parsing; outputs a list of commands, handlers and text
@@ -110,12 +107,6 @@ public class Class_Scanner extends Base_Scanner {
         backText = repeatThis;
     }
 
-    public void include(String fileName){
-        if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
-            fileName += SOURCE_FILE_EXTENSION;
-        }
-        changeTextSource(new TokenSource(new TextSource_file(fileName)));
-    }
     public ArrayList<ScanNode> getScanNodeList(){
         return this.nodes;
     }
@@ -125,9 +116,9 @@ public class Class_Scanner extends Base_Scanner {
         nodes.add(node);
     }
 
-//    public final void addNodes(ArrayList<ScanNode> newNodes){
-//        nodes.addAll(newNodes);
-//    }
+    public final void addNodes(ArrayList<ScanNode> newNodes){
+        nodes.addAll(newNodes);
+    }
 
     // Serialize and deserialize
 //    private boolean write_rxlx_file(String path){

@@ -1,8 +1,11 @@
 package demos;
 
 import commons.Commons;
+import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
-import demos.RxTree.TreeNode;
+import compile.rx.RxLogicTree;
+import compile.rx.RxTree;
+import compile.rx.RxTree.TreeNode;
 import java.util.ArrayList;//RX_AND, RX_OR, RX_NOT, RX_EQ,
 
 public class RxTree_ {
@@ -30,7 +33,7 @@ public class RxTree_ {
         //rxTree.dispPreOrder(root);
         //rxTree.dispLeaves(root);
         rxTree.dispBreadthFirst(root);
-        ArrayList<RxScanNode> cmdList = rxTree.treeToScanNodeList(root);
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root, "line 0 word 0");
         //Commons.disp(cmdList, "\nCommandList");
         ArrayList<String> strList = scanNodesToString(cmdList);
         TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
@@ -41,7 +44,7 @@ public class RxTree_ {
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.treeFromRxWord(text);
-        ArrayList<RxScanNode> cmdList = rxTree.treeToScanNodeList(root);
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root, "line 0 word 0");
         Commons.disp(cmdList);
         ArrayList<String> strList = scanNodesToString(cmdList);
         TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
@@ -83,9 +86,9 @@ public class RxTree_ {
     }
     
 
-    public ArrayList<String> scanNodesToString(ArrayList<RxScanNode> scanNodes){
+    public ArrayList<String> scanNodesToString(ArrayList<Factory_Node.ScanNode> scanNodes){
         ArrayList<String> nodesToString = new ArrayList<>();
-        for(RxScanNode node : scanNodes){
+        for(Factory_Node.ScanNode node : scanNodes){
             nodesToString.add(node.toString());
         }
         return nodesToString;

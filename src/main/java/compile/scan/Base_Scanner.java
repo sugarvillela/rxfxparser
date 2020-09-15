@@ -3,8 +3,12 @@ package compile.scan;
 import compile.basics.Base_Stack;
 import compile.basics.CompileInitializer;
 import toksource.Base_TextSource;
+import toksource.TextSource_file;
+import toksource.TokenSource;
 
 import java.util.Stack;
+
+import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 public class Base_Scanner  extends Base_Stack {
     protected final String inName;
@@ -14,6 +18,13 @@ public class Base_Scanner  extends Base_Stack {
         this.inName = CompileInitializer.getInstance().getInName();
         fileStack = new Stack<>();
         this.fin = fin;
+    }
+
+    public void include(String fileName){
+        if(!fileName.endsWith(SOURCE_FILE_EXTENSION)){
+            fileName += SOURCE_FILE_EXTENSION;
+        }
+        changeTextSource(new TokenSource(new TextSource_file(fileName)));
     }
 
     public void changeTextSource(Base_TextSource source){

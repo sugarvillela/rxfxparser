@@ -4,7 +4,7 @@ package compile.parse;
 import compile.basics.Factory_Node;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 import static compile.basics.Keywords.HANDLER.RX_WORD;
 
 public class ItemRxWord extends Base_ParseItem{
@@ -25,7 +25,7 @@ public class ItemRxWord extends Base_ParseItem{
     }
 
     @Override
-    public void addTo(HANDLER handler, KWORD key, String val) {
+    public void addTo(HANDLER handler, FIELD key, String val) {
         if(RX_WORD != handler){
             er.set("Dev error", handler.toString());
         }
@@ -37,7 +37,7 @@ public class ItemRxWord extends Base_ParseItem{
     }
 
     @Override
-    public void setAttrib(HANDLER handler, KWORD key, String val) {
+    public void setAttrib(HANDLER handler, FIELD key, String val) {
         switch(key){
             case DEF_NAME:
                 defName = val;

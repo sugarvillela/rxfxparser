@@ -31,12 +31,12 @@ public abstract class RxlxReader extends Base_Stack{
         CompileInitializer compileInitializer = CompileInitializer.getInstance();
         otherParseStack = compileInitializer.getCurrParserStack();
         compileInitializer.setCurrParserStack(this);
-        otherStatusReporter = er.getTextStatusReporter();
-        er.setTextStatusReporter(fin);
+        otherStatusReporter = Erlog.getTextStatusReporter();
+        Erlog.setTextStatusReporter(fin);
     }
     private void resumeOther(){
         CompileInitializer.getInstance().setCurrParserStack(otherParseStack);
-        er.setTextStatusReporter(otherStatusReporter);
+        Erlog.setTextStatusReporter(otherStatusReporter);
     }
     protected final void readFile(){
         pauseOther();

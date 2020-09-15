@@ -1,7 +1,6 @@
 package erlog;
 
-import compile.basics.CompileInitializer;
-import toksource.Base_TextSource;
+import compile.basics.IStackComponent;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
@@ -23,25 +22,23 @@ public class Erlog implements ChangeListener {
     
     private Erlog(String setClassName){
         this.className = setClassName;
-        erlogCore = ErlogCore.getCurrentInstance(); 
+        //erlogCore = ErlogCore.getInstance();
     }
-    public static Erlog get(){
-        return new Erlog("Erlog");
+
+    public static Erlog get(String text){// same erasure for string and object
+        return new Erlog(text);
+    }
+    public static Erlog get(IStackComponent stackComponent){// same erasure for string and object
+        return new Erlog(stackComponent.getDebugName());
     }
     public static Erlog get(Object object){// same erasure for string and object
-        if(object instanceof String){
-            return new Erlog((String)object);
-        }
-        else{
-            return new Erlog(object.getClass().getSimpleName());
-        }
+        return new Erlog(object.getClass().getSimpleName());
     }
-    
     public static void initErlog(int setBehavior){
         ErlogCore.init(setBehavior);
     }
 
-    protected ErlogCore erlogCore;
+    //protected ErlogCore erlogCore;
     protected String className;
     
     /*=====Public API=========================================================*/
@@ -49,43 +46,43 @@ public class Erlog implements ChangeListener {
     /**Set error, let current instance of ITextSource provide line, col number
      * @param message describes the error */
     public void set( String message ){
-        erlogCore.set( message, className );
+        ErlogCore.set( message, className );
     }
     
     /**Set error, let current instance of ITextSource provide line, col number
      * @param message describes the error 
      * @param text text that caused the error */
     public void set( String message, String text ){
-        erlogCore.set( message + ": " + text, className );
+        ErlogCore.set( message + ": " + text, className );
     }
     
     /**Writes accumulated errors to file */
-    public void finish(){
-        erlogCore.finish();
+    public static void finish(){
+        ErlogCore.finish();
     }
     
     /**Displays accumulated errors */
-    public void disp(){
-        erlogCore.disp();
+    public static void disp(){
+        ErlogCore.disp();
     }
     
     /** @param textStatus provides line, col status for error report */
-    public void setTextStatusReporter(ITextStatus textStatus){
-        erlogCore.setTextStatusReporter(textStatus);
+    public static void setTextStatusReporter(ITextStatus textStatus){
+        ErlogCore.setTextStatusReporter(textStatus);
     }
     
     /** @return object to report parsing status, if any */
-    public ITextStatus getTextStatusReporter(){
-        return erlogCore.getTextStatusReporter();
+    public static ITextStatus getTextStatusReporter(){
+        return ErlogCore.getTextStatusReporter();
     }
     
     /** No line, column status in error report */
-    public void clearTextStatusReporter(){
-        erlogCore.clearTextStatusReporter();
+    public static void clearTextStatusReporter(){
+        ErlogCore.clearTextStatusReporter();
     }
 
     @Override
     public void onTextSourceChange(ITextStatus textStatus, ChangeNotifier caller) {
-        erlogCore.setTextStatusReporter(textStatus);
+        ErlogCore.setTextStatusReporter(textStatus);
     }
 }

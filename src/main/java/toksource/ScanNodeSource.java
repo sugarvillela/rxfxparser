@@ -7,7 +7,7 @@ package toksource;
 
 import compile.basics.Factory_Node.RxScanNode;
 import static compile.basics.Factory_Node.RxScanNode.NUM_RX_FIELDS;
-import erlog.Erlog;
+
 import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.basics.Factory_Node.ScanNode;
@@ -65,7 +65,7 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
                 tok[0],
                 Keywords.CMD.get(tok[1]),
                 handler,
-                NULL_TEXT.equals(tok[3])? null : Keywords.KWORD.fromString(tok[3]),
+                NULL_TEXT.equals(tok[3])? null : Keywords.FIELD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
             );
         }

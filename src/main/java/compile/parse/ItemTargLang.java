@@ -4,7 +4,7 @@ package compile.parse;
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 
 public class ItemTargLang extends Base_ParseItem{
     
@@ -13,10 +13,10 @@ public class ItemTargLang extends Base_ParseItem{
     }
 
     @Override
-    public void addTo(HANDLER handler, KWORD key, String val) {}
+    public void addTo(HANDLER handler, FIELD key, String val) {}
 
     @Override
-    public void setAttrib(HANDLER handler, KWORD key, String val) {
+    public void setAttrib(HANDLER handler, FIELD key, String val) {
         switch(key){
             case PROJ_NAME:
                 CompileInitializer.getInstance().setProjName(val);

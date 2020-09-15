@@ -4,12 +4,9 @@ import codegen.Widget;
 import commons.Dev;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
-import compile.symboltable.Factory_TextNode;
+import compile.symboltable.SymbolTable;
 import compile.symboltable.SymbolTable_Enu;
-import compile.symboltable.TextSniffer;
 import erlog.Erlog;
-import toksource.Base_TextSource;
-import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -61,7 +58,7 @@ public class CompileInitializer implements ChangeListener {
 
     }
     public void init(String[] args){
-        inName = (args.length > 0)? args[0] : "semantic";
+        inName = (args.length > 0)? args[0] : "semantic1";
         if(inName.endsWith(SOURCE_FILE_EXTENSION)){
             inName = inName.substring(0, inName.length() - SOURCE_FILE_EXTENSION.length());
             System.out.println(SOURCE_FILE_EXTENSION + " extension not needed.");
@@ -74,7 +71,7 @@ public class CompileInitializer implements ChangeListener {
         System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newEnumSet);
 
         this.addChangeListener(er);
-        this.addChangeListener(Factory_TextNode.getInstance());
+        this.addChangeListener(SymbolTable.getInstance());
 
         PreScanner.init(
             new TokenSource(
@@ -83,7 +80,9 @@ public class CompileInitializer implements ChangeListener {
         );
         PreScanner preScanner = PreScanner.getInstance();
         preScanner.onCreate();
-        //System.out.println(Factory_TextNode.getInstance());
+        System.out.println("\nConstantTable:");
+        //System.out.println(ConstantTable.getInstance());
+        //Factory_TextNode.getInstance().testItr();
         Class_Scanner.init(
             new TokenSource(
                 new TextSource_file(inName + SOURCE_FILE_EXTENSION)
@@ -101,6 +100,7 @@ public class CompileInitializer implements ChangeListener {
 //                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
 //            )
 //        );
+        Erlog.finish();
     }
     private void readArgs(String[] args){
         for(int i = 1; i < args.length; i++){

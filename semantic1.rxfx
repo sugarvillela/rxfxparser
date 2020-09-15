@@ -1,0 +1,29 @@
+<?php
+/* This part has no purpose but to be copied */
+$number = 0;
+
+/*$
+	ATTRIB
+		PROJ_NAME=semantic99
+		NEW_ENUM_SET=true
+	
+	CONSTANT $const1 D=d
+	CONSTANT $const2 bonkers
+	
+	
+	ENUB	
+		$SCOPES sen phrase word char
+	
+
+	RX $myRx ~(LEN(1-6)=true&pos='pos.verb')&(C=c&$const1)|~(E=e&FIRST($const2)=f)&'G'{5-15} 
+		~(H=h&I='i')&(J=j&K=k) 
+	FX fxCommand1 fxCommand2 fxCommandWow
+
+$*/
+
+
+function anotherFunction(){
+	$number+=2;
+}
+
+?>

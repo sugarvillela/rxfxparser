@@ -5,7 +5,7 @@
  */
 package compile.basics;
 
-import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**Contains the language definition, including enums, constants
  *
@@ -42,10 +42,13 @@ public final class Keywords {
         RXFX,
         FOR,
         IF, ELSE,
+        RX, FX, SRCLANG,
+        // Constant types
+        CONSTANT,
         // Non-file-generating handlers
-        RX, FX, SRCLANG, ATTRIB, INCLUDE, FUN, RAW_TEXT,
+        ATTRIB, INCLUDE, FUN, RAW_TEXT,
         // sub-handlers not actually in the language
-        IF_ELSE, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT,
+        IF_ELSE, BOOL_TEST, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT,
         SYMBOL_TABLE, 
         // handlers whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
@@ -67,7 +70,7 @@ public final class Keywords {
 //            return get(text) != null;
 //        }  
     }
-    public enum KWORD{
+    public enum FIELD {
         // Keys for setAttrib()
         // keywords that can be specified in language
         PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_ENUM_SET,
@@ -79,8 +82,8 @@ public final class Keywords {
         //BRANCH, LEAF //tree structure roles
         //, IF, ELIF, ELSE, NEGATE, ENDLINE, PARSE_STATUS
         ;
-        public static KWORD fromString( String text ){
-            for(KWORD k : values()){
+        public static FIELD fromString(String text ){
+            for(FIELD k : values()){
                 if(k.toString().equals(text)){
                     return k;
                 }
@@ -138,9 +141,44 @@ public final class Keywords {
             return null;
         }
     }
+    //EMPTY_PARAM = 0, NUM_PARAM = 1, NUM_RANGE = 2, NUM_RANGE = 3, CONST_PARAM = 4, NO_FUN
 
-    public enum TABLE_TYPE{
-        VAR_TABLE, FUN_TABLE, ENUD_TABLE, ENUB_TABLE, UNKNOWN_TABLE
+    public enum RX_PARAM_TYPE{
+        // Rx Functions
+        EMPTY_PARAM     (0, true,  Pattern.compile("\\(\\)$")),
+        NUM_PARAM       (1, true,  Pattern.compile("\\([0-9]+\\)$")),
+        NUM_RANGE_PARAM (2, true,  Pattern.compile("\\([0-9]+[-][0-9]\\)$")),
+        ALPHA_NUM_PARAM (3, true,  Pattern.compile("\\([A-Za-z0-9_]+\\)$")),
+        CONST_PARAM     (4, true,  Pattern.compile("\\([$][A-Za-z][A-Za-z0-9_]*\\)$")),
+        SINGLE_FIELD    (5, false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
+        DOTTED_FIELD    (6, false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$"))
+        ;
+
+        public final int asInt;
+        public final boolean isFun;
+        public final Pattern pattern;
+        private RX_PARAM_TYPE(int asInt, boolean isFun, Pattern pattern){
+            this.asInt = asInt;
+            this.isFun = isFun;
+            this.pattern = pattern;
+        }
+
+        public static RX_PARAM_TYPE fromInt(int i){
+            for(RX_PARAM_TYPE t : values()){
+                if(t.asInt == i){
+                    return t;
+                }
+            }
+            return null;
+        }
+        public static RX_PARAM_TYPE get( String text ){
+            for(RX_PARAM_TYPE f : values()){
+                if(f.toString().equals(text)){
+                    return f;
+                }
+            }
+            return null;
+        }
     }
     // String constants for switches: defines language behavior
     public static final String CONT_LINE = "...";      // Matlab-like extension
@@ -150,17 +188,10 @@ public final class Keywords {
     public static final String TARGLANG_INSERT_CLOSE = "/*";// pops target language insert
     public static final String ITEM_OPEN = "{";        // surrounds item content
     public static final String ITEM_CLOSE = "}";       // ends item content
-    public static final String USERDEF_OPEN = "$";     // user-defined heading
+    public static final String USERDEF_OPEN = "$";     // user-defined name
     public static final String COMMENT_TEXT = "//";    //
     public static final String TEXT_FIELD_NAME = "text";// class WORD text field
-    
-    public static String fileName_symbolTableAll(){
-        return String.format(
-            "%s_%s_%s", 
-            HANDLER.SYMBOL_TABLE, 
-            "ALL", 
-            CompileInitializer.getInstance().getProjName()) + INTERIM_FILE_EXTENSION;
-    }
+
     public static String fileName_symbolTableEnu(){
         return String.format(
             "%s_%s_%s", 

@@ -9,3 +9,10 @@
 		
 		$ANIMAL 
 			lion tiger zebra bear deer dog cat
+			
+	FUN $yourFun {
+		RXFX 
+			RX yunPattern1 yunPattern2
+			 funPatternC
+			FX yunCommand1
+	}

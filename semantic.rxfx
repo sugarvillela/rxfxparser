@@ -12,9 +12,13 @@ function incNumber(){
 		PROJ_NAME=semantic99
 		NEW_ENUM_SET=true
 	
-	INCLUDE semanticENUB 
+	CONSTANT $const1 billyBob
+	CONSTANT $const2 69
+	CONSTANT $const3 semanticENUB
 	
-	FUN $myFun{
+	INCLUDE $const3 
+	
+	FUN $myFun {
 		RXFX 
 			RX funPatternA funPatternB
 			 funPatternC
@@ -32,11 +36,23 @@ function incNumber(){
 		$yourNumber= subtract();
 		booby();
 	/*
+	IF RX rxPattern {
+		FX fxThang1
+	}
+	ELSE { 
+		FX elseFxThang2
+	}
 	
 
-		RX myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
-		 ~(E=e&F=f)&'G'*
-		FX fxCommand1 fxCommand2 fxCommandWow
+	RX $myRx myPatternIsThis{5-15} ~(A=a&B='b')&(C=c&D=d) 
+	 ~(E=e&F=f)&'G'*
+	FX fxCommand1 fxCommand2 fxCommandWow
+	
+	$myRx
+	
+	FX holyGuacamole farmBoogie
+	
+	$myFun
 		
 		
 	ENUD

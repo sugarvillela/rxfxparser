@@ -18,9 +18,10 @@ public class Factory_ScanItem extends Factory_Strategy{
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
-                        POP_ON_KEYWORD,
-                        POP_ON_TARG_LANG_INSERT,
-                        POP_ON_VAR,
+                        BACK_POP_ON_ANY_HANDLER,
+                        BACK_POP_ON_TARG_LANG_INSERT,
+                        READ_CONSTANT,
+                        BACK_POP_ON_ANY_VAR,
                         MANAGE_ENU_LISTS,
                         ADD_TEXT
                     ),
@@ -41,10 +42,10 @@ public class Factory_ScanItem extends Factory_Strategy{
                     null,
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
-                        POP_ON_TARG_LANG_INSERT,
+                        BACK_POP_ON_TARG_LANG_INSERT,
                         PUSH_COMMENT,
-                        POP_ON_VAR,
-                        POP_ON_KEYWORD,
+                        BACK_POP_ON_ANY_VAR,
+                        BACK_POP_ON_ANY_HANDLER,
                         ADD_KEY_VAL_ATTRIB
                     ),
                     setPushStrategies(NOP),// silent push pop
@@ -53,12 +54,11 @@ public class Factory_ScanItem extends Factory_Strategy{
             case SRCLANG:
                 return new ScanItem(
                     h, 
-                    new HANDLER[]{ATTRIB, ENUB, ENUD, INCLUDE, FUN, RXFX, RX, FX, SCOPE, IF_ELSE, IF, ELSE },
+                    new HANDLER[]{ATTRIB, ENUB, ENUD, INCLUDE, FUN, RXFX, RX, FX, SCOPE, IF_ELSE, IF, ELSE, CONSTANT },
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_COMMENT,
                         PUSH_TARG_LANG_INSERT,
-                        READ_FUN,
                         READ_VAR,
                         PUSH_GOOD_HANDLER,
                         ERR
@@ -69,7 +69,18 @@ public class Factory_ScanItem extends Factory_Strategy{
                         h,
                         null,
                         setStrategies(
+                                READ_CONSTANT,
                                 ON_INCLUDE
+                        ),
+                        setPushStrategies(NOP),// silent push pop
+                        setPopStrategies(NOP)
+                );
+            case CONSTANT:
+                return new ScanItem(
+                        h,
+                        null,
+                        setStrategies(
+                                IGNORE_CONSTANT
                         ),
                         setPushStrategies(NOP),// silent push pop
                         setPopStrategies(NOP)
@@ -80,12 +91,13 @@ public class Factory_ScanItem extends Factory_Strategy{
                     new HANDLER[]{RX, FX},
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
-                        POP_ON_TARG_LANG_INSERT,
+                            BACK_POP_ON_TARG_LANG_INSERT,
                         PUSH_COMMENT,
                         READ_VAR,
                         SET_USER_DEF_NAME,
                         PUSH_GOOD_HANDLER,
-                        POP_ON_KEYWORD,
+                            BACK_POP_ON_ANY_HANDLER,
+                            BACK_POP_ON_BAD_VAR,
                         ERR
                     ),
                     setPopStrategies(RXFX_ERR_ON_POP, ON_POP)
@@ -96,12 +108,13 @@ public class Factory_ScanItem extends Factory_Strategy{
                     null,
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
-                        POP_ON_TARG_LANG_INSERT,
+                            BACK_POP_ON_TARG_LANG_INSERT,
+                        BACK_POP_ON_ITEM_OPEN,
                         PUSH_COMMENT,
                         SET_USER_DEF_NAME,
                         READ_VAR,
-                        POP_ON_VAR,
-                        POP_ON_KEYWORD,
+                            BACK_POP_ON_ANY_HANDLER,
+                            BACK_POP_ON_ANY_VAR,
                         ADD_RX_WORD
                     ),
                     setPushStrategies(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
@@ -113,12 +126,13 @@ public class Factory_ScanItem extends Factory_Strategy{
                     null,
                     setStrategies(
                         POP_ALL_ON_END_SOURCE,
-                        POP_ON_TARG_LANG_INSERT,
+                            BACK_POP_ON_TARG_LANG_INSERT,
                         PUSH_COMMENT,
                         SET_USER_DEF_NAME,
                         READ_VAR,
-                        POP_ON_VAR,
-                        POP_ON_KEYWORD,
+                            BACK_POP_ON_ANY_HANDLER,
+                            BACK_POP_ON_ANY_VAR,
+                            BACK_POP_ON_ITEM_CLOSE,
                         ADD_FX_WORD
                     ),
                     setPushStrategies(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
@@ -126,27 +140,64 @@ public class Factory_ScanItem extends Factory_Strategy{
                 );
             case IF_ELSE:
                 return new ScanItem(
+                    h,
+                    new HANDLER[]{IF, ELSE},
+                    setStrategies(
+                        POP_ALL_ON_END_SOURCE,
+                        PUSH_TARG_LANG_INSERT,
+                        PUSH_COMMENT,
+                        READ_VAR,
+                        SET_USER_DEF_NAME,
+                        PUSH_GOOD_HANDLER,
+                            BACK_POP_ON_ANY_HANDLER,
+                            BACK_POP_ON_BAD_VAR,
+                        ERR
+                    )
+                );
+            case IF:
+                return new ScanItem(
                         h,
-                        new HANDLER[]{IF, ELSE},
+                        new HANDLER[]{RXFX, RX, FX, IF_ELSE, IF, FUN},
                         setStrategies(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
-                                POP_ON_VAR,
+                                MANAGE_IF,
+                                BACK_POP_ON_BAD_VAR,
+                                READ_VAR,
+                                PUSH_TARG_LANG_INSERT,
                                 PUSH_GOOD_HANDLER,
-                                POP_ON_KEYWORD,
                                 ERR
-                        )
+                        ),
+                        setPushStrategies(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
+                        setPopStrategies(ON_POP)
                 );
-            case IF:
+            case BOOL_TEST://helper class
                 return new ScanItem(
                         h,
                         new HANDLER[]{SCOPE, RX},
                         setStrategies(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
-                                POP_ON_VAR,
+                                BACK_POP_ON_ITEM_OPEN,
+                                PUSH_TARG_LANG_INSERT,
+                                READ_VAR,
+                                BACK_POP_ON_BAD_VAR,
                                 PUSH_GOOD_HANDLER,
-                                POP_ON_KEYWORD,
+                                ERR
+                        )
+                );
+            case ELSE:
+                return new ScanItem(
+                        h,
+                        new HANDLER[]{RXFX, RX, FX, IF_ELSE, IF, FUN},
+                        setStrategies(
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                MANAGE_ELSE,
+                                BACK_POP_ON_BAD_VAR,
+                                READ_VAR,
+                                PUSH_TARG_LANG_INSERT,
+                                PUSH_GOOD_HANDLER,
                                 ERR
                         ),
                         setPushStrategies(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
@@ -161,7 +212,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_COMMENT,
                         READ_VAR,
                         PUSH_GOOD_HANDLER,
-                        POP_ON_KEYWORD,
+                            BACK_POP_ON_ANY_HANDLER,
                         ERR
                     )
                 );
@@ -181,12 +232,9 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return new ScanItem(
                     h, 
                     null,
-                    setStrategies(
-                        POP_ON_TARGLANG_INSERT_CLOSE,
-                        ADD_TO_LINE_BUFFER
-                    ),
+                    setStrategies(MANAGE_TARG_LANG_INSERT),
                     setPushStrategies(ON_PUSH_NO_SNIFF),
-                    setPopStrategies(DUMP_BUFFER_ON_POP, ON_POP_NO_SNIFF)
+                    setPopStrategies(ON_POP_NO_SNIFF)
                 );
 
             case FUN:

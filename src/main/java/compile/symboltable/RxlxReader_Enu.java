@@ -18,7 +18,7 @@ import static compile.basics.Keywords.CMD.*;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.HANDLER.ENUB;
 import static compile.basics.Keywords.HANDLER.ENUD;
-import static compile.basics.Keywords.KWORD.DEF_NAME;
+import static compile.basics.Keywords.FIELD.DEF_NAME;
 
 /** Abstract class to handler SymbolTable_Enu initialization from file
  *
@@ -94,7 +94,7 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
         }
 
         @Override
-        public void addTo(Keywords.HANDLER handler, Keywords.KWORD key, String val) {
+        public void addTo(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
 //            System.out.println("_____addTo_____");
 //            System.out.println(handler);
 //            System.out.println(node.h);
@@ -108,8 +108,8 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
         }
 
         @Override
-        public void setAttrib(Keywords.HANDLER handler, Keywords.KWORD key, String val) {
-            if(key == Keywords.KWORD.DEF_NAME && handler == node.h){
+        public void setAttrib(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
+            if(key == Keywords.FIELD.DEF_NAME && handler == node.h){
                 node.data = val;
             }
             else{

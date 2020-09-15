@@ -1,6 +1,5 @@
 package compile.symboltable;
 
-import commons.Commons;
 import compile.basics.CompileInitializer;
 import compile.basics.Keywords;
 import erlog.Erlog;
@@ -14,16 +13,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** Saves named text to an iterable node to use as text source during scanning */
-public class Factory_TextNode implements ChangeListener {
-    private static Factory_TextNode instance;
+public class SymbolTable implements ChangeListener {
+    private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
+    private static SymbolTable instance;
 
-    private Factory_TextNode() {
+    private SymbolTable() {
         symbolTable = new HashMap<>();
         busy = false;
     }
 
-    public static Factory_TextNode getInstance(){
-        return (instance == null)? (instance = new Factory_TextNode()) : instance;
+    public static SymbolTable getInstance(){
+        return (instance == null)? (instance = new SymbolTable()) : instance;
     }
     public static void killInstance(){
         CompileInitializer.getInstance().removeChangeListener(instance);
@@ -41,7 +41,7 @@ public class Factory_TextNode implements ChangeListener {
 
     public void startTextNode(Keywords.HANDLER type){
         if(busy){
-            Erlog.get().set("Don't nest named definitions", type.toString());
+            Erlog.get(this).set("Don't nest named definitions", type.toString());
         }
         else{
             currNode = new TextNode(this.textStatus);
@@ -81,20 +81,18 @@ public class Factory_TextNode implements ChangeListener {
 
     //=====Methods used by Scanner to iterate node data=====================================
 
+    public Base_TextNode readVar(String text){
+        if(SYMBOL_TEST.isUserDef(text)){
+            return symbolTable.get(SYMBOL_TEST.stripUserDef(text));
+        }
+        return null;
+    }
     public boolean isTextNode(String textNodeName){
         return symbolTable.containsKey(textNodeName);
     }
 
     public Base_TextNode getTextNode(String textNodeName){
         return symbolTable.get(textNodeName);
-    }
-
-    public Base_TextNode getTextNode(String textNodeName, Keywords.HANDLER type){
-        Base_TextNode node = symbolTable.get(textNodeName);
-        if(node != null && node.getType().equals(type)){
-            return node;
-        }
-        return null;
     }
 
     @Override
@@ -146,17 +144,17 @@ public class Factory_TextNode implements ChangeListener {
             if(textStatus.isEndLine()){// keep track of line endings
                 endLines.add(index);
             }
-            Commons.disp(endLines, String.format("Factory_textNode.addWord() %s_____%s, %d, size", text, words.get(index-1), index));
+            //Commons.disp(endLines, String.format("Factory_textNode.addWord() %s_____%s, %d, size", text, words.get(index-1), index));
         }
         public void back(){
             if(!words.isEmpty()){
 
-                Commons.disp(endLines, String.format("Factory_textNode.back() %s, %d, size", words.get(index-1), index));
+                //Commons.disp(endLines, String.format("Factory_textNode.back() %s, %d, size", words.get(index-1), index));
 
                 endLines.remove(Integer.valueOf(index));
                 index--;
                 words.remove(index);
-                Commons.disp(endLines, "after");
+                //Commons.disp(endLines, "after");
             }
         }
         @Override

@@ -71,7 +71,9 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeN
     }
     @Override
     public String getDebugName(){
-        return this.getClass().getSimpleName() + ": " + debugName;
+        return (debugName == null)?
+            this.getClass().getSimpleName() :
+            this.getClass().getSimpleName() + ": " + debugName;
     }
     
     // utilities
@@ -103,7 +105,7 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeN
     public void onPop(){}
     @Override
     public void onQuit(){
-        er.clearTextStatusReporter();
+        Erlog.clearTextStatusReporter();
     }
 
     // ChangeNotifier implementation

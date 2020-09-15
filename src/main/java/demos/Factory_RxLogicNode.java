@@ -33,7 +33,6 @@ public abstract class Factory_RxLogicNode {
     }
     public static abstract class LogicNode{
         public LogicNode parent;
-        //public Keywords.KWORD connector;
         public String data;
         public OP op;
         public int level, id;

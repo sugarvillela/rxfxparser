@@ -1,4 +1,4 @@
-package demos;
+package compile.rx;
 
 import static compile.basics.Keywords.OP.AND;
 import static compile.basics.Keywords.OP.OR;
@@ -9,10 +9,15 @@ import static compile.basics.Keywords.OP.CPAR;
 import static compile.basics.Keywords.OP.OPAR;
 import static compile.basics.Keywords.OP.SQUOTE;
 import java.util.ArrayList;
+
+import compile.rx.ut.RxParamUtil;
+import compile.symboltable.ConstantTable;
 import toksource.ScanNodeSource;
 import toksource.TextSource_list;
 
 public class RxLogicTree extends RxTree{
+    private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
+    private static final RxParamUtil PARAM_UTIL = RxParamUtil.getInstance();
     private static RxTree instance;
     
     public static RxTree getInstance(){
@@ -36,26 +41,29 @@ public class RxLogicTree extends RxTree{
             more |= root.unwrap(OPAR.asChar, CPAR.asChar);
             more |= root.unquote(SQUOTE.asChar);
         }while(more);
-        balanceLeaves(root);
+        readConstants(root);    // read constants before extend
+        extendLeaves(root);     // fix, split and unwrap
+        readConstants(root);    // read constants again after extend
+        setFunReferences(root);
         return root;
     }
     
     @Override
-    public ArrayList<RxScanNode> treeToScanNodeList(TreeNode root){
+    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root, String lineCol){
         ArrayList<TreeNode> nodes = instance.preOrder(root);
         int stackLevel = 0;
-        ArrayList<RxScanNode> cmdList = new ArrayList<>();
+        ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
         for(TreeNode node : nodes){
             //System.out.println(stackLevel + "... "+ node.level);
             while(stackLevel > node.level){
                 stackLevel--;
                 cmdList.add(
-                    (Factory_Node.RxScanNode)Factory_Node.newRxPop(lineCol)
+                    Factory_Node.newRxPop(lineCol)
                 );
             }
             stackLevel++;
             cmdList.add(
-                (RxScanNode)Factory_Node.newRxPush(lineCol, node)
+                Factory_Node.newRxPush(lineCol, node)
             );
         }
         return cmdList;
@@ -90,11 +98,20 @@ public class RxLogicTree extends RxTree{
         return reroot;
     }
 
-    private void balanceLeaves(TreeNode root){
+    private void readConstants(TreeNode root){
+        ArrayList<TreeNode> leaves = leaves(root);
+        for(TreeNode leaf : leaves){
+            String read = CONSTANT_TABLE.readConstant(leaf.data);
+            if(read != null){
+                leaf.data = read;
+            }
+        }
+    }
+    private void extendLeaves(TreeNode root){
         ArrayList<TreeNode> leaves = leaves(root);
         for(TreeNode leaf : leaves){
             char splitChar = findSplitChar(leaf.data);
-            if(splitChar == '\0'){
+            if(splitChar == '\0'){  // The field name is optional; add default text field name
                 splitChar = '=';
                 leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
             }
@@ -118,5 +135,22 @@ public class RxLogicTree extends RxTree{
             }
         }
         return '\0';
+    }
+
+    private void setFunReferences(TreeNode root){
+        ArrayList<TreeNode> leaves = leaves(root);
+        for(TreeNode leaf : leaves){
+            leaf.payload = new Payload();
+            PARAM_UTIL.findAndSetParam(leaf.data);
+            leaf.payload.paramType = PARAM_UTIL.getParamType();
+            if(PARAM_UTIL.isFun()){
+                leaf.data = PARAM_UTIL.getTruncated();
+                leaf.payload.param = PARAM_UTIL.getParam();
+                System.out.print("found rx function:" + leaf.data);
+            }
+            System.out.printf(":  %s: %s - %s : %s \n",
+                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
+            );
+        }
     }
 }

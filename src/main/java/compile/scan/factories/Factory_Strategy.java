@@ -2,6 +2,9 @@ package compile.scan.factories;
 
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
+import compile.rx.RxLogicTree;
+import compile.rx.RxTree;
+import compile.rx.ut.RxValidator;
 import compile.scan.ut.*;
 import compile.symboltable.*;
 import erlog.Erlog;
@@ -13,7 +16,7 @@ import compile.basics.Keywords.CMD;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.HANDLER.*;
-import static compile.basics.Keywords.KWORD.*;
+import static compile.basics.Keywords.FIELD.*;
 
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
@@ -27,32 +30,37 @@ public abstract class Factory_Strategy{
         PUSH_SOURCE_LANG,           // Symbol != HANDLER, setWordGetter
         POP_ALL_ON_END_SOURCE,      // Symbol != HANDLER, leave target lang on stack
         PUSH_GOOD_HANDLER,          // PUSH handler if on allowed handler list
-        POP_ON_KEYWORD,             // The main stack transition: pop current, add new
+        BACK_POP_ON_ANY_HANDLER,             // The main stack transition: pop current, add new
         ADD_TEXT,                   // ADD_TO command with text
         ADD_KEY_VAL_ATTRIB,         // SET_ATTRIB with key = val text
         ADD_RX_WORD,                // RX only
         ADD_FX_WORD,                // FX only
-        POP_ON_TARG_LANG_INSERT,    // Disallow in certain contexts
+        BACK_POP_ON_TARG_LANG_INSERT,    // Disallow in certain contexts
         PUSH_TARG_LANG_INSERT,      // Symbol != HANDLER
-        ADD_TO_LINE_BUFFER,         // TARGLANG_INSERT background function
+        MANAGE_TARG_LANG_INSERT,         // TARGLANG_INSERT background function
         MANAGE_ENU_LISTS,           // ENUB, ENUD set name attribute
+        MANAGE_IF,                  // State machine to manage if, boolTest,
+        MANAGE_ELSE,                // State machine to manage else,
         ON_INCLUDE,                 // Add a file to the file stack
         SET_USER_DEF_NAME,          // Set name attribute
-        READ_FUN,                   // Unroll function symbol table data
+        READ_CONSTANT,              // Get a single word from ConstantTable
         READ_VAR,                   // Unroll VAR symbol table data
-        POP_ON_VAR,                 // Where nested var not allowed, pop instead
-        POP_ON_TARGLANG_INSERT_CLOSE,//Symbol != HANDLER
+        IGNORE_CONSTANT,                 // For ignoring CONSTANT definition
+        BACK_POP_ON_ANY_VAR,        // Where nested var not allowed, pop instead
+        BACK_POP_ON_BAD_VAR,        // Var exists but handler type not allowed
         PUSH_COMMENT,               // Symbol != HANDLER, Silent push pop and ignore
         POP_ON_ENDLINE,             // Comment
+        BACK_POP_ON_ITEM_OPEN,      // for IF ELSE
+        BACK_POP_ON_ITEM_CLOSE,     // for IF ELSE
         POP_ON_ITEM_CLOSE,          // Used by function definitions
         ERR,                        // Last on list, should not be reached
         
         ON_PUSH,                    // PUSH message
-        ON_POP,                     // generate name if not set, POP message
         ON_PUSH_NO_SNIFF,           // Same as ON_PUSH but doesn't call TextSniffer
+
+        ON_POP,                     // generate name if not set, POP message
         ON_POP_NO_SNIFF,            // Same as ON_POP but doesn't call TextSniffer
         ON_POP_ENU,                 // Dump pushPop history to SymbolTable_Enu; no TextSniffer
-        DUMP_BUFFER_ON_POP,         // OnPop: TARGLANG_INSERT cleanup function
         ASSERT_TOGGLE_ON_PUSH,      // OnPush: RXFX assert RX -> FX, IF_ELSE asserts IF -> ELSE or IF
         RXFX_ERR_ON_POP,            // OnPop: RXFX ends with FX
         ON_LAST_POP,                // OnPop: cleanup activities on TargLangBase pop
@@ -71,34 +79,44 @@ public abstract class Factory_Strategy{
                 return new AddRxWord();
             case ADD_FX_WORD:
                 return new AddFxWord();
-            case ADD_TO_LINE_BUFFER:
-                return new AddToLineBuffer();
+            case MANAGE_TARG_LANG_INSERT:
+                return new ManageTargLangInsert();
             case ON_INCLUDE:
                 return new OnInclude();
             case PUSH_SOURCE_LANG:
                 return new PushSourceLang();
             case PUSH_COMMENT:
                 return new PushComment();
-            case POP_ON_TARG_LANG_INSERT:
-                return new PopOnTargLangInsert();
+            case BACK_POP_ON_TARG_LANG_INSERT:
+                return new BackPopOnTargLangInsert();
             case PUSH_TARG_LANG_INSERT:
                 return new PushTargLangInsert();
             case MANAGE_ENU_LISTS:
                 return new ManageEnuLists();
+            case MANAGE_IF:
+                return new ManageIf();
+            case MANAGE_ELSE:
+                return new ManageElse();
             case SET_USER_DEF_NAME:
                 return new SetUserDefName();
-            case READ_FUN:
-                return new ReadFun();
+            case READ_CONSTANT:
+                return new ReadConstant();
             case READ_VAR:
                 return new ReadVar();
-            case POP_ON_VAR:
-                return new PopOnVar();
-            case POP_ON_TARGLANG_INSERT_CLOSE:
-                return new PopOnTargLangInsertClose();
+            case IGNORE_CONSTANT:
+                return new IgnoreConstant();
+            case BACK_POP_ON_ANY_VAR:
+                return new BackPopOnAnyVar();
+            case BACK_POP_ON_BAD_VAR:
+                return new BackPopOnBadVar();
             case POP_ON_ENDLINE:
                 return new PopOnEndLine();
-            case POP_ON_KEYWORD:
-                return new PopOnKeyword();
+            case BACK_POP_ON_ANY_HANDLER:
+                return new BackPopOnAnyHandler();
+            case BACK_POP_ON_ITEM_OPEN:
+                return new BackPopOnItemOpen();
+            case BACK_POP_ON_ITEM_CLOSE:
+                return new BackPopOnItemClose();
             case POP_ON_ITEM_CLOSE:
                 return new PopOnItemClose();
             case POP_ALL_ON_END_SOURCE:
@@ -139,8 +157,6 @@ public abstract class Factory_Strategy{
                 return new OnPop_Enu();
             case ON_LAST_POP:
                 return new OnLastPop();
-            case DUMP_BUFFER_ON_POP:
-                return new DumpBufferOnPop();
             case RXFX_ERR_ON_POP:
                 return new RxFxErrOnPop();
             default:
@@ -173,13 +189,14 @@ public abstract class Factory_Strategy{
         return currentActions;
     }
 
-    private static final LineBuffer LINEBUFFER = new LineBuffer();
+    //vate static final LineBuffer LINEBUFFER = new LineBuffer();
+    private static final RxTree RX_TREE = RxLogicTree.getInstance();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
     private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
-    private static final Factory_TextNode SYMBOL_TABLE = Factory_TextNode.getInstance();
+    private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
+    private static final SymbolTable SYMBOL_TABLE = SymbolTable.getInstance();
     private static SymbolTable_Enu SYMBOL_TABLE_ENU = null;
-    private static HANDLER lastPopped = null;
 
     public static abstract class Strategy{
         Class_Scanner P;
@@ -187,6 +204,29 @@ public abstract class Factory_Strategy{
         public Strategy(){
             P = (Class_Scanner)CompileInitializer.getInstance().getCurrParserStack();
         }
+
+        public void back(String text, Base_ScanItem context){
+            context.back();//don't sniff keyword because it will be repeated
+            P.back(text);//repeat keyword so next handler can push it
+        }
+        public void backPush(String text, Base_ScanItem oldContext, Base_ScanItem newContext){
+            P.push(newContext);
+            back(text, oldContext);
+        }
+        public void backPop(String text, Base_ScanItem context){
+            back(text, context);
+            P.pop();
+        }
+
+        /**Every scan item has a loop of strategies it calls;
+         * A strategy should break the loop if it changes something.
+         * Except for pop actions, each strategy should be temporally uncoupled from other strategies,
+         * meaning that a test performed by one should not affect the actions of another.
+         * Accept non-optimization for encapsulation (may perform the same test twice).
+         * @param text The current word from iterator
+         * @param context The scan item has a loop of strategies it calls
+         * @return True if context should break the loop; true if this object changed something
+         */
         public abstract boolean go(String text, Base_ScanItem context);
     }
 
@@ -210,24 +250,21 @@ public abstract class Factory_Strategy{
             }
             return false;
         }
+        // Some scan items require a container to enforce ordering
         private boolean addContainer(String text, Base_ScanItem context, HANDLER newHandler){
             HANDLER topHandler;
             switch(newHandler){
                 case IF:
                     topHandler = ((Base_ScanItem)P.getTop()).getHandler();
-                    if(!IF_ELSE.equals(topHandler) && !ELSE.equals(topHandler)){
-                        P.push(Factory_ScanItem.get(IF_ELSE));
-                        P.back(text);
-                        context.back();
+                    if(!IF_ELSE.equals(topHandler)){
+                        backPush(text, context, Factory_ScanItem.get(IF_ELSE));
                         return true;
                     }
                     return false;
                 case RX:
                     topHandler = ((Base_ScanItem)P.getTop()).getHandler();
-                    if(!RXFX.equals(topHandler)){
-                        P.push(Factory_ScanItem.get(RXFX));
-                        P.back(text);
-                        context.back();
+                    if(!RXFX.equals(topHandler) && !BOOL_TEST.equals(topHandler)){
+                        backPush(text, context, Factory_ScanItem.get(RXFX));
                         return true;
                     }
                     return false;
@@ -235,6 +272,7 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+
     public static class AddText extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -249,14 +287,14 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             // Get key = value
-            String toks[] = text.split("=");
+            String[] toks = text.split("=");
             if( toks.length != 2 ){
                 Erlog.get(this).set("key=value format is required", text);
                 return false;
             }
 
             // assert key is keyword
-            Keywords.KWORD key = Keywords.KWORD.fromString(toks[0]);
+            FIELD key = FIELD.fromString(toks[0]);
             String val = toks[1];
             if(key == null){
                 Erlog.get(this).set("Unknown keyword: " + toks[0], text);
@@ -307,25 +345,6 @@ public abstract class Factory_Strategy{
         }
     }
 
-    public static class AddToLineBuffer extends Strategy{
-        public AddToLineBuffer(){
-            LINEBUFFER.clear();
-        }
-        
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            LINEBUFFER.add(text);
-            if(Erlog.get().getTextStatusReporter().isEndLine()){
-                context.addNode(
-                    Factory_Node.newScanNode( 
-                        CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
-                    )
-                );
-            }
-            return true;
-        }
-    }
-    
     public static class PushSourceLang extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -344,7 +363,7 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(text.startsWith(COMMENT_TEXT)){// okay to discard text
-                if(!Erlog.get().getTextStatusReporter().isEndLine()){
+                if(!Erlog.getTextStatusReporter().isEndLine()){
                     P.push(Factory_ScanItem.get(Keywords.HANDLER.COMMENT));
                 }
                 return true;
@@ -353,13 +372,11 @@ public abstract class Factory_Strategy{
         }
     }
 
-    public static class PopOnTargLangInsert extends Strategy{
+    public static class BackPopOnTargLangInsert extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(TARGLANG_INSERT_OPEN.equals(text)){
-                context.back();//don't sniff keyword because it will be repeated
-                P.back(text);
-                P.pop();
+                backPop(text, context);
                 return true;
             }
             return false;
@@ -376,66 +393,11 @@ public abstract class Factory_Strategy{
         }
     }
 
-    public static class ManageEnuLists extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            HANDLER h = context.getHandler();
-
-            if(SYMBOL_TEST.isUserDef(text)){
-
-                // Lazy init allows specifying in attrib whether to use new enum set or add to existing
-                if(SYMBOL_TABLE_ENU == null){
-                    SymbolTable_Enu.init(
-                            (CompileInitializer.getInstance().isNewEnumSet())?
-                                    null :
-                                    new ScanNodeSource(new TextSource_file(Keywords.fileName_symbolTableEnu()))
-                    );
-                    SYMBOL_TABLE_ENU = SymbolTable_Enu.getInstance();
-                    SYMBOL_TABLE_ENU.onCreate();
-                }
-
-                String defName = text.substring(USERDEF_OPEN.length());
-                
-                // Make sure name doesn't exist
-                if(SYMBOL_TABLE_ENU.contains(h, defName)){
-                    Erlog.get(this).set(
-                            String.format(
-                                    "%s already exists...%s categories must be uniquely named",
-                                    defName, h.toString()
-                            )
-                    );
-                }
-                
-                // if not the first list defined, pop current and push another one
-                if(context.getDefName() != null){
-                    context = Factory_ScanItem.get(h);
-                    P.pop();
-                    P.push(context);
-                }
-
-                // tell context its name
-                context.setDefName(defName);
-
-                // build nodes
-                context.addNode(
-                    Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
-                );
-
-                System.out.println("ManageEnuLists: name: "+defName + ", handler: "+context.getHandler());
-                return true;
-            }
-//            else{// is an item
-//                System.out.printf("     : %s: %s \n", context.getDefName(), text);
-//                SYMBOL_TABLE_ENU.addTo(h, null, text);
-//            }
-            return false;
-        }
-    }
     public static class SetUserDefName extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(SYMBOL_TEST.isUserDef(text) && context.getDefName() == null){
-                String defName = text.substring(USERDEF_OPEN.length());
+                String defName = SYMBOL_TEST.stripUserDef(text);
                 if(SYMBOL_TEST.isNew(defName)){
                     context.setDefName(defName);
                     context.addNode(
@@ -447,17 +409,105 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+    public static class ReadConstant extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            String read = CONSTANT_TABLE.readConstant(text);
+            if(read != null){
+                back(read, context);
+                return true;
+            }
+            return false;
+        }
+    }
     public static class ReadVar extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            SymbolTable.Base_TextNode node = SYMBOL_TABLE.readVar(text);
+            if(node != null && context.isGoodHandler(node.getType())){
+                if(context.isGoodHandler(node.getType())){
+                    P.changeTextSource(node);
+                }
+                else{
+                    Erlog.get(this).set(node.getType() + " dereference not allowed here", text);
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class ReadFun extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            SymbolTable.Base_TextNode node = SYMBOL_TABLE.readVar(text);
+            if(node != null && node.getType().equals(FUN)){
+                if(context.isGoodHandler(FUN)){
+                    P.changeTextSource(node);
+                }
+                else{
+                    Erlog.get(this).set(FUN + " dereference not allowed here", text);
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class IgnoreConstant extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(context.getState() == 1){
+                context.setState(0);
+                P.pop();
+            }
+            else{
+                context.setState(1);
+            }
+            return true;
+        }
+    }
+    public static class PopOnEndLine extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(Erlog.getTextStatusReporter().isEndLine()){
+                P.pop();
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class BackPopOnAnyHandler extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if( Keywords.HANDLER.fromString(text) != null){
+                backPop(text, context);
+                return true;
+            }
+            return false;
+        }
+    }
+    public static class BackPopOnAnyVar extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            //System.out.println("PopOnVar: " + context.getHandler());
+            if(SYMBOL_TEST.isUserDef(text) && SYMBOL_TABLE.isTextNode(SYMBOL_TEST.stripUserDef(text))){
+                //System.out.println("isUserDef and isNode: " + text);
+                backPop(text, context);
+                return true;
+            }
+            //System.out.println("not UserDef: " + text);
+            return false;
+        }
+    }
+    public static class BackPopOnBadVar extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             //System.out.println("ReadVar: " + context.getHandler());
             if(SYMBOL_TEST.isUserDef(text)){
                 //System.out.println("isUserDef" + text);
-                String defName = text.substring(USERDEF_OPEN.length());
-                Factory_TextNode.Base_TextNode node = SYMBOL_TABLE.getTextNode(defName);
-                if(node != null && context.isGoodHandler(node.getType())){
-                    //System.out.println("goodType: " + defName);
-                    P.changeTextSource(node);
+                String defName = SYMBOL_TEST.stripUserDef(text);
+                SymbolTable.Base_TextNode node = SYMBOL_TABLE.getTextNode(defName);
+                if(node != null && !context.isGoodHandler(node.getType())){
+                    backPop(text, context);
                     return true;
                 }
                 //System.out.println(" not goodType: " + defName);
@@ -467,64 +517,23 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    public static class ReadFun extends Strategy{
+    public static class BackPopOnItemOpen extends Strategy{// test listener
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(SYMBOL_TEST.isUserDef(text)){
-                String identifier = text.substring(USERDEF_OPEN.length());
-                Factory_TextNode.Base_TextNode node = SYMBOL_TABLE.getTextNode(identifier, FUN);
-                if(node != null){
-                    P.changeTextSource(node);
-                }
-            }
-            return false;
-        }
-    }
-    public static class PopOnTargLangInsertClose extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            if( TARGLANG_INSERT_CLOSE.equals(text) ){
-                P.pop();
+            if(ITEM_OPEN.equals(text)){
+                backPop(text, context);
                 return true;
             }
             return false;
         }
     }
-    public static class PopOnEndLine extends Strategy{
+    public static class BackPopOnItemClose extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(Erlog.get().getTextStatusReporter().isEndLine()){
-                P.pop();
+            if(ITEM_CLOSE.equals(text)){
+                backPop(text, context);
                 return true;
             }
-            return false;
-        }
-    }
-    public static class PopOnKeyword extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            if( Keywords.HANDLER.fromString(text) != null){
-                context.back();//don't sniff keyword because it will be repeated
-                P.back(text);//repeat keyword so next handler can push it
-                P.pop();
-
-                return true;
-            }
-            return false;
-        }
-    }
-    public static class PopOnVar extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            //System.out.println("PopOnVar: " + context.getHandler());
-            if(SYMBOL_TEST.isUserDef(text) && SYMBOL_TABLE.isTextNode(text.substring(USERDEF_OPEN.length()))){
-                //System.out.println("isUserDef and isNode: " + text);
-                context.back();//don't sniff keyword because it will be repeated
-                P.back(text);//repeat keyword so next handler can push it
-                P.pop();
-                return true;
-            }
-            System.out.println("not UserDef: " + text);
             return false;
         }
     }
@@ -549,7 +558,156 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-    
+
+    public static class ManageEnuLists extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            HANDLER h = context.getHandler();
+
+            if(SYMBOL_TEST.isUserDef(text)){
+
+                // Lazy init allows specifying in attrib whether to use new enum set or add to existing
+                if(SYMBOL_TABLE_ENU == null){
+                    SymbolTable_Enu.init(
+                            (CompileInitializer.getInstance().isNewEnumSet())?
+                                    null :
+                                    new ScanNodeSource(new TextSource_file(Keywords.fileName_symbolTableEnu()))
+                    );
+                    SYMBOL_TABLE_ENU = SymbolTable_Enu.getInstance();
+                    SYMBOL_TABLE_ENU.onCreate();
+                }
+
+                String defName = SYMBOL_TEST.stripUserDef(text);
+
+                // Make sure name doesn't exist
+                if(SYMBOL_TABLE_ENU.contains(h, defName)){
+                    Erlog.get(this).set(
+                            String.format(
+                                    "%s already exists...%s categories must be uniquely named",
+                                    defName, h.toString()
+                            )
+                    );
+                }
+
+                // if not the first list defined, pop current and push another one
+                if(context.getDefName() != null){
+                    context = Factory_ScanItem.get(h);
+                    P.pop();
+                    P.push(context);
+                }
+
+                // tell context its name
+                context.setDefName(defName);
+
+                // build nodes
+                context.addNode(
+                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+                );
+
+                System.out.println("ManageEnuLists: name: "+defName + ", handler: "+context.getHandler());
+                return true;
+            }
+//            else{// is an item
+//                System.out.printf("     : %s: %s \n", context.getDefName(), text);
+//                SYMBOL_TABLE_ENU.addTo(h, null, text);
+//            }
+            return false;
+        }
+    }
+    public static class ManageTargLangInsert extends Strategy{
+        private static final LineBuffer LINEBUFFER = new LineBuffer();
+
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if( TARGLANG_INSERT_CLOSE.equals(text) ){
+                if(!LINEBUFFER.isEmpty()){
+                    context.addNode(
+                            Factory_Node.newScanNode(
+                                    CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
+                            )
+                    );
+                }
+                P.pop();
+            }
+            else{
+                LINEBUFFER.add(text);
+                if(Erlog.getTextStatusReporter().isEndLine()){
+                    context.addNode(
+                            Factory_Node.newScanNode(
+                                    CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
+                            )
+                    );
+                }
+            }
+            return true;
+        }
+    }
+    public static class ManageIf extends Strategy{
+        private final int WAIT = 0, IDENTIFIED = 1, OPENED = 2;
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            switch(context.getState()){
+                case WAIT:
+                    if(SYMBOL_TEST.isUserDef(text)){
+                        context.setDefName(SYMBOL_TEST.stripUserDef(text));
+                        P.push( Factory_ScanItem.get(BOOL_TEST) );//current text is name, next text is part of test
+                    }
+                    else{
+                        backPush(text, context, Factory_ScanItem.get(BOOL_TEST));//no name; current text is part of test
+                    }
+                    context.setState(IDENTIFIED);
+                    return true;
+                case IDENTIFIED:
+                    if(ITEM_OPEN.equals(text)){
+                        context.setState(OPENED);
+                    }
+                    else{
+                        Erlog.get(this).set("Expected " + ITEM_OPEN, text);
+                    }
+                    return true;
+                case OPENED:
+                    if(ITEM_CLOSE.equals(text)){
+                        context.setState(WAIT);
+                        P.pop();
+                        return true;
+                    }
+            }
+            return false;
+        }
+    }
+    public static class ManageElse extends Strategy{
+        private final int WAIT = 0, IDENTIFIED = 1, OPENED = 2;
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            switch(context.getState()){
+                case WAIT:
+                    context.setState(IDENTIFIED);
+                    if(SYMBOL_TEST.isUserDef(text)){
+                        context.setDefName(SYMBOL_TEST.stripUserDef(text));
+                    }
+                    else{
+                        back(text, context);
+                    }
+                    return true;
+                case IDENTIFIED:
+                    if(ITEM_OPEN.equals(text)){
+                        context.setState(OPENED);
+                    }
+                    else{
+                        Erlog.get(this).set("Expected " + ITEM_OPEN, text);
+                    }
+                    return true;
+                case OPENED:
+                    if(ITEM_CLOSE.equals(text)){
+                        context.setState(WAIT);
+                        P.pop();
+                        return true;
+                    }
+            }
+            return false;
+        }
+    }
+
     public static class AddRxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -562,15 +720,20 @@ public abstract class Factory_Strategy{
             if(RxValidator.getInstance().assertValidRxWord(text)){
                 context.addNode( Factory_Node.newScanNode( CMD.PUSH, h ));
                 
-                context.addNode(
-                    Factory_Node.newScanNode( CMD.ADD_TO, h, text)
-                );
+//                context.addNode(
+//                    Factory_Node.newScanNode( CMD.ADD_TO, h, text)
+//                );
                 context.addNode( Factory_Node.newScanNode( 
                     CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
                 );
                 context.addNode( Factory_Node.newScanNode( 
                     CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
-                );                
+                );
+                RxTree.TreeNode root = RX_TREE.treeFromRxWord(text);
+                RX_TREE.dispBreadthFirst(root);
+                context.addNodes(
+                        RX_TREE.treeToScanNodeList(root, Erlog.getTextStatusReporter().readableStatus())
+                );
                 context.addNode( Factory_Node.newScanNode( CMD.POP, h ));
                 return true;
             }
@@ -590,6 +753,7 @@ public abstract class Factory_Strategy{
         }
         
     }
+
     public static class OnInclude extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -598,20 +762,12 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+
     public static class OnPush extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             TextSniffer.getInstance().onPush(context);
             context.addNode( Factory_Node.newScanNode( CMD.PUSH, context.getHandler() ) );
-            return false;
-        }
-    }
-    public static class OnPop extends Strategy{
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            TextSniffer.getInstance().onPop(context);
-            context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
-            lastPopped = context.getHandler();
             return false;
         }
     }
@@ -622,11 +778,21 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+
+    public static class OnPop extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            TextSniffer.getInstance().onPop(context);
+            context.assertDoneState();
+            context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
+            return false;
+        }
+    }
     public static class OnPopNoSniff extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
+            context.assertDoneState();
             context.addNode( Factory_Node.newScanNode( CMD.POP, context.getHandler() ) );
-            lastPopped = context.getHandler();
             return false;
         }
     }
@@ -639,7 +805,6 @@ public abstract class Factory_Strategy{
             if(defName != null){
                 SYMBOL_TABLE_ENU.readList(context.getScanNodeList());
             }
-            lastPopped = context.getHandler();
             return false;
         }
     }
@@ -647,19 +812,6 @@ public abstract class Factory_Strategy{
     public static class Nop extends Strategy{// Comment onPush, onPop
         @Override
         public boolean go(String text, Base_ScanItem context){
-            return false;
-        }
-    }
-    public static class DumpBufferOnPop extends Strategy{// TargLangInsert
-        @Override
-        public boolean go(String text, Base_ScanItem context){
-            if(!LINEBUFFER.isEmpty()){
-                context.addNode(
-                    Factory_Node.newScanNode( 
-                        CMD.ADD_TO, context.getHandler(), LINEBUFFER.dump()
-                    )
-                );
-            }
             return false;
         }
     }
@@ -696,7 +848,7 @@ public abstract class Factory_Strategy{
             if(SYMBOL_TABLE_ENU != null){
                 SYMBOL_TABLE_ENU.onQuit();
             }
-            SYMBOL_TABLE.killInstance();
+            SymbolTable.killInstance();
             return false;
         }
     }
@@ -712,7 +864,7 @@ public abstract class Factory_Strategy{
 //            addToSymbolTable(context);
 //            context.addNode(
 //                Factory_Node.newScanNode( 
-//                    CMD.PUSH, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
+//                    CMD.PUSH, context.getHandler(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );
 //            return false;
@@ -734,7 +886,7 @@ public abstract class Factory_Strategy{
 //        public boolean go(String text, Base_ScanItem context){
 //            context.addNode(
 //                Factory_Node.newScanNode( 
-//                    CMD.POP, context.getHandler(), Keywords.KWORD.DEF_NAME, this.name
+//                    CMD.POP, context.getHandler(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );
 //            return false;

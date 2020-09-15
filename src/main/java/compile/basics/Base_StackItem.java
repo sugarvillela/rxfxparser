@@ -69,8 +69,11 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     }
     @Override
     public String getDebugName(){
-        return this.getClass().getSimpleName() + ": " + debugName;
+        return (debugName == null)?
+                this.getClass().getSimpleName() :
+                this.getClass().getSimpleName() + ": " + debugName;
     }
+
     /*======Empty ILifeCycle methods==========================================*/
     
     @Override

@@ -5,7 +5,7 @@ import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
 import static compile.basics.Keywords.HANDLER;
-import static compile.basics.Keywords.KWORD;
+import static compile.basics.Keywords.FIELD;
 import unique.Uq_enumgen;
 import unique.Enum_itr;
 
@@ -22,7 +22,7 @@ public class ItemENUB extends Base_ParseItem{
         count = 0;
     }
     @Override
-    public void addTo(HANDLER handler, KWORD key, String val) {
+    public void addTo(HANDLER handler, FIELD key, String val) {
         if(NULL_TEXT.equals(val)){
             er.set("No variable name", val);
         }
