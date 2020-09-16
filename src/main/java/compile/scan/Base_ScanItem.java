@@ -1,15 +1,13 @@
 package compile.scan;
 
-import commons.Commons;
-import compile.basics.Keywords;
 import compile.basics.Base_StackItem;
 import compile.scan.factories.Factory_Strategy;
 import compile.symboltable.TextSniffer;
-import erlog.Erlog;
+
 import java.util.Arrays;
-import compile.basics.Keywords.HANDLER;
+import compile.basics.Keywords.DATATYPE;
 import compile.basics.Factory_Node.ScanNode;
-import compile.scan.factories.Factory_Strategy.Strategy;
+
 import java.util.ArrayList;
 
 /**Base class provides common tasks
@@ -19,9 +17,11 @@ import java.util.ArrayList;
  */
 
 public abstract class Base_ScanItem extends Base_StackItem{
-    protected HANDLER h;                    // class's own enum
-    protected Keywords.HANDLER[] allowedHandlers;// children handlers to instantiate
-    protected Factory_Strategy.StrategyEnum[] strategies, onPushStrategies, onPopStrategies;
+    protected DATATYPE h;                    // class's own enum
+    protected DATATYPE[] allowedDatatypes;// children datatypes to instantiate
+    protected Factory_Strategy.StrategyEnum[] strategies;
+    protected Factory_Strategy.PushEnum[] onPushStrategies;
+    protected Factory_Strategy.PopEnum[] onPopStrategies;
     protected String defName;
     protected int state, loIndex, hiIndex;
     protected final TextSniffer textSniffer;
@@ -34,10 +34,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
     @Override
     public void onPush(){
         loIndex = ((Class_Scanner)P).getScanNodeList().size();
-//        String handlerStr = (h == null)? "Null Handler" : h.toString();
-//        System.out.println("Base_ScanItem onPush: " + handlerStr + ", loIndex: " + loIndex);
+//        String datatypeStr = (h == null)? "Null Datatype" : h.toString();
+//        System.out.println("Base_ScanItem onPush: " + datatypeStr + ", loIndex: " + loIndex);
         if(onPushStrategies != null){
-            for(Factory_Strategy.StrategyEnum strategyEnum : onPushStrategies){
+            for(Factory_Strategy.PushEnum strategyEnum : onPushStrategies){
                 if(strategyEnum.strategy.go(null, this)){
                     return;
                 }
@@ -48,15 +48,15 @@ public abstract class Base_ScanItem extends Base_StackItem{
     @Override
     public void onPop(){
         if(onPopStrategies != null){
-            for(Factory_Strategy.StrategyEnum strategyEnum : onPopStrategies){
+            for(Factory_Strategy.PopEnum strategyEnum : onPopStrategies){
                 if(strategyEnum.strategy.go(null, this)){
                     break;
                 }
             }
         }
         hiIndex = ((Class_Scanner)P).getScanNodeList().size();
-//        String handlerStr = (h == null)? "Null Handler" : h.toString();
-//        System.out.println("Base_ScanItem onPop: " + handlerStr + ", loIndex: " + hiIndex);
+//        String datatypeStr = (h == null)? "Null Datatype" : h.toString();
+//        System.out.println("Base_ScanItem onPop: " + datatypeStr + ", loIndex: " + hiIndex);
     }
 
     public void pushPop(String text) {
@@ -74,10 +74,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
     public void back(){
         textSniffer.back();
     }
-    public void setHandler(HANDLER h){
+    public void setDatatype(DATATYPE h){
         this.h = h;
     }
-    public HANDLER getHandler(){
+    public DATATYPE getDatatype(){
         return this.h;
     }
     
@@ -115,14 +115,14 @@ public abstract class Base_ScanItem extends Base_StackItem{
     }
 
 
-    public final void setAllowedHandlers(Keywords.HANDLER[] allowedHandlers){
-        this.allowedHandlers = allowedHandlers;
+    public final void setAllowedDatatypes(DATATYPE[] allowedDatatypes){
+        this.allowedDatatypes = allowedDatatypes;
     }
 
-    public final boolean isGoodHandler(Keywords.HANDLER handler){
+    public final boolean isGoodDatatype(DATATYPE datatype){
         return(
-            allowedHandlers != null && 
-            Arrays.asList(allowedHandlers).contains(handler)
+            allowedDatatypes != null &&
+            Arrays.asList(allowedDatatypes).contains(datatype)
         );
     }
 }

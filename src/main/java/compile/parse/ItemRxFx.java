@@ -1,13 +1,13 @@
 package compile.parse;
 
 import compile.basics.Factory_Node;
-import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.FIELD;
-import static compile.basics.Keywords.HANDLER.RX;
-import static compile.basics.Keywords.HANDLER.FX;
+import static compile.basics.Keywords.DATATYPE.RX;
+import static compile.basics.Keywords.DATATYPE.FX;
 
 public class ItemRxFx extends Base_ParseItem{
-    protected HANDLER toggle;
+    protected DATATYPE toggle;
     
     public ItemRxFx(Factory_Node.ScanNode node){
         super(node);
@@ -21,9 +21,9 @@ public class ItemRxFx extends Base_ParseItem{
         );
     }
     @Override
-    public void addTo(HANDLER handler, FIELD key, String val) {
+    public void addTo(DATATYPE datatype, FIELD key, String val) {
 //        if(key == FIELD.ABOVE){
-//            switch(handler){
+//            switch(datatype){
 //                case RX:
 //                    if(toggle != FX){
 //                        setErr();

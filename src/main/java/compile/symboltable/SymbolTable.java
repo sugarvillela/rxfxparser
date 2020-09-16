@@ -39,7 +39,7 @@ public class SymbolTable implements ChangeListener {
 
     //=====Methods to populate nodes=====================================
 
-    public void startTextNode(Keywords.HANDLER type){
+    public void startTextNode(Keywords.DATATYPE type){
         if(busy){
             Erlog.get(this).set("Don't nest named definitions", type.toString());
         }
@@ -52,7 +52,7 @@ public class SymbolTable implements ChangeListener {
 
     public void setTextName(String textName){
         if(symbolTable.containsKey(textName)){
-            Erlog.get(this).set("Duplicate identifier");
+            Erlog.get(this).set("Identifier already exists", textName);
         }
         else{
             currNode.setName(textName);
@@ -125,7 +125,7 @@ public class SymbolTable implements ChangeListener {
         protected ArrayList<String> words;
         protected ITextStatus textStatus;
         protected String name;
-        protected Keywords.HANDLER type;
+        protected Keywords.DATATYPE type;
         protected int initialRow, index;
 
         public Base_TextNode(ITextStatus textStatus){
@@ -177,12 +177,12 @@ public class SymbolTable implements ChangeListener {
         }
 
         @Override
-        public void setType(Keywords.HANDLER type) {
+        public void setType(Keywords.DATATYPE type) {
             this.type = type;
         }
 
         @Override
-        public Keywords.HANDLER getType() {
+        public Keywords.DATATYPE getType() {
             return type;
         }
 

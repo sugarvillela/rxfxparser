@@ -75,9 +75,11 @@ public abstract class RxTree {
         public OP op;//, parentOp;//--
         public boolean not;         //--
         public int level, id;       //--
-        public Keywords.RX_PARAM_TYPE paramType;
+        // payload
+        public Keywords.DATATYPE generalType;
+        public Keywords.PAR paramType;
         public String param;
-        public Keywords.HANDLER dataType;
+        public Keywords.DATATYPE dataType;
         
         public TreeNode(){
             this.op = PAYLOAD;

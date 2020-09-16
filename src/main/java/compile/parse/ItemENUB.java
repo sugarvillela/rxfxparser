@@ -4,7 +4,7 @@ package compile.parse;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
-import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.FIELD;
 import unique.Uq_enumgen;
 import unique.Enum_itr;
@@ -15,14 +15,14 @@ public class ItemENUB extends Base_ParseItem{
     
     public ItemENUB(Factory_Node.ScanNode node){
         super(node);
-        if(node.h == HANDLER.ENUB){// ENUD extends ENUB with different itr
+        if(node.h == DATATYPE.LIST_BOOLEAN){// ENUD extends ENUB with different itr
             itr = (Enum_itr)(new Uq_enumgen(CompileInitializer.getInstance().getWRow())).iterator();
         }
         
         count = 0;
     }
     @Override
-    public void addTo(HANDLER handler, FIELD key, String val) {
+    public void addTo(DATATYPE datatype, FIELD key, String val) {
         if(NULL_TEXT.equals(val)){
             er.set("No variable name", val);
         }

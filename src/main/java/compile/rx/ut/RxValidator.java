@@ -1,7 +1,7 @@
 package compile.rx.ut;
 
 import compile.basics.Keywords;
-import compile.basics.Keywords.FUNCT;
+import compile.basics.Keywords.RX_FUN;
 import erlog.Erlog;
 
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public class RxValidator {
     }
 
     public boolean assertRxFunction(String text){
-        FUNCT f = FUNCT.fromString(text);
+        RX_FUN f = RX_FUN.fromString(text);
         if(f == null){
             Erlog.get(this).set( "Invalid RX Function name", text);
             return false;
@@ -53,9 +53,9 @@ public class RxValidator {
         }
         return good;
     }
-    public boolean assertValidTests(Keywords.RX_PARAM_TYPE prev, Keywords.RX_PARAM_TYPE curr){
+    public boolean assertValidTests(Keywords.PAR prev, Keywords.PAR curr){
         return (
-                (prev == Keywords.RX_PARAM_TYPE.CATEGORY && curr == Keywords.RX_PARAM_TYPE.CATEGORY_ITEM)
+                (prev == Keywords.PAR.CATEGORY && curr == Keywords.PAR.CATEGORY_ITEM)
                 );
     }
     

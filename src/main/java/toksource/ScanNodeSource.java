@@ -13,7 +13,7 @@ import compile.basics.Keywords;
 import compile.basics.Factory_Node.ScanNode;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
-import static compile.basics.Keywords.HANDLER.RX_BUILDER;
+import static compile.basics.Keywords.DATATYPE.RX_BUILDER;
 
 import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
@@ -57,14 +57,14 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
         @Override
         public ScanNode nextNode(String next){
             String[] tok = next.split(",", NUM_FIELDS);
-            Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
-            if(RX_BUILDER.equals(handler)){
+            Keywords.DATATYPE datatype = Keywords.DATATYPE.fromString(tok[2]);
+            if(RX_BUILDER.equals(datatype)){
                 return null;
             }
             return new ScanNode(
                 tok[0],
                 Keywords.CMD.fromString(tok[1]),
-                handler,
+                datatype,
                 NULL_TEXT.equals(tok[3])? null : Keywords.FIELD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
             );
@@ -74,19 +74,19 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
         @Override
         public ScanNode nextNode(String next){
             String[] tok = next.split(",", NUM_RX_FIELDS);
-            Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
+            Keywords.DATATYPE datatype = Keywords.DATATYPE.fromString(tok[2]);
 
-            if(!RX_BUILDER.equals(handler)){
+            if(!RX_BUILDER.equals(datatype)){
                 return null;
             }
 
             return new RxScanNode(// 0 text status, 1 push or pop, 2 RX_BUILDER, 3 negate, 4 operation, 5 data format in leaf, 6 text payload, 7 function parameter, 8 unique id
                 tok[0], // text status
                 Keywords.CMD.fromString(tok[1]),   // push or pop
-                handler,                    // RX_BUILDER
+                datatype,                    // RX_BUILDER
                 Boolean.parseBoolean(tok[3]),// negate
                 NULL_TEXT.equals(tok[4])? null : Keywords.OP.fromString(tok[4]),    // operation
-                NULL_TEXT.equals(tok[5])? null : Keywords.RX_PARAM_TYPE.fromString(tok[5]),// param type (data format)
+                NULL_TEXT.equals(tok[5])? null : Keywords.PAR.fromString(tok[5]),// param type (data format)
                 tok[6],                    // text payload
                 NULL_TEXT.equals(tok[7])? null : tok[7],    // param
                 NULL_TEXT.equals(tok[8])? -1 : Integer.parseInt(tok[8]) // id

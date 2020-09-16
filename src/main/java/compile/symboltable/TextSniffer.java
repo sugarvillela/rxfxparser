@@ -45,9 +45,9 @@ public class TextSniffer {
             case IDENTIFY:
                 if(symbolTest.isUserDef(text)){
                     String textName = text.substring(USERDEF_OPEN.length());
-                    factoryTextNode.startTextNode(scanItem.getHandler());
+                    factoryTextNode.startTextNode(scanItem.getDatatype());
                     factoryTextNode.setTextName(textName);
-                    factoryTextNode.addWord(scanItem.getHandler().toString());
+                    factoryTextNode.addWord(scanItem.getDatatype().toString());
                     state = PARSE;
                 }
                 else{
@@ -63,13 +63,13 @@ public class TextSniffer {
     }
     public void onPop(Base_ScanItem scanItem){
 
-        System.out.println(state + ": TextSniffer onPop: " + scanItem.getDebugName());
+        //System.out.println(state + ": TextSniffer onPop: " + scanItem.getDebugName());
         if(state == PARSE && scanItem.equals(this.scanItem)){
-            System.out.println("++++TextSniffer onPop++++");
+            //System.out.println("++++TextSniffer onPop++++");
             factoryTextNode.finishTextNode();
             factoryTextNode.testItr();
             //System.out.println(factoryTextNode.toString());
-            System.out.println("+++++++++++++++++++++++++");
+            //System.out.println("+++++++++++++++++++++++++");
             state = WAIT;
         }
     }

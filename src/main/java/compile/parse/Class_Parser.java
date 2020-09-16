@@ -54,7 +54,7 @@ public class Class_Parser extends RxlxReader {
             //System.out.println("\nNode: " + currNode.toString());
             
             if(currNode.cmd == null || currNode.h == null){
-                er.set("onCreate: Null command");
+                er.set("Null command in rxlx file");
             }
             switch (currNode.cmd){
                 case PUSH:
@@ -76,7 +76,7 @@ public class Class_Parser extends RxlxReader {
                     ((Base_ParseItem)getTop()).setAttrib(currNode.h, currNode.k, currNode.data);
                     break;
                 default:
-                    er.set("onCreate: rxlx file improperly edited", currNode.cmd.toString());
+                    er.set("rxlx file improperly edited", currNode.cmd.toString());
             }
             //disp();
         }

@@ -5,7 +5,7 @@ import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.FIELD.VAL;
-import static compile.basics.Keywords.HANDLER.RX_BUILDER;
+import static compile.basics.Keywords.DATATYPE.RX_BUILDER;
 import compile.basics.Keywords.OP;
 import compile.rx.RxTree.TreeNode;
 
@@ -21,30 +21,30 @@ import java.util.ArrayList;
 public class Factory_Node {
     public static ScanNode newScanNode(String text){
         String[] tok = text.split(",", NUM_FIELDS);
-        Keywords.HANDLER handler = Keywords.HANDLER.fromString(tok[2]);
-        if(RX_BUILDER.equals(handler)){
+        Keywords.DATATYPE datatype = Keywords.DATATYPE.fromString(tok[2]);
+        if(RX_BUILDER.equals(datatype)){
             return null;
         }
         return new ScanNode(
                 tok[0],
                 Keywords.CMD.fromString(tok[1]),
-                handler,
+                datatype,
                 NULL_TEXT.equals(tok[3])? null : Keywords.FIELD.fromString(tok[3]),
                 NULL_TEXT.equals(tok[4])? "" : tok[4]
         );
     }
     /* factory access for scan node */
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler){
-        return new ScanNode(null, setCommand, setHandler, null, "");
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype){
+        return new ScanNode(null, setCommand, setDatatype, null, "");
     }
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, String setData){
-        return new ScanNode(null, setCommand, setHandler, null, setData);
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, String setData){
+        return new ScanNode(null, setCommand, setDatatype, null, setData);
     }
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord){
-        return new ScanNode(null, setCommand, setHandler, setKWord, "");
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord){
+        return new ScanNode(null, setCommand, setDatatype, setKWord, "");
     }
-    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord, String setData){
-        return new ScanNode(null, setCommand, setHandler, setKWord, setData);
+    public static ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord, String setData){
+        return new ScanNode(null, setCommand, setDatatype, setKWord, setData);
     }
     /** node for input and output list */
     public static class ScanNode{
@@ -52,13 +52,13 @@ public class Factory_Node {
         public static final int NUM_FIELDS = 5;
         public String lineCol;
         public Keywords.CMD cmd;
-        public Keywords.HANDLER h;
+        public Keywords.DATATYPE h;
         public Keywords.FIELD k;
         public String data;
         
-        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.HANDLER setHandler, Keywords.FIELD setKWord, String setData){
+        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord, String setData){
             this.lineCol = lineCol;
-            h = setHandler;
+            h = setDatatype;
             cmd = setCommand;
             k = setKWord;
             data = setData;
@@ -96,21 +96,21 @@ public class Factory_Node {
         public final OP op;
         public final boolean not;
         public final int id;
-        public final Keywords.RX_PARAM_TYPE paramType;
+        public final Keywords.PAR paramType;
         public final String param;
 
         public RxScanNode(// 0 text status, 1 push or pop, 2 RX_BUILDER, 3 negate, 4 operation, 5 data format in leaf, 6 text payload, 7 function parameter, 8 unique id
-                String lineCol,             // 0
-                Keywords.CMD setCommand,    // 1
-                Keywords.HANDLER setHandler,// 2
-                boolean negate,             // 3
-                OP setOp,                   // 4
-                Keywords.RX_PARAM_TYPE paramType,// 5
-                String setData,             // 6
-                String param,               // 7
-                int id                      // 8
+                          String lineCol,             // 0
+                          Keywords.CMD setCommand,    // 1
+                          Keywords.DATATYPE setDatatype,// 2
+                          boolean negate,             // 3
+                          OP setOp,                   // 4
+                          Keywords.PAR paramType,// 5
+                          String setData,             // 6
+                          String param,               // 7
+                          int id                      // 8
         ) {
-            super(lineCol, setCommand, setHandler, null, setData);
+            super(lineCol, setCommand, setDatatype, null, setData);
             this.op = setOp;
             this.not = negate;
             this.id = id;

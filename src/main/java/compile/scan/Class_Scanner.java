@@ -2,7 +2,7 @@
 package compile.scan;
 
 import compile.basics.Factory_Node;
-import compile.basics.Keywords.HANDLER;
+import compile.basics.Keywords.DATATYPE;
 import compile.basics.CompileInitializer;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import compile.scan.factories.Factory_ScanItem;
 import toksource.Base_TextSource;
 import toksource.TokenSource;
 
-/**Does the language parsing; outputs a list of commands, handlers and text
+/**Does the language parsing; outputs a list of commands, datatypes and text
  *
  * @author Dave Swanson
  */
@@ -52,8 +52,8 @@ public class Class_Scanner extends Base_Scanner {
         backText = null;
         String text;
         
-        // start with a target language handler
-        push(Factory_ScanItem.get(HANDLER.TARGLANG_BASE));//Factory_cxs
+        // start with a target language datatype
+        push(Factory_ScanItem.get(DATATYPE.TARGLANG_BASE));//Factory_cxs
         // start in line mode for target language
         fin.setLineGetter();
         while(true){// outer loop on INCLUDE file stack level
@@ -69,7 +69,7 @@ public class Class_Scanner extends Base_Scanner {
                     backText = null;
                 }
 
-                System.out.println(">>>" + text);
+                System.out.println(fin.readableStatus() + " >>> " + text);
                 ((Base_ScanItem)top).pushPop(text);
             }
 
@@ -82,7 +82,7 @@ public class Class_Scanner extends Base_Scanner {
             //System.exit(0);
         }
 
-        // pop target language handler;
+        // pop target language datatype;
         pop();
         //Commons.disp(nodes, "\nClass_Scanner nodes");
     }

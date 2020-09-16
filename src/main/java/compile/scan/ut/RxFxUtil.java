@@ -1,8 +1,8 @@
 package compile.scan.ut;
 
 import compile.basics.Keywords;
-import static compile.basics.Keywords.HANDLER.RX;
-import static compile.basics.Keywords.HANDLER.FX;
+import static compile.basics.Keywords.DATATYPE.RX;
+import static compile.basics.Keywords.DATATYPE.FX;
 import erlog.Erlog;
 
 /**
@@ -10,13 +10,13 @@ import erlog.Erlog;
  * @author newAdmin
  */
 public class RxFxUtil {
-    protected Keywords.HANDLER toggle;
+    protected Keywords.DATATYPE toggle;
     
     public RxFxUtil(){
         toggle = FX;
     }
-    public final boolean assertToggle(Keywords.HANDLER handler){
-        switch(handler){
+    public final boolean assertToggle(Keywords.DATATYPE datatype){
+        switch(datatype){
             case RX:
                 if(toggle != FX){
                     setErr();
@@ -28,7 +28,7 @@ public class RxFxUtil {
                 }
                 break;
         }
-        toggle = handler;
+        toggle = datatype;
         return true;
     }
     public final boolean errOnPop(){

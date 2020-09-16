@@ -10,7 +10,7 @@ import toksource.Base_TextSource;
 import toksource.TokenSource;
 
 import static compile.basics.Keywords.*;
-import static compile.basics.Keywords.HANDLER.FUN;
+import static compile.basics.Keywords.DATATYPE.FUN;
 
 /** A stripped down scanner that only sees target language, source language,
  * include statements and function definitions.
@@ -55,7 +55,7 @@ public class PreScanner extends Base_Scanner {
 
         String text;
 
-        // start with a target language handler
+        // start with a target language datatype
         push(new TargetLanguage());
 
         // start in line mode for target language
@@ -141,18 +141,18 @@ public class PreScanner extends Base_Scanner {
                     include(text);
                     break;
                 case WAIT:// Wait for function keyword or include keyword
-                    HANDLER handler = HANDLER.fromString(text);
-                    if(handler != null){
-                        switch(handler){
+                    DATATYPE datatype = DATATYPE.fromString(text);
+                    if(datatype != null){
+                        switch(datatype){
                             case FUN:
                                 factoryTextNode.startTextNode(FUN);
                                 state = IDENTIFY;
                                 break;
                             case INCLUDE:
-                                push(new IncludeHandler());
+                                push(new ManageInclude());
                                 break;
                             case CONSTANT:
-                                push(new ConstantHandler());
+                                push(new ManageConstant());
                                 break;
                         }
                     }
@@ -188,7 +188,7 @@ public class PreScanner extends Base_Scanner {
 
         }
     }
-    private class IncludeHandler extends Base_PreScanItem {
+    private class ManageInclude extends Base_PreScanItem {
         @Override
         public void pushPop(String text) {
             if(symbolTest.isUserDef(text)){
@@ -202,10 +202,10 @@ public class PreScanner extends Base_Scanner {
             pop();
         }
     }
-    private class ConstantHandler extends Base_PreScanItem {
+    private class ManageConstant extends Base_PreScanItem {
         private int state;
 
-        public ConstantHandler(){
+        public ManageConstant(){
             state = IDENTIFY;
         }
         @Override

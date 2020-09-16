@@ -29,11 +29,11 @@ public class Base_Scanner  extends Base_Stack {
 
     public void changeTextSource(Base_TextSource source){
         if(source == null){
-            er.set("changeTextSource: NULL source");
+            er.set("Failed to change text source: NULL source");
 
         }
         else if(!source.hasData()){
-            er.set("changeTextSource: bad source", source.toString());
+            er.set("Failed to change text source: bad source", source.toString());
         }
         else{
             System.out.println("changeTextSource: \n" + source);

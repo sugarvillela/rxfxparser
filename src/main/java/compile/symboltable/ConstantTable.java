@@ -34,7 +34,7 @@ public class ConstantTable {
     public void setConstantName(String name){
         System.out.println("setConstantName: "+name);
         if(symbolTable.containsKey(name)){
-            Erlog.get(this).set("Duplicate identifier");
+            Erlog.get(this).set("Identifier already exists", name);
         }
         else{
             currNode.name = name;

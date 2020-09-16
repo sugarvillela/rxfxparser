@@ -12,10 +12,10 @@ import toksource.interfaces.ITextStatus;
  */
 public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeNotifier {
     protected String debugName;
-    protected Base_StackItem top;  // stack; handlers are linked nodes
+    protected Base_StackItem top;  // stack; datatypes are linked nodes
     protected int stackSize;     // changes on push, pop
     protected Base_TextSource fin;  // file to be parsed
-    protected String title;      // outFile name = title_handler.extension
+    //protected String title;
     protected Erlog er;    // logs, notifies, quits or all 3
 
     

@@ -81,7 +81,7 @@ public class RxRangeUtil {
 
         }
         else{
-            Erlog.get(this).set("Bad number format", text);
+            Erlog.get(this).set("Expected range in standard format... Example: {1-2} or {5}", text);
             return false;
         }
     }

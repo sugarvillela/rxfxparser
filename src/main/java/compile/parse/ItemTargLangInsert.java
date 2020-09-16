@@ -3,7 +3,7 @@ package compile.parse;
 
 import compile.basics.Factory_Node;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
-import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.FIELD;
 
 public class ItemTargLangInsert extends Base_ParseItem{
@@ -22,7 +22,7 @@ public class ItemTargLangInsert extends Base_ParseItem{
     }
 
     @Override
-    public void addTo(HANDLER handler, FIELD key, String val) {
+    public void addTo(DATATYPE datatype, FIELD key, String val) {
         if(NULL_TEXT.equals(val)){
             er.set("No ItemTargLangInsert", val);
         }

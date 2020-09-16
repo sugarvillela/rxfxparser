@@ -44,7 +44,7 @@ public abstract class RxlxReader extends Base_Stack{
             Factory_Node.ScanNode currNode = fin.nextNode();
             System.out.println(currNode);
             if(currNode.cmd == null || currNode.h == null){
-                er.set("readFile: Null command");
+                er.set("Null command in rxlx file");
             }
             else{
                 readNode(currNode);
@@ -61,7 +61,7 @@ public abstract class RxlxReader extends Base_Stack{
             //String topName = top==null? "NULL" : top.getDebugName();
             //System.out.println("readList: "+ stackSize +". top = " + topName);
             if(node.cmd == null || node.h == null){
-                er.set("readFile: Null command");
+                er.set("Null command in rxlx file");
             }
             else{
                 readNode(node);
@@ -87,7 +87,7 @@ public abstract class RxlxReader extends Base_Stack{
                 break;
             case SET_ATTRIB:
                 if(node.k == null){
-                    er.set("SET_ATTRIB: Null key");
+                    er.set("Null key in rxlx file");
                 }
                 ((IParseItem)getTop()).setAttrib(node.h, node.k, node.data);
                 break;

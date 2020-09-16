@@ -5,22 +5,25 @@ $number = 0;
 /*$
 	ATTRIB
 		PROJ_NAME=semantic99
-		NEW_ENUM_SET=true
+		NEW_LIST_SET=true
 	
 	CONSTANT $const1 D=d
 	CONSTANT $const2 bonkers
 	
-	
-	ENUD	
-		$SCOPES sen phrase word char
+	LIST<DISCRETE>
+		$SCOPES
+			sen phrase word char
 		
-	ENUB	
-		$POS 
-			verb noun adjective ...
-			adverb linking article determiner modal // Comment
+	LIST<BOOLEAN>
+		$POS // Use all caps in these definitions
+			VERB NOUN ADJECTIVE ADVERB LINKING ARTICLE 
+			DETERMINER MODAL 
+			
+	LIST<TEXT>
+		$TEXT 
+			IN ORIG ALT EXPAND1 EXPAND2 NAME SURNAME
 
-	RX $myRx ~(LEN(1-6)=true&pos='pos.verb')&(C=c&$const1)|~(E=e&FIRST($const2)=f)&'G'{5-15} 
-		~(H=h&I='i')&(J=j&K=k) 
+	RX $myRx ~(in.LEN()&Tokyo)
 	FX fxCommand1 fxCommand2 fxCommandWow
 
 $*/

@@ -5,6 +5,9 @@
  */
 package compile.basics;
 
+import compile.symboltable.ListTable;
+
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**Contains the language definition, including enums, constants
@@ -31,12 +34,15 @@ public final class Keywords {
             return null;
         }
     }
-    // List of handlers to be implemented
-    public enum HANDLER {//values() returns H[] array
-        // File generating handlers
-        TARGLANG_BASE, 
-        ENUB, 
-        ENUD, 
+
+
+    // List of datatypes to be implemented
+    public enum DATATYPE {//values() returns H[] array
+        // File generating datatypes
+        TARGLANG_BASE,
+        LIST_BOOLEAN,
+        LIST_DISCRETE,
+        LIST_TEXT,
         VAR, 
         SCOPE, 
         RXFX,
@@ -45,21 +51,26 @@ public final class Keywords {
         RX, FX, SRCLANG,
         // Constant types
         CONSTANT,
-        // Non-file-generating handlers
+        // Non-file-generating datatypes
         ATTRIB, INCLUDE, FUN, RAW_TEXT,
-        // sub-handlers not actually in the language
+        // sub-datatypes not actually in the language
         IF_ELSE, BOOL_TEST, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT,
-        SYMBOL_TABLE, 
-        // handlers whose text indicators are not the same as enum name
+        // datatypes whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // error indicator
-        //UNKNOWN_HANDLER,
+        //UNKNOWN_DATATYPE,
         // Top enum ordinal gives size of list
-        NUM_HANDLERS
+        NUM_DATATYPES
         ;
-        
-        public static HANDLER fromString( String text ){
-            for(HANDLER h : values()){
+
+        private static final Pattern CHEVRONS = Pattern.compile("[<]([A-Z]+)[>]$");
+
+        public static DATATYPE fromString(String text ){
+            Matcher matcher = CHEVRONS.matcher(text);
+            if(matcher.find()){
+                text = matcher.replaceAll("_$1");
+            }
+            for(DATATYPE h : values()){
                 if(h.toString().equals(text)){
                     return h;
                 }
@@ -73,7 +84,7 @@ public final class Keywords {
     public enum FIELD {
         // Keys for setAttrib()
         // keywords that can be specified in language
-        PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_ENUM_SET,
+        PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_LIST_SET,
         // Internal keywords for communicating between components
         DEF_NAME, //ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges
@@ -128,53 +139,92 @@ public final class Keywords {
             return null;
         }
     }
-    public enum FUNCT{
-        // function names for Rx logic
-        FIRST, LAST, LEN
+    public enum PRIM {// PRIMITIVE
+        BOOLEAN    (Pattern.compile("^(true)|(truthy)|(false)$")),
+        NUMBER     (Pattern.compile("^[0-9]*[.]?[0-9]+$")),
+        STRING     (Pattern.compile("."))
         ;
-        public static FUNCT fromString(String text ){
-            for(FUNCT f : values()){
-                if(f.toString().equals(text)){
-                    return f;
+        public final Pattern pattern;
+        private PRIM(Pattern pattern){
+            this.pattern = pattern;
+        }
+        public static PRIM fromString(String text ){
+            for(PRIM p : values()){
+                if(p.toString().equals(text)){
+                    return p;
+                }
+            }
+            return null;
+        }
+        public PRIM whatIsIt(String text){
+            for(PRIM p : values()){
+                if(p.pattern.matcher(text).find()){
+                    return p;
                 }
             }
             return null;
         }
     }
-    //EMPTY_PARAM = 0, NUM_PARAM = 1, NUM_RANGE = 2, NUM_RANGE = 3, CONST_PARAM = 4, NO_FUN
-
-    public enum RX_PARAM_TYPE{
+    public enum PAR {// PARAMETER
         // Rx Functions
-        EMPTY_PARAM     (0, true,  Pattern.compile("\\(\\)$")),
-        NUM_PARAM       (1, true,  Pattern.compile("\\([0-9]+\\)$")),
-        NUM_RANGE_PARAM (2, true,  Pattern.compile("\\([0-9]+[-][0-9]\\)$")),
-        ALPHA_NUM_PARAM (3, true,  Pattern.compile("\\([A-Za-z0-9_]+\\)$")),
-        CONST_PARAM     (4, true,  Pattern.compile("\\([$][A-Za-z][A-Za-z0-9_]*\\)$")),
-        SINGLE_FIELD    (5, false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
-        DOTTED_FIELD    (6, false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),
-        CATEGORY        (7, false, null),
-        CATEGORY_ITEM   (8, false, null)
+        EMPTY_PAR       (true,  Pattern.compile("^[^.]+\\(()\\)$")),
+        NUM_PAR         (true,  Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
+        RANGE_PAR       (true,  Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
+        RANGE_BELOW     (true,  Pattern.compile("^[^.]+\\(([-][0-9]+)\\)$")),
+        RANGE_ABOVE     (true,  Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
+        AL_NUM_PAR      (true,  Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
+        CONST_PAR       (true,  Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
+        SINGLE_FIELD    (false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
+        DOTTED_FIELD    (false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),//
+        DOTTED_FUN      (false, Pattern.compile("^[a-zA-z0-9_.]+\\(.*\\)$")),
+        CATEGORY        (false, null),
+        CATEGORY_ITEM   (false, null)
         ;
 
-        public final int asInt;
         public final boolean isFun;
         public final Pattern pattern;
-        private RX_PARAM_TYPE(int asInt, boolean isFun, Pattern pattern){
-            this.asInt = asInt;
+        private PAR(boolean isFun, Pattern pattern){
             this.isFun = isFun;
             this.pattern = pattern;
         }
 
-        public static RX_PARAM_TYPE fromInt(int i){
-            for(RX_PARAM_TYPE t : values()){
-                if(t.asInt == i){
-                    return t;
+        public static PAR fromInt(int i){
+            for(PAR p : values()){
+                if(p.ordinal() == i){
+                    return p;
                 }
             }
             return null;
         }
-        public static RX_PARAM_TYPE fromString(String text ){
-            for(RX_PARAM_TYPE f : values()){
+        public static PAR fromString(String text ){
+            for(PAR p : values()){
+                if(p.toString().equals(text)){
+                    return p;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum RX_FUN {
+        // function names for Rx logic
+        FIRST   (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.STRING),
+        LAST    (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.STRING),
+        LEN     (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.NUMBER),
+        RANGE   (PRIM.NUMBER, new PAR[]{PAR.NUM_PAR, PAR.RANGE_PAR, PAR.RANGE_BELOW, PAR.RANGE_ABOVE}, PRIM.BOOLEAN),
+        ;
+
+        public final PRIM outType;
+        public final PAR[] par;
+        public final PRIM caller;
+
+        private RX_FUN(PRIM caller, PAR[] par, PRIM outType){
+            this.outType =outType;
+            this.par = par;
+            this.caller = caller;
+        }
+        public static RX_FUN fromString(String text ){
+            for(RX_FUN f : values()){
                 if(f.toString().equals(text)){
                     return f;
                 }
@@ -182,23 +232,29 @@ public final class Keywords {
             return null;
         }
     }
+
+
+    //EMPTY_PARAM = 0, NUM_PARAM = 1, NUM_RANGE = 2, NUM_RANGE = 3, CONST_PARAM = 4, NO_FUN
+
+
     // String constants for switches: defines language behavior
     public static final String CONT_LINE = "...";      // Matlab-like extension
-    public static final String SOURCE_OPEN = "/*$";    // pushes source handler
-    public static final String SOURCE_CLOSE = "$*/";   // pops all source handlers
+    public static final String SOURCE_OPEN = "/*$";    // pushes source datatype
+    public static final String SOURCE_CLOSE = "$*/";   // pops all source datatypes
     public static final String TARGLANG_INSERT_OPEN = "*/"; // inserts target language without popping source
     public static final String TARGLANG_INSERT_CLOSE = "/*";// pops target language insert
     public static final String ITEM_OPEN = "{";        // surrounds item content
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined name
     public static final String COMMENT_TEXT = "//";    //
-    public static final String TEXT_FIELD_NAME = "text";// class WORD text field
+    public static final String TEXT_FIELD_NAME = "TEXT";// class WORD text field
 
-    public static String fileName_symbolTableEnu(){
+    public static String listTableFileName(){
         return String.format(
-            "%s_%s_%s", 
-            HANDLER.SYMBOL_TABLE, 
-            "ENU", 
-            CompileInitializer.getInstance().getProjName()) + INTERIM_FILE_EXTENSION;
+            "%s_%s%s",
+            CompileInitializer.getInstance().getInName(),
+            ListTable.class.getSimpleName(),
+            INTERIM_FILE_EXTENSION
+        );
     }
 }

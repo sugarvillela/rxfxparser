@@ -16,41 +16,49 @@ import java.util.Map;
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.CMD.*;
 import static compile.basics.Keywords.CMD.POP;
-import static compile.basics.Keywords.HANDLER.ENUB;
-import static compile.basics.Keywords.HANDLER.ENUD;
+import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.FIELD.DEF_NAME;
 
-/** Abstract class to handler SymbolTable_Enu initialization from file
+/** Abstract class to datatype SymbolTable_Enu initialization from file
  *
  */
-public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
-    Map <Keywords.HANDLER, Map<String, Base_ParseItem>> symbolTable;
-    //protected Keywords.HANDLER currHandler;
+public abstract class ListTable_RxlxReader extends RxlxReader implements IParseItem {
+    Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> symbolTable;
+    //protected Keywords.DATATYPE currDatatype;
     protected String currName;
 
-    public RxlxReader_Enu(ScanNodeSource fin){
+    public ListTable_RxlxReader(ScanNodeSource fin){
         super(fin);
         symbolTable = new HashMap<>(3);
-        symbolTable.put(ENUB, new HashMap<>(8));
-        symbolTable.put(ENUD, new HashMap<>(8));
+        symbolTable.put(LIST_BOOLEAN, new HashMap<>(8));
+        symbolTable.put(LIST_DISCRETE, new HashMap<>(8));
+        symbolTable.put(LIST_TEXT, new HashMap<>(8));
     }
 
-    public boolean contains(Keywords.HANDLER handler, String val){
-        return symbolTable.get(handler).containsKey(val);
+    public boolean contains(Keywords.DATATYPE datatype, String val){
+        return symbolTable.get(datatype).containsKey(val);
     }
 
-    public Keywords.HANDLER getDataType(String category){
-        for (Map.Entry<Keywords.HANDLER, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
-            if(outer.getValue().containsKey(category)){
+    public Keywords.DATATYPE getDataType(String text){
+        for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+            if(outer.getValue().containsKey(text)){
                 return outer.getKey();
+            }
+        }
+        String category = getCategory(text);
+        if(category != null){
+            for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+                if(outer.getValue().containsKey(category)){
+                    return outer.getKey();
+                }
             }
         }
         return null;
     }
     public String getCategory(String val){
-        for (Map.Entry<Keywords.HANDLER, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+        for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                System.out.println("key: " + inner.getValue());
+                //System.out.println("key: " + inner.getValue());
                 if(((SymbolTableNode)inner.getValue()).contains(val)){
                     return inner.getKey();
                 }
@@ -67,34 +75,21 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
     @Override
     public void onQuit(){
         ArrayList<Factory_Node.ScanNode> scanNodes = new ArrayList<>();
-        if(!symbolTable.get(ENUB).isEmpty()){
-            populateScanNodes(symbolTable.get(ENUB), scanNodes);
+        for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+            for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
+                ((SymbolTableNode)inner.getValue()).populateScanNodes(scanNodes);
+            }
         }
-        if(!symbolTable.get(ENUD).isEmpty()){
-            populateScanNodes(symbolTable.get(ENUD), scanNodes);
-        }
-        //Commons.disp(scanNodes, "\nscanNodes");
         if(!scanNodes.isEmpty()){
-            Factory_Node.persist(Keywords.fileName_symbolTableEnu(), scanNodes, "Lists ENUB, ENUD group names and items");
+            Factory_Node.persist(Keywords.listTableFileName(), scanNodes, "Defines lists, categories and items");
         }
     }
-
-    private void populateScanNodes(
-            Map<String, Base_ParseItem> subTable,
-            ArrayList<Factory_Node.ScanNode> scanNodes
-    ){
-        for (Map.Entry<String, Base_ParseItem> entry : subTable.entrySet()) {
-            System.out.println("populateScanNodes name: " + entry.getKey());
-            ((SymbolTableNode)entry.getValue()).populateScanNodes(scanNodes);
-        }
-    }
-
 
     public static class SymbolTableNode extends Base_ParseItem{
         private final ArrayList<String> list;
-        private final Map <Keywords.HANDLER, Map<String, Base_ParseItem>> parentTable;//reference to same obj in surrounding class
+        private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable;//reference to same obj in surrounding class
 
-        public SymbolTableNode(ScanNode node, Map <Keywords.HANDLER, Map<String, Base_ParseItem>> parentTable) {
+        public SymbolTableNode(ScanNode node, Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable) {
             super(node);
             this.parentTable = parentTable;
             list = new ArrayList<>();
@@ -114,12 +109,12 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
         }
 
         @Override
-        public void addTo(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
+        public void addTo(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
 //            System.out.println("_____addTo_____");
-//            System.out.println(handler);
+//            System.out.println(datatype);
 //            System.out.println(node.h);
 //            System.out.println("_______________");
-            if(handler == node.h){
+            if(datatype == node.h){
                 list.add(val);
             }
             else{
@@ -128,8 +123,8 @@ public abstract class RxlxReader_Enu extends RxlxReader implements IParseItem {
         }
 
         @Override
-        public void setAttrib(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
-            if(key == Keywords.FIELD.DEF_NAME && handler == node.h){
+        public void setAttrib(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
+            if(key == Keywords.FIELD.DEF_NAME && datatype == node.h){
                 node.data = val;
             }
             else{

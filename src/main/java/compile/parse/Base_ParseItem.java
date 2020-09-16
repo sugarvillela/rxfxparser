@@ -33,7 +33,7 @@ import compile.basics.Base_StackItem;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.ScanNode;
 import compile.basics.IParseItem;
-import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.FIELD;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
@@ -50,17 +50,17 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     }
     
     @Override
-    public void addTo(HANDLER handler, FIELD key, String val) {}
+    public void addTo(DATATYPE datatype, FIELD key, String val) {}
     
     @Override
-    public void setAttrib(HANDLER handler, FIELD key, String val) {
+    public void setAttrib(DATATYPE datatype, FIELD key, String val) {
         switch (key){
             case DEF_NAME:
                 defName = val;
                 break;
             default:
                 //System.out.println(key.toString() + " in Base_ParseItem setAttrib: " + val);
-                ((Base_ParseItem)below).setAttrib(handler, key, val);
+                ((Base_ParseItem)below).setAttrib(datatype, key, val);
         }
     }
     

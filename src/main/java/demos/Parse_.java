@@ -4,13 +4,11 @@ import compile.scan.Class_Scanner;
 import compile.parse.Class_Parser;
 import commons.Commons;
 import java.util.ArrayList;
-import static compile.basics.Keywords.HANDLER.RX;
+
 import compile.basics.Factory_Node.ScanNode;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
-import toktools.TK;
-import toktools.Tokens;
-import toktools.Tokens_special;
+
 /**
  *
  * @author Dave Swanson

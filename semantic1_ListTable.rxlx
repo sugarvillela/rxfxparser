@@ -1,0 +1,31 @@
+# Generated file, do not edit
+# Last write: 09/15/2020 20:32:14
+# Defines lists, categories and items
+semantic1.rxfx line 17 word 0,PUSH,LIST_BOOLEAN,NULL,NULL
+semantic1.rxfx line 17 word 0,SET_ATTRIB,LIST_BOOLEAN,DEF_NAME,pos
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,verb
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,noun
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,adjective
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,adverb
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,linking
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,article
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,determiner
+semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,modal
+semantic1.rxfx line 17 word 0,POP,LIST_BOOLEAN,NULL,NULL
+semantic1.rxfx line 13 word 0,PUSH,LIST_DISCRETE,NULL,NULL
+semantic1.rxfx line 13 word 0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,scopes
+semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,sen
+semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,phrase
+semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,word
+semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,char
+semantic1.rxfx line 13 word 0,POP,LIST_DISCRETE,NULL,NULL
+semantic1.rxfx line 22 word 0,PUSH,LIST_TEXT,NULL,NULL
+semantic1.rxfx line 22 word 0,SET_ATTRIB,LIST_TEXT,DEF_NAME,TEXT
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,in
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,orig
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,alt
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,expand1
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,expand2
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,name
+semantic1.rxfx line 22 word 0,ADD_TO,LIST_TEXT,NULL,surname
+semantic1.rxfx line 22 word 0,POP,LIST_TEXT,NULL,NULL

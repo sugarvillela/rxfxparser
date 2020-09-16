@@ -5,54 +5,54 @@ import compile.basics.Keywords;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 
-public class SymbolTable_Enu extends RxlxReader_Enu {//
-    private static SymbolTable_Enu instance;
+public class ListTable extends ListTable_RxlxReader {//
+    private static ListTable instance;
 
-    public static SymbolTable_Enu getInstance(){
+    public static ListTable getInstance(){
         return instance;
     }
 
     public static void init(ScanNodeSource fin){
-        instance = new SymbolTable_Enu(fin);
+        instance = new ListTable(fin);
     }
 
-    private SymbolTable_Enu(ScanNodeSource fin) {
+    private ListTable(ScanNodeSource fin) {
         super(fin);
     }
 
     @Override
-    public void addTo(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
-        SymbolTableNode symbolTableNode = ((SymbolTableNode)symbolTable.get(handler).get(currName));
+    public void addTo(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
+        SymbolTableNode symbolTableNode = ((SymbolTableNode)symbolTable.get(datatype).get(currName));
         if(symbolTableNode.contains(val)){
             Erlog.get(this).set(
                     String.format(
                             "%s already exists in %s...%s definitions must be uniquely named",
-                            val, currName, handler.toString()
+                            val, currName, datatype.toString()
                     )
             );
         }
         else{
-            symbolTableNode.addTo(handler, null, val);
+            symbolTableNode.addTo(datatype, null, val);
         }
     }
 
     @Override
-    public void setAttrib(Keywords.HANDLER handler, Keywords.FIELD key, String val) {
+    public void setAttrib(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
         currName = val;
-        if(symbolTable.get(handler).containsKey(val)){
+        if(symbolTable.get(datatype).containsKey(val)){
             Erlog.get(this).set(
                     String.format(
                             "%s already exists...%s categories must be uniquely named",
-                            currName, handler.toString()
+                            currName, datatype.toString()
                     )
             );
         }
         else{
-            symbolTable.get(handler).put(
+            symbolTable.get(datatype).put(
                     currName,
                     this.get(
                         new Factory_Node.ScanNode(
-                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, handler, key, val
+                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, datatype, key, val
                         )
                     )
             );

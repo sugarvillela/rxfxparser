@@ -5,7 +5,7 @@ import compile.basics.Factory_Node;
 import erlog.Erlog;
 import compile.parse.Base_ParseItem;
 import static compile.basics.Keywords.FIELD;
-import static compile.basics.Keywords.HANDLER;
+import static compile.basics.Keywords.DATATYPE;
 
 import compile.basics.Factory_Node.ScanNode;
 
@@ -19,11 +19,11 @@ import compile.parse.ItemUserDefList;
 public class Factory_ParseItem {
     public static Base_ParseItem get(ScanNode node){
         //System.out.println("====Base_ParseItem.get()====" + node.h.toString());
-        HANDLER h = node.h;
+        DATATYPE h = node.h;
         switch(h){
-            case ENUB:
+            case LIST_BOOLEAN:
                 return new ItemENUB(node);
-            case ENUD:
+            case LIST_DISCRETE:
                 return new ItemENUD(node);
             case SRCLANG:
                 return new ParseItem(node);
@@ -51,7 +51,7 @@ public class Factory_ParseItem {
             case SCOPE:
                 return null;//new Scope(node);
             default:
-                Erlog.get("Factory_cxs").set("Developer error in get(handler)", node.toString());
+                Erlog.get("Factory_cxs").set("Developer error in get(datatype)", node.toString());
                 return null;
         }
     }
@@ -64,7 +64,7 @@ public class Factory_ParseItem {
         public void onPush() {}
         
         @Override
-        public void addTo(HANDLER handler, FIELD key, String val){
+        public void addTo(DATATYPE datatype, FIELD key, String val){
         }
 
 //        @Override

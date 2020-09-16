@@ -5,7 +5,7 @@ import commons.Dev;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
 import compile.symboltable.SymbolTable;
-import compile.symboltable.SymbolTable_Enu;
+import compile.symboltable.ListTable;
 import erlog.Erlog;
 import toksource.TextSource_file;
 import toksource.TokenSource;
@@ -138,7 +138,7 @@ public class CompileInitializer implements ChangeListener {
     }
     public String getProjName(){ return this.projName; }
 
-    public String genAnonName(Keywords.HANDLER type){
+    public String genAnonName(Keywords.DATATYPE type){
         String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
         return anon;
     }
@@ -170,14 +170,14 @@ public class CompileInitializer implements ChangeListener {
         return newEnumSet;
     }
     private void deleteMe(){
-        SymbolTable_Enu.init(null);
-        SymbolTable_Enu enu = SymbolTable_Enu.getInstance();
+        ListTable.init(null);
+        ListTable listTable = ListTable.getInstance();
         ArrayList<Factory_Node.ScanNode> nodes = new ArrayList<>();
         nodes.add(Factory_Node.newScanNode("Line 16 Word 0,PUSH,ENUB,NULL,NULL"));
         nodes.add(Factory_Node.newScanNode("Line 17 Word 0,SET_ATTRIB,ENUB,DEF_NAME,POS"));
         nodes.add(Factory_Node.newScanNode("Line 18 Word 0,ADD_TO,ENUB,NULL,verb"));
         nodes.add(Factory_Node.newScanNode("Line 21 Word 0,POP,ENUB,NULL,NULL"));
-        enu.readList(nodes);
-        enu.onQuit();
+        listTable.readList(nodes);
+        listTable.onQuit();
     }
 }

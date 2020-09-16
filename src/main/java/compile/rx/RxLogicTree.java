@@ -1,10 +1,13 @@
 package compile.rx;
 
+import static compile.basics.Keywords.DATATYPE.LIST_BOOLEAN;
 import static compile.basics.Keywords.OP.AND;
 import static compile.basics.Keywords.OP.OR;
-import static compile.basics.Keywords.RX_PARAM_TYPE.CATEGORY;
-import static compile.basics.Keywords.RX_PARAM_TYPE.CATEGORY_ITEM;
+import static compile.basics.Keywords.PAR.CATEGORY;
+import static compile.basics.Keywords.PAR.CATEGORY_ITEM;
 import static compile.basics.Keywords.TEXT_FIELD_NAME;
+
+import commons.Commons;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
 import static compile.basics.Keywords.OP.CPAR;
@@ -15,13 +18,17 @@ import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.rx.ut.RxParamUtil;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.SymbolTable_Enu;
+import compile.symboltable.ListTable;
+import erlog.Erlog;
 import toksource.ScanNodeSource;
 import toksource.TextSource_list;
+import toktools.TK;
+import toktools.Tokens_special;
 
 public class RxLogicTree extends RxTree{
     private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     private static final RxParamUtil PARAM_UTIL = RxParamUtil.getInstance();
+    private static final Tokens_special tokenizer = new Tokens_special(".", "(", TK.IGNORESKIP );
     private static RxTree instance;
     
     public static RxTree getInstance(){
@@ -29,11 +36,16 @@ public class RxLogicTree extends RxTree{
     }
     protected RxLogicTree(){}
     
-    private final String lineCol = "line 0 word 0";
+    private ListTable listTable;
     
     @Override
     public TreeNode treeFromRxWord(String text){
         System.out.println("tokenize start: root text: " + text);
+        listTable = ListTable.getInstance();
+        if(listTable == null){
+            Erlog.get(this).set("LIST<*> items are not defined");
+            return null;
+        }
         TreeNode root = new TreeNode(text, 0, null);
         boolean more;
         do{
@@ -116,9 +128,11 @@ public class RxLogicTree extends RxTree{
     private void extendLeaves(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
             char splitChar = findSplitChar(leaf.data);
-            if(splitChar == '\0'){  // The field name is optional; add default text field name
+            if( // Optional text: add fields to balance the statement
+                    splitChar == '\0' &&
+                    this.balanceLeaf(leaf, leaf.data)
+            ){
                 splitChar = '=';
-                leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
             }
             leaf.split(splitChar);
             leaf.negate();
@@ -141,7 +155,56 @@ public class RxLogicTree extends RxTree{
         }
         return '\0';
     }
-
+    private boolean balanceLeaf(TreeNode leaf, String leafData){
+        PARAM_UTIL.findAndSetParam(leafData);
+        if(PARAM_UTIL.isFun()){
+            Keywords.RX_FUN rxFun = Keywords.RX_FUN.fromString(PARAM_UTIL.getTruncated());
+            Keywords.PRIM outType = rxFun.outType;
+            switch(outType){
+                case BOOLEAN:
+                    leaf.data += "=true";
+                    break;
+                case NUMBER:
+                    leaf.data += "=truthy";
+                    break;
+                default:
+                    leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
+            }
+            //Erlog.get(this).set("isFun!!! stop: ", leaf.toString());
+            return true;
+        }
+        else {
+            String[] tok;
+            switch(PARAM_UTIL.getParamType()){
+                case SINGLE_FIELD:
+                    //System.out.println("balanceLeaf SINGLE_FIELD: "+leafData);
+                    Keywords.DATATYPE datatype = listTable.getDataType(leafData);
+                    //System.out.print("datatype: ");
+                    //System.out.println(datatype);
+                    if(datatype == null){
+                        leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
+                    }
+                    else if(LIST_BOOLEAN.equals(datatype)){
+                        leaf.data += "=true";
+                    }
+                    else{
+                        leaf.data += "=truthy";
+                    }
+                    //Erlog.get(this).set("is Single field!!! stop: ", leaf.toString());
+                    return true;
+                case DOTTED_FIELD:
+                    tok = tokenizer.toArr(leafData);
+                    //Commons.disp(tok, "balanceLeaf DOTTED_FIELD: "+leafData);
+                    return balanceLeaf(leaf, tok[0]);
+                case DOTTED_FUN:
+                    tok = tokenizer.toArr(leafData);
+                    //Commons.disp(tok, "balanceLeaf DOTTED_FUN: "+leafData);
+                    return balanceLeaf(leaf, tok[tok.length - 1]);
+            }
+        }
+        Erlog.get(this).set("Syntax error", leafData);
+        return false;
+    }
     private void setPayloads(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
 
@@ -159,12 +222,8 @@ public class RxLogicTree extends RxTree{
         }
     }
     private void setDataTypes(ArrayList<TreeNode> leaves){
-        SymbolTable_Enu symbolTableEnu = SymbolTable_Enu.getInstance();
-        if(symbolTableEnu == null){
-            return;
-        }
-        Keywords.HANDLER dataType;
-        Keywords.RX_PARAM_TYPE prevParamType = null, currParamType = null;
+        Keywords.DATATYPE dataType;
+        Keywords.PAR prevParamType = null, currParamType = null;
         String category;
         for(TreeNode leaf : leaves){
             if(leaf.paramType == null){
@@ -172,11 +231,11 @@ public class RxLogicTree extends RxTree{
                 continue;
             }
             if(!leaf.paramType.isFun){
-                if((dataType = symbolTableEnu.getDataType(leaf.data)) != null){
+                if((dataType = listTable.getDataType(leaf.data)) != null){
                     leaf.dataType = dataType;
                     currParamType = CATEGORY;
                 }
-                else if((category = symbolTableEnu.getCategory(leaf.data)) != null){
+                else if((category = listTable.getCategory(leaf.data)) != null){
                     //leaf.dataType = dataType;
                     currParamType = CATEGORY_ITEM;
                 }
