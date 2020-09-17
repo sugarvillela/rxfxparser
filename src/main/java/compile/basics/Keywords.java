@@ -35,14 +35,15 @@ public final class Keywords {
         }
     }
 
-
     // List of datatypes to be implemented
     public enum DATATYPE {//values() returns H[] array
         // File generating datatypes
+        LIST_BOOLEAN    (PRIM.BOOLEAN),
+        LIST_DISCRETE   (PRIM.DISCRETE),
+        LIST_STRING     (PRIM.STRING),
+        LIST_NUMBER     (PRIM.NUMBER),
+        RAW_TEXT        (PRIM.STRING),
         TARGLANG_BASE,
-        LIST_BOOLEAN,
-        LIST_DISCRETE,
-        LIST_TEXT,
         VAR, 
         SCOPE, 
         RXFX,
@@ -52,18 +53,41 @@ public final class Keywords {
         // Constant types
         CONSTANT,
         // Non-file-generating datatypes
-        ATTRIB, INCLUDE, FUN, RAW_TEXT,
+        ATTRIB, INCLUDE, FUN,
         // sub-datatypes not actually in the language
         IF_ELSE, BOOL_TEST, RX_WORD, RX_BUILDER, FX_WORD, //RX_STATEMENT,
         // datatypes whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // error indicator
         //UNKNOWN_DATATYPE,
+        // test text
+        TRUE    (true),
+        FALSE   (false),
+        TRUTHY  (true),
+        FALSEY  (false),
         // Top enum ordinal gives size of list
         NUM_DATATYPES
         ;
 
         private static final Pattern CHEVRONS = Pattern.compile("[<]([A-Z]+)[>]$");
+        public final PRIM outType;
+        public final boolean interpret;
+
+        private DATATYPE(boolean interpret){
+            this.interpret = interpret;
+            outType = null;
+        }
+
+        private DATATYPE(){
+            interpret = false;
+            outType = null;
+        }
+        private DATATYPE(PRIM outType){
+            interpret = false;
+            this.outType = outType;
+        }
+
+
 
         public static DATATYPE fromString(String text ){
             Matcher matcher = CHEVRONS.matcher(text);
@@ -76,6 +100,9 @@ public final class Keywords {
                 }
             }
             return null;
+        }
+        public static DATATYPE fromBool( boolean state ){
+            return (state)? TRUE : FALSE;
         }
 //        public static boolean isKeyword( String text ){
 //            return get(text) != null;
@@ -139,14 +166,23 @@ public final class Keywords {
             return null;
         }
     }
+
     public enum PRIM {// PRIMITIVE
-        BOOLEAN    (Pattern.compile("^(true)|(truthy)|(false)$")),
-        NUMBER     (Pattern.compile("^[0-9]*[.]?[0-9]+$")),
-        STRING     (Pattern.compile("."))
+        BOOLEAN    (Pattern.compile("^(TRUE)|(TRUTHY)|(FALSE)|(FALSEY)$"),
+                                                            new OP[]{OP.EQUAL},                 new DATATYPE[]{DATATYPE.TRUE,   DATATYPE.FALSE}),
+        DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL},   new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY}),
+        NUMBER     (Pattern.compile("^[0-9]*[.]?[0-9]+$"),  new OP[]{OP.GT, OP.LT, OP.EQUAL},   new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY}),
+        STRING     (Pattern.compile("."),                   new OP[]{OP.EQUAL},                 new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY})
         ;
+
         public final Pattern pattern;
-        private PRIM(Pattern pattern){
+        public final OP[] ops;
+        public final DATATYPE[] tests;
+
+        private PRIM(Pattern pattern, OP[] ops, DATATYPE[] tests){
             this.pattern = pattern;
+            this.ops = ops;
+            this.tests = tests;
         }
         public static PRIM fromString(String text ){
             for(PRIM p : values()){
@@ -157,12 +193,19 @@ public final class Keywords {
             return null;
         }
         public PRIM whatIsIt(String text){
+            PRIM out = STRING;
             for(PRIM p : values()){
                 if(p.pattern.matcher(text).find()){
-                    return p;
+                    out = p;
+                    break;
                 }
             }
-            return null;
+            if(out == DISCRETE){
+                return (CompileInitializer.getInstance().fitToWVal(text))? DISCRETE : NUMBER;
+            }
+            else{
+                return out;
+            }
         }
     }
     public enum PAR {// PARAMETER
@@ -174,11 +217,13 @@ public final class Keywords {
         RANGE_ABOVE     (true,  Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
         AL_NUM_PAR      (true,  Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
         CONST_PAR       (true,  Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
+        TEST            (false, Pattern.compile("^(true)|(truthy)|(false)|(falsey)|(TRUE)|(TRUTHY)|(FALSE)|(FALSEY)$")),
         SINGLE_FIELD    (false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
-        DOTTED_FIELD    (false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),//
+        DOTTED_FIELD    (false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),
         DOTTED_FUN      (false, Pattern.compile("^[a-zA-z0-9_.]+\\(.*\\)$")),
         CATEGORY        (false, null),
-        CATEGORY_ITEM   (false, null)
+        CATEGORY_ITEM   (false, null),
+
         ;
 
         public final boolean isFun;
@@ -247,7 +292,7 @@ public final class Keywords {
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined name
     public static final String COMMENT_TEXT = "//";    //
-    public static final String TEXT_FIELD_NAME = "TEXT";// class WORD text field
+    public static final String TEXT_FIELD_NAME = "IN";// class WORD text field
 
     public static String listTableFileName(){
         return String.format(

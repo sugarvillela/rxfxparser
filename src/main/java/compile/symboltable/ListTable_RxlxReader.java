@@ -29,10 +29,11 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
 
     public ListTable_RxlxReader(ScanNodeSource fin){
         super(fin);
-        symbolTable = new HashMap<>(3);
-        symbolTable.put(LIST_BOOLEAN, new HashMap<>(8));
+        symbolTable = new HashMap<>(6);
+        symbolTable.put(LIST_BOOLEAN,  new HashMap<>(8));
         symbolTable.put(LIST_DISCRETE, new HashMap<>(8));
-        symbolTable.put(LIST_TEXT, new HashMap<>(8));
+        symbolTable.put(LIST_NUMBER,   new HashMap<>(8));
+        symbolTable.put(LIST_STRING,   new HashMap<>(8));
     }
 
     public boolean contains(Keywords.DATATYPE datatype, String val){

@@ -1,13 +1,11 @@
 package compile.rx;
 
-import static compile.basics.Keywords.DATATYPE.LIST_BOOLEAN;
+import static compile.basics.Keywords.DATATYPE.BOOL_TEST;
+import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.OP.AND;
 import static compile.basics.Keywords.OP.OR;
-import static compile.basics.Keywords.PAR.CATEGORY;
-import static compile.basics.Keywords.PAR.CATEGORY_ITEM;
 import static compile.basics.Keywords.TEXT_FIELD_NAME;
 
-import commons.Commons;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
 import static compile.basics.Keywords.OP.CPAR;
@@ -57,13 +55,17 @@ public class RxLogicTree extends RxTree{
             more |= root.unwrap(OPAR.asChar, CPAR.asChar);
             more |= root.unquote(SQUOTE.asChar);
         }while(more);
+
         ArrayList<TreeNode> leaves = leaves(root);
         readConstants(leaves);    // read constants before extend
         extendLeaves(leaves);     // fix, split and unwrap
+
         leaves = leaves(root);    // recalculate after extend
         readConstants(leaves);    // read constants again after extend
-        setPayloads(leaves);
-        setDataTypes(leaves);
+        setPayNodes(leaves);
+        //setDataTypes(leaves);
+        dispBreadthFirst(root);
+        Erlog.get(this).set("Happy stop");
         return root;
     }
     
@@ -157,40 +159,45 @@ public class RxLogicTree extends RxTree{
     }
     private boolean balanceLeaf(TreeNode leaf, String leafData){
         PARAM_UTIL.findAndSetParam(leafData);
-        if(PARAM_UTIL.isFun()){
+        Keywords.PAR paramType = PARAM_UTIL.getParamType();
+        if(paramType.isFun){
             Keywords.RX_FUN rxFun = Keywords.RX_FUN.fromString(PARAM_UTIL.getTruncated());
-            Keywords.PRIM outType = rxFun.outType;
-            switch(outType){
-                case BOOLEAN:
-                    leaf.data += "=true";
-                    break;
-                case NUMBER:
-                    leaf.data += "=truthy";
-                    break;
-                default:
-                    leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
-            }
+            leaf.data += "=" + rxFun.outType.tests[0];
+//            switch(outType){
+//                case BOOLEAN:
+//                    leaf.data += "=true";
+//                    break;
+//                case NUMBER:
+//                    leaf.data += "=truthy";
+//                    break;
+//                default:
+//                    leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
+//            }
             //Erlog.get(this).set("isFun!!! stop: ", leaf.toString());
             return true;
         }
         else {
             String[] tok;
-            switch(PARAM_UTIL.getParamType()){
+            switch(paramType){
                 case SINGLE_FIELD:
-                    //System.out.println("balanceLeaf SINGLE_FIELD: "+leafData);
-                    Keywords.DATATYPE datatype = listTable.getDataType(leafData);
-                    //System.out.print("datatype: ");
-                    //System.out.println(datatype);
-                    if(datatype == null){
+                case TEST:
+                    Keywords.DATATYPE dataType = listTable.getDataType(leafData);
+                    if(dataType == null){
                         leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
                     }
-                    else if(LIST_BOOLEAN.equals(datatype)){
-                        leaf.data += "=true";
-                    }
                     else{
-                        leaf.data += "=truthy";
+                        leaf.data += "=" + dataType.outType.tests[0];
                     }
-                    //Erlog.get(this).set("is Single field!!! stop: ", leaf.toString());
+//                    switch(listTable.getDataType(leafData)){
+//                        case RAW_TEXT:
+//                            leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
+//                            break;
+//                        case LIST_BOOLEAN:
+//                            leaf.data += "=true";
+//                            break;
+//                        default:
+//                            leaf.data += "=truthy";
+//                    }
                     return true;
                 case DOTTED_FIELD:
                     tok = tokenizer.toArr(leafData);
@@ -205,45 +212,86 @@ public class RxLogicTree extends RxTree{
         Erlog.get(this).set("Syntax error", leafData);
         return false;
     }
-    private void setPayloads(ArrayList<TreeNode> leaves){
+    private void setPayNodes(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
-
-            PARAM_UTIL.findAndSetParam(leaf.data);
-            leaf.paramType = PARAM_UTIL.getParamType();
-
-            if(PARAM_UTIL.isFun()){
-                leaf.data = PARAM_UTIL.getTruncated();
-                leaf.param = PARAM_UTIL.getParam();
-                //System.out.print("found rx function:" + leaf.data);
-            }
-//            System.out.printf(":  %s: %s - %s : %s \n",
-//                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
-//            );
+            setNodes(leaf);
         }
     }
+    private void setNodes(TreeNode leaf){
+        String[] tok = tokenizer.toArr(leaf.data);
+        PayNode[] payNodes = new PayNode[tok.length];
+
+        for(int i = 0; i < tok.length; i++){
+            PARAM_UTIL.findAndSetParam(tok[i]);
+/*
+        public Keywords.PAR paramType;
+        public Keywords.RX_FUN funType;
+        public String bodyText, paramText;
+        public String category;
+        public Keywords.DATATYPE listSource;
+        public Keywords.PRIM outType;
+* */
+            PayNode node = new PayNode();
+            node.paramType = PARAM_UTIL.getParamType();
+            switch(node.paramType){
+                case TEST:
+                case SINGLE_FIELD:
+                default:
+                    if(node.paramType.isFun){
+                        node.funType = PARAM_UTIL.getFunType();
+                        node.bodyText = PARAM_UTIL.getTruncated();
+                        node.paramText = (node.paramType == Keywords.PAR.EMPTY_PAR)? null : PARAM_UTIL.getParamText();
+                        node.outType = node.funType.outType;
+                    }
+                    else{
+                        Erlog.get(this).set("Syntax error?", leaf.data);
+                    }
+            }
+            if(node.paramType.isFun){
+                node.funType = PARAM_UTIL.getFunType();
+                node.bodyText = PARAM_UTIL.getTruncated();
+                node.paramText = (node.paramType == Keywords.PAR.EMPTY_PAR)? null : PARAM_UTIL.getParamText();
+                node.outType = node.funType.outType;
+            }
+            else{
+                node.funType = null;
+                node.bodyText = tok[i];
+                //Keywords.BOOL_TEST boolTest = Keywords.BOOL_TEST.fromString(node.bodyText);
+
+                node.uDefCategory = listTable.getCategory(node.bodyText);
+                node.listSource = listTable.getDataType(node.uDefCategory);
+                node.outType = node.listSource.outType;
+            }
+            payNodes[i] = node;
+        }
+        leaf.payNodes = payNodes;
+    }
+
+
+
     private void setDataTypes(ArrayList<TreeNode> leaves){
-        Keywords.DATATYPE dataType;
-        Keywords.PAR prevParamType = null, currParamType = null;
-        String category;
-        for(TreeNode leaf : leaves){
-            if(leaf.paramType == null){
-                System.out.println("missing param type: " + leaf.data);
-                continue;
-            }
-            if(!leaf.paramType.isFun){
-                if((dataType = listTable.getDataType(leaf.data)) != null){
-                    leaf.dataType = dataType;
-                    currParamType = CATEGORY;
-                }
-                else if((category = listTable.getCategory(leaf.data)) != null){
-                    //leaf.dataType = dataType;
-                    currParamType = CATEGORY_ITEM;
-                }
-            }
+//        Keywords.DATATYPE dataType;
+//        Keywords.PAR prevParamType = null, currParamType = null;
+//        String category;
+//        for(TreeNode leaf : leaves){
+//            if(leaf.paramType == null){
+//                System.out.println("missing param type: " + leaf.data);
+//                continue;
+//            }
+//            if(!leaf.paramType.isFun){
+//                if((dataType = listTable.getDataType(leaf.data)) != null){
+//                    leaf.dataType = dataType;
+//                    currParamType = CATEGORY;
+//                }
+//                else if((category = listTable.getCategory(leaf.data)) != null){
+//                    //leaf.dataType = dataType;
+//                    currParamType = CATEGORY_ITEM;
+//                }
+//            }
 
 //            System.out.printf(":  %s: %s - %s : %s \n",
 //                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
 //            );
-        }
+//        }
     }
 }

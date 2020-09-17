@@ -128,6 +128,13 @@ public class CompileInitializer implements ChangeListener {
     public int  getWRow(){ return wrow; }
     public void setWVal(int wval){ this.wval = wval; }
     public int  getWVal(){ return wval; }
+    public boolean fitToWVal(String numeric){// validate numeric before calling here
+//        int n;
+//        try{ n = Integer.parseInt(numeric); }
+//        catch(Exception e){ return false; }
+        int fit = (int)Math.pow(2, wval);
+        return Integer.parseInt(numeric) < fit;
+    }
 
     public String getInName(){
         return this.inName;
@@ -169,6 +176,8 @@ public class CompileInitializer implements ChangeListener {
     public boolean isNewEnumSet(){
         return newEnumSet;
     }
+
+
     private void deleteMe(){
         ListTable.init(null);
         ListTable listTable = ListTable.getInstance();

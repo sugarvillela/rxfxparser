@@ -19,11 +19,11 @@ $number = 0;
 			VERB NOUN ADJECTIVE ADVERB LINKING ARTICLE 
 			DETERMINER MODAL 
 			
-	LIST<TEXT>
+	LIST<STRING>
 		$TEXT 
 			IN ORIG ALT EXPAND1 EXPAND2 NAME SURNAME
 
-	RX $myRx ~(in.LEN()&Tokyo)
+	RX $myRx (~IN.LEN()&Tokyo)
 	FX fxCommand1 fxCommand2 fxCommandWow
 
 $*/

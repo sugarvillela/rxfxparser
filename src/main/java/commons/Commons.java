@@ -2,9 +2,13 @@
  */
 package commons;
 
+import compile.basics.Keywords;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 
 /**Very simple functions for stuff Java does not do well, or do at all
  *
@@ -14,6 +18,14 @@ public class Commons {
     public static String timeString(){
         return (new SimpleDateFormat("dd/MM/yyyy HH:mm:ss")).format(new Date());
     }
+
+    public static String nullSafe(Object obj){//safe toString() for nullable object
+        return (obj==null)? NULL_TEXT : obj.toString();
+    }
+    public static String nullSafe(String str){//safe toString() for nullable object
+        return (str == null || str.isEmpty())? NULL_TEXT : str;
+    }
+
     //private Commons(){}
 //    private static Commons C=null;
 //    public static Commons getInstance(){

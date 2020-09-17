@@ -6,6 +6,8 @@ import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
 import static compile.basics.Keywords.FIELD.VAL;
 import static compile.basics.Keywords.DATATYPE.RX_BUILDER;
+
+import commons.Commons;
 import compile.basics.Keywords.OP;
 import compile.rx.RxTree.TreeNode;
 
@@ -69,19 +71,14 @@ public class Factory_Node {
         public String toString(){//one line of a csv file
             return String.format(
                 "%s,%s,%s,%s,%s",
-                nullSafe(lineCol), 
-                nullSafe(cmd), 
-                nullSafe(h), 
-                nullSafe(k),
-                nullSafe(data)
+                Commons.nullSafe(lineCol),
+                Commons.nullSafe(cmd),
+                Commons.nullSafe(h),
+                Commons.nullSafe(k),
+                Commons.nullSafe(data)
             );
         }
-        public String nullSafe(Object obj){//safe toString() for nullable object
-            return (obj==null)? NULL_TEXT : obj.toString();
-        }
-        public String nullSafe(String str){//safe toString() for nullable object
-            return (str == null || str.isEmpty())? NULL_TEXT : str;
-        }
+
     }
     
     public static ScanNode newRxPush(String lineCol,TreeNode treeNode){
@@ -96,8 +93,8 @@ public class Factory_Node {
         public final OP op;
         public final boolean not;
         public final int id;
-        public final Keywords.PAR paramType;
-        public final String param;
+        //public final Keywords.PAR paramType;
+        //public final String param;
 
         public RxScanNode(// 0 text status, 1 push or pop, 2 RX_BUILDER, 3 negate, 4 operation, 5 data format in leaf, 6 text payload, 7 function parameter, 8 unique id
                           String lineCol,             // 0
@@ -114,8 +111,8 @@ public class Factory_Node {
             this.op = setOp;
             this.not = negate;
             this.id = id;
-            this.paramType = paramType;
-            this.param = param;
+            //this.paramType = paramType;
+            //this.param = param;
         }
         
         public RxScanNode(
@@ -134,15 +131,15 @@ public class Factory_Node {
                 this.op = null;
                 this.not = false;
                 this.id = -1;
-                this.paramType = null;
-                this.param = null;
+                //this.paramType = null;
+                //this.param = null;
             }
             else{
                 this.op = treeNode.op;
                 this.not = treeNode.not;
                 this.id = treeNode.id;
-                this.paramType = treeNode.paramType;
-                this.param = treeNode.param;
+                //this.paramType = treeNode.paramType;
+                //this.param = treeNode.param;
             }
         }
         /**Data to string for writing to file
@@ -151,14 +148,14 @@ public class Factory_Node {
         public String toString(){//one line of a csv file
             return String.format(// 0 text status, 1 push or pop, 2 RX_BUILDER, 3 negate, 4 operation, 5 data format in leaf, 6 text payload, 7 function parameter, 8 unique id
                 "%s,%s,%s,%b,%s,%s,%s,%s,%d",
-                nullSafe(lineCol),  // 0 text status
-                nullSafe(cmd),      // 1 push or pop
-                nullSafe(h),        // 2 RX_BUILDER
+                Commons.nullSafe(lineCol),  // 0 text status
+                Commons.nullSafe(cmd),      // 1 push or pop
+                Commons.nullSafe(h),        // 2 RX_BUILDER
                 not,                // 3 negate
-                nullSafe(op),       // 4 operation
-                nullSafe(paramType),// 5 data format in leaf
-                nullSafe(data),     // 6 text payload
-                nullSafe(param),    // 7 function parameter taken from input text
+                Commons.nullSafe(op),       // 4 operation
+                //Commons.nullSafe(paramType),// 5 data format in leaf
+                Commons.nullSafe(data),     // 6 text payload
+                //Commons.nullSafe(param),    // 7 function parameter taken from input text
                 id                  // 8 unique id
             );  
         }
@@ -166,9 +163,9 @@ public class Factory_Node {
             TreeNode treeNode = new TreeNode();
             treeNode.not = this.not;    // 3 negate
             treeNode.op = this.op;      // 4 operation
-            treeNode.paramType = this.paramType;// 5 data format
+            //treeNode.paramType = this.paramType;// 5 data format
             treeNode.data = this.data;  // 6 text payload
-            treeNode.param = this.param;// 7 function parameter
+            //treeNode.param = this.param;// 7 function parameter
             treeNode.id = this.id;      // 8 unique id
             treeNode.level = 0;
 

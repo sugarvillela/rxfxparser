@@ -76,10 +76,7 @@ public abstract class RxTree {
         public boolean not;         //--
         public int level, id;       //--
         // payload
-        public Keywords.DATATYPE generalType;
-        public Keywords.PAR paramType;
-        public String param;
-        public Keywords.DATATYPE dataType;
+        public PayNode[] payNodes;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -282,7 +279,8 @@ public abstract class RxTree {
             String position;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
             String dispRole = (op == null)? NULL_TEXT : op.toString();
-            String paramTypeString = (paramType == null)? NULL_TEXT : paramType.toString();
+
+            //String paramTypeString = (paramType == null)? NULL_TEXT : paramType.toString();
             if(nodes == null){
                 position = "LEAF " + data;
             }
@@ -295,8 +293,40 @@ public abstract class RxTree {
                 String children = String.join(", ", childNodes);
                 position = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
-            return String.format("%d: parent %s -> %s, role = %s, position = %s, paramType=%s, param=%s",
-                level, dispParent, this.readableId(), dispRole, position, paramTypeString, param
+            return String.format("%d: parent %s -> %s, role = %s, position = %s \n%s",
+                level, dispParent, this.readableId(), dispRole, position, payNodeInfo()
+            );
+        }
+        public String payNodeInfo(){
+            if(payNodes == null){
+                return "";
+            }
+            ArrayList<String> out = new ArrayList<>();
+            for(PayNode payNode : payNodes){
+                out.add("\t" + payNode.toString());
+            }
+            return String.join("\n", out);
+        }
+    }
+    public static class PayNode{
+        public Keywords.PAR paramType;
+        public Keywords.RX_FUN funType;
+        public String bodyText, paramText;
+        public String uDefCategory;
+        public Keywords.DATATYPE listSource;
+        public Keywords.PRIM outType;
+
+        @Override
+        public String toString(){
+            return String.format(
+                "paramType=%s, funType=%s, bodyText=%s, paramText=%s, category=%s, listSource=%s, outType=%s",
+                    Commons.nullSafe(paramType),
+                    Commons.nullSafe(funType),
+                    Commons.nullSafe(bodyText),
+                    Commons.nullSafe(paramText),
+                    Commons.nullSafe(uDefCategory),
+                    Commons.nullSafe(listSource),
+                    Commons.nullSafe(outType)
             );
         }
     }

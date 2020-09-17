@@ -1,6 +1,5 @@
 package compile.rx.ut;
 
-import commons.Commons;
 import compile.basics.Keywords;
 import compile.symboltable.ConstantTable;
 import erlog.Erlog;
@@ -21,25 +20,21 @@ public class RxParamUtil {
     }
 
     private final Keywords.PAR[] types;
-    private String truncated, param;
+    private String truncated, paramText;
     private int paramType;
 
     public void findAndSetParam(String text){
         identifyPattern(text);
-        if(isFun()){
+        if(getParamType().isFun){
             if(types[paramType] == CONST_PAR){
                 readConstant();
             }
             RxValidator validator = RxValidator.getInstance();
             validator.assertRxFunction(truncated);
             if(types[paramType] == RANGE_PAR){
-                validator.assertValidRange(param);
+                validator.assertValidRange(paramText);
             }
         }
-    }
-
-    public boolean isFun(){
-        return types[paramType].isFun;
     }
 
     public Keywords.PAR getParamType(){
@@ -51,10 +46,13 @@ public class RxParamUtil {
         return truncated;
     }
 
-    public String getParam(){
-        return param;
+    public String getParamText(){
+        return paramText;
     }
 
+    public Keywords.RX_FUN getFunType(){// already validated as fun
+        return Keywords.RX_FUN.fromString(truncated);
+    }
     private void identifyPattern(String text){
         Matcher matcher;
         for(paramType = 0; paramType < types.length; paramType++){
@@ -64,14 +62,14 @@ public class RxParamUtil {
             matcher = types[paramType].pattern.matcher(text);
             if(matcher.find()){
                 if(types[paramType].isFun){
-                    param = matcher.replaceAll("$1");
-                    truncated = text.substring(0, text.length() - param.length() -2);
+                    paramText = matcher.replaceAll("$1");
+                    truncated = text.substring(0, text.length() - paramText.length() -2);
                     //param = param.substring(1, param.length() - 1);
 
                 }
                 else{
                     truncated = "";
-                    param = "";
+                    paramText = "";
                 }
                 return;
             }
@@ -80,12 +78,12 @@ public class RxParamUtil {
     }
 
     private void readConstant(){
-        String read = ConstantTable.getInstance().readConstant(param);
+        String read = ConstantTable.getInstance().readConstant(paramText);
         if(read == null){
-            Erlog.get(this).set("Undefined constant", param);
+            Erlog.get(this).set("Undefined constant", paramText);
         }
         else{
-            System.out.println("param="+param + ", read="+read);
+            System.out.println("param="+ paramText + ", read="+read);
             identifyPattern(String.format("%s(%s)", truncated, read));
         }
     }
