@@ -1,6 +1,5 @@
 package compile.rx;
 
-import compile.basics.Keywords;
 import compile.basics.Keywords.OP;
 
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
@@ -8,6 +7,7 @@ import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
 import compile.basics.Factory_Node;
+import compile.rx.factories.Factory_PayNode;
 import erlog.Erlog;
 import java.util.ArrayList;
 import toktools.TK;
@@ -69,14 +69,14 @@ public abstract class RxTree {
     public static class TreeNode{
         private static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
         private static final Unique UQ = new Unique();
-        public ArrayList<TreeNode> nodes;//--
+        private ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
         public String data;         //--
         public OP op;//, parentOp;//--
-        public boolean not;         //--
+        public boolean quoted, not;         //--
         public int level, id;       //--
         // payload
-        public PayNode[] payNodes;
+        public ArrayList<Factory_PayNode.PayNode> payNodes;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -87,6 +87,7 @@ public abstract class RxTree {
             this.op = PAYLOAD;
             //connector = RX_PAYLOAD;
             this.id = UQ.next();
+            this.quoted = false;
             this.not = false;
             this.data = data;
             this.level = level;
@@ -204,6 +205,7 @@ public abstract class RxTree {
                     return false;
                 }
                 data = data.substring(1, len - 1);
+                quoted = true;
                 return true;
             }
 
@@ -302,32 +304,10 @@ public abstract class RxTree {
                 return "";
             }
             ArrayList<String> out = new ArrayList<>();
-            for(PayNode payNode : payNodes){
+            for(Factory_PayNode.PayNode payNode : payNodes){
                 out.add("\t" + payNode.toString());
             }
             return String.join("\n", out);
-        }
-    }
-    public static class PayNode{
-        public Keywords.PAR paramType;
-        public Keywords.RX_FUN funType;
-        public String bodyText, paramText;
-        public String uDefCategory;
-        public Keywords.DATATYPE listSource;
-        public Keywords.PRIM outType;
-
-        @Override
-        public String toString(){
-            return String.format(
-                "paramType=%s, funType=%s, bodyText=%s, paramText=%s, category=%s, listSource=%s, outType=%s",
-                    Commons.nullSafe(paramType),
-                    Commons.nullSafe(funType),
-                    Commons.nullSafe(bodyText),
-                    Commons.nullSafe(paramText),
-                    Commons.nullSafe(uDefCategory),
-                    Commons.nullSafe(listSource),
-                    Commons.nullSafe(outType)
-            );
         }
     }
 }

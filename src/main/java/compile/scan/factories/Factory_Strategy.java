@@ -202,7 +202,7 @@ public abstract class Factory_Strategy{
             context.addNode(
                 Factory_Node.newScanNode( CMD.ADD_TO, context.getDatatype(), text)
             );
-            return false;
+            return true;
         }
     }
 
@@ -468,6 +468,7 @@ public abstract class Factory_Strategy{
     }
 
     public static class ManageLists extends Strategy{
+
         @Override
         public boolean go(String text, Base_ScanItem context){
             DATATYPE h = context.getDatatype();
@@ -513,9 +514,14 @@ public abstract class Factory_Strategy{
                 );
 
                 System.out.println("ManageEnuLists: name: "+defName + ", datatype: "+context.getDatatype());
-                return true;
             }
-            return false;
+            else{
+                context.addNode(
+                        Factory_Node.newScanNode( CMD.ADD_TO, h, text)
+                );
+                LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
+            }
+            return true;
         }
     }
     public static class ManageTargLangInsert extends Strategy{

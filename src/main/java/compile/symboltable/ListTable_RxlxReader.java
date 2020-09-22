@@ -25,7 +25,7 @@ import static compile.basics.Keywords.FIELD.DEF_NAME;
 public abstract class ListTable_RxlxReader extends RxlxReader implements IParseItem {
     Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> symbolTable;
     //protected Keywords.DATATYPE currDatatype;
-    protected String currName;
+    protected String currCategory;
 
     public ListTable_RxlxReader(ScanNodeSource fin){
         super(fin);
@@ -41,21 +41,28 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
     }
 
     public Keywords.DATATYPE getDataType(String text){
-        for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
-            if(outer.getValue().containsKey(text)){
-                return outer.getKey();
-            }
-        }
-        String category = getCategory(text);
-        if(category != null){
+        if(text != null){
             for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
-                if(outer.getValue().containsKey(category)){
+                if(outer.getValue().containsKey(text)){
                     return outer.getKey();
                 }
             }
+            String category = getCategory(text);
+            if(category != null){
+                for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
+                    if(outer.getValue().containsKey(category)){
+                        return outer.getKey();
+                    }
+                }
+            }
+            Keywords.DATATYPE datatype = Keywords.DATATYPE.fromString(text);
+            if(datatype != null){
+                return datatype;
+            }
         }
-        return null;
+        return RAW_TEXT;
     }
+
     public String getCategory(String val){
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {

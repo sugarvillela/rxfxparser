@@ -2,9 +2,13 @@ package compile.rx.ut;
 
 import compile.basics.Keywords;
 import compile.basics.Keywords.RX_FUN;
+import compile.rx.factories.Factory_PayNode;
 import erlog.Erlog;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
+
+import static compile.basics.Keywords.PRIM.NULL;
 
 public class RxValidator {
     private static RxValidator instance;
@@ -32,14 +36,6 @@ public class RxValidator {
         return true;
     }
 
-    public boolean assertRxFunction(String text){
-        RX_FUN f = RX_FUN.fromString(text);
-        if(f == null){
-            Erlog.get(this).set( "Invalid RX Function name", text);
-            return false;
-        }
-        return true;
-    }
     public boolean assertValidRange(String range){
         String[] toks = range.split("-");
         boolean good = false;
@@ -53,10 +49,58 @@ public class RxValidator {
         }
         return good;
     }
-    public boolean assertValidTests(Keywords.PAR prev, Keywords.PAR curr){
-        return (
-                (prev == Keywords.PAR.CATEGORY && curr == Keywords.PAR.CATEGORY_ITEM)
+    public boolean assertValidParam(RX_FUN fun, Keywords.PAR givenParam){
+        for(Keywords.PAR testParam: fun.parTypes){
+            if(testParam.equals(givenParam)){
+                return true;
+            }
+        }
+        Erlog.get(this).set(
+            String.format("%s not a valid parameter type in %s. Allowed types: %s",
+                    givenParam.toString(), fun.toString(), fun.readableParTypes())
+        );
+        return false;
+    }
+    public boolean assertValidOperation(
+            ArrayList<Factory_PayNode.PayNode> leftNodes,
+            Keywords.OP op,
+            ArrayList<Factory_PayNode.PayNode> rightNodes
+    ){
+        return assertValidTest(
+                assertValidChain(leftNodes),
+                op,
+                assertValidChain(rightNodes)
+        );
+    }
+    public Keywords.PRIM assertValidChain(ArrayList<Factory_PayNode.PayNode> nodes){
+        Keywords.PRIM last = NULL;
+        for(Factory_PayNode.PayNode payNode : nodes){
+            if(last != payNode.caller){
+                Erlog.get(this).set(
+                        String.format("Expected %s input to %s, found %s",
+                                payNode.caller.toString(), payNode.bodyText, last.toString())
                 );
+            }
+            last = payNode.outType;
+        }
+        return last;
+    }
+    public boolean assertValidTest(Keywords.PRIM left, Keywords.OP op, Keywords.PRIM right){
+        if(left != right){
+            Erlog.get(this).set(
+                    String.format("Comparing %s to %s",
+                        left.toString(), right.toString())
+            );
+            return false;
+        }
+        if(!left.isAllowedOp(op)){
+            Erlog.get(this).set(
+                    String.format("%s %C %s not allowed",
+                            left.toString(), op.asChar, right.toString())
+            );
+            return false;
+        }
+        return true;
     }
     
     // TODO

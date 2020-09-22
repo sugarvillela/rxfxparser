@@ -14,6 +14,7 @@ public class Factory_ScanItem extends Factory_Strategy{
         switch(h){
             case LIST_BOOLEAN:
             case LIST_DISCRETE:
+            case LIST_NUMBER:
             case LIST_STRING:
                 return new ScanItem(
                     h, 
@@ -25,8 +26,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         BACK_POP_ON_TARG_LANG_INSERT,
                         READ_CONSTANT,
                         BACK_POP_ON_ANY_VAR,
-                            MANAGE_LISTS,
-                        ADD_TEXT
+                        MANAGE_LISTS
                     ),
                     getPush(ON_PUSH_NO_SNIFF),
                     getPop(ON_POP_LIST)
@@ -58,7 +58,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return new ScanItem(
                     h, 
                     new DATATYPE[]{
-                        ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, INCLUDE, FUN, RXFX, RX, FX,
+                        ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, INCLUDE, FUN, RXFX, RX, FX,
                             SCOPE, IF_ELSE, IF, ELSE, CONSTANT
                     },
                     getStrategy(

@@ -8,7 +8,7 @@ $number = 0;
 		NEW_LIST_SET=true
 	
 	CONSTANT $const1 D=d
-	CONSTANT $const2 bonkers
+	CONSTANT $const2 NOUN
 	
 	LIST<DISCRETE>
 		$SCOPES
@@ -18,12 +18,18 @@ $number = 0;
 		$POS // Use all caps in these definitions
 			VERB NOUN ADJECTIVE ADVERB LINKING ARTICLE 
 			DETERMINER MODAL 
+		$STATE // Use all caps in these definitions
+			MORE
 			
 	LIST<STRING>
 		$TEXT 
 			IN ORIG ALT EXPAND1 EXPAND2 NAME SURNAME
+			
+	LIST<NUMBER>
+		$INT 
+			NUM_VAL INDEX GROUP EE
 
-	RX $myRx (~IN.LEN()&Tokyo)
+	RX $myRx IN.LEN().RANGE(4-)<FALSE|Tokyo
 	FX fxCommand1 fxCommand2 fxCommandWow
 
 $*/

@@ -38,11 +38,15 @@ public final class Keywords {
     // List of datatypes to be implemented
     public enum DATATYPE {//values() returns H[] array
         // File generating datatypes
+        NONE            (PRIM.NULL),
         LIST_BOOLEAN    (PRIM.BOOLEAN),
         LIST_DISCRETE   (PRIM.DISCRETE),
         LIST_STRING     (PRIM.STRING),
         LIST_NUMBER     (PRIM.NUMBER),
         RAW_TEXT        (PRIM.STRING),
+        NUM_TEXT        (PRIM.NUMBER),
+        BOOL_TEXT       (PRIM.BOOLEAN),
+        LIST,
         TARGLANG_BASE,
         VAR, 
         SCOPE, 
@@ -61,10 +65,7 @@ public final class Keywords {
         // error indicator
         //UNKNOWN_DATATYPE,
         // test text
-        TRUE    (true),
-        FALSE   (false),
-        TRUTHY  (true),
-        FALSEY  (false),
+
         // Top enum ordinal gives size of list
         NUM_DATATYPES
         ;
@@ -101,9 +102,9 @@ public final class Keywords {
             }
             return null;
         }
-        public static DATATYPE fromBool( boolean state ){
-            return (state)? TRUE : FALSE;
-        }
+//        public static DATATYPE fromBool( boolean state ){
+//            return (state)? TRUE : FALSE;
+//        }
 //        public static boolean isKeyword( String text ){
 //            return get(text) != null;
 //        }  
@@ -168,21 +169,19 @@ public final class Keywords {
     }
 
     public enum PRIM {// PRIMITIVE
-        BOOLEAN    (Pattern.compile("^(TRUE)|(TRUTHY)|(FALSE)|(FALSEY)$"),
-                                                            new OP[]{OP.EQUAL},                 new DATATYPE[]{DATATYPE.TRUE,   DATATYPE.FALSE}),
-        DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL},   new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY}),
-        NUMBER     (Pattern.compile("^[0-9]*[.]?[0-9]+$"),  new OP[]{OP.GT, OP.LT, OP.EQUAL},   new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY}),
-        STRING     (Pattern.compile("."),                   new OP[]{OP.EQUAL},                 new DATATYPE[]{DATATYPE.TRUTHY, DATATYPE.FALSEY})
+        BOOLEAN    (Pattern.compile("^(TRUE)|(FALSE)$"),    new OP[]{OP.EQUAL}),
+        DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
+        NUMBER     (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
+        STRING     (Pattern.compile("."),                   new OP[]{OP.EQUAL}),
+        NULL       (Pattern.compile("null"),                new OP[]{OP.EQUAL})
         ;
 
         public final Pattern pattern;
-        public final OP[] ops;
-        public final DATATYPE[] tests;
+        public final OP[] allowedOps;
 
-        private PRIM(Pattern pattern, OP[] ops, DATATYPE[] tests){
+        private PRIM(Pattern pattern, OP[] allowedOps){
             this.pattern = pattern;
-            this.ops = ops;
-            this.tests = tests;
+            this.allowedOps = allowedOps;
         }
         public static PRIM fromString(String text ){
             for(PRIM p : values()){
@@ -207,29 +206,36 @@ public final class Keywords {
                 return out;
             }
         }
+        public boolean isAllowedOp(OP op){
+            for(OP allowedOp: allowedOps){
+                if(allowedOp.equals(op)){
+                    return true;
+                }
+            }
+            return false;
+        }
     }
-    public enum PAR {// PARAMETER
+    public enum PAR {// RX PARAMETER
         // Rx Functions
-        EMPTY_PAR       (true,  Pattern.compile("^[^.]+\\(()\\)$")),
-        NUM_PAR         (true,  Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
-        RANGE_PAR       (true,  Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
-        RANGE_BELOW     (true,  Pattern.compile("^[^.]+\\(([-][0-9]+)\\)$")),
-        RANGE_ABOVE     (true,  Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
-        AL_NUM_PAR      (true,  Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
-        CONST_PAR       (true,  Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
-        TEST            (false, Pattern.compile("^(true)|(truthy)|(false)|(falsey)|(TRUE)|(TRUTHY)|(FALSE)|(FALSEY)$")),
-        SINGLE_FIELD    (false, Pattern.compile("^[a-zA-z][a-zA-z0-9_]*$")),
-        DOTTED_FIELD    (false, Pattern.compile("^([a-zA-z][a-zA-z0-9_]*\\.)+[a-zA-z][a-zA-z0-9_]*$")),
-        DOTTED_FUN      (false, Pattern.compile("^[a-zA-z0-9_.]+\\(.*\\)$")),
-        CATEGORY        (false, null),
-        CATEGORY_ITEM   (false, null),
-
+        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(()\\)$")),
+        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
+        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
+        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([-][0-9]+)\\)$")),
+        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
+        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
+        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
+        TEST_TRUE       (DATATYPE.BOOL_TEXT,Pattern.compile("^TRUE$")),
+        TEST_FALSE      (DATATYPE.BOOL_TEXT,Pattern.compile("^FALSE$")),
+        TEST_NUM        (DATATYPE.NUM_TEXT, Pattern.compile("^[0-9]+$")),
+        DOTTED_FUN      (DATATYPE.NONE,     Pattern.compile("^[$a-zA-Z0-9_.]+\\(.*\\)$")),
+        CATEGORY_ITEM   (DATATYPE.LIST,     Pattern.compile("^[$][a-zA-Z][a-zA-Z0-9_]*\\[([a-zA-Z][a-zA-Z0-9_]*)\\]$")),
+        TEST_TEXT       (DATATYPE.RAW_TEXT, Pattern.compile("."))
         ;
 
-        public final boolean isFun;
+        public final DATATYPE datatype;
         public final Pattern pattern;
-        private PAR(boolean isFun, Pattern pattern){
-            this.isFun = isFun;
+        private PAR(DATATYPE datatype, Pattern pattern){
+            this.datatype = datatype;
             this.pattern = pattern;
         }
 
@@ -253,19 +259,19 @@ public final class Keywords {
 
     public enum RX_FUN {
         // function names for Rx logic
-        FIRST   (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.STRING),
-        LAST    (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.STRING),
-        LEN     (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR}, PRIM.NUMBER),
-        RANGE   (PRIM.NUMBER, new PAR[]{PAR.NUM_PAR, PAR.RANGE_PAR, PAR.RANGE_BELOW, PAR.RANGE_ABOVE}, PRIM.BOOLEAN),
+        FIRST   (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR},                                                 PRIM.STRING),
+        LAST    (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR},                                                 PRIM.STRING),
+        LEN     (PRIM.STRING, new PAR[]{PAR.EMPTY_PAR},                                                 PRIM.NUMBER),
+        RANGE   (PRIM.NUMBER, new PAR[]{PAR.NUM_PAR, PAR.RANGE_PAR, PAR.RANGE_BELOW, PAR.RANGE_ABOVE},  PRIM.BOOLEAN),
         ;
 
         public final PRIM outType;
-        public final PAR[] par;
+        public final PAR[] parTypes;
         public final PRIM caller;
 
-        private RX_FUN(PRIM caller, PAR[] par, PRIM outType){
+        private RX_FUN(PRIM caller, PAR[] parTypes, PRIM outType){
             this.outType =outType;
-            this.par = par;
+            this.parTypes = parTypes;
             this.caller = caller;
         }
         public static RX_FUN fromString(String text ){
@@ -275,6 +281,24 @@ public final class Keywords {
                 }
             }
             return null;
+        }
+        public boolean isAllowedCaller(PRIM caller){
+            return this.caller.equals(caller);
+        }
+        public boolean isAllowedPar(PAR parType){
+            for(PAR allowedParType: parTypes){
+                if(allowedParType.equals(parType)){
+                    return true;
+                }
+            }
+            return false;
+        }
+        public String readableParTypes(){
+            String[] out = new String[parTypes.length];
+            for(int i = 0; i < parTypes.length; i++){
+                out[i] = parTypes[i].toString();
+            }
+            return String.join(", ", out);
         }
     }
 
@@ -292,7 +316,7 @@ public final class Keywords {
     public static final String ITEM_CLOSE = "}";       // ends item content
     public static final String USERDEF_OPEN = "$";     // user-defined name
     public static final String COMMENT_TEXT = "//";    //
-    public static final String TEXT_FIELD_NAME = "IN";// class WORD text field
+    public static final String DEFAULT_FIELD_FORMAT = "$%s[%s]"; // category[item]
 
     public static String listTableFileName(){
         return String.format(

@@ -1,20 +1,22 @@
 package compile.rx;
 
-import static compile.basics.Keywords.DATATYPE.BOOL_TEST;
-import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
+import static compile.basics.Keywords.*;
+import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.OP.AND;
 import static compile.basics.Keywords.OP.OR;
-import static compile.basics.Keywords.TEXT_FIELD_NAME;
 
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.RxScanNode;
 import static compile.basics.Keywords.OP.CPAR;
 import static compile.basics.Keywords.OP.OPAR;
 import static compile.basics.Keywords.OP.SQUOTE;
+
 import java.util.ArrayList;
 
 import compile.basics.Keywords;
+import compile.rx.factories.Factory_PayNode;
 import compile.rx.ut.RxParamUtil;
+import compile.rx.ut.RxValidator;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -63,8 +65,9 @@ public class RxLogicTree extends RxTree{
         leaves = leaves(root);    // recalculate after extend
         readConstants(leaves);    // read constants again after extend
         setPayNodes(leaves);
-        //setDataTypes(leaves);
         dispBreadthFirst(root);
+        //dispLeaves(root);
+        validateOperations(leaves);
         Erlog.get(this).set("Happy stop");
         return root;
     }
@@ -121,10 +124,14 @@ public class RxLogicTree extends RxTree{
 
     private void readConstants(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
-            String read = CONSTANT_TABLE.readConstant(leaf.data);
-            if(read != null){
-                leaf.data = read;
+            String[] tok = tokenizer.toArr(leaf.data);
+            for(int i = 0; i < tok.length; i++){
+                String read = CONSTANT_TABLE.readConstant(tok[i]);
+                if(read != null){
+                    tok[i] = read;
+                }
             }
+            leaf.data = String.join(".", tok);
         }
     }
     private void extendLeaves(ArrayList<TreeNode> leaves){
@@ -158,113 +165,59 @@ public class RxLogicTree extends RxTree{
         return '\0';
     }
     private boolean balanceLeaf(TreeNode leaf, String leafData){
-        PARAM_UTIL.findAndSetParam(leafData);
+        PARAM_UTIL.findAndSetParam(leaf, leafData);
         Keywords.PAR paramType = PARAM_UTIL.getParamType();
-        if(paramType.isFun){
-            Keywords.RX_FUN rxFun = Keywords.RX_FUN.fromString(PARAM_UTIL.getTruncated());
-            leaf.data += "=" + rxFun.outType.tests[0];
-//            switch(outType){
-//                case BOOLEAN:
-//                    leaf.data += "=true";
-//                    break;
-//                case NUMBER:
-//                    leaf.data += "=truthy";
-//                    break;
-//                default:
-//                    leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
-//            }
-            //Erlog.get(this).set("isFun!!! stop: ", leaf.toString());
-            return true;
+        switch(paramType){
+            case DOTTED_FUN:
+                String[] tok = tokenizer.toArr(leafData);
+                //Commons.disp(tok, "balanceLeaf DOTTED_FUN: "+leafData);
+                return balanceLeaf(leaf, tok[tok.length - 1]);
+            case CATEGORY_ITEM:
+                leaf.data = String.format("%s[%s]",
+                        PARAM_UTIL.getMainText(),
+                        PARAM_UTIL.getBracketText()
+                );
+                break;
         }
-        else {
-            String[] tok;
-            switch(paramType){
-                case SINGLE_FIELD:
-                case TEST:
-                    Keywords.DATATYPE dataType = listTable.getDataType(leafData);
-                    if(dataType == null){
-                        leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
-                    }
-                    else{
-                        leaf.data += "=" + dataType.outType.tests[0];
-                    }
-//                    switch(listTable.getDataType(leafData)){
-//                        case RAW_TEXT:
-//                            leaf.data = TEXT_FIELD_NAME + "=" + leaf.data;
-//                            break;
-//                        case LIST_BOOLEAN:
-//                            leaf.data += "=true";
-//                            break;
-//                        default:
-//                            leaf.data += "=truthy";
-//                    }
-                    return true;
-                case DOTTED_FIELD:
-                    tok = tokenizer.toArr(leafData);
-                    //Commons.disp(tok, "balanceLeaf DOTTED_FIELD: "+leafData);
-                    return balanceLeaf(leaf, tok[0]);
-                case DOTTED_FUN:
-                    tok = tokenizer.toArr(leafData);
-                    //Commons.disp(tok, "balanceLeaf DOTTED_FUN: "+leafData);
-                    return balanceLeaf(leaf, tok[tok.length - 1]);
-            }
+        PRIM outType = PARAM_UTIL.getOutType();
+        switch(outType){
+            case BOOLEAN:
+                leaf.data += "=TRUE";
+                return true;
+            case STRING:
+                leaf.data = listTable.getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
+                return true;
+            case NUMBER:
+                leaf.data = listTable.getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
+                return true;
         }
         Erlog.get(this).set("Syntax error", leafData);
         return false;
     }
     private void setPayNodes(ArrayList<TreeNode> leaves){
+        Factory_PayNode factory = new Factory_PayNode();
+        String[] tok;
+
         for(TreeNode leaf : leaves){
-            setNodes(leaf);
+            tok = tokenizer.toArr(leaf.data);
+
+            for(int i = 0; i < tok.length; i++){
+                PARAM_UTIL.findAndSetParam(leaf, tok[i]);
+                factory.add(tok[i]);
+            }
+            leaf.payNodes = factory.getPayNodes();
+            factory.clear();
         }
     }
-    private void setNodes(TreeNode leaf){
-        String[] tok = tokenizer.toArr(leaf.data);
-        PayNode[] payNodes = new PayNode[tok.length];
-
-        for(int i = 0; i < tok.length; i++){
-            PARAM_UTIL.findAndSetParam(tok[i]);
-/*
-        public Keywords.PAR paramType;
-        public Keywords.RX_FUN funType;
-        public String bodyText, paramText;
-        public String category;
-        public Keywords.DATATYPE listSource;
-        public Keywords.PRIM outType;
-* */
-            PayNode node = new PayNode();
-            node.paramType = PARAM_UTIL.getParamType();
-            switch(node.paramType){
-                case TEST:
-                case SINGLE_FIELD:
-                default:
-                    if(node.paramType.isFun){
-                        node.funType = PARAM_UTIL.getFunType();
-                        node.bodyText = PARAM_UTIL.getTruncated();
-                        node.paramText = (node.paramType == Keywords.PAR.EMPTY_PAR)? null : PARAM_UTIL.getParamText();
-                        node.outType = node.funType.outType;
-                    }
-                    else{
-                        Erlog.get(this).set("Syntax error?", leaf.data);
-                    }
-            }
-            if(node.paramType.isFun){
-                node.funType = PARAM_UTIL.getFunType();
-                node.bodyText = PARAM_UTIL.getTruncated();
-                node.paramText = (node.paramType == Keywords.PAR.EMPTY_PAR)? null : PARAM_UTIL.getParamText();
-                node.outType = node.funType.outType;
-            }
-            else{
-                node.funType = null;
-                node.bodyText = tok[i];
-                //Keywords.BOOL_TEST boolTest = Keywords.BOOL_TEST.fromString(node.bodyText);
-
-                node.uDefCategory = listTable.getCategory(node.bodyText);
-                node.listSource = listTable.getDataType(node.uDefCategory);
-                node.outType = node.listSource.outType;
-            }
-            payNodes[i] = node;
+    private void validateOperations(ArrayList<TreeNode> leaves){
+        RxValidator validator = RxValidator.getInstance();
+        for(int i = 1; i < leaves.size(); i+=2){
+            validator.assertValidOperation(
+                leaves.get(i-1).payNodes,
+                leaves.get(i).parent.op,
+                leaves.get(i).payNodes
+            );
         }
-        leaf.payNodes = payNodes;
     }
 
 

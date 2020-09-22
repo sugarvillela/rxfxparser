@@ -5,6 +5,11 @@ import compile.basics.Keywords;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
+
 public class ListTable extends ListTable_RxlxReader {//
     private static ListTable instance;
 
@@ -18,44 +23,64 @@ public class ListTable extends ListTable_RxlxReader {//
 
     private ListTable(ScanNodeSource fin) {
         super(fin);
+        defaults = new HashMap<>(8);
     }
+
+    Map <Keywords.DATATYPE, String> defaults;
 
     @Override
     public void addTo(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
-        SymbolTableNode symbolTableNode = ((SymbolTableNode)symbolTable.get(datatype).get(currName));
+        SymbolTableNode symbolTableNode = ((SymbolTableNode)symbolTable.get(datatype).get(currCategory));
         if(symbolTableNode.contains(val)){
             Erlog.get(this).set(
                     String.format(
                             "%s already exists in %s...%s definitions must be uniquely named",
-                            val, currName, datatype.toString()
+                            val, currCategory, datatype.toString()
                     )
             );
         }
         else{
             symbolTableNode.addTo(datatype, null, val);
+            setDefaultFieldString(datatype, currCategory, val); // add default field string for dataType
         }
     }
 
     @Override
     public void setAttrib(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
-        currName = val;
-        if(symbolTable.get(datatype).containsKey(val)){
+        currCategory = val;
+        if(symbolTable.get(datatype).containsKey(currCategory)){
             Erlog.get(this).set(
                     String.format(
                             "%s already exists...%s categories must be uniquely named",
-                            currName, datatype.toString()
+                            currCategory, datatype.toString()
                     )
             );
         }
         else{
             symbolTable.get(datatype).put(
-                    currName,
+                    currCategory,
                     this.get(
                         new Factory_Node.ScanNode(
-                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, datatype, key, val
+                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, datatype, key, currCategory
                         )
                     )
             );
         }
+    }
+
+    public void setDefaultFieldString(Keywords.DATATYPE datatype, String category, String item){
+        if(!defaults.containsKey(datatype)){
+            System.out.println(datatype+" setDefaultFieldString : " + String.format(DEFAULT_FIELD_FORMAT, category, item));
+            defaults.put(datatype, String.format(DEFAULT_FIELD_FORMAT, category, item));
+        }
+    }
+
+    public String getDefaultFieldString(Keywords.DATATYPE datatype){
+        if(!defaults.containsKey(datatype)){
+            Erlog.get(this).set(
+                    "No default category/item is defined", datatype.toString()
+            );
+        }
+        return defaults.get(datatype);
     }
 }
