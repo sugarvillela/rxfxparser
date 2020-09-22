@@ -75,10 +75,10 @@ public class RxValidator {
     public Keywords.PRIM assertValidChain(ArrayList<Factory_PayNode.PayNode> nodes){
         Keywords.PRIM last = NULL;
         for(Factory_PayNode.PayNode payNode : nodes){
-            if(last != payNode.caller){
+            if(last != payNode.callerType){
                 Erlog.get(this).set(
                         String.format("Expected %s input to %s, found %s",
-                                payNode.caller.toString(), payNode.bodyText, last.toString())
+                                payNode.callerType.toString(), payNode.mainText, last.toString())
                 );
             }
             last = payNode.outType;

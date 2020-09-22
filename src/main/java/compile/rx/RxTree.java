@@ -24,7 +24,7 @@ public abstract class RxTree {
         for(int i = 0; i < levels.length; i++){
             disp.add("Level: " + i);
             for(TreeNode node : levels[i]){
-                disp.add(node.toString());
+                disp.add(node.readableContent());
             }
         }
         Commons.disp(disp, "\nBreadthFirst");
@@ -32,12 +32,20 @@ public abstract class RxTree {
     
     public void dispLeaves(TreeNode root){
         ArrayList<TreeNode> leaves = leaves(root);
-        Commons.disp(leaves, "\nLeaves");
+        ArrayList<String> readable = new ArrayList<>();
+        for(TreeNode leaf : leaves){
+            readable.add(leaf.readableContent());
+        }
+        Commons.disp(readable, "\nLeaves");
     }
     
     public void dispPreOrder(TreeNode root){
-        ArrayList<TreeNode> disp = preOrder(root);
-        Commons.disp(disp, "\nPreOrder");
+        ArrayList<TreeNode> preOrder = preOrder(root);
+        ArrayList<String> readable = new ArrayList<>();
+        for(TreeNode node : preOrder){
+            readable.add(node.readableContent());
+        }
+        Commons.disp(readable, "\nPreOrder");
     }
     
     public ArrayList<TreeNode>[] breadthFirst(TreeNode root){
@@ -63,11 +71,12 @@ public abstract class RxTree {
     }
     
     public abstract TreeNode treeFromRxWord(String text);
-    public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root, String lineCol);
-    public abstract TreeNode treeFromScanNodeSource(ArrayList<String> cmdList);
+    public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root);
+    public abstract TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList);
     
     public static class TreeNode{
         private static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
+        private static final int NUM_RX_FIELDS = 4;
         private static final Unique UQ = new Unique();
         private ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
@@ -224,6 +233,17 @@ public abstract class RxTree {
             }
             nodes.add(node);
         }
+
+        public TreeNode(String scanNodeData){
+            String[] tok = scanNodeData.split(",", NUM_RX_FIELDS);
+            this.not = Boolean.parseBoolean(tok[0]);
+            this.op = OP.fromString(tok[1]);
+            this.id = Integer.parseInt(tok[2]);
+            this.data = tok[3];
+            this.quoted = false;
+            this.level = 0;
+            this.parent = null;
+        }
         //=======Access functions===========================================
         
         public int treeDepth(int max){
@@ -278,6 +298,15 @@ public abstract class RxTree {
         
         @Override
         public String toString(){
+            return String.format("%b,%s,%d,%s",
+                not,                    // negate
+                Commons.nullSafe(op),   // operation
+                id,                     // unique id
+                Commons.nullSafe(data)  // text payload
+
+            );
+        }
+        public String readableContent(){
             String position;// = (nodes == null)? "none" : role.toString();
             String dispParent = (parent == null)? "start" : parent.readableId();
             String dispRole = (op == null)? NULL_TEXT : op.toString();
@@ -296,16 +325,16 @@ public abstract class RxTree {
                 position = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
             return String.format("%d: parent %s -> %s, role = %s, position = %s \n%s",
-                level, dispParent, this.readableId(), dispRole, position, payNodeInfo()
+                    level, dispParent, this.readableId(), dispRole, position, payNodeInfo()
             );
         }
-        public String payNodeInfo(){
+        private String payNodeInfo(){
             if(payNodes == null){
                 return "";
             }
             ArrayList<String> out = new ArrayList<>();
             for(Factory_PayNode.PayNode payNode : payNodes){
-                out.add("\t" + payNode.toString());
+                out.add("\t" + payNode.readableContent());
             }
             return String.join("\n", out);
         }

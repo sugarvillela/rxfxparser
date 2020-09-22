@@ -2,14 +2,10 @@ package compile.rx;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.OP.AND;
-import static compile.basics.Keywords.OP.OR;
+import static compile.basics.Keywords.FIELD.VAL;
+import static compile.basics.Keywords.OP.*;
 
 import compile.basics.Factory_Node;
-import compile.basics.Factory_Node.RxScanNode;
-import static compile.basics.Keywords.OP.CPAR;
-import static compile.basics.Keywords.OP.OPAR;
-import static compile.basics.Keywords.OP.SQUOTE;
 
 import java.util.ArrayList;
 
@@ -65,15 +61,15 @@ public class RxLogicTree extends RxTree{
         leaves = leaves(root);    // recalculate after extend
         readConstants(leaves);    // read constants again after extend
         setPayNodes(leaves);
-        dispBreadthFirst(root);
+        //dispBreadthFirst(root);
         //dispLeaves(root);
         validateOperations(leaves);
-        Erlog.get(this).set("Happy stop");
+        //Erlog.get(this).set("Happy stop");
         return root;
     }
     
     @Override
-    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root, String lineCol){
+    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root){
         ArrayList<TreeNode> nodes = instance.preOrder(root);
         int stackLevel = 0;
         ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
@@ -81,43 +77,75 @@ public class RxLogicTree extends RxTree{
             //System.out.println(stackLevel + "... "+ node.level);
             while(stackLevel > node.level){
                 stackLevel--;
-                cmdList.add(
-                    Factory_Node.newRxPop(lineCol)
+                cmdList.add(//setCommand, RX_BUILDER, VAL, setData
+                    Factory_Node.newPopNode(lineCol, RX_BUILDER)
                 );
             }
             stackLevel++;
             cmdList.add(
-                Factory_Node.newRxPush(lineCol, node)
+                Factory_Node.newScanNode(lineCol, CMD.PUSH, RX_BUILDER, VAL, node.toString())
             );
+            if(PAYLOAD.equals(node.op)){
+                cmdList.add(Factory_Node.newPushNode(lineCol, PAY_NODE));
+                for(Factory_PayNode.PayNode payNode : node.payNodes){
+                    cmdList.add(
+                        Factory_Node.newScanNode(lineCol, CMD.ADD_TO, PAY_NODE, VAL, payNode.toString())
+                    );
+                }
+                cmdList.add(Factory_Node.newPopNode(lineCol, PAY_NODE));
+            }
         }
         return cmdList;
     }
     @Override
-    public TreeNode treeFromScanNodeSource(ArrayList<String> cmdList){
-        ScanNodeSource source = new ScanNodeSource(new TextSource_list(cmdList));
+    public TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList){
+        ArrayList<String> textCommands = new ArrayList<>();
+        for(Factory_Node.ScanNode inputNode : cmdList){
+            textCommands.add(inputNode.toString());
+        }
+
+        ScanNodeSource source = new ScanNodeSource(new TextSource_list(textCommands));
+        Factory_PayNode factoryPayNode = new Factory_PayNode();
         TreeNode reroot = null, head = null;
         while(source.hasNext()){
-            RxScanNode scanNode = (RxScanNode)source.nextNode();
-            switch(scanNode.cmd){
-                case PUSH:
-                    if(reroot == null){
-                        reroot = head = scanNode.toTreeNode();
-                    }
-                    else{
-                        TreeNode treeNode = scanNode.toTreeNode();
-                        treeNode.level = head.level + 1;
-                        treeNode.parent = head;
-                        head.addChildExternal(treeNode);
-                        head = treeNode;
+            Factory_Node.ScanNode scanNode = source.nextNode();
+            switch(scanNode.h){
+                case RX_BUILDER:
+                    switch(scanNode.cmd){
+                        case PUSH:
+                            if(reroot == null){
+                                reroot = head = new TreeNode(scanNode.data);
+                            }
+                            else{
+                                TreeNode treeNode = new TreeNode(scanNode.data);
+                                treeNode.level = head.level + 1;
+                                treeNode.parent = head;
+                                head.addChildExternal(treeNode);
+                                head = treeNode;
+                            }
+                            break;
+                        case POP:
+                            head = head.parent;
+                            if(head == null){
+                                return reroot;
+                            }
+                            break;
                     }
                     break;
-                case POP:
-                    head = head.parent;
-                    if(head == null){
-                        return reroot;
+                case PAY_NODE:
+                    switch(scanNode.cmd){
+                        case PUSH:
+                            head.payNodes = new ArrayList<>();
+                            break;
+                        case ADD_TO:
+                            head.payNodes.add(factoryPayNode.payNodeFromScanNode(scanNode.data));
+                            break;
+                        case POP:
+                            break;
                     }
                     break;
             }
+
         }
         return reroot;
     }
@@ -218,33 +246,5 @@ public class RxLogicTree extends RxTree{
                 leaves.get(i).payNodes
             );
         }
-    }
-
-
-
-    private void setDataTypes(ArrayList<TreeNode> leaves){
-//        Keywords.DATATYPE dataType;
-//        Keywords.PAR prevParamType = null, currParamType = null;
-//        String category;
-//        for(TreeNode leaf : leaves){
-//            if(leaf.paramType == null){
-//                System.out.println("missing param type: " + leaf.data);
-//                continue;
-//            }
-//            if(!leaf.paramType.isFun){
-//                if((dataType = listTable.getDataType(leaf.data)) != null){
-//                    leaf.dataType = dataType;
-//                    currParamType = CATEGORY;
-//                }
-//                else if((category = listTable.getCategory(leaf.data)) != null){
-//                    //leaf.dataType = dataType;
-//                    currParamType = CATEGORY_ITEM;
-//                }
-//            }
-
-//            System.out.printf(":  %s: %s - %s : %s \n",
-//                leaf.data, PARAM_UTIL.getTruncated(), PARAM_UTIL.getParam(), PARAM_UTIL.getParamType()
-//            );
-//        }
     }
 }

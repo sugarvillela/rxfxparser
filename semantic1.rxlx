@@ -1,5 +1,5 @@
 # Generated file, do not edit
-# Last write: 09/18/2020 23:17:40
+# Last write: 09/22/2020 14:33:13
 # Interim file containing parser instructions
 semantic1.rxfx line 0 word 0,PUSH,TARGLANG_BASE,NULL,NULL
 semantic1.rxfx line 1 word 0,ADD_TO,TARGLANG_BASE,NULL,<?php
@@ -52,3 +52,50 @@ semantic1.rxfx line 32 word 1,SET_ATTRIB,RX,DEF_NAME,myRx
 semantic1.rxfx line 32 word 2,PUSH,RX_WORD,NULL,NULL
 semantic1.rxfx line 32 word 2,SET_ATTRIB,RX_WORD,LO,1
 semantic1.rxfx line 32 word 2,SET_ATTRIB,RX_WORD,HI,1
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,OR,0,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,LT,1,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,PAYLOAD,3,IN.LEN()
+semantic1.rxfx line 32 word 2,PUSH,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,ADD_TO,PAY_NODE,VAL,NULL,CATEGORY_ITEM,STRING,NULL,IN,NULL,TEXT,LIST_STRING,1
+semantic1.rxfx line 32 word 2,ADD_TO,PAY_NODE,VAL,STRING,EMPTY_PAR,NUMBER,LEN,LEN,NULL,NULL,NULL,1
+semantic1.rxfx line 32 word 2,POP,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,POP,RX_BUILDER,NULL,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,PAYLOAD,4,7
+semantic1.rxfx line 32 word 2,PUSH,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,ADD_TO,PAY_NODE,VAL,NULL,TEST_NUM,NUMBER,NULL,7,NULL,NULL,NULL,7
+semantic1.rxfx line 32 word 2,POP,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,POP,RX_BUILDER,NULL,NULL
+semantic1.rxfx line 32 word 2,POP,RX_BUILDER,NULL,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,EQUAL,2,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,PAYLOAD,5,$TEXT[IN]
+semantic1.rxfx line 32 word 2,PUSH,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,ADD_TO,PAY_NODE,VAL,NULL,CATEGORY_ITEM,STRING,NULL,IN,NULL,TEXT,LIST_STRING,1
+semantic1.rxfx line 32 word 2,POP,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,POP,RX_BUILDER,NULL,NULL
+semantic1.rxfx line 32 word 2,PUSH,RX_BUILDER,VAL,false,PAYLOAD,6,Tokyo
+semantic1.rxfx line 32 word 2,PUSH,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,ADD_TO,PAY_NODE,VAL,NULL,TEST_TEXT,STRING,NULL,Tokyo,NULL,NULL,NULL,1
+semantic1.rxfx line 32 word 2,POP,PAY_NODE,NULL,NULL
+semantic1.rxfx line 32 word 2,POP,RX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 0,POP,RX,NULL,NULL
+semantic1.rxfx line 33 word 0,PUSH,FX,NULL,NULL
+semantic1.rxfx line 33 word 1,PUSH,FX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 1,ADD_TO,FX_WORD,NULL,fxCommand1
+semantic1.rxfx line 33 word 1,POP,FX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 2,PUSH,FX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 2,ADD_TO,FX_WORD,NULL,fxCommand2
+semantic1.rxfx line 33 word 2,POP,FX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 3,PUSH,FX_WORD,NULL,NULL
+semantic1.rxfx line 33 word 3,ADD_TO,FX_WORD,NULL,fxCommandWow
+semantic1.rxfx line 33 word 3,POP,FX_WORD,NULL,NULL
+semantic1.rxfx line 35 word 0,POP,FX,NULL,NULL
+semantic1.rxfx line 35 word 0,POP,RXFX,NULL,NULL
+semantic1.rxfx line 35 word 0,POP,SRCLANG,NULL,NULL
+semantic1.rxfx line 36 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic1.rxfx line 37 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic1.rxfx line 38 word 0,ADD_TO,TARGLANG_BASE,NULL,function anotherFunction(){
+semantic1.rxfx line 39 word 0,ADD_TO,TARGLANG_BASE,NULL,	$number+=2;
+semantic1.rxfx line 40 word 0,ADD_TO,TARGLANG_BASE,NULL,}
+semantic1.rxfx line 41 word 0,ADD_TO,TARGLANG_BASE,NULL,NULL
+semantic1.rxfx line 42 word 0,ADD_TO,TARGLANG_BASE,NULL,?>
+semantic1.rxfx line 42 word 0,POP,TARGLANG_BASE,NULL,NULL

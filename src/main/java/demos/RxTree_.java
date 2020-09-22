@@ -2,7 +2,6 @@ package demos;
 
 import commons.Commons;
 import compile.basics.Factory_Node;
-import compile.basics.Factory_Node.RxScanNode;
 import compile.rx.RxLogicTree;
 import compile.rx.RxTree;
 import compile.rx.RxTree.TreeNode;
@@ -33,22 +32,22 @@ public class RxTree_ {
         //rxTree.dispPreOrder(root);
         //rxTree.dispLeaves(root);
         rxTree.dispBreadthFirst(root);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root, "line 0 word 0");
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList("lineCol", root);
         //Commons.disp(cmdList, "\nCommandList");
         ArrayList<String> strList = scanNodesToString(cmdList);
-        TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
+        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
         //rxTree.dispPreOrder(reroot);
-        rxTree.dispBreadthFirst(root);
+        //rxTree.dispBreadthFirst(root);
     }
     public void test3(){
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.treeFromRxWord(text);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root, "line 0 word 0");
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList("lineCol", root);
         Commons.disp(cmdList);
         ArrayList<String> strList = scanNodesToString(cmdList);
-        TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
-        assertEqual(root, reroot);
+        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
+        //assertEqual(root, reroot);
     }
     public void test4(){
         String text = "~((myFunction()=6&myAge<65)&(C=c&D>d))&~(weightOfEarth>157pounds&state.done=true)&'G'";

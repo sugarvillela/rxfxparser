@@ -29,7 +29,7 @@ $number = 0;
 		$INT 
 			NUM_VAL INDEX GROUP EE
 
-	RX $myRx IN.LEN().RANGE(4-)<FALSE|Tokyo
+	RX $myRx IN.LEN()<7|Tokyo
 	FX fxCommand1 fxCommand2 fxCommandWow
 
 $*/
