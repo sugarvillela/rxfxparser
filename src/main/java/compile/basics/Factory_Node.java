@@ -4,12 +4,9 @@ import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.CMD.PUSH;
-import static compile.basics.Keywords.FIELD.VAL;
 import static compile.basics.Keywords.DATATYPE.RX_BUILDER;
 
 import commons.Commons;
-import compile.basics.Keywords.OP;
-import compile.rx.RxTree.TreeNode;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

@@ -11,7 +11,6 @@ import toktools.Tokens_special;
 import java.util.ArrayList;
 
 import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
-import static compile.basics.Keywords.DATATYPE.NONE;
 import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.PAR.*;
 import static compile.basics.Keywords.PRIM.NULL;
@@ -21,7 +20,7 @@ public class Factory_PayNode {
     private static final int NUM_PAYNODE_FIELDS = 9;
     private RxParamUtil paramUtil;
     private ListTable listTable;
-    private ArrayList<Factory_PayNode.PayNode> payNodes;
+    private ArrayList<Factory_PayNode.IPayNode> payNodes;
 
     public Factory_PayNode(){
         paramUtil = RxParamUtil.getInstance();
@@ -31,63 +30,68 @@ public class Factory_PayNode {
     public void finishNode(PayNode newNode){
         payNodes.add(newNode);
     }
-    public ArrayList<Factory_PayNode.PayNode> getPayNodes(){
+    public ArrayList<Factory_PayNode.IPayNode> getPayNodes(){
         return payNodes;
     }
     public void clear(){
         payNodes = new ArrayList<>();
     }
 
-    public void add(String text){
+    public void addRxPayNode(String text){
         Keywords.PAR paramType = paramUtil.getParamType();
-        PayNode node = new PayNode();
         switch(paramType.datatype){
             case FUN:
                 Keywords.RX_FUN funType = paramUtil.getFunType();
-
-                node.callerType = funType.caller;
-                node.paramType = paramType;
-                node.outType = funType.outType;
-                node.funType = funType;
-                node.mainText = paramUtil.getMainText();
-                node.bracketText = paramUtil.getBracketText();
-                node.bracketText = null;
-                node.uDefCategory = null;
-                node.listSource = null;
-                node.value = 1;
+                finishNode( new PayNode(
+                        funType.caller,
+                        paramType,
+                        funType.outType,
+                        funType,
+                        paramUtil.getMainText(),
+                        paramUtil.getBracketText(),
+                        null,
+                        null,
+                        1
+                ));
                 break;
             case NUM_TEXT:
-                node.callerType = NULL;
-                node.paramType = paramType;
-                node.outType = Keywords.PRIM.NUMBER;
-                node.funType = null;
-                node.mainText = text;
-                node.bracketText = null;
-                node.uDefCategory = null;
-                node.listSource = null;
-                node.value = Integer.parseInt(text);
+                finishNode( new PayNode(
+                        NULL,
+                        paramType,
+                        Keywords.PRIM.NUMBER,
+                        null,
+                        text,
+                        null,
+                        null,
+                        null,
+                        Integer.parseInt(text)
+                ));
                 break;
             case BOOL_TEXT:
-                node.callerType = NULL;
-                node.paramType = paramType;
-                node.outType = Keywords.PRIM.BOOLEAN;
-                node.funType = null;
-                node.mainText = text;
-                node.bracketText = null;
-                node.uDefCategory = null;
-                node.listSource = null;
-                node.value = Boolean.parseBoolean(text)? 1 : 0;
+                finishNode( new PayNode(
+                        NULL,
+                        paramType,
+                        Keywords.PRIM.BOOLEAN,
+                        null,
+                        text,
+                        null,
+                        null,
+                        null,
+                        Boolean.parseBoolean(text)? 1 : 0
+                ));
                 break;
             case RAW_TEXT:
-                node.callerType = NULL;
-                node.paramType = TEST_TEXT;
-                node.outType = RAW_TEXT.outType;
-                node.funType = null;
-                node.mainText = text;
-                node.bracketText = null;
-                node.uDefCategory = null;
-                node.listSource = null;
-                node.value = 1;
+                finishNode( new PayNode(
+                        NULL,
+                        TEST_TEXT,
+                        RAW_TEXT.outType,
+                        null,
+                        text,
+                        null,
+                        null,
+                        null,
+                        1
+                ));
                 break;
             case LIST:
                 String category = paramUtil.makeNotUserDef(paramUtil.getMainText());
@@ -96,52 +100,69 @@ public class Factory_PayNode {
                     Erlog.get(this).set(item + " not an item in " + category, text);
                 }
                 Keywords.DATATYPE listSource = listTable.getDataType(category);
-
-                node.callerType = NULL;
-                node.paramType = CATEGORY_ITEM;
-                node.outType = listSource.outType;
-                node.funType = null;
-                node.mainText = item;
-                node.bracketText = null;
-                node.uDefCategory = category;
-                node.listSource = listSource;
-                node.value = 1;
+                finishNode( new PayNode(
+                        NULL,
+                        CATEGORY_ITEM,
+                        listSource.outType,
+                        null,
+                        item,
+                        null,
+                        category,
+                        listSource,
+                        1
+                ));
                 break;
             default:
                 Erlog.get(this).set("Unknown parameter type", text);
         }
-        finishNode(node);
     }
 
-    public PayNode payNodeFromScanNode(String scanNodeText){
+    public PayNode rxPayNodeFromScanNode(String scanNodeText){
         String[] tok = T.toArr(scanNodeText);
         if(tok.length != NUM_PAYNODE_FIELDS){
             Erlog.get(this).set("Bad scan node text size", scanNodeText);
             return null;
         }
-        PayNode node = new PayNode();
-        node.callerType =   Keywords.PRIM.fromString(tok[0]);
-        node.paramType =    Keywords.PAR.fromString(tok[1]);
-        node.outType =      Keywords.PRIM.fromString(tok[2]);
-        node.funType =      (NULL_TEXT.equals(tok[3]))? null : Keywords.RX_FUN.fromString(tok[3]);
-        node.mainText =     (NULL_TEXT.equals(tok[4]))? null : tok[4];
-        node.bracketText =  (NULL_TEXT.equals(tok[5]))? null : tok[5];;
-        node.uDefCategory = (NULL_TEXT.equals(tok[6]))? null : tok[6];;
-        node.listSource =   (NULL_TEXT.equals(tok[7]))? null : Keywords.DATATYPE.fromString(tok[7]);;
-        node.value =        Integer.parseInt(tok[8]);
-        return  node;
+        return new PayNode(
+            Keywords.PRIM.fromString(tok[0]),
+            Keywords.PAR.fromString(tok[1]),
+            Keywords.PRIM.fromString(tok[2]),
+            (NULL_TEXT.equals(tok[3]))? null : Keywords.RX_FUN.fromString(tok[3]),
+            (NULL_TEXT.equals(tok[4]))? null : tok[4],
+            (NULL_TEXT.equals(tok[5]))? null : tok[5],
+            (NULL_TEXT.equals(tok[6]))? null : tok[6],
+            (NULL_TEXT.equals(tok[7]))? null : Keywords.DATATYPE.fromString(tok[7]),
+            Integer.parseInt(tok[8])
+        );
     }
-    public static class PayNode{
-        public Keywords.PRIM callerType;
-        public Keywords.PAR paramType;
-        public Keywords.PRIM outType;
-        public Keywords.RX_FUN funType;
-        public String mainText;
-        public String bracketText;
-        public String uDefCategory;
-        public Keywords.DATATYPE listSource;
-        public int value;
 
+    public interface IPayNode{
+        String readableContent();
+    }
+    public static class PayNode implements IPayNode{
+        public final Keywords.PRIM callerType;
+        public final Keywords.PAR paramType;
+        public final Keywords.PRIM outType;
+        public final Keywords.RX_FUN funType;
+        public final String mainText;
+        public final String bracketText;
+        public final String uDefCategory;
+        public final Keywords.DATATYPE listSource;
+        public final int value;
+
+        public PayNode(Keywords.PRIM callerType, Keywords.PAR paramType, Keywords.PRIM outType, Keywords.RX_FUN funType, String mainText, String bracketText, String uDefCategory, Keywords.DATATYPE listSource, int value) {
+            this.callerType = callerType;
+            this.paramType = paramType;
+            this.outType = outType;
+            this.funType = funType;
+            this.mainText = mainText;
+            this.bracketText = bracketText;
+            this.uDefCategory = uDefCategory;
+            this.listSource = listSource;
+            this.value = value;
+        }
+
+        @Override
         public String readableContent(){
             ArrayList<String> out = new ArrayList<>();
             if(callerType != null)  {out.add("callerType: " +   callerType.toString());}

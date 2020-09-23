@@ -1,4 +1,4 @@
-package compile.rx;
+package compile.basics;
 
 import compile.basics.Keywords.OP;
 
@@ -6,18 +6,25 @@ import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
-import compile.basics.Factory_Node;
 import compile.rx.factories.Factory_PayNode;
+import compile.symboltable.ConstantTable;
 import erlog.Erlog;
 import java.util.ArrayList;
 import toktools.TK;
 import toktools.Tokens_special;
 import unique.Unique;
 
-public abstract class RxTree {
+public abstract class RxFxTreeFactory {
+    protected final TreeNodeFactory treeNodeFactory;
 
-    protected RxTree(){}
-    
+    protected RxFxTreeFactory(TreeNodeFactory treeNodeFactory){
+        this.treeNodeFactory = treeNodeFactory;
+    }
+
+    public TreeNodeFactory getTreeNodeFactory(){
+        return treeNodeFactory;
+    }
+
     public void dispBreadthFirst(TreeNode root){
         ArrayList<TreeNode>[] levels = breadthFirst(root);
         ArrayList<String> disp = new ArrayList<>();
@@ -70,26 +77,27 @@ public abstract class RxTree {
         return preOrder;
     }
     
-    public abstract TreeNode treeFromRxWord(String text);
+    public abstract TreeNode treeFromWordPattern(String text);
     public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root);
     public abstract TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList);
-    
-    public static class TreeNode{
-        private static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
-        private static final int NUM_RX_FIELDS = 4;
-        private static final Unique UQ = new Unique();
-        private ArrayList<TreeNode> nodes;//--
+
+
+
+
+    public static abstract class TreeNode{
+        protected static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
+        protected static final Unique UQ = new Unique();
+        protected ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
         public String data;         //--
         public OP op;//, parentOp;//--
         public boolean quoted, not;         //--
         public int level, id;       //--
         // payload
-        public ArrayList<Factory_PayNode.PayNode> payNodes;
+        public ArrayList<Factory_PayNode.IPayNode> payNodes;
         
         public TreeNode(){
             this.op = PAYLOAD;
-            //connector = RX_PAYLOAD;
         }
         
         public TreeNode(String data, int level, TreeNode parent){
@@ -103,12 +111,12 @@ public abstract class RxTree {
             this.parent = parent;
         }
 
-        public boolean split(char delim){
+        public boolean split(RxFxTreeFactory factory, char delim){
             //System.out.println("\ndelim = " + delim + ", data = " + data + ", connector = " + connector);
             if(data == null){
                 boolean more = false;
                 for(TreeNode node : nodes){
-                    more |= node.split(delim);
+                    more |= node.split(factory, delim);
                 }
                 return more;
             }
@@ -122,7 +130,9 @@ public abstract class RxTree {
                     op = OP.fromChar(delim);
                     //setConnector();
                     for(String token : tokens){
-                        this.addChild(new TreeNode(token, level + 1, this));
+                        this.addChild(
+                            factory.getTreeNodeFactory().get(token, level + 1, this)
+                        );
                     }
                     return true;
                 }
@@ -167,6 +177,7 @@ public abstract class RxTree {
             }
             return data != null && unwrap(false, first, last);
         }
+
         private boolean unwrap(boolean changed, char first, char last){
             int brace = 0, len = data.length();
             boolean outer = true;                   // Stays true if {a=b} or {{a=b}&{c=d}}
@@ -191,35 +202,9 @@ public abstract class RxTree {
             }
             return changed;
         }
-        public boolean unquote(char quote){
-            if(nodes != null){
-                boolean more = false;
-                for(TreeNode node : nodes){
-                    more |= node.unquote(quote);
-                }
-                return more;
-            }
-            if(data != null){
-                int len = data.length(), count = 0;
-                for(int i = 0; i<len; i++){
-                    if(data.charAt(i) == quote){
-                        count++;
-                    }
-                }
-                if(count % 2 != 0){// ''a' mismatch
-                    Erlog.get(this).set("Unclosed quote", data);
-                    return false;
-                }
-                if(count != 2 || data.charAt(0) != quote || quote != data.charAt(len - 1)){// 'a'='b' ignore until later
-                    return false;
-                }
-                data = data.substring(1, len - 1);
-                quoted = true;
-                return true;
-            }
 
-            return false;
-        }
+        public abstract boolean unquote(char quote);
+
         public void addChild(TreeNode node){
             nodes.add(node);
         }
@@ -227,23 +212,12 @@ public abstract class RxTree {
         //=======Rebuild====================================================
         
         public void addChildExternal(TreeNode node){
-            //System.out.println("addChildExternal: "+node.op);
             if(nodes == null){
                 nodes = new ArrayList<>();
             }
             nodes.add(node);
         }
 
-        public TreeNode(String scanNodeData){
-            String[] tok = scanNodeData.split(",", NUM_RX_FIELDS);
-            this.not = Boolean.parseBoolean(tok[0]);
-            this.op = OP.fromString(tok[1]);
-            this.id = Integer.parseInt(tok[2]);
-            this.data = tok[3];
-            this.quoted = false;
-            this.level = 0;
-            this.parent = null;
-        }
         //=======Access functions===========================================
         
         public int treeDepth(int max){
@@ -303,11 +277,10 @@ public abstract class RxTree {
                 Commons.nullSafe(op),   // operation
                 id,                     // unique id
                 Commons.nullSafe(data)  // text payload
-
             );
         }
         public String readableContent(){
-            String position;// = (nodes == null)? "none" : role.toString();
+            String position;
             String dispParent = (parent == null)? "start" : parent.readableId();
             String dispRole = (op == null)? NULL_TEXT : op.toString();
 
@@ -325,18 +298,105 @@ public abstract class RxTree {
                 position = String.format("BRANCH %d children: %s", nodes.size(), children);
             }
             return String.format("%d: parent %s -> %s, role = %s, position = %s \n%s",
-                    level, dispParent, this.readableId(), dispRole, position, payNodeInfo()
+                    level, dispParent, this.readableId(), dispRole, position, allReadablePayloadContent()
             );
         }
-        private String payNodeInfo(){
+        private String allReadablePayloadContent(){
             if(payNodes == null){
                 return "";
             }
             ArrayList<String> out = new ArrayList<>();
-            for(Factory_PayNode.PayNode payNode : payNodes){
+            for(Factory_PayNode.IPayNode payNode : payNodes){
                 out.add("\t" + payNode.readableContent());
             }
             return String.join("\n", out);
+        }
+    }
+    public static class RxTreeNode extends TreeNode{
+        protected static final int NUM_TREE_FIELDS = 4;
+
+        public RxTreeNode(String data, int level, TreeNode parent){
+            super(data, level, parent);
+        }
+        public RxTreeNode(String scanNodeData){
+            String[] tok = scanNodeData.split(",", NUM_TREE_FIELDS);
+            this.not = Boolean.parseBoolean(tok[0]);
+            this.op = OP.fromString(tok[1]);
+            this.id = Integer.parseInt(tok[2]);
+            this.data = tok[3];
+            this.quoted = false;
+            this.level = 0;
+            this.parent = null;
+        }
+
+        @Override
+        public boolean unquote(char quote){
+            if(nodes != null){
+                boolean more = false;
+                for(TreeNode node : nodes){
+                    more |= node.unquote(quote);
+                }
+                return more;
+            }
+            if(data != null){
+                int len = data.length(), count = 0;
+                for(int i = 0; i<len; i++){
+                    if(data.charAt(i) == quote){
+                        count++;
+                    }
+                }
+                if(count % 2 != 0){// ''a' mismatch
+                    Erlog.get(this).set("Unclosed quote", data);
+                    return false;
+                }
+                if(count != 2 || data.charAt(0) != quote || quote != data.charAt(len - 1)){// 'a'='b' ignore until later
+                    return false;
+                }
+                data = data.substring(1, len - 1);
+                quoted = true;
+                return true;
+            }
+
+            return false;
+        }
+    }
+    public static class FxTreeNode extends TreeNode{
+        protected static final int NUM_TREE_FIELDS = 4;
+
+        public FxTreeNode(String data, int level, TreeNode parent){
+            super(data, level, parent);
+        }
+        public FxTreeNode(String scanNodeData){
+            String[] tok = scanNodeData.split(",", NUM_TREE_FIELDS);
+            this.not = Boolean.parseBoolean(tok[0]);
+            this.op = OP.fromString(tok[1]);
+            this.id = Integer.parseInt(tok[2]);
+            this.data = tok[3];
+            this.quoted = false;
+            this.level = 0;
+            this.parent = null;
+        }
+
+        @Override
+        public boolean unquote(char quote){// just in case I forget
+            Erlog.get(this).set("FX doesn't support quoted text");
+            return false;
+        }
+    }
+
+    public interface TreeNodeFactory{
+        TreeNode get(String data, int level, TreeNode parent);
+    }
+    public static class RxTreeNodeFactory implements TreeNodeFactory{
+        @Override
+        public TreeNode get(String data, int level, TreeNode parent){
+            return new RxTreeNode(data, level, parent);
+        }
+    }
+    public static class FxTreeNodeFactory implements TreeNodeFactory{
+        @Override
+        public TreeNode get(String data, int level, TreeNode parent){
+            return new RxTreeNode(data, level, parent);
         }
     }
 }

@@ -2,8 +2,9 @@ package compile.scan.factories;
 
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
+import compile.fx.FxLogicTree;
 import compile.rx.RxLogicTree;
-import compile.rx.RxTree;
+import compile.basics.RxFxTreeFactory;
 import compile.rx.ut.RxValidator;
 import compile.scan.ut.*;
 import compile.symboltable.*;
@@ -109,7 +110,8 @@ public abstract class Factory_Strategy{
         return enums;
     }
 
-    private static final RxTree RX_TREE = RxLogicTree.getInstance();
+    private static final RxFxTreeFactory RX_TREE = RxLogicTree.getInstance();
+    private static final RxFxTreeFactory FX_TREE = FxLogicTree.getInstance();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
     private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
@@ -641,7 +643,7 @@ public abstract class Factory_Strategy{
                 context.addNode( Factory_Node.newScanNode( 
                     CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
                 );
-                RxTree.TreeNode root = RX_TREE.treeFromRxWord(text);
+                RxFxTreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
                 //RX_TREE.dispBreadthFirst(root);
                 ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(Erlog.getTextStatusReporter().readableStatus(), root);
                 testRebuild(root, nodes);
@@ -651,15 +653,15 @@ public abstract class Factory_Strategy{
             }
             return false;
         }
-        private void testRebuild(RxTree.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
-            RxTree.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(nodes);
+        private void testRebuild(RxFxTreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
+            RxFxTreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(nodes);
             System.out.println(">>>>testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
             assertEqual(origRoot, newRoot);
         }
-        private boolean assertEqual(RxTree.TreeNode root1, RxTree.TreeNode root2){
-            ArrayList<RxTree.TreeNode>[] levels1 = RX_TREE.breadthFirst(root1);
-            ArrayList<RxTree.TreeNode>[] levels2 = RX_TREE.breadthFirst(root2);
+        private boolean assertEqual(RxFxTreeFactory.TreeNode root1, RxFxTreeFactory.TreeNode root2){
+            ArrayList<RxFxTreeFactory.TreeNode>[] levels1 = RX_TREE.breadthFirst(root1);
+            ArrayList<RxFxTreeFactory.TreeNode>[] levels2 = RX_TREE.breadthFirst(root2);
             if(levels1.length != levels2.length){
                 System.out.println("fail: levels1.length != levels2.length");
                 return false;
@@ -690,9 +692,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             DATATYPE h = FX_WORD;
             context.addNode(Factory_Node.newPushNode(h));
-            context.addNode(
-                Factory_Node.newScanNode( CMD.ADD_TO, h, text)
-            );
+            RxFxTreeFactory.TreeNode root = FX_TREE.treeFromWordPattern(text);
             context.addNode(Factory_Node.newPopNode(h));
             return true;
         }

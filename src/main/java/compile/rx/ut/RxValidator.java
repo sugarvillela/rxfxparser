@@ -62,9 +62,9 @@ public class RxValidator {
         return false;
     }
     public boolean assertValidOperation(
-            ArrayList<Factory_PayNode.PayNode> leftNodes,
+            ArrayList<Factory_PayNode.IPayNode> leftNodes,
             Keywords.OP op,
-            ArrayList<Factory_PayNode.PayNode> rightNodes
+            ArrayList<Factory_PayNode.IPayNode> rightNodes
     ){
         return assertValidTest(
                 assertValidChain(leftNodes),
@@ -72,9 +72,10 @@ public class RxValidator {
                 assertValidChain(rightNodes)
         );
     }
-    public Keywords.PRIM assertValidChain(ArrayList<Factory_PayNode.PayNode> nodes){
+    public Keywords.PRIM assertValidChain(ArrayList<Factory_PayNode.IPayNode> nodes){
         Keywords.PRIM last = NULL;
-        for(Factory_PayNode.PayNode payNode : nodes){
+        for(Factory_PayNode.IPayNode iPayNode : nodes){
+            Factory_PayNode.PayNode payNode = (Factory_PayNode.PayNode)iPayNode;
             if(last != payNode.callerType){
                 Erlog.get(this).set(
                         String.format("Expected %s input to %s, found %s",

@@ -3,8 +3,8 @@ package demos;
 import commons.Commons;
 import compile.basics.Factory_Node;
 import compile.rx.RxLogicTree;
-import compile.rx.RxTree;
-import compile.rx.RxTree.TreeNode;
+import compile.basics.RxFxTreeFactory;
+import compile.basics.RxFxTreeFactory.TreeNode;
 import java.util.ArrayList;//RX_AND, RX_OR, RX_NOT, RX_EQ,
 
 public class RxTree_ {
@@ -17,18 +17,18 @@ public class RxTree_ {
         rxTree = RxLogicTree.getInstance();
     }
     
-    private final RxTree rxTree;
+    private final RxFxTreeFactory rxTree;
     
     public void test1(){
         String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromRxWord(text);
+        TreeNode root = rxTree.treeFromWordPattern(text);
         rxTree.dispBreadthFirst(root);
         //rxTree.dispPreOrder(root);
     }
     public void test2(){
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromRxWord(text);
+        TreeNode root = rxTree.treeFromWordPattern(text);
         //rxTree.dispPreOrder(root);
         //rxTree.dispLeaves(root);
         rxTree.dispBreadthFirst(root);
@@ -42,7 +42,7 @@ public class RxTree_ {
     public void test3(){
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromRxWord(text);
+        TreeNode root = rxTree.treeFromWordPattern(text);
         ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList("lineCol", root);
         Commons.disp(cmdList);
         ArrayList<String> strList = scanNodesToString(cmdList);
@@ -52,7 +52,7 @@ public class RxTree_ {
     public void test4(){
         String text = "~((myFunction()=6&myAge<65)&(C=c&D>d))&~(weightOfEarth>157pounds&state.done=true)&'G'";
         //String text = "~(~(A=a&B=~'b'))";//&(C=c)&'D'='d'|~(E=e&F=f)&'G'
-        TreeNode root = rxTree.treeFromRxWord(text);
+        TreeNode root = rxTree.treeFromWordPattern(text);
         rxTree.dispBreadthFirst(root);
         //rxLeafUtil.finishAndValidate(root);
 //        rxTree.dispBreadthFirst(root);

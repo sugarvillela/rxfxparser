@@ -1,7 +1,7 @@
 package compile.rx.ut;
 
 import compile.basics.Keywords;
-import compile.rx.RxTree;
+import compile.basics.RxFxTreeFactory;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -32,7 +32,7 @@ public class RxParamUtil {
 
     Matcher matcher;
 
-    public void findAndSetParam(RxTree.TreeNode leaf, String text){
+    public void findAndSetParam(RxFxTreeFactory.TreeNode leaf, String text){
         if(leaf.quoted){//quoted text is raw text
             mainText = text;
             bracketText = "";
@@ -76,7 +76,7 @@ public class RxParamUtil {
         return (text == null)? "" :
             (text.startsWith(USERDEF_OPEN))? text.substring(USERDEF_OPEN.length()) : text;
     }
-    private void identifyPattern(RxTree.TreeNode leaf, String text){
+    private void identifyPattern(RxFxTreeFactory.TreeNode leaf, String text){
         for(pari = 0; pari < parTypes.length; pari++){
             if(parTypes[pari].pattern == null){
                 break;

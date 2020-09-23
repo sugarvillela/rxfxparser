@@ -10,6 +10,9 @@ import compile.symboltable.ListTable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static compile.basics.Keywords.FX_PAR.FUN_AL_NUM;
+import static compile.basics.Keywords.FX_PAR.FUN_EMPTY;
+
 /**Contains the language definition, including enums, constants
  *
  * @author Dave Swanson
@@ -49,7 +52,7 @@ public final class Keywords {
         }
     }
 
-    // List of datatypes to be implemented
+    // List of data types and constrol structures to be implemented
     public enum DATATYPE {//values() returns H[] array
         // RX data types
         NONE            (PRIM.NULL),
@@ -108,6 +111,8 @@ public final class Keywords {
             return null;
         }
     }
+
+    // List of field names for key=value or setting attributes
     public enum FIELD {
         // Keys for setAttrib()
         // keywords that can be specified in language
@@ -129,6 +134,8 @@ public final class Keywords {
             return null;
         }
     }
+
+    //Rx ops
     public enum OP{
         AND     ('&'),
         OR      ('|'),
@@ -136,10 +143,10 @@ public final class Keywords {
         GT      ('>'),
         LT      ('<'),
         NOT     ('~'),
-        PAYLOAD ('P'),
         OPAR    ('('),
         CPAR    (')'),
-        SQUOTE  ('\'')
+        SQUOTE  ('\''),
+        PAYLOAD ('P')
         ;
         
         public final char asChar;
@@ -167,6 +174,7 @@ public final class Keywords {
         }
     }
 
+    // Actual data types in the language
     public enum PRIM {// PRIMITIVE
         BOOLEAN    (Pattern.compile("^(TRUE)|(FALSE)$"),    new OP[]{OP.EQUAL}),
         DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
@@ -302,6 +310,104 @@ public final class Keywords {
         }
     }
 
+    public enum FX_DATATYPE {
+        ACCESSOR,
+        MUTATOR,
+        //NONE
+        ;
+
+        public static FX_DATATYPE fromString(String text ){
+            for(FX_DATATYPE d : values()){
+                if(d.toString().equals(text)){
+                    return d;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum FX_PAR {
+        //DOTTED              (FX_DATATYPE.NONE,      Pattern.compile("^[$a-zA-Z0-9_]+[.][$a-zA-Z0-9_]+\\(.*\\)$")),
+        ACCESS_ALL          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[:]?\\]$")),
+        ACCESS_NUM          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+\\]$")),
+        ACCESS_NEG          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[-][0-9]+\\]$")),
+        ACCESS_BOT          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[<][<]\\]$")),
+        ACCESS_TOP          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[>][>]\\]$")),
+        ACCESS_BEFORE       (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[<][<][0-9]+\\]$")),
+        ACCESS_AFTER        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[>][>][0-9]+\\]$")),
+        ACCESS_RANGE        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+[:][0-9]+\\]$")),
+        ACCESS_BELOW        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[:][0-9]+\\]$")),
+        ACCESS_ABOVE        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+[:]\\]$")),
+        FUN_EMPTY           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(()\\)$")),
+        FUN_NUM             (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
+        FUN_RANGE           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
+        FUN_BELOW           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([-][0-9]+)\\)$")),
+        FUN_ABOVE           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
+        FUN_CONST           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
+        FUN_AL_NUM          (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
+        FUN_CAT             (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*)\\)$")),
+        //FUN_MULTI           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\((([A-Za-z0-9_]+[,]\\s?)+[A-Za-z0-9_]+)\\)$")),
+        FUN_MULTI_CAT       (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\((([A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*[,]\\s?)+[A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*)\\)$")),
+
+        ;
+
+        public final FX_DATATYPE datatype;
+        public final Pattern pattern;
+
+        private FX_PAR(FX_DATATYPE datatype, Pattern pattern){
+            this.datatype = datatype;
+            this.pattern = pattern;
+        }
+
+        public static FX_PAR fromInt(int i){
+            for(FX_PAR p : values()){
+                if(p.ordinal() == i){
+                    return p;
+                }
+            }
+            return null;
+        }
+        public static FX_PAR fromString(String text ){
+            for(FX_PAR p : values()){
+                if(p.toString().equals(text)){
+                    return p;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum FX_FUN {
+        VOT     (PRIM.STRING, new FX_PAR[]{FUN_AL_NUM}, PRIM.BOOLEAN),
+        SET     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        DRP     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        CON     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        CON_    (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        DEL     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        MAR     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        RUN     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        CPY     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN),
+        SWP     (PRIM.STRING, new FX_PAR[]{FUN_EMPTY}, PRIM.BOOLEAN)
+        ;
+
+        public final PRIM outType;
+        public final FX_PAR[] parTypes;
+        public final PRIM caller;
+
+        private FX_FUN(PRIM caller, FX_PAR[] parTypes, PRIM outType){
+            this.outType =outType;
+            this.parTypes = parTypes;
+            this.caller = caller;
+        }
+        public static FX_FUN fromString(String text ){
+            for(FX_FUN f : values()){
+                if(f.toString().equals(text)){
+                    return f;
+                }
+            }
+            return null;
+        }
+    }
     public static String listTableFileName(){
         return String.format(
             "%s_%s%s",

@@ -10,6 +10,7 @@ import compile.basics.Factory_Node;
 import java.util.ArrayList;
 
 import compile.basics.Keywords;
+import compile.basics.RxFxTreeFactory;
 import compile.rx.factories.Factory_PayNode;
 import compile.rx.ut.RxParamUtil;
 import compile.rx.ut.RxValidator;
@@ -21,33 +22,35 @@ import toksource.TextSource_list;
 import toktools.TK;
 import toktools.Tokens_special;
 
-public class RxLogicTree extends RxTree{
-    private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
+public class RxLogicTree extends RxFxTreeFactory {
+    protected static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
+    protected static final Tokens_special dotTokenizer = new Tokens_special(".", "'", TK.IGNORESKIP );
     private static final RxParamUtil PARAM_UTIL = RxParamUtil.getInstance();
-    private static final Tokens_special tokenizer = new Tokens_special(".", "(", TK.IGNORESKIP );
-    private static RxTree instance;
+    private static RxFxTreeFactory instance;
     
-    public static RxTree getInstance(){
+    public static RxFxTreeFactory getInstance(){
         return (instance == null)? (instance = new RxLogicTree()) : instance;
     }
-    protected RxLogicTree(){}
+    protected RxLogicTree(){
+        super(new RxTreeNodeFactory());
+    }
     
     private ListTable listTable;
     
     @Override
-    public TreeNode treeFromRxWord(String text){
+    public TreeNode treeFromWordPattern(String text){
         System.out.println("tokenize start: root text: " + text);
         listTable = ListTable.getInstance();
         if(listTable == null){
             Erlog.get(this).set("LIST<*> items are not defined");
             return null;
         }
-        TreeNode root = new TreeNode(text, 0, null);
+        TreeNode root = treeNodeFactory.get(text, 0, null);
         boolean more;
         do{
             more = false;
-            more |= root.split(AND.asChar);
-            more |= root.split(OR.asChar);
+            more |= root.split(this, AND.asChar);
+            more |= root.split(this, OR.asChar);
 //            more |= root.split(CHAR_EQUAL);
             more |= root.negate();
             more |= root.unwrap(OPAR.asChar, CPAR.asChar);
@@ -87,7 +90,7 @@ public class RxLogicTree extends RxTree{
             );
             if(PAYLOAD.equals(node.op)){
                 cmdList.add(Factory_Node.newPushNode(lineCol, PAY_NODE));
-                for(Factory_PayNode.PayNode payNode : node.payNodes){
+                for(Factory_PayNode.IPayNode payNode : node.payNodes){
                     cmdList.add(
                         Factory_Node.newScanNode(lineCol, CMD.ADD_TO, PAY_NODE, VAL, payNode.toString())
                     );
@@ -114,10 +117,10 @@ public class RxLogicTree extends RxTree{
                     switch(scanNode.cmd){
                         case PUSH:
                             if(reroot == null){
-                                reroot = head = new TreeNode(scanNode.data);
+                                reroot = head = new RxTreeNode(scanNode.data);
                             }
                             else{
-                                TreeNode treeNode = new TreeNode(scanNode.data);
+                                TreeNode treeNode = new RxTreeNode(scanNode.data);
                                 treeNode.level = head.level + 1;
                                 treeNode.parent = head;
                                 head.addChildExternal(treeNode);
@@ -138,7 +141,7 @@ public class RxLogicTree extends RxTree{
                             head.payNodes = new ArrayList<>();
                             break;
                         case ADD_TO:
-                            head.payNodes.add(factoryPayNode.payNodeFromScanNode(scanNode.data));
+                            head.payNodes.add(factoryPayNode.rxPayNodeFromScanNode(scanNode.data));
                             break;
                         case POP:
                             break;
@@ -152,7 +155,7 @@ public class RxLogicTree extends RxTree{
 
     private void readConstants(ArrayList<TreeNode> leaves){
         for(TreeNode leaf : leaves){
-            String[] tok = tokenizer.toArr(leaf.data);
+            String[] tok = dotTokenizer.toArr(leaf.data);
             for(int i = 0; i < tok.length; i++){
                 String read = CONSTANT_TABLE.readConstant(tok[i]);
                 if(read != null){
@@ -171,7 +174,7 @@ public class RxLogicTree extends RxTree{
             ){
                 splitChar = '=';
             }
-            leaf.split(splitChar);
+            leaf.split(this, splitChar);
             leaf.negate();
             leaf.unwrap(OPAR.asChar, CPAR.asChar);
             leaf.unquote(SQUOTE.asChar);
@@ -197,7 +200,7 @@ public class RxLogicTree extends RxTree{
         Keywords.PAR paramType = PARAM_UTIL.getParamType();
         switch(paramType){
             case DOTTED_FUN:
-                String[] tok = tokenizer.toArr(leafData);
+                String[] tok = dotTokenizer.toArr(leafData);
                 //Commons.disp(tok, "balanceLeaf DOTTED_FUN: "+leafData);
                 return balanceLeaf(leaf, tok[tok.length - 1]);
             case CATEGORY_ITEM:
@@ -227,11 +230,11 @@ public class RxLogicTree extends RxTree{
         String[] tok;
 
         for(TreeNode leaf : leaves){
-            tok = tokenizer.toArr(leaf.data);
+            tok = dotTokenizer.toArr(leaf.data);
 
             for(int i = 0; i < tok.length; i++){
                 PARAM_UTIL.findAndSetParam(leaf, tok[i]);
-                factory.add(tok[i]);
+                factory.addRxPayNode(tok[i]);
             }
             leaf.payNodes = factory.getPayNodes();
             factory.clear();
