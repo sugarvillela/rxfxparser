@@ -1,4 +1,4 @@
-package compile.rx.ut;
+package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.basics.RxFxTreeFactory;
@@ -12,7 +12,7 @@ import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.PAR.*;
 import static compile.basics.Keywords.USERDEF_OPEN;
 
-public class RxParamUtil {
+public class RxParamUtil extends ParamUtil{
     private static RxParamUtil instance;
 
     private RxParamUtil(){
@@ -24,14 +24,15 @@ public class RxParamUtil {
     }
 
     private final Keywords.PAR[] parTypes;
-    private int pari;
-    private ListTable listTable;
-    private Keywords.DATATYPE listSource;
-    private String mainText, bracketText;
-    Keywords.PRIM outType;
+//    private int pari;
+//    private ListTable listTable;
+//    private Keywords.DATATYPE listSource;
+//    private String mainText, bracketText;
+//    private Keywords.PRIM outType;
+//
+//    Matcher matcher;
 
-    Matcher matcher;
-
+    @Override
     public void findAndSetParam(RxFxTreeFactory.TreeNode leaf, String text){
         if(leaf.quoted){//quoted text is raw text
             mainText = text;
@@ -50,32 +51,14 @@ public class RxParamUtil {
         return Keywords.PAR.fromInt(pari);
     }
 
-    public String getMainText(){
-        return mainText;
-    }
-
-    public String getBracketText(){
-        return bracketText;
-    }
-
     public Keywords.RX_FUN getFunType(){// already validated as fun
         return Keywords.RX_FUN.fromString(mainText);
-    }
-    public Keywords.PRIM getOutType(){
-        return outType;
     }
     public void fixParamType(Keywords.PAR newParamType){
         pari = newParamType.ordinal();
     }
 
-    public String makeUserDef(String text){
-        return (text == null)? "" :
-            (text.startsWith(USERDEF_OPEN))? text : USERDEF_OPEN + text;
-    }
-    public String makeNotUserDef(String text){
-        return (text == null)? "" :
-            (text.startsWith(USERDEF_OPEN))? text.substring(USERDEF_OPEN.length()) : text;
-    }
+
     private void identifyPattern(RxFxTreeFactory.TreeNode leaf, String text){
         for(pari = 0; pari < parTypes.length; pari++){
             if(parTypes[pari].pattern == null){
@@ -119,6 +102,7 @@ public class RxParamUtil {
         }
         Erlog.get(this).set("Syntax error", text);
     }
+
     private Keywords.PRIM setOutTypeFromFun(){
         Keywords.RX_FUN fun = Keywords.RX_FUN.fromString(mainText);
         if(fun == null){
@@ -127,6 +111,7 @@ public class RxParamUtil {
         }
         return fun.outType;
     }
+
     private Keywords.PRIM setOutTypeFromItem(){// error or assume?
         String category = listTable.getCategory(bracketText);
         //System.out.println("mainText: " + mainText + ", category: " + category);
@@ -138,6 +123,7 @@ public class RxParamUtil {
         listSource = listTable.getDataType(mainText);
         return listSource.outType;
     }
+
     private Keywords.PRIM setOutTypeFromText(String text){
         if(
             (mainText = listTable.getCategory(text)) == null ||
@@ -156,13 +142,5 @@ public class RxParamUtil {
             System.out.println("setOutTypeFromText... "+text+"=text, par="+CATEGORY_ITEM);
             return listSource.outType;
         }
-    }
-    private String readConstant(){
-        String read = ConstantTable.getInstance().readConstant(bracketText);
-        if(read == null){
-            Erlog.get(this).set("Undefined constant", bracketText);
-        }
-        System.out.println("param="+ bracketText + ", read="+read);
-        return String.format("%s(%s)", mainText, read);
     }
 }

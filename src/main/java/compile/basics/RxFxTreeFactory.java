@@ -6,8 +6,7 @@ import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
 import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
-import compile.rx.factories.Factory_PayNode;
-import compile.symboltable.ConstantTable;
+import compile.sublang.factories.PayNodes;
 import erlog.Erlog;
 import java.util.ArrayList;
 import toktools.TK;
@@ -79,7 +78,7 @@ public abstract class RxFxTreeFactory {
     
     public abstract TreeNode treeFromWordPattern(String text);
     public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root);
-    public abstract TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList);
+    public abstract TreeNode treeFromScanNodeSource(Keywords.DATATYPE datatype, ArrayList<Factory_Node.ScanNode> cmdList);
 
 
 
@@ -94,7 +93,7 @@ public abstract class RxFxTreeFactory {
         public boolean quoted, not;         //--
         public int level, id;       //--
         // payload
-        public ArrayList<Factory_PayNode.IPayNode> payNodes;
+        public ArrayList<PayNodes.PayNode> payNodes;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -306,8 +305,8 @@ public abstract class RxFxTreeFactory {
                 return "";
             }
             ArrayList<String> out = new ArrayList<>();
-            for(Factory_PayNode.IPayNode payNode : payNodes){
-                out.add("\t" + payNode.readableContent());
+            for(PayNodes.PayNode rxPayNode : payNodes){
+                out.add("\t" + rxPayNode.readableContent());
             }
             return String.join("\n", out);
         }

@@ -1,9 +1,12 @@
-package compile.fx;
+package compile.sublang;
 
 import compile.basics.Factory_Node;
+import compile.basics.Keywords;
 import compile.basics.RxFxTreeFactory;
-import compile.fx.ut.FxParamUtil;
-import compile.rx.factories.Factory_PayNode;
+import compile.sublang.ut.FxParamUtil;
+import compile.sublang.factories.PayNodes;
+import compile.sublang.ut.ParamUtil;
+import compile.sublang.ut.RxParamUtil;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -12,12 +15,14 @@ import toktools.Tokens_special;
 
 import java.util.ArrayList;
 
+import static compile.basics.Keywords.DATATYPE.FX;
+import static compile.basics.Keywords.DATATYPE.RX;
 import static compile.basics.Keywords.OP.*;
 
 public class FxLogicTree  extends RxFxTreeFactory {
     private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     protected static final Tokens_special dotTokenizer = new Tokens_special(".", "'", TK.IGNORESKIP );
-    private static final FxParamUtil PARAM_UTIL = FxParamUtil.getInstance();
+    private static final FxParamUtil PARAM_UTIL = (FxParamUtil) ParamUtil.getParamUtil(FX);
 
     private static FxLogicTree instance;
 
@@ -49,7 +54,9 @@ public class FxLogicTree  extends RxFxTreeFactory {
 
         ArrayList<TreeNode> leaves = leaves(root);
         readConstants(leaves);    // read constants before extend
+        setPayNodes(leaves);
         dispBreadthFirst(root);
+        Erlog.get(this).set("Happy stop");
         return root;
     }
 
@@ -62,18 +69,26 @@ public class FxLogicTree  extends RxFxTreeFactory {
         }
     }
     private void setPayNodes(ArrayList<TreeNode> leaves){
-        Factory_PayNode factory = new Factory_PayNode();
+        //PayNodes.FxPayNodeFactory factory = (PayNodes.FxPayNodeFactory) PayNodes.getFactory(FX);
         String[] tok;
 
         for(TreeNode leaf : leaves){
+            System.out.println();
+            System.out.println("=======> setPayNodes: " + leaf.data);
             tok = dotTokenizer.toArr(leaf.data);
 
             for(int i = 0; i < tok.length; i++){
                 PARAM_UTIL.findAndSetParam(leaf, tok[i]);
+                System.out.println(i + ": " + tok[i]);
+                System.out.println(PARAM_UTIL.getMainText());
+                System.out.println(PARAM_UTIL.getBracketText());
+                System.out.println(PARAM_UTIL.getRangeLow());
+                System.out.println(PARAM_UTIL.getRangeHigh());
+                System.out.println();
                 //factory.add(tok[i]);
             }
-            leaf.payNodes = factory.getPayNodes();
-            factory.clear();
+            //leaf.payNodes = factory.getPayNodes();
+            //factory.clear();
         }
     }
     @Override
@@ -82,7 +97,7 @@ public class FxLogicTree  extends RxFxTreeFactory {
     }
 
     @Override
-    public TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList) {
+    public TreeNode treeFromScanNodeSource(Keywords.DATATYPE datatype, ArrayList<Factory_Node.ScanNode> cmdList) {
         return null;
     }
     /*

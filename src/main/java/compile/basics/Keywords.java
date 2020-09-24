@@ -311,9 +311,11 @@ public final class Keywords {
     }
 
     public enum FX_DATATYPE {
-        ACCESSOR,
-        MUTATOR,
-        //NONE
+        ACCESSOR_C, // A class of instructions
+        ACCESSOR_N, // A numeric instruction
+        ACCESSOR_R, // A range instruction
+        MUTATOR_C,
+        MUTATOR
         ;
 
         public static FX_DATATYPE fromString(String text ){
@@ -327,27 +329,34 @@ public final class Keywords {
     }
 
     public enum FX_PAR {
-        //DOTTED              (FX_DATATYPE.NONE,      Pattern.compile("^[$a-zA-Z0-9_]+[.][$a-zA-Z0-9_]+\\(.*\\)$")),
-        ACCESS_ALL          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[:]?\\]$")),
-        ACCESS_NUM          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+\\]$")),
-        ACCESS_NEG          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[-][0-9]+\\]$")),
-        ACCESS_BOT          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[<][<]\\]$")),
-        ACCESS_TOP          (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[>][>]\\]$")),
-        ACCESS_BEFORE       (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[<][<][0-9]+\\]$")),
-        ACCESS_AFTER        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[>][>][0-9]+\\]$")),
-        ACCESS_RANGE        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+[:][0-9]+\\]$")),
-        ACCESS_BELOW        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[:][0-9]+\\]$")),
-        ACCESS_ABOVE        (FX_DATATYPE.ACCESSOR,  Pattern.compile("^\\[[0-9]+[:]\\]$")),
-        FUN_EMPTY           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(()\\)$")),
-        FUN_NUM             (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
-        FUN_RANGE           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
-        FUN_BELOW           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([-][0-9]+)\\)$")),
-        FUN_ABOVE           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([0-9]+[-])\\)$")),
-        FUN_CONST           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([$][A-Za-z][A-Za-z0-9_]*)\\)$")),
-        FUN_AL_NUM          (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
-        FUN_CAT             (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\(([A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*)\\)$")),
-        //FUN_MULTI           (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\((([A-Za-z0-9_]+[,]\\s?)+[A-Za-z0-9_]+)\\)$")),
-        FUN_MULTI_CAT       (FX_DATATYPE.MUTATOR,   Pattern.compile("^[^.]+\\((([A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*[,]\\s?)+[A-Za-z0-9_]+(\\[[A-Za-z0-9_]+\\])*)\\)$")),
+//        ACCESS_ERR          (FX_DATATYPE.FX_ERR,      Pattern.compile("^\\[([0-9]+[-][0-9]+)\\]$")),
+//        FUN_ERR             (FX_DATATYPE.FX_ERR,      Pattern.compile("^.+\\(([0-9]+[:][0-9])\\)$")),
+        ACCESS_ALL          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^(\\[\\])|(\\[[<][>]\\])|(\\[[-]\\])$")),
+        ACCESS_BOT          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[<][<]\\]$")),
+        ACCESS_TOP          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[>][>]\\]$")),
+
+        ACCESS_NUM          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)\\]$")),
+//        ACCESS_NEG          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([-][0-9]+)\\]$")),
+        ACCESS_BEFORE       (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[<][<]([0-9]+)\\]$")),
+        ACCESS_AFTER        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[>][>]([0-9]+)\\]$")),
+
+        ACCESS_BELOW        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[-]([0-9]+)\\]$")),
+        ACCESS_ABOVE        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)[-]\\]$")),
+        ACCESS_RANGE        (FX_DATATYPE.ACCESSOR_R,  Pattern.compile("^\\[([0-9]+[-][0-9]+)\\]$")),
+
+        FUN_CONST           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$][A-Za-z0-9_]+)\\)$")),
+        FUN_EMPTY           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(()\\)$")),
+        FUN_NUM             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)\\)$")),
+        FUN_RANGE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+[-][0-9])\\)$")),
+        FUN_BELOW           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
+        FUN_ABOVE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
+        FUN_ALL             (FX_DATATYPE.MUTATOR_C,   Pattern.compile("^.+\\(([<][>])\\)$")),
+        FUN_BOT             (FX_DATATYPE.MUTATOR_C,   Pattern.compile("^.+\\(([<][<])\\)$")),
+        FUN_TOP             (FX_DATATYPE.MUTATOR_C,   Pattern.compile("^.+\\(([>][>])\\)$")),
+        FUN_AL_NUM          (FX_DATATYPE.MUTATOR_C,   Pattern.compile("^.+\\(([A-Za-z0-9_]+)\\)$")),
+        FUN_MULTI           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([A-Za-z0-9_]+[,]\\s*)+[A-Za-z0-9_]+)\\)$")),
+        FUN_CAT             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$")),
+        FUN_CAT_MULTI       (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\][,]\\s*)+[$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$"))
 
         ;
 

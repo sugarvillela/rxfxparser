@@ -30,7 +30,7 @@ $number = 0;
 			NUM_VAL INDEX GROUP EE
 
 	RX $myRx Tokyo //TODO: CHECK QUOTED SPECIAL CHARACTERS
-	FX ([].VOT()|[<<].DRP())&[>>].MARK()
+	FX ([2].VOT(ears,nose,throat)|[-1].DRP())&[1:4].MARK()
 
 $*/
 

@@ -1,4 +1,4 @@
-package compile.rx;
+package compile.sublang;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.DATATYPE.*;
@@ -11,9 +11,10 @@ import java.util.ArrayList;
 
 import compile.basics.Keywords;
 import compile.basics.RxFxTreeFactory;
-import compile.rx.factories.Factory_PayNode;
-import compile.rx.ut.RxParamUtil;
-import compile.rx.ut.RxValidator;
+import compile.sublang.factories.PayNodes;
+import compile.sublang.ut.ParamUtil;
+import compile.sublang.ut.RxParamUtil;
+import compile.sublang.ut.RxValidator;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -25,7 +26,7 @@ import toktools.Tokens_special;
 public class RxLogicTree extends RxFxTreeFactory {
     protected static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     protected static final Tokens_special dotTokenizer = new Tokens_special(".", "'", TK.IGNORESKIP );
-    private static final RxParamUtil PARAM_UTIL = RxParamUtil.getInstance();
+    private static final RxParamUtil PARAM_UTIL = (RxParamUtil) ParamUtil.getParamUtil(RX);
     private static RxFxTreeFactory instance;
     
     public static RxFxTreeFactory getInstance(){
@@ -73,7 +74,7 @@ public class RxLogicTree extends RxFxTreeFactory {
     
     @Override
     public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root){
-        ArrayList<TreeNode> nodes = instance.preOrder(root);
+        ArrayList<TreeNode> nodes = preOrder(root);
         int stackLevel = 0;
         ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
         for(TreeNode node : nodes){
@@ -90,7 +91,7 @@ public class RxLogicTree extends RxFxTreeFactory {
             );
             if(PAYLOAD.equals(node.op)){
                 cmdList.add(Factory_Node.newPushNode(lineCol, PAY_NODE));
-                for(Factory_PayNode.IPayNode payNode : node.payNodes){
+                for(PayNodes.PayNode payNode : node.payNodes){
                     cmdList.add(
                         Factory_Node.newScanNode(lineCol, CMD.ADD_TO, PAY_NODE, VAL, payNode.toString())
                     );
@@ -101,14 +102,14 @@ public class RxLogicTree extends RxFxTreeFactory {
         return cmdList;
     }
     @Override
-    public TreeNode treeFromScanNodeSource(ArrayList<Factory_Node.ScanNode> cmdList){
+    public TreeNode treeFromScanNodeSource(Keywords.DATATYPE datatype, ArrayList<Factory_Node.ScanNode> cmdList){
         ArrayList<String> textCommands = new ArrayList<>();
         for(Factory_Node.ScanNode inputNode : cmdList){
             textCommands.add(inputNode.toString());
         }
 
         ScanNodeSource source = new ScanNodeSource(new TextSource_list(textCommands));
-        Factory_PayNode factoryPayNode = new Factory_PayNode();
+        PayNodes.PayNodeFactory factory = PayNodes.getFactory(datatype);
         TreeNode reroot = null, head = null;
         while(source.hasNext()){
             Factory_Node.ScanNode scanNode = source.nextNode();
@@ -141,7 +142,7 @@ public class RxLogicTree extends RxFxTreeFactory {
                             head.payNodes = new ArrayList<>();
                             break;
                         case ADD_TO:
-                            head.payNodes.add(factoryPayNode.rxPayNodeFromScanNode(scanNode.data));
+                            head.payNodes.add(factory.payNodeFromScanNode(scanNode.data));
                             break;
                         case POP:
                             break;
@@ -226,7 +227,7 @@ public class RxLogicTree extends RxFxTreeFactory {
         return false;
     }
     private void setPayNodes(ArrayList<TreeNode> leaves){
-        Factory_PayNode factory = new Factory_PayNode();
+        PayNodes.RxPayNodeFactory factory = (PayNodes.RxPayNodeFactory) PayNodes.getFactory(RX);
         String[] tok;
 
         for(TreeNode leaf : leaves){
@@ -234,7 +235,7 @@ public class RxLogicTree extends RxFxTreeFactory {
 
             for(int i = 0; i < tok.length; i++){
                 PARAM_UTIL.findAndSetParam(leaf, tok[i]);
-                factory.addRxPayNode(tok[i]);
+                factory.addPayNode(tok[i]);
             }
             leaf.payNodes = factory.getPayNodes();
             factory.clear();

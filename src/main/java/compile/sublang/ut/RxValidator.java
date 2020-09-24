@@ -1,8 +1,8 @@
-package compile.rx.ut;
+package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.basics.Keywords.RX_FUN;
-import compile.rx.factories.Factory_PayNode;
+import compile.sublang.factories.PayNodes;
 import erlog.Erlog;
 
 import java.util.ArrayList;
@@ -62,9 +62,9 @@ public class RxValidator {
         return false;
     }
     public boolean assertValidOperation(
-            ArrayList<Factory_PayNode.IPayNode> leftNodes,
+            ArrayList<PayNodes.PayNode> leftNodes,
             Keywords.OP op,
-            ArrayList<Factory_PayNode.IPayNode> rightNodes
+            ArrayList<PayNodes.PayNode> rightNodes
     ){
         return assertValidTest(
                 assertValidChain(leftNodes),
@@ -72,17 +72,17 @@ public class RxValidator {
                 assertValidChain(rightNodes)
         );
     }
-    public Keywords.PRIM assertValidChain(ArrayList<Factory_PayNode.IPayNode> nodes){
+    public Keywords.PRIM assertValidChain(ArrayList<PayNodes.PayNode> nodes){
         Keywords.PRIM last = NULL;
-        for(Factory_PayNode.IPayNode iPayNode : nodes){
-            Factory_PayNode.PayNode payNode = (Factory_PayNode.PayNode)iPayNode;
-            if(last != payNode.callerType){
+        for(PayNodes.PayNode payNode : nodes){
+            PayNodes.RxPayNode rxPayNode = (PayNodes.RxPayNode) payNode;
+            if(last != rxPayNode.callerType){
                 Erlog.get(this).set(
                         String.format("Expected %s input to %s, found %s",
-                                payNode.callerType.toString(), payNode.mainText, last.toString())
+                                rxPayNode.callerType.toString(), rxPayNode.mainText, last.toString())
                 );
             }
-            last = payNode.outType;
+            last = rxPayNode.outType;
         }
         return last;
     }

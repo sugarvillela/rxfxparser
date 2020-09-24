@@ -2,10 +2,10 @@ package compile.scan.factories;
 
 import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
-import compile.fx.FxLogicTree;
-import compile.rx.RxLogicTree;
+import compile.sublang.FxLogicTree;
+import compile.sublang.RxLogicTree;
 import compile.basics.RxFxTreeFactory;
-import compile.rx.ut.RxValidator;
+import compile.sublang.ut.RxValidator;
 import compile.scan.ut.*;
 import compile.symboltable.*;
 import erlog.Erlog;
@@ -654,7 +654,7 @@ public abstract class Factory_Strategy{
             return false;
         }
         private void testRebuild(RxFxTreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
-            RxFxTreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(nodes);
+            RxFxTreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
             System.out.println(">>>>testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
             assertEqual(origRoot, newRoot);
