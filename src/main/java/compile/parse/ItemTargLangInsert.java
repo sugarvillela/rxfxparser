@@ -2,7 +2,7 @@ package compile.parse;
 
 
 import compile.basics.Factory_Node;
-import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.FIELD;
 

@@ -3,8 +3,8 @@ package demos;
 import commons.Commons;
 import compile.basics.Factory_Node;
 import compile.sublang.RxLogicTree;
-import compile.basics.RxFxTreeFactory;
-import compile.basics.RxFxTreeFactory.TreeNode;
+import compile.sublang.factories.TreeFactory;
+import compile.sublang.factories.TreeFactory.TreeNode;
 import java.util.ArrayList;//RX_AND, RX_OR, RX_NOT, RX_EQ,
 
 public class RxTree_ {
@@ -17,7 +17,7 @@ public class RxTree_ {
         rxTree = RxLogicTree.getInstance();
     }
     
-    private final RxFxTreeFactory rxTree;
+    private final TreeFactory rxTree;
     
     public void test1(){
         String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
@@ -32,7 +32,7 @@ public class RxTree_ {
         //rxTree.dispPreOrder(root);
         //rxTree.dispLeaves(root);
         rxTree.dispBreadthFirst(root);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList("lineCol", root);
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root);
         //Commons.disp(cmdList, "\nCommandList");
         ArrayList<String> strList = scanNodesToString(cmdList);
         //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
@@ -43,7 +43,7 @@ public class RxTree_ {
         //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
         String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
         TreeNode root = rxTree.treeFromWordPattern(text);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList("lineCol", root);
+        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(root);
         Commons.disp(cmdList);
         ArrayList<String> strList = scanNodesToString(cmdList);
         //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);

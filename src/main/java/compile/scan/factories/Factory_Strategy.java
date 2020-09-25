@@ -4,14 +4,13 @@ import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
 import compile.sublang.FxLogicTree;
 import compile.sublang.RxLogicTree;
-import compile.basics.RxFxTreeFactory;
-import compile.sublang.ut.RxValidator;
+import compile.sublang.factories.TreeFactory;
+import compile.sublang.ut.ValidatorRx;
 import compile.scan.ut.*;
 import compile.symboltable.*;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.scan.Class_Scanner;
-import compile.basics.Keywords;
 import compile.basics.Keywords.DATATYPE;
 import compile.basics.Keywords.CMD;
 
@@ -110,8 +109,9 @@ public abstract class Factory_Strategy{
         return enums;
     }
 
-    private static final RxFxTreeFactory RX_TREE = RxLogicTree.getInstance();
-    private static final RxFxTreeFactory FX_TREE = FxLogicTree.getInstance();
+    private static final Factory_Node NODE_FACTORY = Factory_Node.getInstance();
+    private static final TreeFactory RX_TREE = RxLogicTree.getInstance();
+    private static final TreeFactory FX_TREE = FxLogicTree.getInstance();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
     private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
@@ -204,7 +204,7 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             context.addNode(
-                Factory_Node.newScanNode( CMD.ADD_TO, context.getDatatype(), text)
+                NODE_FACTORY.newScanNode( CMD.ADD_TO, context.getDatatype(), text)
             );
             return true;
         }
@@ -266,7 +266,7 @@ public abstract class Factory_Strategy{
                 return false;
             }
             context.addNode(
-                Factory_Node.newScanNode(CMD.SET_ATTRIB, below.getDatatype(), key, val )
+                NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, below.getDatatype(), key, val )
             );
             return true;
         }
@@ -328,7 +328,7 @@ public abstract class Factory_Strategy{
                 if(SYMBOL_TEST.isNew(defName)){
                     context.setDefName(defName);
                     context.addNode(
-                        Factory_Node.newScanNode(CMD.SET_ATTRIB, context.getDatatype(), DEF_NAME, defName)
+                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, context.getDatatype(), DEF_NAME, defName)
                     );
                     return true;
                 }
@@ -484,7 +484,7 @@ public abstract class Factory_Strategy{
                     ListTable.init(
                             (CompileInitializer.getInstance().isNewEnumSet())?
                                     null :
-                                    new ScanNodeSource(new TextSource_file(Keywords.listTableFileName()))
+                                    new ScanNodeSource(new TextSource_file(ListTable_RxlxReader.listTableFileName()))
                     );
                     LIST_TABLE = ListTable.getInstance();
                     LIST_TABLE.onCreate();
@@ -514,14 +514,14 @@ public abstract class Factory_Strategy{
 
                 // build nodes
                 context.addNode(
-                        Factory_Node.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
                 );
 
                 System.out.println("ManageEnuLists: name: "+defName + ", datatype: "+context.getDatatype());
             }
             else{
                 context.addNode(
-                        Factory_Node.newScanNode( CMD.ADD_TO, h, text)
+                        NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text)
                 );
                 LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
             }
@@ -536,7 +536,7 @@ public abstract class Factory_Strategy{
             if( TARGLANG_INSERT_CLOSE.equals(text) ){
                 if(!LINEBUFFER.isEmpty()){
                     context.addNode(
-                            Factory_Node.newScanNode(
+                            NODE_FACTORY.newScanNode(
                                     CMD.ADD_TO, context.getDatatype(), LINEBUFFER.dump()
                             )
                     );
@@ -547,7 +547,7 @@ public abstract class Factory_Strategy{
                 LINEBUFFER.add(text);
                 if(Erlog.getTextStatusReporter().isEndLine()){
                     context.addNode(
-                            Factory_Node.newScanNode(
+                            NODE_FACTORY.newScanNode(
                                     CMD.ADD_TO, context.getDatatype(), LINEBUFFER.dump()
                             )
                     );
@@ -631,72 +631,54 @@ public abstract class Factory_Strategy{
             if(rxRangeUtil.findAndSetRange(text)){
                 text = rxRangeUtil.getTruncated();
             }
-            if(RxValidator.getInstance().assertValidRxWord(text)){
-                context.addNode(Factory_Node.newPushNode(h));
+            if(ValidatorRx.getInstance().assertValidRxWord(text)){
+                context.addNode(NODE_FACTORY.newPushNode(h));
                 
 //                context.addNode(
-//                    Factory_Node.newScanNode( CMD.ADD_TO, h, text)
+//                    NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text)
 //                );
-                context.addNode( Factory_Node.newScanNode( 
+                context.addNode( NODE_FACTORY.newScanNode(
                     CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
                 );
-                context.addNode( Factory_Node.newScanNode( 
+                context.addNode( NODE_FACTORY.newScanNode(
                     CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
                 );
-                RxFxTreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
+                TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
                 //RX_TREE.dispBreadthFirst(root);
-                ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(Erlog.getTextStatusReporter().readableStatus(), root);
+                ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(root);
                 testRebuild(root, nodes);
                 context.addNodes(nodes);
-                context.addNode(Factory_Node.newPopNode(h));
+                context.addNode(NODE_FACTORY.newPopNode(h));
                 return true;
             }
             return false;
         }
-        private void testRebuild(RxFxTreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
-            RxFxTreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
-            System.out.println(">>>>testRebuild<<<<");
+        private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
+            TreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
+            System.out.println(">>>>RX testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
-            assertEqual(origRoot, newRoot);
+            RX_TREE.assertEqual(origRoot, newRoot);
         }
-        private boolean assertEqual(RxFxTreeFactory.TreeNode root1, RxFxTreeFactory.TreeNode root2){
-            ArrayList<RxFxTreeFactory.TreeNode>[] levels1 = RX_TREE.breadthFirst(root1);
-            ArrayList<RxFxTreeFactory.TreeNode>[] levels2 = RX_TREE.breadthFirst(root2);
-            if(levels1.length != levels2.length){
-                System.out.println("fail: levels1.length != levels2.length");
-                return false;
-            }
-            for(int i = 0; i<levels1.length; i++){
-                int len1 = levels1[i].size();
-                int len2 = levels2[i].size();
-                if(len1 != len2){
-                    System.out.println("fail: len1 != len2");
-                    return false;
-                }
-                for(int j = 0; j < len1; j++){
-                    String node1 = levels1[i].get(j).readableContent();
-                    String node2 = levels2[i].get(j).readableContent();
-                    boolean equal = node1.equals(node2);
-                    System.out.printf("\n%d:%d: equal: %b\n    %s \n    %s \n", i, j, equal, node1, node2);
-                    if(!equal){
-                        //Error!
-                        System.out.println("not equal");
-                    }
-                }
-            }
-            return true;
-        }
+
     }
     public static class AddFxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             DATATYPE h = FX_WORD;
-            context.addNode(Factory_Node.newPushNode(h));
-            RxFxTreeFactory.TreeNode root = FX_TREE.treeFromWordPattern(text);
-            context.addNode(Factory_Node.newPopNode(h));
+            context.addNode(NODE_FACTORY.newPushNode(h));
+            TreeFactory.TreeNode root = FX_TREE.treeFromWordPattern(text);
+            ArrayList<Factory_Node.ScanNode> nodes = FX_TREE.treeToScanNodeList(root);
+            testRebuild(root, nodes);
+            context.addNodes(nodes);
+            context.addNode(NODE_FACTORY.newPopNode(h));
             return true;
         }
-        
+        private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
+            TreeFactory.TreeNode newRoot = FX_TREE.treeFromScanNodeSource(FX, nodes);
+            System.out.println(">>>>FX testRebuild<<<<");
+            //RX_TREE.dispBreadthFirst(newRoot);
+            FX_TREE.assertEqual(origRoot, newRoot);
+        }
     }
 
     public static class ReadInclude extends Strategy{
@@ -712,14 +694,14 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             TextSniffer.getInstance().onPush(context);
-            context.addNode(Factory_Node.newPushNode(context.getDatatype()));
+            context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
             return false;
         }
     }
     public static class OnPushNoSniff extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            context.addNode(Factory_Node.newPushNode(context.getDatatype()));
+            context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
             return false;
         }
     }
@@ -729,7 +711,7 @@ public abstract class Factory_Strategy{
         public boolean go(String text, Base_ScanItem context){
             TextSniffer.getInstance().onPop(context);
             context.assertDoneState();
-            context.addNode(Factory_Node.newPopNode(context.getDatatype()));
+            context.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
             return false;
         }
     }
@@ -737,14 +719,14 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             context.assertDoneState();
-            context.addNode(Factory_Node.newPopNode(context.getDatatype()));
+            context.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
             return false;
         }
     }
     public static class OnPopList extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            context.addNode(Factory_Node.newPopNode(context.getDatatype()));
+            context.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
             String defName = context.getDefName();
             //Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
             if(defName != null){
@@ -808,7 +790,7 @@ public abstract class Factory_Strategy{
 //        public boolean go(String text, Base_ScanItem context){
 //            addToSymbolTable(context);
 //            context.addNode(
-//                Factory_Node.newScanNode( 
+//                NODE_FACTORY.newScanNode(
 //                    CMD.PUSH, context.getDatatype(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );
@@ -830,7 +812,7 @@ public abstract class Factory_Strategy{
 //        @Override
 //        public boolean go(String text, Base_ScanItem context){
 //            context.addNode(
-//                Factory_Node.newScanNode( 
+//                NODE_FACTORY.newScanNode(
 //                    CMD.POP, context.getDatatype(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );

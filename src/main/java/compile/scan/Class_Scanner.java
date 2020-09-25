@@ -93,7 +93,7 @@ public class Class_Scanner extends Base_Scanner {
 
         if(
             inName == null ||
-            !Factory_Node.persist(
+            !nodeFactory.persist(
                 inName + INTERIM_FILE_EXTENSION,
                     nodes,
                     "Interim file containing parser instructions"
@@ -112,7 +112,6 @@ public class Class_Scanner extends Base_Scanner {
     }
 
     public final void addNode(ScanNode node){
-        node.lineCol = fin.readableStatus();
         nodes.add(node);
     }
 

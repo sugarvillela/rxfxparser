@@ -1,28 +1,43 @@
-package compile.basics;
+package compile.sublang.factories;
 
+import compile.basics.Factory_Node;
+import compile.basics.Keywords;
 import compile.basics.Keywords.OP;
 
-import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Keywords.DATATYPE.*;
+import static compile.basics.Keywords.DATATYPE.PAY_NODE;
+import static compile.basics.Keywords.FIELD.VAL;
+import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.OP.NOT;
 import static compile.basics.Keywords.OP.PAYLOAD;
 import commons.Commons;
-import compile.sublang.factories.PayNodes;
 import erlog.Erlog;
 import java.util.ArrayList;
+
+import interfaces.DataNode;
+import toksource.ScanNodeSource;
+import toksource.TextSource_list;
 import toktools.TK;
 import toktools.Tokens_special;
 import unique.Unique;
 
-public abstract class RxFxTreeFactory {
-    protected final TreeNodeFactory treeNodeFactory;
+public abstract class TreeFactory {
+    //protected final Keywords.DATATYPE rxOrFx;
+    protected final Factory_Node nodeFactory;
 
-    protected RxFxTreeFactory(TreeNodeFactory treeNodeFactory){
-        this.treeNodeFactory = treeNodeFactory;
+    protected TreeFactory(){
+        //this.rxOrFx = rxOrFx;
+        this.nodeFactory = Factory_Node.getInstance();
     }
 
-    public TreeNodeFactory getTreeNodeFactory(){
-        return treeNodeFactory;
+    public static TreeNode newTreeNode(Keywords.DATATYPE rxOrFx, String data, int level, TreeNode parent){
+        return (RX.equals(rxOrFx))? new RxTreeNode(data, level, parent) : new FxTreeNode(data, level, parent);
     }
+    public static TreeNode newTreeNode(Keywords.DATATYPE rxOrFx, Factory_Node.ScanNode scanNode){
+        return (RX.equals(rxOrFx))? new RxTreeNode(scanNode) : new FxTreeNode(scanNode);
+    }
+
+    /*=====Root display methods=======================================================================================*/
 
     public void dispBreadthFirst(TreeNode root){
         ArrayList<TreeNode>[] levels = breadthFirst(root);
@@ -53,6 +68,8 @@ public abstract class RxFxTreeFactory {
         }
         Commons.disp(readable, "\nPreOrder");
     }
+
+    /*=====Root access methods========================================================================================*/
     
     public ArrayList<TreeNode>[] breadthFirst(TreeNode root){
         int max = root.treeDepth(0)+1;
@@ -75,13 +92,119 @@ public abstract class RxFxTreeFactory {
         root.preOrder(preOrder);
         return preOrder;
     }
-    
+
+    /*=====Tree build and convert methods=============================================================================*/
+
     public abstract TreeNode treeFromWordPattern(String text);
-    public abstract ArrayList<Factory_Node.ScanNode> treeToScanNodeList(String lineCol, TreeNode root);
-    public abstract TreeNode treeFromScanNodeSource(Keywords.DATATYPE datatype, ArrayList<Factory_Node.ScanNode> cmdList);
 
+    /* For later */
+    public TreeNode treeFromScanNodeSource(Keywords.DATATYPE rxOrFx, ArrayList<Factory_Node.ScanNode> cmdList){
+        ArrayList<String> textCommands = new ArrayList<>();
+        for(Factory_Node.ScanNode inputNode : cmdList){
+            textCommands.add(inputNode.toString());
+        }
+        ScanNodeSource source = new ScanNodeSource(new TextSource_list(textCommands));
+        PayNodes.PayNodeFactory factory = PayNodes.getFactory(rxOrFx);
+        TreeNode reroot = null, head = null;
+        while(source.hasNext()){
+            Factory_Node.ScanNode scanNode = source.nextNode();
+            switch(scanNode.h){
+                case RXFX_BUILDER:
+                    switch(scanNode.cmd){
+                        case PUSH:
+                            if(reroot == null){
+                                reroot = head = TreeFactory.newTreeNode(rxOrFx, scanNode);
+                            }
+                            else{
+                                TreeNode treeNode = TreeFactory.newTreeNode(rxOrFx, scanNode);
+                                treeNode.level = head.level + 1;
+                                treeNode.parent = head;
+                                head.addChildExternal(treeNode);
+                                head = treeNode;
+                            }
+                            break;
+                        case POP:
+                            head = head.parent;
+                            if(head == null){
+                                return reroot;
+                            }
+                            break;
+                    }
+                    break;
+                case PAY_NODE:
+                    switch(scanNode.cmd){
+                        case PUSH:
+                            head.payNodes = new ArrayList<>();
+                            break;
+                        case ADD_TO:
+                            head.payNodes.add(factory.payNodeFromScanNode(scanNode.data));
+                            break;
+                        case POP:
+                            break;
+                    }
+                    break;
+            }
 
+        }
+        return reroot;
+    }
 
+    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root){
+        ArrayList<TreeNode> nodes = preOrder(root);
+        int stackLevel = 0;
+        ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
+        for(TreeNode node : nodes){
+
+            while(stackLevel > node.level){
+                stackLevel--;
+                cmdList.add(
+                        nodeFactory.newPopNode(RXFX_BUILDER)
+                );
+            }
+            stackLevel++;
+            cmdList.add(
+                    nodeFactory.newScanNode(Keywords.CMD.PUSH, RXFX_BUILDER, VAL, node.toString())
+            );
+            if(PAYLOAD.equals(node.op)){
+                cmdList.add(nodeFactory.newPushNode(PAY_NODE));
+                for(DataNode payNode : node.payNodes){
+                    cmdList.add(
+                            nodeFactory.newScanNode(Keywords.CMD.ADD_TO, PAY_NODE, VAL, payNode.toString())
+                    );
+                }
+                cmdList.add(nodeFactory.newPopNode(PAY_NODE));
+            }
+        }
+        return cmdList;
+    }
+
+    public boolean assertEqual(TreeFactory.TreeNode root1, TreeFactory.TreeNode root2){
+        ArrayList<TreeFactory.TreeNode>[] levels1 = this.breadthFirst(root1);
+        ArrayList<TreeFactory.TreeNode>[] levels2 = this.breadthFirst(root2);
+        if(levels1.length != levels2.length){
+            System.out.println("fail: levels1.length != levels2.length");
+            return false;
+        }
+        for(int i = 0; i<levels1.length; i++){
+            int len1 = levels1[i].size();
+            int len2 = levels2[i].size();
+            if(len1 != len2){
+                System.out.println("fail: len1 != len2");
+                return false;
+            }
+            for(int j = 0; j < len1; j++){
+                String node1 = levels1[i].get(j).readableContent();
+                String node2 = levels2[i].get(j).readableContent();
+                boolean equal = node1.equals(node2);
+                System.out.printf("\n%d:%d: equal: %b\n    %s \n    %s \n", i, j, equal, node1, node2);
+                if(!equal){
+                    //Error!
+                    System.out.println("not equal");
+                }
+            }
+        }
+        return true;
+    }
 
     public static abstract class TreeNode{
         protected static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
@@ -93,7 +216,7 @@ public abstract class RxFxTreeFactory {
         public boolean quoted, not;         //--
         public int level, id;       //--
         // payload
-        public ArrayList<PayNodes.PayNode> payNodes;
+        public ArrayList<DataNode> payNodes;
         
         public TreeNode(){
             this.op = PAYLOAD;
@@ -110,12 +233,12 @@ public abstract class RxFxTreeFactory {
             this.parent = parent;
         }
 
-        public boolean split(RxFxTreeFactory factory, char delim){
+        public boolean split(Keywords.DATATYPE rxOrFx, char delim){
             //System.out.println("\ndelim = " + delim + ", data = " + data + ", connector = " + connector);
             if(data == null){
                 boolean more = false;
                 for(TreeNode node : nodes){
-                    more |= node.split(factory, delim);
+                    more |= node.split(rxOrFx, delim);
                 }
                 return more;
             }
@@ -130,7 +253,7 @@ public abstract class RxFxTreeFactory {
                     //setConnector();
                     for(String token : tokens){
                         this.addChild(
-                            factory.getTreeNodeFactory().get(token, level + 1, this)
+                                TreeFactory.newTreeNode(rxOrFx, token, level + 1, this)
                         );
                     }
                     return true;
@@ -305,7 +428,7 @@ public abstract class RxFxTreeFactory {
                 return "";
             }
             ArrayList<String> out = new ArrayList<>();
-            for(PayNodes.PayNode rxPayNode : payNodes){
+            for(DataNode rxPayNode : payNodes){
                 out.add("\t" + rxPayNode.readableContent());
             }
             return String.join("\n", out);
@@ -317,8 +440,8 @@ public abstract class RxFxTreeFactory {
         public RxTreeNode(String data, int level, TreeNode parent){
             super(data, level, parent);
         }
-        public RxTreeNode(String scanNodeData){
-            String[] tok = scanNodeData.split(",", NUM_TREE_FIELDS);
+        public RxTreeNode(Factory_Node.ScanNode scanNode){
+            String[] tok = scanNode.data.split(",", NUM_TREE_FIELDS);
             this.not = Boolean.parseBoolean(tok[0]);
             this.op = OP.fromString(tok[1]);
             this.id = Integer.parseInt(tok[2]);
@@ -365,8 +488,8 @@ public abstract class RxFxTreeFactory {
         public FxTreeNode(String data, int level, TreeNode parent){
             super(data, level, parent);
         }
-        public FxTreeNode(String scanNodeData){
-            String[] tok = scanNodeData.split(",", NUM_TREE_FIELDS);
+        public FxTreeNode(Factory_Node.ScanNode scanNode){
+            String[] tok = scanNode.data.split(",", NUM_TREE_FIELDS);
             this.not = Boolean.parseBoolean(tok[0]);
             this.op = OP.fromString(tok[1]);
             this.id = Integer.parseInt(tok[2]);
@@ -380,22 +503,6 @@ public abstract class RxFxTreeFactory {
         public boolean unquote(char quote){// just in case I forget
             Erlog.get(this).set("FX doesn't support quoted text");
             return false;
-        }
-    }
-
-    public interface TreeNodeFactory{
-        TreeNode get(String data, int level, TreeNode parent);
-    }
-    public static class RxTreeNodeFactory implements TreeNodeFactory{
-        @Override
-        public TreeNode get(String data, int level, TreeNode parent){
-            return new RxTreeNode(data, level, parent);
-        }
-    }
-    public static class FxTreeNodeFactory implements TreeNodeFactory{
-        @Override
-        public TreeNode get(String data, int level, TreeNode parent){
-            return new RxTreeNode(data, level, parent);
         }
     }
 }

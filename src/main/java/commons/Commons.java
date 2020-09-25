@@ -2,13 +2,11 @@
  */
 package commons;
 
-import compile.basics.Keywords;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Keywords.NULL_TEXT;
 
 /**Very simple functions for stuff Java does not do well, or do at all
  *
@@ -25,107 +23,58 @@ public class Commons {
     public static String nullSafe(String str){//safe toString() for nullable object
         return (str == null || str.isEmpty())? NULL_TEXT : str;
     }
+    public static String nullSafe(Object[] objects){
+        if(objects == null){
+            return NULL_TEXT;
+        }
+        String[] out = new String[objects.length];
+        for(int i = 0; i < objects.length; i++){
+            out[i] = nullSafe(objects[i]);
+        }
+        return String.join("|", out);
+    }
+    public static String nullSafe(int[] objects){
+        return (objects == null)? NULL_TEXT : Commons.join("|", objects);
+    }
 
-    //private Commons(){}
-//    private static Commons C=null;
-//    public static Commons getInstance(){
-//        return (C==null)? ( C = new Commons() ) : C;
-//    }
-    public interface Result{
-        public boolean success();
-        public int intVal();
+    public static String undoNullSafe(String text){
+        return (text == NULL_TEXT)? null : text;
     }
-    public static String[] copyNonNull( String[] arr ){
-        int i = 0;
-        for( String str : arr ){
-            if( str != null ){
-                i ++;
-            }
+    public static String[] undoNullSafes(String text){
+        if(NULL_TEXT.equals(text)){
+            return null;
         }
-        String[] out = new String[i];
-        i = 0;
-        for( String str : arr ){
-            if( str != null ){
-                out[i] = str;
-                i ++;
-            }
+        String[] toks = text.split("\\|");
+        for(int i = 0; i < toks.length; i++){
+            toks[i] = undoNullSafe(toks[i]);
+        }
+        return toks;
+    }
+    public static int[] undoNullSafe_int(String text){
+        if(NULL_TEXT.equals(text)){
+            return null;
+        }
+        String[] toks = text.split("\\|");
+        int[] out = new int[toks.length];
+        for(int i = 0; i < toks.length; i++){
+            out[i] = Integer.parseInt(toks[i]);
         }
         return out;
     }
-    public static char[] copyNonNull( char[] arr ){
-        int i = 0;
-        for( char c : arr ){
-            if( c != '\0' ){
-                i ++;
-            }
+
+    public static String join(String delimiter, Object[] objects){
+        String[] out = new String[objects.length];
+        for(int i = 0; i < objects.length; i++){
+            out[i] = objects[i].toString();
         }
-        char[] out = new char[i];
-        i = 0;
-        for( char c : arr ){
-            if( c != '\0' ){
-                out[i] = c;
-                i ++;
-            }
-        }
-        return out;
+        return String.join(delimiter, out);
     }
-    
-    public static Result equals(CharSequence[] A, CharSequence[] B){
-        final int len = A.length;
-        if(A.length != B.length){
-            return new Result(){
-                @Override
-                public boolean success(){
-                    return false;
-                }
-                @Override
-                public int intVal(){
-                    return -1;
-                }
-            };
+    public static String join(String delimiter, int[] objects){
+        String[] out = new String[objects.length];
+        for(int i = 0; i < objects.length; i++){
+            out[i] = String.valueOf(objects[i]);
         }
-        for(int i=0; i<A.length; i++){
-            System.out.println(A[i]+"=="+B[i]);
-            if(!A[i].equals(B[i])){
-                System.out.println("not equal");
-                final int failIndex = i;
-                return new Result(){
-                    @Override
-                    public boolean success(){
-                        return false;
-                    }
-                    @Override
-                    public int intVal(){
-                        return failIndex;
-                    }
-                };
-            }
-        }
-        return new Result(){
-            public int val = len;
-            @Override
-            public boolean success(){
-                return true;
-            }
-            @Override
-            public int intVal(){
-                return len;
-            }
-        };
-    }
-    public static boolean equals(CharSequence[] A, CharSequence[] B, boolean verbose){
-        if(A.length != B.length){
-            System.out.printf("bad length: %d, %d\n",A.length, B.length);
-            return false;
-        }
-        for(int i=0; i<A.length; i++){
-            System.out.println(A[i]+"=="+B[i]);
-            if(!A[i].equals(B[i])){
-                System.out.println("not equal");
-                return false;
-            }
-        }
-        return true;
+        return String.join(delimiter, out);
     }
     public static int indexOf( String needle, String[] haystack ){
         for(int i=0; i<haystack.length; i++){
@@ -196,9 +145,42 @@ public class Commons {
         }
         return nu;
     }
-    
+    public static String[] copyNonNull( String[] arr ){
+        int i = 0;
+        for( String str : arr ){
+            if( str != null ){
+                i ++;
+            }
+        }
+        String[] out = new String[i];
+        i = 0;
+        for( String str : arr ){
+            if( str != null ){
+                out[i] = str;
+                i ++;
+            }
+        }
+        return out;
+    }
+    public static char[] copyNonNull( char[] arr ){
+        int i = 0;
+        for( char c : arr ){
+            if( c != '\0' ){
+                i ++;
+            }
+        }
+        char[] out = new char[i];
+        i = 0;
+        for( char c : arr ){
+            if( c != '\0' ){
+                out[i] = c;
+                i ++;
+            }
+        }
+        return out;
+    }
     public static <T> void disp( ArrayList<T> arr ){
-        disp(arr, "generic array");
+        disp(arr, "generic array list");
     }
     public static <T> void disp( ArrayList<T> arr, String label ){
         if( arr==null || arr.isEmpty() ){
@@ -213,7 +195,7 @@ public class Commons {
     }
     // For Strings or Objects
     public static <T> void disp( T[] arr ){
-        disp(arr, "");
+        disp(arr, "generic array");
     }
     public static <T> void disp( T[] arr, String label ){
         if( arr==null || arr.length==0 ){
@@ -257,9 +239,6 @@ public class Commons {
     }
     public static int boolInt(boolean bool){// Java can't cast bool to int
         return bool? 1 : 0;
-    }
-    public static String objStr(Object obj){//safe toString() for nullable object
-        return(obj==null)? "" : obj.toString();
     }
 
     public static String assertFileExt( String f, String ext ){

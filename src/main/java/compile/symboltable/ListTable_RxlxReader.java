@@ -1,10 +1,7 @@
 package compile.symboltable;
 
-import compile.basics.Factory_Node;
+import compile.basics.*;
 import compile.basics.Factory_Node.ScanNode;
-import compile.basics.IParseItem;
-import compile.basics.Keywords;
-import compile.basics.RxlxReader;
 import compile.parse.Base_ParseItem;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
@@ -13,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.CMD.*;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.DATATYPE.*;
@@ -89,8 +86,17 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
             }
         }
         if(!scanNodes.isEmpty()){
-            Factory_Node.persist(Keywords.listTableFileName(), scanNodes, "Defines lists, categories and items");
+            nodeFactory.persist(listTableFileName(), scanNodes, "Defines lists, categories and items");
         }
+    }
+
+    public static String listTableFileName(){
+        return String.format(
+                "%s_%s%s",
+                CompileInitializer.getInstance().getInName(),
+                ListTable.class.getSimpleName(),
+                Keywords.INTERIM_FILE_EXTENSION
+        );
     }
 
     public static class SymbolTableNode extends Base_ParseItem{

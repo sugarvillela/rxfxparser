@@ -2,7 +2,7 @@ package compile.sublang.ut;
 
 import commons.RangeUtil;
 import compile.basics.Keywords;
-import compile.basics.RxFxTreeFactory;
+import compile.sublang.factories.TreeFactory;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -13,25 +13,24 @@ import static compile.basics.Keywords.DATATYPE.RX;
 import static compile.basics.Keywords.USERDEF_OPEN;
 
 public abstract class ParamUtil {
-
+    protected static final int MAX = 1024;
     protected final RangeUtil rangeUtil;
-    protected int pari;
     protected ListTable listTable;
-    protected Keywords.DATATYPE listSource;
     protected String mainText, bracketText;
-    protected Keywords.PRIM outType;
+    protected String uDefCategory;          // null unless text describes a list item
+    protected Keywords.DATATYPE listSource; // null unless text describes a list item
+    protected int intValues[];
     protected Matcher matcher;
-    protected int low, high;
 
     protected ParamUtil(){
         rangeUtil = new RangeUtil();
     }
 
     public static ParamUtil getParamUtil(Keywords.DATATYPE datatype){
-        return (RX.equals(datatype))? RxParamUtil.getInstance() : FxParamUtil.getInstance();
+        return (RX.equals(datatype))? ParamUtilRx.getInstance() : ParamUtilFx.getInstance();
     }
 
-    public abstract void findAndSetParam(RxFxTreeFactory.TreeNode leaf, String text);
+    public abstract void findAndSetParam(TreeFactory.TreeNode leaf, String text);
 
     public final String getMainText(){
         return mainText;
@@ -41,16 +40,10 @@ public abstract class ParamUtil {
         return bracketText;
     }
 
-    public final Keywords.PRIM getOutType(){
-        return outType;
+    public int[] getIntValues() {
+        return intValues;
     }
 
-    public final int getRangeLow(){
-        return low;
-    }
-    public final int getRangeHigh(){
-        return high;
-    }
     public final String makeUserDef(String text){
         return (text == null)? "" :
                 (text.startsWith(USERDEF_OPEN))? text : USERDEF_OPEN + text;
@@ -59,12 +52,14 @@ public abstract class ParamUtil {
         return (text == null)? "" :
                 (text.startsWith(USERDEF_OPEN))? text.substring(USERDEF_OPEN.length()) : text;
     }
-    protected final String readConstant(){
-        String read = ConstantTable.getInstance().readConstant(bracketText);
+
+    /** Expects funName(parameter) to be split: mainText = funName, bracketText = parameter
+     * @return rebuilt function call with constant decoded */
+    protected final String readConstant(String mainText_, String bracketText_){
+        String read = ConstantTable.getInstance().readConstant(bracketText_);
         if(read == null){
-            Erlog.get(this).set("Undefined constant", bracketText);
+            Erlog.get(this).set("Undefined constant", bracketText_);
         }
-        System.out.println("param="+ bracketText + ", read="+read);
-        return String.format("%s(%s)", mainText, read);
+        return String.format("%s(%s)", mainText_, read);
     }
 }

@@ -4,19 +4,20 @@ import compile.basics.Keywords;
 import compile.basics.Keywords.RX_FUN;
 import compile.sublang.factories.PayNodes;
 import erlog.Erlog;
+import interfaces.DataNode;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import static compile.basics.Keywords.PRIM.NULL;
 
-public class RxValidator {
-    private static RxValidator instance;
+public class ValidatorRx {
+    private static ValidatorRx instance;
     
-    private RxValidator(){}
+    private ValidatorRx(){}
     
-    public static RxValidator getInstance(){
-        return (instance == null)? (instance = new RxValidator()) : instance;
+    public static ValidatorRx getInstance(){
+        return (instance == null)? (instance = new ValidatorRx()) : instance;
     } 
 
     private final Pattern DUP_SYMBOLS = Pattern.compile(".*(&&|\\|\\||==|~~).*");
@@ -49,8 +50,8 @@ public class RxValidator {
         }
         return good;
     }
-    public boolean assertValidParam(RX_FUN fun, Keywords.PAR givenParam){
-        for(Keywords.PAR testParam: fun.parTypes){
+    public boolean assertValidParam(RX_FUN fun, Keywords.RX_PAR givenParam){
+        for(Keywords.RX_PAR testParam: fun.parTypes){
             if(testParam.equals(givenParam)){
                 return true;
             }
@@ -62,9 +63,9 @@ public class RxValidator {
         return false;
     }
     public boolean assertValidOperation(
-            ArrayList<PayNodes.PayNode> leftNodes,
+            ArrayList<DataNode> leftNodes,
             Keywords.OP op,
-            ArrayList<PayNodes.PayNode> rightNodes
+            ArrayList<DataNode> rightNodes
     ){
         return assertValidTest(
                 assertValidChain(leftNodes),
@@ -72,9 +73,9 @@ public class RxValidator {
                 assertValidChain(rightNodes)
         );
     }
-    public Keywords.PRIM assertValidChain(ArrayList<PayNodes.PayNode> nodes){
+    public Keywords.PRIM assertValidChain(ArrayList<DataNode> nodes){
         Keywords.PRIM last = NULL;
-        for(PayNodes.PayNode payNode : nodes){
+        for(DataNode payNode : nodes){
             PayNodes.RxPayNode rxPayNode = (PayNodes.RxPayNode) payNode;
             if(last != rxPayNode.callerType){
                 Erlog.get(this).set(

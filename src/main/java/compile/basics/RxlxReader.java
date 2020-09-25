@@ -11,12 +11,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class RxlxReader extends Base_Stack{
+    protected final Factory_Node nodeFactory;
+
+
     protected ScanNodeSource fin;
     private Base_Stack otherParseStack;
     private ITextStatus otherStatusReporter;
 
     public RxlxReader(ScanNodeSource fin){
         this.fin = fin;
+        this.nodeFactory = Factory_Node.getInstance();
     }
 
     protected abstract Base_ParseItem get(Factory_Node.ScanNode node);

@@ -2,6 +2,7 @@ package compile.scan;
 
 import compile.basics.Base_Stack;
 import compile.basics.CompileInitializer;
+import compile.basics.Factory_Node;
 import toksource.Base_TextSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
@@ -13,11 +14,13 @@ import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 public class Base_Scanner  extends Base_Stack {
     protected final String inName;
     protected final Stack<Base_TextSource> fileStack;
+    protected final Factory_Node nodeFactory;
 
     public Base_Scanner(Base_TextSource fin) {
         this.inName = CompileInitializer.getInstance().getInName();
-        fileStack = new Stack<>();
+        this.fileStack = new Stack<>();
         this.fin = fin;
+        this.nodeFactory = Factory_Node.getInstance();
     }
 
     public void include(String fileName){

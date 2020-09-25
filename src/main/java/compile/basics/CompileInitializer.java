@@ -71,6 +71,7 @@ public class CompileInitializer implements ChangeListener {
         System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newEnumSet);
 
         this.addChangeListener(er);
+        this.addChangeListener(Factory_Node.getInstance());
         this.addChangeListener(SymbolTable.getInstance());
 
         PreScanner.init(
@@ -129,9 +130,6 @@ public class CompileInitializer implements ChangeListener {
     public void setWVal(int wval){ this.wval = wval; }
     public int  getWVal(){ return wval; }
     public boolean fitToWVal(String numeric){// validate numeric before calling here
-//        int n;
-//        try{ n = Integer.parseInt(numeric); }
-//        catch(Exception e){ return false; }
         int fit = (int)Math.pow(2, wval);
         return Integer.parseInt(numeric) < fit;
     }
@@ -179,14 +177,14 @@ public class CompileInitializer implements ChangeListener {
 
 
     private void deleteMe(){
-        ListTable.init(null);
-        ListTable listTable = ListTable.getInstance();
-        ArrayList<Factory_Node.ScanNode> nodes = new ArrayList<>();
-        nodes.add(Factory_Node.newScanNode("Line 16 Word 0,PUSH,ENUB,NULL,NULL"));
-        nodes.add(Factory_Node.newScanNode("Line 17 Word 0,SET_ATTRIB,ENUB,DEF_NAME,POS"));
-        nodes.add(Factory_Node.newScanNode("Line 18 Word 0,ADD_TO,ENUB,NULL,verb"));
-        nodes.add(Factory_Node.newScanNode("Line 21 Word 0,POP,ENUB,NULL,NULL"));
-        listTable.readList(nodes);
-        listTable.onQuit();
+//        ListTable.init(null);
+//        ListTable listTable = ListTable.getInstance();
+//        ArrayList<Factory_Node.ScanNode> nodes = new ArrayList<>();
+//        nodes.add(Factory_Node.newScanNode("Line 16 Word 0,PUSH,ENUB,NULL,NULL"));
+//        nodes.add(Factory_Node.newScanNode("Line 17 Word 0,SET_ATTRIB,ENUB,DEF_NAME,POS"));
+//        nodes.add(Factory_Node.newScanNode("Line 18 Word 0,ADD_TO,ENUB,NULL,verb"));
+//        nodes.add(Factory_Node.newScanNode("Line 21 Word 0,POP,ENUB,NULL,NULL"));
+//        listTable.readList(nodes);
+//        listTable.onQuit();
     }
 }

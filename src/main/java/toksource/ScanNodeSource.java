@@ -8,9 +8,8 @@ package toksource;
 import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.basics.Factory_Node.ScanNode;
-import static compile.basics.Factory_Node.ScanNode.NULL_TEXT;
+import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
-import static compile.basics.Keywords.DATATYPE.RX_BUILDER;
 
 import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
