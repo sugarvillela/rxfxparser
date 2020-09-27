@@ -1,5 +1,6 @@
 package toksource;
 
+import static compile.basics.Keywords.LOGGABLE_FORMAT;
 import static compile.basics.Keywords.STATUS_FORMAT;
 
 import interfaces.ILifeCycle;
@@ -41,6 +42,10 @@ public abstract class Base_TextSource implements ITextSource, ITextWordOrLine, I
     @Override
     public int getCol(){
         return -1;
+    }
+    @Override
+    public String loggableStatus(){
+        return String.format(LOGGABLE_FORMAT, this.getFileName(), this.getRow(), this.getCol());
     }
     @Override
     public String readableStatus(){

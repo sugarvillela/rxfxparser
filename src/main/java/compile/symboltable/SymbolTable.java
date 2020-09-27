@@ -261,7 +261,7 @@ public class SymbolTable implements ChangeListener {
             this.rewind();
             while(this.hasNext()){
                 String next = this.next();
-                System.out.printf("%s: %b, %s\n", this.readableStatus(), isEndLine(), next);
+                System.out.printf("%s: %b, %s\n", this.loggableStatus(), isEndLine(), next);
             }
         }
     }

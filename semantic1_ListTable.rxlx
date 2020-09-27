@@ -1,42 +1,42 @@
 # Generated file, do not edit
-# Last write: 09/24/2020 22:37:44
+# Last write: 09/26/2020 23:53:55
 # Defines lists, categories and items
-semantic1.rxfx line 21 word 0,PUSH,LIST_BOOLEAN,NULL,NULL
-semantic1.rxfx line 21 word 0,SET_ATTRIB,LIST_BOOLEAN,DEF_NAME,STATE
-semantic1.rxfx line 21 word 0,ADD_TO,LIST_BOOLEAN,NULL,MORE
-semantic1.rxfx line 21 word 0,POP,LIST_BOOLEAN,NULL,NULL
-semantic1.rxfx line 17 word 0,PUSH,LIST_BOOLEAN,NULL,NULL
-semantic1.rxfx line 17 word 0,SET_ATTRIB,LIST_BOOLEAN,DEF_NAME,POS
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,VERB
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,NOUN
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,ADJECTIVE
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,ADVERB
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,LINKING
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,ARTICLE
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,DETERMINER
-semantic1.rxfx line 17 word 0,ADD_TO,LIST_BOOLEAN,NULL,MODAL
-semantic1.rxfx line 17 word 0,POP,LIST_BOOLEAN,NULL,NULL
-semantic1.rxfx line 28 word 0,PUSH,LIST_NUMBER,NULL,NULL
-semantic1.rxfx line 28 word 0,SET_ATTRIB,LIST_NUMBER,DEF_NAME,INT
-semantic1.rxfx line 28 word 0,ADD_TO,LIST_NUMBER,NULL,NUM_VAL
-semantic1.rxfx line 28 word 0,ADD_TO,LIST_NUMBER,NULL,INDEX
-semantic1.rxfx line 28 word 0,ADD_TO,LIST_NUMBER,NULL,GROUP
-semantic1.rxfx line 28 word 0,ADD_TO,LIST_NUMBER,NULL,EE
-semantic1.rxfx line 28 word 0,POP,LIST_NUMBER,NULL,NULL
-semantic1.rxfx line 24 word 0,PUSH,LIST_STRING,NULL,NULL
-semantic1.rxfx line 24 word 0,SET_ATTRIB,LIST_STRING,DEF_NAME,TEXT
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,IN
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,ORIG
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,ALT
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,EXPAND1
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,EXPAND2
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,NAME
-semantic1.rxfx line 24 word 0,ADD_TO,LIST_STRING,NULL,SURNAME
-semantic1.rxfx line 24 word 0,POP,LIST_STRING,NULL,NULL
-semantic1.rxfx line 13 word 0,PUSH,LIST_DISCRETE,NULL,NULL
-semantic1.rxfx line 13 word 0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,SCOPES
-semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,sen
-semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,phrase
-semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,word
-semantic1.rxfx line 13 word 0,ADD_TO,LIST_DISCRETE,NULL,char
-semantic1.rxfx line 13 word 0,POP,LIST_DISCRETE,NULL,NULL
+semantic1.rxfx|24|0,PUSH,LIST_STRING,-,-
+semantic1.rxfx|24|0,SET_ATTRIB,LIST_STRING,DEF_NAME,TEXT
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,IN
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,ORIG
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,ALT
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,EXPAND1
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,EXPAND2
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,NAME
+semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,SURNAME
+semantic1.rxfx|24|0,POP,LIST_STRING,-,-
+semantic1.rxfx|13|0,PUSH,LIST_DISCRETE,-,-
+semantic1.rxfx|13|0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,SCOPES
+semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,sen
+semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,phrase
+semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,word
+semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,char
+semantic1.rxfx|13|0,POP,LIST_DISCRETE,-,-
+semantic1.rxfx|28|0,PUSH,LIST_NUMBER,-,-
+semantic1.rxfx|28|0,SET_ATTRIB,LIST_NUMBER,DEF_NAME,INT
+semantic1.rxfx|28|0,ADD_TO,LIST_NUMBER,-,NUM_VAL
+semantic1.rxfx|28|0,ADD_TO,LIST_NUMBER,-,INDEX
+semantic1.rxfx|28|0,ADD_TO,LIST_NUMBER,-,GROUP
+semantic1.rxfx|28|0,ADD_TO,LIST_NUMBER,-,EE
+semantic1.rxfx|28|0,POP,LIST_NUMBER,-,-
+semantic1.rxfx|21|0,PUSH,LIST_BOOLEAN,-,-
+semantic1.rxfx|21|0,SET_ATTRIB,LIST_BOOLEAN,DEF_NAME,STATE
+semantic1.rxfx|21|0,ADD_TO,LIST_BOOLEAN,-,MORE
+semantic1.rxfx|21|0,POP,LIST_BOOLEAN,-,-
+semantic1.rxfx|17|0,PUSH,LIST_BOOLEAN,-,-
+semantic1.rxfx|17|0,SET_ATTRIB,LIST_BOOLEAN,DEF_NAME,POS
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,VERB
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,NOUN
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,ADJECTIVE
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,ADVERB
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,LINKING
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,ARTICLE
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,DETERMINER
+semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,MODAL
+semantic1.rxfx|17|0,POP,LIST_BOOLEAN,-,-

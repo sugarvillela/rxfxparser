@@ -1,11 +1,9 @@
 package compile.sublang;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords;
 import compile.sublang.factories.PayNodes;
 import compile.sublang.factories.TreeFactory;
-import compile.sublang.ut.ParamUtilFx;
-import compile.sublang.ut.ParamUtil;
+import compile.sublang.ut.FxAccessUtil;
+import compile.sublang.ut.FxFunUtil;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -20,7 +18,8 @@ import static compile.basics.Keywords.OP.*;
 public class FxLogicTree  extends TreeFactory {
     private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     protected static final Tokens_special dotTokenizer = new Tokens_special(".", "'", TK.IGNORESKIP );
-    private static final ParamUtilFx PARAM_UTIL = (ParamUtilFx) ParamUtil.getParamUtil(FX);
+    private static final FxAccessUtil ACCESS_UTIL = FxAccessUtil.getInstance();
+    private static final FxFunUtil FUN_UTIL = FxFunUtil.getInstance();
 
     private static FxLogicTree instance;
 
@@ -72,13 +71,18 @@ public class FxLogicTree  extends TreeFactory {
             System.out.println();
             System.out.println("=======> setPayNodes: " + leaf.data);
             tok = dotTokenizer.toArr(leaf.data);
+            if(tok.length == 2){
+                factory.clear();
+                ACCESS_UTIL.findAndSetParam(leaf, tok[0]);
+                factory.addPayNode();
 
-            for(int i = 0; i < tok.length; i++){
-                PARAM_UTIL.findAndSetParam(leaf, tok[i]);
-                factory.addPayNode(tok[i]);
+                FUN_UTIL.findAndSetParam(leaf, tok[1]);
+                factory.addPayNode();
+                leaf.payNodes = factory.getPayNodes();
             }
-            leaf.payNodes = factory.getPayNodes();
-            factory.clear();
+            else{
+                Erlog.get(this).set("FX language requires 'Access Operator' followed by 'Function'", leaf.data);
+            }
         }
     }
 }

@@ -78,9 +78,10 @@ public class ValidatorRx {
         for(DataNode payNode : nodes){
             PayNodes.RxPayNode rxPayNode = (PayNodes.RxPayNode) payNode;
             if(last != rxPayNode.callerType){
+                String identifier = (rxPayNode.funType == null)? rxPayNode.item : rxPayNode.funType.toString();
                 Erlog.get(this).set(
                         String.format("Expected %s input to %s, found %s",
-                                rxPayNode.callerType.toString(), rxPayNode.mainText, last.toString())
+                                rxPayNode.callerType.toString(), identifier, last.toString())
                 );
             }
             last = rxPayNode.outType;

@@ -9,13 +9,13 @@ import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.PRIM.*;
 import static compile.basics.Keywords.RX_PAR.*;
 
-public class ParamUtilRx extends ParamUtil{
-    private static ParamUtilRx instance;
+public class RxParamUtil extends ParamUtil{
+    private static RxParamUtil instance;
 
-    private ParamUtilRx(){}
+    private RxParamUtil(){}
 
-    public static ParamUtilRx getInstance(){
-        return (instance == null)? (instance = new ParamUtilRx()): instance;
+    public static RxParamUtil getInstance(){
+        return (instance == null)? (instance = new RxParamUtil()): instance;
     }
 
     //private final Keywords.RX_PAR[] parTypes;
@@ -45,6 +45,7 @@ public class ParamUtilRx extends ParamUtil{
         outType = null;
         funType = null;
         bracketText = null;
+        item = null;
         uDefCategory = null;
         listSource = null;
         intValues = null;
@@ -135,6 +136,8 @@ public class ParamUtilRx extends ParamUtil{
                     default:
                         Erlog.get(this).set("Developer", mainText);
                 }
+                mainText = null;
+                bracketText = null;
                 return;
             }
         }
@@ -142,13 +145,12 @@ public class ParamUtilRx extends ParamUtil{
     }
 
     private void setTypesFromFun(){
-        Keywords.RX_FUN tempFunType = Keywords.RX_FUN.fromString(mainText);
-        if(tempFunType == null){
+        funType = Keywords.RX_FUN.fromString(mainText);
+        if(funType == null){
             Erlog.get(this).set( "Invalid RX Function name", mainText);
         }
         else{
-            mainText = String.format("$%s(%s)", mainText, bracketText);
-            funType = tempFunType;
+            //mainText = String.format("$%s(%s)", mainText, bracketText);
             callerType = funType.caller;
             outType = funType.outType;
         }
@@ -157,34 +159,34 @@ public class ParamUtilRx extends ParamUtil{
     private void setTypesFromItem(){// error or assume?
         String category = makeNotUserDef(mainText.substring(0, mainText.length() - bracketText.length() -2));
         if(category.equals(listTable.getCategory(bracketText))){
+            item = bracketText;
             uDefCategory = category;
             listSource = listTable.getDataType(uDefCategory);
             outType = listSource.outType;
         }
         else{
             Erlog.get(this).set(bracketText + " not an item in " + mainText, mainText + "[" + bracketText + "]");
-            fixParamType(TEST_TEXT);
-            outType = TEST_TEXT.datatype.outType;
+//            fixParamType(TEST_TEXT);
+//            outType = TEST_TEXT.datatype.outType;
         }
     }
 
     private void setTypesFromText(){
-        String category = listTable.getCategory(mainText);
+        String tempCategory = listTable.getCategory(mainText);
         Keywords.DATATYPE tempListSource;
         if(
-            category != null &&
-            (tempListSource = listTable.getDataType(category)) != RAW_TEXT
+            tempCategory != null &&
+            (tempListSource = listTable.getDataType(tempCategory)) != RAW_TEXT
         ){
             fixParamType(CATEGORY_ITEM);
-            bracketText = mainText;
-            mainText = String.format("$%s[%s]", category, bracketText);
+            item = mainText;
+            //mainText = String.format("$%s[%s]", category, bracketText);
+            uDefCategory = tempCategory;
             listSource = tempListSource;
             outType = listSource.outType;
         }
         else{
-            fixParamType(TEST_TEXT);
-            bracketText = null;
-            //System.out.println("setOutTypeFromText... "+mainText+"=text, par="+TEST_TEXT);
+            item = mainText;
             outType = RAW_TEXT.outType;
         }
     }

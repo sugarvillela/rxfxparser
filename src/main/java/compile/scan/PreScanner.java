@@ -76,7 +76,7 @@ public class PreScanner extends Base_Scanner {
                 System.out.println("stack empty");
                 break;
             }
-            System.out.println("not empty: "+fin.readableStatus());
+            //System.out.println("not empty: "+fin.loggableStatus());
             //System.exit(0);
         }
         pop();

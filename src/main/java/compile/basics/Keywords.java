@@ -20,9 +20,10 @@ public final class Keywords {
     public static final String SOURCE_FILE_EXTENSION = ".rxfx";
     public static final String INTERIM_FILE_EXTENSION = ".rxlx";
 
+    public static final String LOGGABLE_FORMAT = "%s|%d|%d";            // file name, line, word
     public static final String STATUS_FORMAT = "%s line %d word %d";    // file name, line, word
     public static final String DEFAULT_FIELD_FORMAT = "$%s[%s]";        // category[item]
-    public static final String NULL_TEXT = "NULL";                      // nullSafe string output when a member is null
+    public static final String NULL_TEXT = "-";                      // nullSafe string output when a member is null
 
     // String constants for switches: defines language behavior
 
@@ -346,34 +347,52 @@ public final class Keywords {
             return null;
         }
     }
-
-    public enum FX_PAR {
-//        ACCESS_ERR          (FX_DATATYPE.FX_ERR,      Pattern.compile("^\\[([0-9]+[-][0-9]+)\\]$")),
-//        FUN_ERR             (FX_DATATYPE.FX_ERR,      Pattern.compile("^.+\\(([0-9]+[:][0-9])\\)$")),
+    public enum FX_ACCESS{
         ACCESS_ALL          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^(\\[\\])|(\\[[<][>]\\])|(\\[[-]\\])$")),
         ACCESS_BOT          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[<][<]\\]$")),
         ACCESS_TOP          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[>][>]\\]$")),
 
         ACCESS_NUM          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)\\]$")),
-//        ACCESS_NEG          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([-][0-9]+)\\]$")),
+        //        ACCESS_NEG          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([-][0-9]+)\\]$")),
         ACCESS_BEFORE       (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[<][<]([0-9]+)\\]$")),
         ACCESS_AFTER        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[>][>]([0-9]+)\\]$")),
 
         ACCESS_BELOW        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[-]([0-9]+)\\]$")),
         ACCESS_ABOVE        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)[-]\\]$")),
         ACCESS_RANGE        (FX_DATATYPE.ACCESSOR_R,  Pattern.compile("^\\[([0-9]+[-][0-9]+)\\]$")),
+        ;
 
+        public final FX_DATATYPE datatype;
+        public final Pattern pattern;
+
+        private FX_ACCESS(FX_DATATYPE datatype, Pattern pattern){
+            this.datatype = datatype;
+            this.pattern = pattern;
+        }
+        public static FX_ACCESS fromString(String text ){
+            for(FX_ACCESS a : values()){
+                if(a.toString().equals(text)){
+                    return a;
+                }
+            }
+            return null;
+        }
+    }
+    public enum FX_PAR {
         FUN_CONST           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$][A-Za-z0-9_]+)\\)$")),
         FUN_EMPTY           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(()\\)$")),
         FUN_NUM             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)\\)$")),
+        FUN_NUM_MULTI       (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([0-9]+[,])+[0-9]+)\\)$")),
         FUN_RANGE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+[-][0-9])\\)$")),
         FUN_BELOW           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
         FUN_ABOVE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
         FUN_ALL             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([<][>])\\)$")),
         FUN_BOT             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([<][<])\\)$")),
         FUN_TOP             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([>][>])\\)$")),
-        FUN_AL_NUM          (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([A-Za-z0-9_]+)\\)$")),
-        FUN_MULTI           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([A-Za-z0-9_]+[,]\\s*)+[A-Za-z0-9_]+)\\)$")),
+        FUN_AL_NUM          (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([']?[A-Za-z][A-Za-z0-9_]*[']?)\\)$")),
+        FUN_AL_NUM_Q        (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\([']([A-Za-z][A-Za-z0-9_]*)[']\\)$")),
+        FUN_MULTI           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)\\)$")),
+        FUN_MULTI_Q         (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(['](([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)[']\\)$")),
         FUN_CAT             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$")),
         FUN_CAT_MULTI       (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\][,]\\s*)+[$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$"))
 
@@ -386,15 +405,6 @@ public final class Keywords {
             this.datatype = datatype;
             this.pattern = pattern;
         }
-
-        public static FX_PAR fromInt(int i){
-            for(FX_PAR p : values()){
-                if(p.ordinal() == i){
-                    return p;
-                }
-            }
-            return null;
-        }
         public static FX_PAR fromString(String text ){
             for(FX_PAR p : values()){
                 if(p.toString().equals(text)){
@@ -406,16 +416,15 @@ public final class Keywords {
     }
 
     public enum FX_FUN {
-        VOT     (new FX_PAR[]{FUN_CAT, FUN_MULTI}),
+        VOTE    (new FX_PAR[]{FUN_CAT, FUN_MULTI}),
         SET     (new FX_PAR[]{FUN_EMPTY}),
-        DRP     (new FX_PAR[]{FUN_EMPTY}),
+        DROP    (new FX_PAR[]{FUN_EMPTY}),
         CON     (new FX_PAR[]{FUN_EMPTY}),
-        CON_    (new FX_PAR[]{FUN_EMPTY}),
-        DEL     (new FX_PAR[]{FUN_EMPTY}),
-        MAR     (new FX_PAR[]{FUN_EMPTY}),
+        REMOVE  (new FX_PAR[]{FUN_EMPTY}),
+        MARK    (new FX_PAR[]{FUN_EMPTY}),
         RUN     (new FX_PAR[]{FUN_EMPTY}),
-        CPY     (new FX_PAR[]{FUN_EMPTY}),
-        SWP     (new FX_PAR[]{FUN_EMPTY})
+        COPY    (new FX_PAR[]{FUN_EMPTY}),
+        SWAP    (new FX_PAR[]{FUN_EMPTY})
         ;
 
         public final FX_PAR[] parTypes;

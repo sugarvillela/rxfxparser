@@ -1,7 +1,6 @@
 
 package compile.scan;
 
-import compile.basics.Factory_Node;
 import compile.basics.Keywords.DATATYPE;
 import compile.basics.CompileInitializer;
 
@@ -78,7 +77,7 @@ public class Class_Scanner extends Base_Scanner {
                 System.out.println("stack empty");
                 break;
             }
-            System.out.println("not empty: "+fin.readableStatus());
+            //System.out.println("not empty: "+fin.loggableStatus());
             //System.exit(0);
         }
 

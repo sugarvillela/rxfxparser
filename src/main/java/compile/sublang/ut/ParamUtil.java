@@ -17,7 +17,7 @@ public abstract class ParamUtil {
     protected final RangeUtil rangeUtil;
     protected ListTable listTable;
     protected String mainText, bracketText;
-    protected String uDefCategory;          // null unless text describes a list item
+    protected String uDefCategory, item;    // null unless text describes a list item
     protected Keywords.DATATYPE listSource; // null unless text describes a list item
     protected int intValues[];
     protected Matcher matcher;
@@ -26,18 +26,18 @@ public abstract class ParamUtil {
         rangeUtil = new RangeUtil();
     }
 
-    public static ParamUtil getParamUtil(Keywords.DATATYPE datatype){
-        return (RX.equals(datatype))? ParamUtilRx.getInstance() : ParamUtilFx.getInstance();
-    }
-
     public abstract void findAndSetParam(TreeFactory.TreeNode leaf, String text);
 
-    public final String getMainText(){
-        return mainText;
-    }
+//    public final String getMainText(){
+//        return mainText;
+//    }
+//
+//    public final String getBracketText(){
+//        return bracketText;
+//    }
 
-    public final String getBracketText(){
-        return bracketText;
+    public String getItem(){
+        return item;
     }
 
     public int[] getIntValues() {

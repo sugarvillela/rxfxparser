@@ -11,21 +11,17 @@ import toktools.Tokens_special;
 import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.FX_PAR.FUN_CAT;
 import static compile.basics.Keywords.FX_PAR.FUN_CAT_MULTI;
-import static compile.basics.Keywords.OP.SQUOTE;
-import static compile.basics.Keywords.PRIM.NULL;
-import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
-import static compile.basics.Keywords.RX_PAR.TEST_TEXT;
 
-public class ParamUtilFx extends ParamUtil{
-    private static ParamUtilFx instance;
+public class FxFunUtil extends ParamUtil{
+    private static FxFunUtil instance;
 
-    private ParamUtilFx(){
+    private FxFunUtil(){
 
         commaTokenizer = new Tokens_special(",", "'", TK.IGNORESKIP );
     }
 
-    public static ParamUtilFx getInstance(){
-        return (instance == null)? (instance = new ParamUtilFx()): instance;
+    public static FxFunUtil getInstance(){
+        return (instance == null)? (instance = new FxFunUtil()): instance;
     }
 
     private final Tokens_special commaTokenizer;
@@ -64,6 +60,7 @@ public class ParamUtilFx extends ParamUtil{
         return items;
     }
 
+    @Override
     public void findAndSetParam(TreeFactory.TreeNode leaf, String text){
         listTable = ListTable.getInstance();
         mainText = text;
@@ -76,119 +73,94 @@ public class ParamUtilFx extends ParamUtil{
     private void identifyPattern(){
         Keywords.FX_PAR[] parTypes = Keywords.FX_PAR.values();
         for(int pari = 0; pari < parTypes.length; pari++){
-
             matcher = parTypes[pari].pattern.matcher(mainText);
             if(matcher.find()){
-                //int n = 0;
                 paramType = parTypes[pari];
                 System.out.println("identifyPattern: paramType:" + paramType);
                 System.out.println("                  datatype:" + paramType.datatype);
-                switch(paramType.datatype){
-                    case ACCESSOR_C:
+                bracketText = matcher.replaceAll("$1");
+                setFunType();
+
+                switch(paramType){
+                    case FUN_EMPTY:
+                    case FUN_ALL:
+                    case FUN_BOT:
+                    case FUN_TOP:
                         break;
-                    case ACCESSOR_N:
-                        bracketText = matcher.replaceAll("$1"); // don't need main text
+                    case FUN_CONST: // Constant
+                        mainText = readConstant(mainText, bracketText);
+                        identifyPattern();
+                        return;
+                    case FUN_NUM:
                         intValues = new int[]{Integer.parseInt(bracketText)};
                         break;
-                    case ACCESSOR_R:
-                        bracketText = matcher.replaceAll("$1"); // don't need main text
-                        System.out.println("ACCESSOR_R: bracketText=" + bracketText);
+                    case FUN_NUM_MULTI:
+                        funNumMulti();
+                        bracketText = null;
+                        break;
+                    case FUN_BELOW:
+                        intValues = new int[]{0, Integer.parseInt(bracketText)};
+                        break;
+                    case FUN_ABOVE:
+                        intValues = new int[]{Integer.parseInt(bracketText), MAX};
+                        break;
+                    case FUN_RANGE:
                         rangeUtil.rangeToInt("-", bracketText);
                         intValues = new int[]{rangeUtil.getLow(), rangeUtil.getHigh()};
                         if(intValues[0] >= intValues[1]){
                             Erlog.get(this).set("Expected range in ascending order", bracketText);
                         }
                         break;
-                    case MUTATOR:
-                        bracketText = matcher.replaceAll("$1");
-                        mainText = mainText.substring(0, mainText.length() - bracketText.length() -2);
-                        funType = Keywords.FX_FUN.fromString(mainText);
-                        if(funType == null){
-                            Erlog.get(this).set("Unknown FX function", mainText);
+                    case FUN_AL_NUM:
+                        items = new String[]{bracketText};
+                        if(isListItem(bracketText)){
+                            uDefCategories = new String[]{uDefCategory};
+                            listSources = new Keywords.DATATYPE[]{listSource};
+                            fixParamType(FUN_CAT);
                         }
-                        switch(paramType){
-                            case FUN_EMPTY:
-                            case FUN_ALL:
-                            case FUN_BOT:
-                            case FUN_TOP:
-                                bracketText = null;
-                                break;
-                            case FUN_CONST: // Constant
-                                mainText = readConstant(mainText, bracketText);
-                                identifyPattern();
-                                return;
-                            case FUN_NUM:
-                                intValues = new int[]{Integer.parseInt(bracketText)};
-                                break;
-                            case FUN_BELOW:
-                                intValues = new int[]{0, Integer.parseInt(bracketText)};
-                                break;
-                            case FUN_ABOVE:
-                                intValues = new int[]{Integer.parseInt(bracketText), MAX};
-                                break;
-                            case FUN_RANGE:
-                                rangeUtil.rangeToInt("-", bracketText);
-                                intValues = new int[]{rangeUtil.getLow(), rangeUtil.getHigh()};
-                                if(intValues[0] >= intValues[1]){
-                                    Erlog.get(this).set("Expected range in ascending order", bracketText);
-                                }
-                                break;
-                            case FUN_AL_NUM:
-                                if(isListItem(bracketText)){
-                                    items = new String[]{bracketText};
-                                    uDefCategories = new String[]{uDefCategory};
-                                    listSources = new Keywords.DATATYPE[]{listSource};
-                                    fixParamType(FUN_CAT);
-                                }
-                                break;
-                            case FUN_MULTI:
-                                funMulti();
-                                break;
-                            case FUN_CAT:
-                                items = new String[]{bracketText};
-                                uDefCategories = new String[1];
-                                listSources = new Keywords.DATATYPE[1];
-                                funCat(bracketText, 0);
-                                Commons.disp(items, "FUN_CAT items");
-                                Commons.disp(uDefCategories, "FUN_CAT uDefCategories");
-                                Commons.disp(listSources, "FUN_CAT listSources");
-                                break;
-                            case FUN_CAT_MULTI:
-                                funCatMulti();
-                                bracketText = null; // can't have commas
-                                break;
-                            default:
-                                Erlog.get(this).set("Developer", mainText);
-                        }
+                        break;
+                    case FUN_AL_NUM_Q:
+                        items = new String[]{bracketText};
+                        break;
+                    case FUN_MULTI:
+                        funMulti();
+                        break;
+                    case FUN_MULTI_Q:
+                        items = commaTokenizer.toArr(bracketText);
+                        break;
+                    case FUN_CAT:
+                        items = new String[]{bracketText};
+                        uDefCategories = new String[1];
+                        listSources = new Keywords.DATATYPE[1];
+                        funCat(bracketText, 0);
+                        break;
+                    case FUN_CAT_MULTI:
+                        funCatMulti();
                         break;
                     default:
-                        Erlog.get(this).set("Syntax error", mainText);
-                        break;
+                        Erlog.get(this).set("Developer", mainText);
                 }
-//                if(bracketText != null && bracketText.isEmpty()){
-//                    bracketText = null;
-//                }
+                mainText = null; // don't need these
+                bracketText = null; // don't need these
                 return;
             }
         }
         Erlog.get(this).set("Syntax error", mainText);
     }
 
-    private boolean isQuoted(String bracketText_){
-        int len = bracketText_.length(), count = 0;
-        char q = '\'';
-        if(bracketText_.charAt(0) != q || bracketText_.charAt(len - 1) != q){
-            return false;
+    private void setFunType(){
+        String[] tok = mainText.split("\\(");
+        funType = Keywords.FX_FUN.fromString(tok[0]);
+        if(funType == null){
+            Erlog.get(this).set("Unknown FX function", mainText);
         }
-        for(int i = 0; i<len; i++){
-            if(bracketText_.charAt(i) == q){
-                count++;
-            }
+    }
+    private void funNumMulti(){
+        String[] tok = bracketText.split(",");
+        intValues = new int[tok.length];
+        for(int i = 0; i < tok.length; i++){
+            intValues[i] = Integer.parseInt(tok[i]);
         }
-        if(count != 2){
-            return false;
-        }
-        return true;
     }
     private boolean isListItem(String bracketText_){
         uDefCategory = listTable.getCategory(bracketText_);
@@ -216,7 +188,9 @@ public class ParamUtilFx extends ParamUtil{
             }
             fixParamType(FUN_CAT_MULTI);
         }
-        Commons.disp(items, "funMulti");
+        Commons.disp(items, "funMulti items");
+        Commons.disp(uDefCategories, "funMulti uDefCategories");
+        Commons.disp(listSources, "funMulti listSources");
     }
     private void funCat(String text, int i){
         String category, item;

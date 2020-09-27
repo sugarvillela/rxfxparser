@@ -1,8 +1,6 @@
 package compile.sublang;
 
-import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.FIELD.VAL;
 import static compile.basics.Keywords.OP.*;
 import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
 
@@ -14,12 +12,11 @@ import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.sublang.factories.PayNodes;
 import compile.sublang.ut.ParamUtil;
-import compile.sublang.ut.ParamUtilRx;
+import compile.sublang.ut.RxParamUtil;
 import compile.sublang.ut.ValidatorRx;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
-import interfaces.DataNode;
 import toksource.ScanNodeSource;
 import toksource.TextSource_list;
 import toktools.TK;
@@ -28,7 +25,7 @@ import toktools.Tokens_special;
 public class RxLogicTree extends TreeFactory {
     protected static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     protected static final Tokens_special dotTokenizer = new Tokens_special(".", "'", TK.IGNORESKIP );
-    private static final ParamUtilRx PARAM_UTIL = (ParamUtilRx) ParamUtil.getParamUtil(RX);
+    private static final RxParamUtil PARAM_UTIL = RxParamUtil.getInstance();
     private static TreeFactory instance;
     
     public static TreeFactory getInstance(){
@@ -179,8 +176,8 @@ public class RxLogicTree extends TreeFactory {
 
         if(CATEGORY_ITEM.equals(PARAM_UTIL.getParamType())){
             leaf.data = String.format("%s[%s]",
-                    PARAM_UTIL.getMainText(),
-                    PARAM_UTIL.getBracketText()
+                    PARAM_UTIL.getUDefCategory(),
+                    PARAM_UTIL.getItem()
             );
         }
         switch(PARAM_UTIL.getOutType()){
@@ -203,13 +200,13 @@ public class RxLogicTree extends TreeFactory {
 
         for(TreeNode leaf : leaves){
             tok = dotTokenizer.toArr(leaf.data);
-
+            factory.clear();
             for(int i = 0; i < tok.length; i++){
                 PARAM_UTIL.findAndSetParam(leaf, tok[i]);
-                factory.addPayNode(tok[i]);
+                factory.addPayNode();
             }
             leaf.payNodes = factory.getPayNodes();
-            factory.clear();
+
         }
     }
     private void validateOperations(ArrayList<TreeNode> leaves){

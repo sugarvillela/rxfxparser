@@ -141,7 +141,7 @@ class ErlogCore {//package private class
         protected String errText( String text, String className ){
             return String.format(
                 "Error: %s: %s: %s",
-                textStatus.readableStatus(), 
+                textStatus.readableStatus(),
                 className,
                 text
             );

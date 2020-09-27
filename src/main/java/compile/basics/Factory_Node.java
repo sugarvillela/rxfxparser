@@ -36,16 +36,16 @@ public class Factory_Node implements ChangeListener {
     /* factory access for scan node */
 
     public ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, String setData){
-        return new ScanNode(textStatus.readableStatus(), setCommand, setDatatype, null, setData);
+        return new ScanNode(textStatus.loggableStatus(), setCommand, setDatatype, null, setData);
     }
     public ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord, String setData){
-        return new ScanNode(textStatus.readableStatus(), setCommand, setDatatype, setKWord, setData);
+        return new ScanNode(textStatus.loggableStatus(), setCommand, setDatatype, setKWord, setData);
     }
     public ScanNode newPushNode(Keywords.DATATYPE setDatatype){
-        return new ScanNode(textStatus.readableStatus(), PUSH, setDatatype, null, null);
+        return new ScanNode(textStatus.loggableStatus(), PUSH, setDatatype, null, null);
     }
     public ScanNode newPopNode(Keywords.DATATYPE setDatatype){
-        return new ScanNode(textStatus.readableStatus(), POP, setDatatype, null, null);
+        return new ScanNode(textStatus.loggableStatus(), POP, setDatatype, null, null);
     }
 
     /** node for input and output list */

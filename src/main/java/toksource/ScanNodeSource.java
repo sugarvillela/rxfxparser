@@ -8,8 +8,9 @@ package toksource;
 import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.basics.Factory_Node.ScanNode;
-import static compile.basics.Keywords.NULL_TEXT;
+
 import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
+import static compile.basics.Keywords.*;
 
 import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
@@ -137,12 +138,15 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
     }
 
     @Override
-    public String readableStatus() {
-        return(currNode == null)? 
-            "interim rxlx file location" + fin.readableStatus() : 
-            "source " + currNode.lineCol + " interim " + fin.readableStatus();
+    public String loggableStatus(){
+        return String.format(LOGGABLE_FORMAT, this.getFileName(), this.getRow(), this.getCol());
     }
-
+    @Override
+    public String readableStatus() {
+        return(currNode == null)?
+                "interim: " + fin.readableStatus() :
+                "source " + currNode.lineCol + " interim " + fin.readableStatus();
+    }
     @Override
     public boolean isEndLine() {
         return fin.isEndLine();

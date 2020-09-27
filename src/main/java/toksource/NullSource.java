@@ -1,5 +1,6 @@
 package toksource;
 
+import static compile.basics.Keywords.LOGGABLE_FORMAT;
 import static compile.basics.Keywords.STATUS_FORMAT;
 
 import interfaces.ILifeCycle;
@@ -44,10 +45,13 @@ public class NullSource implements ITextSource, ITextWordOrLine, ILifeCycle {
     }
 
     @Override
+    public String loggableStatus() {
+        return String.format(LOGGABLE_FORMAT, "", 0, 0);
+    }
+    @Override
     public String readableStatus() {
         return String.format(STATUS_FORMAT, "", 0, 0);
     }
-
     @Override
     public void onCreate() {}
 

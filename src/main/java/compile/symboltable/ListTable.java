@@ -24,9 +24,11 @@ public class ListTable extends ListTable_RxlxReader {//
     private ListTable(ScanNodeSource fin) {
         super(fin);
         defaults = new HashMap<>(8);
+        scanNodeFactory = Factory_Node.getInstance();
     }
 
-    Map <Keywords.DATATYPE, String> defaults;
+    private Map <Keywords.DATATYPE, String> defaults;
+    private final Factory_Node scanNodeFactory;
 
     @Override
     public void addTo(Keywords.DATATYPE datatype, Keywords.FIELD key, String val) {
@@ -60,9 +62,7 @@ public class ListTable extends ListTable_RxlxReader {//
             symbolTable.get(datatype).put(
                     currCategory,
                     this.get(
-                        new Factory_Node.ScanNode(
-                            Erlog.getTextStatusReporter().readableStatus(), Keywords.CMD.SET_ATTRIB, datatype, key, currCategory
-                        )
+                        scanNodeFactory.newScanNode(Keywords.CMD.SET_ATTRIB, datatype, key, currCategory)
                     )
             );
         }

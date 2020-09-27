@@ -9,6 +9,7 @@ public interface ITextStatus{
     int getRow();
     int getCol();
     String getFileName();
+    String loggableStatus();
     String readableStatus();
     boolean isEndLine();
 }
