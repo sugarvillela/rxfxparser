@@ -2,6 +2,7 @@ package compile.sublang;
 
 import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.OP.*;
+import static compile.basics.Keywords.PRIM.IMMUTABLE;
 import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
 
 import compile.basics.Factory_Node;
@@ -37,7 +38,7 @@ public class RxLogicTree extends TreeFactory {
     
     @Override
     public TreeNode treeFromWordPattern(String text){
-        System.out.println("tokenize start: root text: " + text);
+        //System.out.println("tokenize start: root text: " + text);
         listTable = ListTable.getInstance();
         if(listTable == null){
             Erlog.get(this).set("LIST<*> items are not defined");
@@ -185,11 +186,16 @@ public class RxLogicTree extends TreeFactory {
                 leaf.data += "=TRUE";
                 return true;
             case STRING:
+                if(leaf.quoted){
+                    leaf.data = "'" + leaf.data + "'";// workaround to keep leaf.quoted true when leaf is parsed
+                }
                 leaf.data = listTable.getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
                 return true;
             case NUMBER:
                 leaf.data = listTable.getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
                 return true;
+            case IMMUTABLE:
+                Erlog.get(this).set(LIST_SCOPES.toString() + " is an immutable datatype for scoping; not allowed here", leaf.data);
         }
         Erlog.get(this).set("Syntax error", leafData);
         return false;
@@ -212,10 +218,13 @@ public class RxLogicTree extends TreeFactory {
     private void validateOperations(ArrayList<TreeNode> leaves){
         ValidatorRx validator = ValidatorRx.getInstance();
         for(int i = 1; i < leaves.size(); i+=2){
+            TreeNode left = leaves.get(i-1);
+            TreeNode right = leaves.get(i);
             validator.assertValidOperation(
-                leaves.get(i-1).payNodes,
-                leaves.get(i).parent.op,
-                leaves.get(i).payNodes
+                    left.payNodes,
+                    right.parent.op,
+                    right.payNodes,
+                    right.parent
             );
         }
     }

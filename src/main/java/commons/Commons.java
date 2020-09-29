@@ -179,6 +179,7 @@ public class Commons {
         }
         return out;
     }
+
     public static <T> void disp( ArrayList<T> arr ){
         disp(arr, "generic array list");
     }

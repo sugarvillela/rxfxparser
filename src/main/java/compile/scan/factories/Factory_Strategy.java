@@ -42,6 +42,7 @@ public abstract class Factory_Strategy{
 
         MANAGE_TARG_LANG_INSERT (new ManageTargLangInsert()),           // TARGLANG_INSERT background function
         MANAGE_LISTS            (new ManageLists()),                    // LIST_* background function
+        MANAGE_SCOPES           (new ManageScopes()),                   // Same as LIST_* but enforces singleton SCOPES list
         MANAGE_IF               (new ManageIf()),                       // State machine to manage if, boolTest,
         MANAGE_ELSE             (new ManageElse()),                     // State machine to manage else,
 
@@ -72,6 +73,7 @@ public abstract class Factory_Strategy{
     public enum PushEnum{
         ON_PUSH                 (new OnPush()),                         // PUSH message
         ON_PUSH_NO_SNIFF        (new OnPushNoSniff()),                  // Same as ON_PUSH but doesn't call TextSniffer
+        ON_PUSH_LIST            (new OnPushList()),                     // Same as ON_PUSH_NO_SNIFF but initializes LIST_TABLE
         ASSERT_TOGGLE_ON_PUSH   (new AssertToggleOnPush()),             // OnPush: RXFX assert RX -> FX, IF_ELSE asserts IF -> ELSE or IF
         ON_PUSH_NOP             (new Nop())                             // OnPush, OnPop, not added to node
         ;
@@ -472,24 +474,11 @@ public abstract class Factory_Strategy{
     }
 
     public static class ManageLists extends Strategy{
-
         @Override
         public boolean go(String text, Base_ScanItem context){
             DATATYPE h = context.getDatatype();
 
             if(SYMBOL_TEST.isUserDef(text)){
-
-                // Lazy init allows specifying in attrib whether to use new list set or add to existing
-                if(LIST_TABLE == null){
-                    ListTable.init(
-                            (CompileInitializer.getInstance().isNewEnumSet())?
-                                    null :
-                                    new ScanNodeSource(new TextSource_file(ListTable_RxlxReader.listTableFileName()))
-                    );
-                    LIST_TABLE = ListTable.getInstance();
-                    LIST_TABLE.onCreate();
-                }
-
                 String defName = SYMBOL_TEST.stripUserDef(text);
 
                 // Make sure name doesn't exist
@@ -517,7 +506,35 @@ public abstract class Factory_Strategy{
                         NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
                 );
 
-                System.out.println("ManageEnuLists: name: "+defName + ", datatype: "+context.getDatatype());
+                //System.out.println("ManageEnuLists: name: "+defName + ", datatype: "+context.getDatatype());
+            }
+            else{
+                context.addNode(
+                        NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text)
+                );
+                LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
+            }
+            return true;
+        }
+    }
+    public static class ManageScopes extends ManageLists{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            DATATYPE h = context.getDatatype();
+            if(SYMBOL_TEST.isUserDef(text)){
+                // Assert scopes list as singleton
+                if(context.getDefName() != null){
+                    Erlog.get(this).set("SCOPES is a global pattern, limited to a single list", text);
+                }
+                String defName = SYMBOL_TEST.stripUserDef(text);
+
+                // tell context its name
+                context.setDefName(defName);
+
+                // build nodes
+                context.addNode(
+                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+                );
             }
             else{
                 context.addNode(
@@ -633,10 +650,7 @@ public abstract class Factory_Strategy{
             }
             if(ValidatorRx.getInstance().assertValidRxWord(text)){
                 context.addNode(NODE_FACTORY.newPushNode(h));
-                
-//                context.addNode(
-//                    NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text)
-//                );
+
                 context.addNode( NODE_FACTORY.newScanNode(
                     CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
                 );
@@ -655,7 +669,7 @@ public abstract class Factory_Strategy{
         }
         private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
             TreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
-            System.out.println(">>>>RX testRebuild<<<<");
+            //System.out.println(">>>>RX testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
             RX_TREE.assertEqual(origRoot, newRoot);
         }
@@ -675,7 +689,7 @@ public abstract class Factory_Strategy{
         }
         private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
             TreeFactory.TreeNode newRoot = FX_TREE.treeFromScanNodeSource(FX, nodes);
-            System.out.println(">>>>FX testRebuild<<<<");
+            //System.out.println(">>>>FX testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
             FX_TREE.assertEqual(origRoot, newRoot);
         }
@@ -705,6 +719,26 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+    public static class OnPushList extends Strategy{
+        // Lazy init allows specifying in attrib whether to use new list set or add to existing
+        private void initListTable(){
+            ListTable.init(
+                    (CompileInitializer.getInstance().isNewEnumSet())?
+                            null :
+                            new ScanNodeSource(new TextSource_file(ListTable_RxlxReader.listTableFileName()))
+            );
+            LIST_TABLE = ListTable.getInstance();
+            LIST_TABLE.onCreate();
+        }
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            if(LIST_TABLE == null){
+                initListTable();
+            }
+            context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
+            return false;
+        }
+    }
 
     public static class OnPop extends Strategy{
         @Override
@@ -723,6 +757,7 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+
     public static class OnPopList extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){

@@ -9,9 +9,6 @@ import erlog.Erlog;
 
 import java.util.regex.Matcher;
 
-import static compile.basics.Keywords.DATATYPE.RX;
-import static compile.basics.Keywords.USERDEF_OPEN;
-
 public abstract class ParamUtil {
     protected static final int MAX = 1024;
     protected final RangeUtil rangeUtil;
@@ -27,14 +24,7 @@ public abstract class ParamUtil {
     }
 
     public abstract void findAndSetParam(TreeFactory.TreeNode leaf, String text);
-
-//    public final String getMainText(){
-//        return mainText;
-//    }
-//
-//    public final String getBracketText(){
-//        return bracketText;
-//    }
+    protected abstract void setFunType();
 
     public String getItem(){
         return item;
@@ -42,15 +32,6 @@ public abstract class ParamUtil {
 
     public int[] getIntValues() {
         return intValues;
-    }
-
-    public final String makeUserDef(String text){
-        return (text == null)? "" :
-                (text.startsWith(USERDEF_OPEN))? text : USERDEF_OPEN + text;
-    }
-    public final String makeNotUserDef(String text){
-        return (text == null)? "" :
-                (text.startsWith(USERDEF_OPEN))? text.substring(USERDEF_OPEN.length()) : text;
     }
 
     /** Expects funName(parameter) to be split: mainText = funName, bracketText = parameter

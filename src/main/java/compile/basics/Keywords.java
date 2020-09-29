@@ -5,14 +5,14 @@
  */
 package compile.basics;
 
-import compile.symboltable.ListTable;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static compile.basics.Keywords.FX_PAR.*;
+import static compile.basics.Keywords.FX_PAR.*;//FX_DATATYPE
+import static compile.basics.Keywords.FX_DATATYPE.*;
 
-/**Contains the language definition, including enums, constants
+/**Contains the language definition, including enums, constants:
+ *
  *
  * @author Dave Swanson
  */
@@ -22,8 +22,9 @@ public final class Keywords {
 
     public static final String LOGGABLE_FORMAT = "%s|%d|%d";            // file name, line, word
     public static final String STATUS_FORMAT = "%s line %d word %d";    // file name, line, word
-    public static final String DEFAULT_FIELD_FORMAT = "$%s[%s]";        // category[item]
-    public static final String NULL_TEXT = "-";                      // nullSafe string output when a member is null
+    public static final String DEFAULT_FIELD_FORMAT = "%s[%s]";        // category[item]
+    public static final String NULL_TEXT = "-";                         // nullSafe string output when a member is null
+    public static final int    RX_MAX_RANGE = 64;
 
     // String constants for switches: defines language behavior
 
@@ -36,11 +37,8 @@ public final class Keywords {
     public static final String USERDEF_OPEN = "$";     // user-defined name
     public static final String COMMENT_TEXT = "//";    //
     public static final String CONT_LINE = "...";      // Matlab-like extension
+    public static final String ACCESS_MOD = "*";       // FX access: input string instead of rx string
 
-
-    public enum KWORD_TYPE{
-        H,C
-    }
     // List of commands to instruct parser
     public enum CMD { 
         PUSH, POP, ADD_TO, SET_ATTRIB;
@@ -62,6 +60,7 @@ public final class Keywords {
         LIST_DISCRETE   (PRIM.DISCRETE),
         LIST_STRING     (PRIM.STRING),
         LIST_NUMBER     (PRIM.NUMBER),
+        LIST_SCOPES     (PRIM.IMMUTABLE),
         RAW_TEXT        (PRIM.STRING),
         NUM_TEXT        (PRIM.NUMBER),
         BOOL_TEXT       (PRIM.BOOLEAN),
@@ -196,7 +195,8 @@ public final class Keywords {
         DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
         NUMBER     (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
         STRING     (Pattern.compile("."),                   new OP[]{OP.EQUAL}),
-        NULL       (Pattern.compile("null"),                new OP[]{OP.EQUAL})
+        NULL       (Pattern.compile("null"),                new OP[]{OP.EQUAL}),
+        IMMUTABLE  (null,                            new OP[]{}),
         ;
 
         public final Pattern pattern;
@@ -241,19 +241,21 @@ public final class Keywords {
 
     /*=====RX enums===================================================================================================*/
 
+    /*=====RX enums===================================================================================================*/
+
     public enum RX_PAR {// RX PARAMETER
         // Rx Functions
-        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(()\\)$")),
-        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+)\\)$")),
-        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+[-][0-9]+)\\)$")),
-        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^[^.]+\\([-]([0-9]+)\\)$")),
-        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([0-9]+)[-]\\)$")),
-        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^[^.]+\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$")),
-        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^[^.]+\\(([A-Za-z0-9_\\.]+)\\)$")),
+        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\(()\\)$")),
+        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)\\)$")),
+        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
+        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
+        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)[-]([0-9]+)\\)$")),
+        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$")),
+        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^.+\\(([A-Za-z0-9_\\.]+)\\)$")),
         TEST_TRUE       (DATATYPE.BOOL_TEXT,Pattern.compile("^TRUE$")),
         TEST_FALSE      (DATATYPE.BOOL_TEXT,Pattern.compile("^FALSE$")),
         TEST_NUM        (DATATYPE.NUM_TEXT, Pattern.compile("^[0-9]+$")),
-        CATEGORY_ITEM   (DATATYPE.LIST,     Pattern.compile("^[$][a-zA-Z][a-zA-Z0-9_]*\\[([a-zA-Z][a-zA-Z0-9_]*)\\]$")),
+        CATEGORY_ITEM   (DATATYPE.LIST,     Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]*\\[([a-zA-Z][a-zA-Z0-9_]*)\\]$")),
         TEST_TEXT       (DATATYPE.RAW_TEXT, Pattern.compile("."))
         ;
 
@@ -332,10 +334,13 @@ public final class Keywords {
     /*=====FX enums===================================================================================================*/
 
     public enum FX_DATATYPE {
-        ACCESSOR_C, // A class of instructions
-        ACCESSOR_N, // A numeric instruction
-        ACCESSOR_R, // A range instruction
-        MUTATOR
+        FX_C, // A class of instructions
+        FX_E, // Empty parameter
+        FX_N, // A numeric instruction
+        FX_T, // A temporary instruction
+        FX_R, // A range instruction
+        FX_A, // An alphanumeric parameter
+        FX_L  // A list item parameter
         ;
 
         public static FX_DATATYPE fromString(String text ){
@@ -348,18 +353,18 @@ public final class Keywords {
         }
     }
     public enum FX_ACCESS{
-        ACCESS_ALL          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^(\\[\\])|(\\[[<][>]\\])|(\\[[-]\\])$")),
-        ACCESS_BOT          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[<][<]\\]$")),
-        ACCESS_TOP          (FX_DATATYPE.ACCESSOR_C,  Pattern.compile("^\\[[>][>]\\]$")),
+        ACCESS_ALL          (FX_DATATYPE.FX_C,  Pattern.compile("^(\\[\\])|(\\[[<][>]\\])|(\\[[-]\\])$")),
+        ACCESS_BOT          (FX_DATATYPE.FX_C,  Pattern.compile("^\\[[<][<]\\]$")),
+        ACCESS_TOP          (FX_DATATYPE.FX_C,  Pattern.compile("^\\[[>][>]\\]$")),
 
-        ACCESS_NUM          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)\\]$")),
+        ACCESS_NUM          (FX_DATATYPE.FX_N,  Pattern.compile("^\\[([0-9]+)\\]$")),
         //        ACCESS_NEG          (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([-][0-9]+)\\]$")),
-        ACCESS_BEFORE       (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[<][<]([0-9]+)\\]$")),
-        ACCESS_AFTER        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[>][>]([0-9]+)\\]$")),
+        ACCESS_BEFORE       (FX_DATATYPE.FX_N,  Pattern.compile("^\\[[<][<]([0-9]+)\\]$")),
+        ACCESS_AFTER        (FX_DATATYPE.FX_N,  Pattern.compile("^\\[[>][>]([0-9]+)\\]$")),
 
-        ACCESS_BELOW        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[[-]([0-9]+)\\]$")),
-        ACCESS_ABOVE        (FX_DATATYPE.ACCESSOR_N,  Pattern.compile("^\\[([0-9]+)[-]\\]$")),
-        ACCESS_RANGE        (FX_DATATYPE.ACCESSOR_R,  Pattern.compile("^\\[([0-9]+[-][0-9]+)\\]$")),
+        ACCESS_BELOW        (FX_DATATYPE.FX_N,  Pattern.compile("^\\[[-]([0-9]+)\\]$")),
+        ACCESS_ABOVE        (FX_DATATYPE.FX_N,  Pattern.compile("^\\[([0-9]+)[-]\\]$")),
+        ACCESS_RANGE        (FX_DATATYPE.FX_R,  Pattern.compile("^\\[([0-9]+)[-]([0-9]+)\\]$")),
         ;
 
         public final FX_DATATYPE datatype;
@@ -379,22 +384,22 @@ public final class Keywords {
         }
     }
     public enum FX_PAR {
-        FUN_CONST           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$][A-Za-z0-9_]+)\\)$")),
-        FUN_EMPTY           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(()\\)$")),
-        FUN_NUM             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)\\)$")),
-        FUN_NUM_MULTI       (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([0-9]+[,])+[0-9]+)\\)$")),
-        FUN_RANGE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+[-][0-9])\\)$")),
-        FUN_BELOW           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
-        FUN_ABOVE           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
-        FUN_ALL             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([<][>])\\)$")),
-        FUN_BOT             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([<][<])\\)$")),
-        FUN_TOP             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([>][>])\\)$")),
-        FUN_AL_NUM          (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([']?[A-Za-z][A-Za-z0-9_]*[']?)\\)$")),
-        FUN_AL_NUM_Q        (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\([']([A-Za-z][A-Za-z0-9_]*)[']\\)$")),
-        FUN_MULTI           (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)\\)$")),
-        FUN_MULTI_Q         (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(['](([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)[']\\)$")),
-        FUN_CAT             (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\(([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$")),
-        FUN_CAT_MULTI       (FX_DATATYPE.MUTATOR,     Pattern.compile("^.+\\((([$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\][,]\\s*)+[$]?[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$"))
+        FUN_CONST           (FX_DATATYPE.FX_T,     Pattern.compile("^.+\\(([$][A-Za-z0-9_]+)\\)$")),
+        FUN_EMPTY           (FX_DATATYPE.FX_E,     Pattern.compile("^.+\\(()\\)$")),
+        FUN_NUM             (FX_DATATYPE.FX_N,     Pattern.compile("^.+\\(([0-9]+)\\)$")),
+        FUN_NUM_MULTI       (FX_DATATYPE.FX_N,     Pattern.compile("^.+\\((([0-9]+[,])+[0-9]+)\\)$")),
+        FUN_RANGE           (FX_DATATYPE.FX_R,     Pattern.compile("^.+\\(([0-9]+)[-]([0-9])\\)$")),
+        FUN_BELOW           (FX_DATATYPE.FX_R,     Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
+        FUN_ABOVE           (FX_DATATYPE.FX_R,     Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
+        FUN_ALL             (FX_DATATYPE.FX_C,     Pattern.compile("^.+\\(([<][>])\\)$")),
+        FUN_BOT             (FX_DATATYPE.FX_C,     Pattern.compile("^.+\\(([<][<])\\)$")),
+        FUN_TOP             (FX_DATATYPE.FX_C,     Pattern.compile("^.+\\(([>][>])\\)$")),
+        FUN_AL_NUM          (FX_DATATYPE.FX_A,     Pattern.compile("^.+\\(([A-Za-z][A-Za-z0-9_]*)\\)$")),
+        FUN_AL_NUM_Q        (FX_DATATYPE.FX_A,     Pattern.compile("^.+\\([']([A-Za-z][A-Za-z0-9_]*)[']\\)$")),
+        FUN_MULTI           (FX_DATATYPE.FX_A,     Pattern.compile("^.+\\((([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)\\)$")),
+        FUN_MULTI_Q         (FX_DATATYPE.FX_A,     Pattern.compile("^.+\\(['](([A-Za-z][A-Za-z0-9_]*[,])+[A-Za-z][A-Za-z0-9_]*)[']\\)$")),
+        FUN_CAT             (FX_DATATYPE.FX_L,     Pattern.compile("^.+\\(([A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$")),
+        FUN_CAT_MULTI       (FX_DATATYPE.FX_L,     Pattern.compile("^.+\\((([A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\][,]\\s*)+[A-Za-z0-9_]+\\[[A-Za-z0-9_]+\\])\\)$"))
 
         ;
 
@@ -416,20 +421,25 @@ public final class Keywords {
     }
 
     public enum FX_FUN {
-        VOTE    (new FX_PAR[]{FUN_CAT, FUN_MULTI}),
-        SET     (new FX_PAR[]{FUN_EMPTY}),
-        DROP    (new FX_PAR[]{FUN_EMPTY}),
-        CON     (new FX_PAR[]{FUN_EMPTY}),
-        REMOVE  (new FX_PAR[]{FUN_EMPTY}),
-        MARK    (new FX_PAR[]{FUN_EMPTY}),
-        RUN     (new FX_PAR[]{FUN_EMPTY}),
-        COPY    (new FX_PAR[]{FUN_EMPTY}),
-        SWAP    (new FX_PAR[]{FUN_EMPTY})
+        // Flags
+        VOTE    (0, new FX_DATATYPE[]{FX_L}),
+        SET     (0, new FX_DATATYPE[]{FX_L}),
+        DROP    (0, new FX_DATATYPE[]{FX_L}),
+        // Structure
+        CON     (0, new FX_DATATYPE[]{FX_E, FX_N, FX_R, FX_C}),
+        COPY    (0, new FX_DATATYPE[]{FX_N, FX_R, FX_C}),
+        SWAP    (0, new FX_DATATYPE[]{FX_N, FX_R, FX_C}),
+        REM     (0, new FX_DATATYPE[]{FX_E}),
+        MARK    (0, new FX_DATATYPE[]{FX_E}),
+        MREM    (1, new FX_DATATYPE[]{FX_E}),                   // Remove if marked
+        RUN     (1, new FX_DATATYPE[]{FX_A})
         ;
 
-        public final FX_PAR[] parTypes;
+        public final int noMod;
+        public final FX_DATATYPE[] parTypes;
 
-        private FX_FUN(FX_PAR[] parTypes){
+        private FX_FUN(int noMod, FX_DATATYPE[] parTypes){
+            this.noMod = noMod;
             this.parTypes = parTypes;
         }
         public static FX_FUN fromString(String text ){
@@ -439,6 +449,17 @@ public final class Keywords {
                 }
             }
             return null;
+        }
+        public boolean isAllowedParam(FX_PAR param){
+            for(FX_DATATYPE allowedDatatype: parTypes){
+                if(allowedDatatype.equals(param.datatype)){
+                    return true;
+                }
+            }
+            return false;
+        }
+        public boolean isAllowedAccessMod(int accessMod){
+            return accessMod + noMod < 2;
         }
     }
 

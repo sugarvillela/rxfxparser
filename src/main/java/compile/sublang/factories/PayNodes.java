@@ -3,8 +3,7 @@ package compile.sublang.factories;
 import commons.Commons;
 import compile.basics.Keywords;
 import compile.sublang.ut.FxAccessUtil;
-import compile.sublang.ut.FxFunUtil;
-import compile.sublang.ut.ParamUtil;
+import compile.sublang.ut.FxParamUtil;
 import compile.sublang.ut.RxParamUtil;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
@@ -41,7 +40,6 @@ public abstract class PayNodes {
     }
 
     public static class RxPayNodeFactory extends PayNodeFactory{
-        public static final int NUM_FIELDS = 8;
         private RxParamUtil paramUtil;
 
         public RxPayNodeFactory(){
@@ -70,7 +68,7 @@ public abstract class PayNodes {
         @Override
         public DataNode payNodeFromScanNode(String scanNodeText){
             String[] tok = T.toArr(scanNodeText);
-            if(tok.length != NUM_FIELDS){
+            if(tok.length != RxPayNode.NUM_FIELDS){
                 Erlog.get(this).set("Bad scan node text size" + tok.length, scanNodeText);
                 return null;
             }
@@ -88,13 +86,13 @@ public abstract class PayNodes {
     }
 
     public static class FxPayNodeFactory extends PayNodeFactory{
-        public static final int NUM_FIELDS = 7;
-        private FxFunUtil funUtil;
+
+        private FxParamUtil funUtil;
         private FxAccessUtil accessUtil;
         boolean state;
 
         public FxPayNodeFactory(){
-            funUtil = FxFunUtil.getInstance();
+            funUtil = FxParamUtil.getInstance();
             accessUtil = FxAccessUtil.getInstance();
         }
 
@@ -114,7 +112,8 @@ public abstract class PayNodes {
                         null,
                         null,
                         null,
-                        accessUtil.getIntValues()
+                        accessUtil.getIntValues(),
+                        accessUtil.getAccessMod()
                 ));
             }
             else{
@@ -125,7 +124,8 @@ public abstract class PayNodes {
                         funUtil.getItems(),
                         funUtil.getCategories(),
                         funUtil.getListSources(),
-                        funUtil.getIntValues()
+                        funUtil.getIntValues(),
+                        0
                 ));
             }
             state = !state;
@@ -134,7 +134,7 @@ public abstract class PayNodes {
         @Override
         public DataNode payNodeFromScanNode(String scanNodeText) {
             String[] tok = T.toArr(scanNodeText);
-            if(tok.length != NUM_FIELDS){
+            if(tok.length != FxPayNode.NUM_FIELDS){
                 Erlog.get(this).set("Bad scan node text size: " + tok.length, scanNodeText);
                 return null;
             }
@@ -145,12 +145,15 @@ public abstract class PayNodes {
                     Commons.undoNullSafes(tok[3]),
                     Commons.undoNullSafes(tok[4]),
                     Keywords.DATATYPE.fromStrings(tok[5]),
-                    Commons.undoNullSafe_int(tok[6])
+                    Commons.undoNullSafe_int(tok[6]),
+                    Integer.parseInt(tok[7])
             );
         }
     }
 
     public static class RxPayNode extends DataNode {
+        public static final int NUM_FIELDS = 8;
+
         public final Keywords.PRIM callerType;
         public final Keywords.RX_PAR paramType;
         public final Keywords.PRIM outType;
@@ -201,6 +204,8 @@ public abstract class PayNodes {
         }
     }
     public static class FxPayNode extends DataNode {
+        public static final int NUM_FIELDS = 8;
+
         public final Keywords.FX_ACCESS accessType;
         public final Keywords.FX_PAR paramType;
         public final Keywords.FX_FUN funType;
@@ -208,8 +213,9 @@ public abstract class PayNodes {
         public final String[] uDefCategories;
         public final Keywords.DATATYPE[] listSources;
         public final int[] values;
+        public final int accessMod;
 
-        public FxPayNode(Keywords.FX_ACCESS accessType, Keywords.FX_PAR paramType, Keywords.FX_FUN funType, String[] items, String[] uDefCategories, Keywords.DATATYPE[] listSources, int[] values) {
+        public FxPayNode(Keywords.FX_ACCESS accessType, Keywords.FX_PAR paramType, Keywords.FX_FUN funType, String[] items, String[] uDefCategories, Keywords.DATATYPE[] listSources, int[] values, int accessMod) {
             this.accessType = accessType;
             this.paramType = paramType;
             this.funType = funType;
@@ -217,6 +223,7 @@ public abstract class PayNodes {
             this.uDefCategories = uDefCategories;
             this.listSources = listSources;
             this.values = values;
+            this.accessMod = accessMod;
         }
 
         @Override
@@ -229,20 +236,22 @@ public abstract class PayNodes {
             if(uDefCategories != null) {out.add("uDefCategories: " + String.join( ", ", uDefCategories));}
             if(listSources != null)    {out.add("listSources: " +    Commons.join(", ", listSources));}
             if(values != null)         {out.add("values: " +         Commons.join(", ", values));}
+            if(accessMod != 0)         {out.add("accessMod: " +      accessMod);}
             return String.join(", ", out);
         }
 
         @Override
         public String toString(){
             return String.format(
-                    "%s,%s,%s,%s,%s,%s,%s",
+                    "%s,%s,%s,%s,%s,%s,%s,%d",
                     Commons.nullSafe(accessType),
                     Commons.nullSafe(paramType),
                     Commons.nullSafe(funType),
                     Commons.nullSafe(items),
                     Commons.nullSafe(uDefCategories),
                     Commons.nullSafe(listSources),
-                    Commons.nullSafe(values)
+                    Commons.nullSafe(values),
+                    accessMod
             );
         }
 

@@ -83,14 +83,13 @@ public class Factory_Node implements ChangeListener {
         public String toString(){//one line of a csv file
             return String.format(
                 "%s,%s,%s,%s,%s",
-                Commons.nullSafe(lineCol),
+                lineCol,
                 Commons.nullSafe(cmd),
                 Commons.nullSafe(h),
                 Commons.nullSafe(k),
                 Commons.nullSafe(data)
             );
         }
-
     }
     /*========================================================================*/
     

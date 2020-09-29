@@ -138,7 +138,7 @@ public class CompileInitializer implements ChangeListener {
         return this.inName;
     }
     public void setProjName(String projName){ 
-        System.out.println("CompileInitializer.setProjName: " + projName);
+        //System.out.println("CompileInitializer.setProjName: " + projName);
         this.projName = projName; 
     }
     public String getProjName(){ return this.projName; }

@@ -30,7 +30,7 @@ public class Parse_ {
                 out.add(source.nextNode());
             }
         }
-        Commons.disp(out);
+        //Commons.disp(out);
     }
     public static void testEnub(){
         Class_Parser P = Class_Parser.getInstance();

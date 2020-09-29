@@ -32,7 +32,7 @@ public class Uq_enumgen extends Enumstore{
         return ( index<<this.wordLen ) | mask;
     }
     public void newRow(){
-        System.out.println("Uq_enumgen newRow");
+        //System.out.println("Uq_enumgen newRow");
         this.itr.newRow();
     }
     public void newCol(){

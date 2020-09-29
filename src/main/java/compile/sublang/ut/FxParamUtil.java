@@ -12,16 +12,16 @@ import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
 import static compile.basics.Keywords.FX_PAR.FUN_CAT;
 import static compile.basics.Keywords.FX_PAR.FUN_CAT_MULTI;
 
-public class FxFunUtil extends ParamUtil{
-    private static FxFunUtil instance;
+public class FxParamUtil extends ParamUtil{
+    private static FxParamUtil instance;
 
-    private FxFunUtil(){
+    private FxParamUtil(){
 
         commaTokenizer = new Tokens_special(",", "'", TK.IGNORESKIP );
     }
 
-    public static FxFunUtil getInstance(){
-        return (instance == null)? (instance = new FxFunUtil()): instance;
+    public static FxParamUtil getInstance(){
+        return (instance == null)? (instance = new FxParamUtil()): instance;
     }
 
     private final Tokens_special commaTokenizer;
@@ -67,9 +67,20 @@ public class FxFunUtil extends ParamUtil{
         reset();
         identifyPattern();
     }
+
+    @Override
+    protected void setFunType(){
+        String[] tok = mainText.split("\\(");
+        funType = Keywords.FX_FUN.fromString(tok[0]);
+        if(funType == null){
+            Erlog.get(this).set("Unknown FX function", mainText);
+        }
+    }
+
     private void fixParamType(Keywords.FX_PAR newParamType){
         paramType = newParamType;
     }
+
     private void identifyPattern(){
         Keywords.FX_PAR[] parTypes = Keywords.FX_PAR.values();
         for(int pari = 0; pari < parTypes.length; pari++){
@@ -148,13 +159,7 @@ public class FxFunUtil extends ParamUtil{
         Erlog.get(this).set("Syntax error", mainText);
     }
 
-    private void setFunType(){
-        String[] tok = mainText.split("\\(");
-        funType = Keywords.FX_FUN.fromString(tok[0]);
-        if(funType == null){
-            Erlog.get(this).set("Unknown FX function", mainText);
-        }
-    }
+
     private void funNumMulti(){
         String[] tok = bracketText.split(",");
         intValues = new int[tok.length];
@@ -188,16 +193,16 @@ public class FxFunUtil extends ParamUtil{
             }
             fixParamType(FUN_CAT_MULTI);
         }
-        Commons.disp(items, "funMulti items");
-        Commons.disp(uDefCategories, "funMulti uDefCategories");
-        Commons.disp(listSources, "funMulti listSources");
+        //Commons.disp(items, "funMulti items");
+        //Commons.disp(uDefCategories, "funMulti uDefCategories");
+        //Commons.disp(listSources, "funMulti listSources");
     }
     private void funCat(String text, int i){
         String category, item;
         Keywords.DATATYPE listSource;
         {
             String[] tok = text.split("\\[");
-            category = makeNotUserDef(tok[0]);
+            category = tok[0];
             item = tok[1].substring(0, tok[1].length() - 1);
         }
 

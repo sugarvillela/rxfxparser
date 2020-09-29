@@ -1,18 +1,17 @@
 package commons;
 
+import erlog.Erlog;
+
 /**Defeatable static logger for development.
  *
  * @author Dave Swanson
  */
 public class Dev {
     /*==========Defeatable static logger======================================*/
-    
+    public static final String TAB = "\t|";
+
     private static boolean displayOn = true;
     private static boolean stackTraceOn = true;
-    public static final String TAB = "\t|";
-    public static final int TRACE_SKIPS = 7;
-    public static final int TRACE_READS = 4;
-    
     public static void dispOn(){ displayOn = true; }
     public static void dispOff(){ displayOn = false; }
     public static void traceOn(){ stackTraceOn = true; }
@@ -66,9 +65,19 @@ public class Dev {
             println("No stack trace" );
         }
         else{
-            int len = Math.min( trace.length, TRACE_SKIPS + TRACE_READS);
-            for(int i = TRACE_SKIPS; i<len; i++){
-                println( "\t" + trace[i] );
+//            int len = Math.min( trace.length, TRACE_SKIPS + TRACE_READS);
+//            for(int i = TRACE_SKIPS; i<len; i++){
+//                println( "\t" + trace[i] );
+//            }
+
+            for(int i = 0; i<trace.length; i++){
+                String traceStr = trace[i].toString();
+                if(traceStr != null && traceStr.contains("Erlog.")){
+                    for(int j = i+1; j<trace.length; j++){
+                        println( "\t" + trace[j] );
+                    }
+                    break;
+                }
             }
             System.out.println();
         }

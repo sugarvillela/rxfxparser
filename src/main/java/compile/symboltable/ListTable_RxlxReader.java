@@ -26,15 +26,28 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
 
     public ListTable_RxlxReader(ScanNodeSource fin){
         super(fin);
-        symbolTable = new HashMap<>(6);
+        symbolTable = new HashMap<>(8);
         symbolTable.put(LIST_BOOLEAN,  new HashMap<>(8));
         symbolTable.put(LIST_DISCRETE, new HashMap<>(8));
         symbolTable.put(LIST_NUMBER,   new HashMap<>(8));
         symbolTable.put(LIST_STRING,   new HashMap<>(8));
+        symbolTable.put(LIST_SCOPES,   new HashMap<>(8));
     }
 
     public boolean contains(Keywords.DATATYPE datatype, String val){
         return symbolTable.get(datatype).containsKey(val);
+    }
+    public boolean isScope(String val){
+        Map<String, Base_ParseItem> table = symbolTable.get(LIST_SCOPES);
+        if(table.containsKey(val)){
+            return true;
+        }
+        for (Map.Entry<String, Base_ParseItem> inner : table.entrySet()) {
+            if(((SymbolTableNode)inner.getValue()).contains(val)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public Keywords.DATATYPE getDataType(String text){
@@ -63,7 +76,6 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
     public String getCategory(String val){
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                //System.out.println("key: " + inner.getValue());
                 if(((SymbolTableNode)inner.getValue()).contains(val)){
                     return inner.getKey();
                 }

@@ -7,7 +7,7 @@ import erlog.Erlog;
 
 /**
  *
- * @author newAdmin
+ * @author Dave Swanson
  */
 public class RxFxUtil {
     protected Keywords.DATATYPE toggle;

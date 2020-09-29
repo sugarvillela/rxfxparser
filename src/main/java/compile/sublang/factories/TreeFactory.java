@@ -182,14 +182,14 @@ public abstract class TreeFactory {
         ArrayList<TreeFactory.TreeNode>[] levels1 = this.breadthFirst(root1);
         ArrayList<TreeFactory.TreeNode>[] levels2 = this.breadthFirst(root2);
         if(levels1.length != levels2.length){
-            System.out.println("fail: levels1.length != levels2.length");
+            Erlog.get(this).set("fail: levels1.length != levels2.length");
             return false;
         }
         for(int i = 0; i<levels1.length; i++){
             int len1 = levels1[i].size();
             int len2 = levels2[i].size();
             if(len1 != len2){
-                System.out.println("fail: len1 != len2");
+                Erlog.get(this).set("fail: len1 != len2");
                 return false;
             }
             for(int j = 0; j < len1; j++){
@@ -288,7 +288,14 @@ public abstract class TreeFactory {
                 return more;
             }
         }
-        
+
+        /**Public starting point for unwrapping.
+         * If not a leaf (nodes != null) then call recursively on children
+         * Else call private version to unwrap self
+         * @param first Opening parentheses
+         * @param last Closing parentheses
+         * @return true if something got changed
+         */
         public boolean unwrap(char first, char last){
             if(nodes != null){
                 boolean more = false;
@@ -300,7 +307,23 @@ public abstract class TreeFactory {
             return data != null && unwrap(false, first, last);
         }
 
+        /**Private recursive method for unwrapping a single string
+         * If isWrapped(), unwraps text and calls self again to unwrap inner wrappings
+         * @param changed OR recursive calls together so any changes are known (last call always false)
+         * @param first Opening parentheses
+         * @param last Closing parentheses
+         * @return true if something got changed
+         */
         private boolean unwrap(boolean changed, char first, char last){
+            if(isWrapped(first, last)){
+                data = data.substring(1, data.length()-1);
+                return unwrap(true, first, last);
+            }
+            return changed;
+        }
+
+        /**Publicly exposed helper. Checks for wrapping and also unbalanced wraps */
+        public boolean isWrapped(char first, char last){
             int brace = 0, len = data.length();
             boolean outer = true;                   // Stays true if {a=b} or {{a=b}&{c=d}}
             for(int i = 0; i<len; i++){
@@ -316,14 +339,10 @@ public abstract class TreeFactory {
             }
             if(brace != 0){// Finds {a}}
                 Erlog.get(this).set("Symbol mismatch", data);
-                return false;
             }
-            if(outer && data.charAt(0) == first && last == data.charAt(len - 1)){
-                data = data.substring(1, len-1);
-                return unwrap(true, first, last);
-            }
-            return changed;
+            return outer && data.charAt(0) == first && last == data.charAt(len - 1);
         }
+
 
         public abstract boolean unquote(char quote);
 
@@ -432,6 +451,12 @@ public abstract class TreeFactory {
                 out.add("\t" + rxPayNode.readableContent());
             }
             return String.join("\n", out);
+        }
+        public String leafOp(){
+            if(op == null || nodes == null || nodes.size() < 2){
+                return "";
+            }
+            return String.format("%s %c %s", nodes.get(0).data, op.asChar, nodes.get(1).data);
         }
     }
     public static class RxTreeNode extends TreeNode{

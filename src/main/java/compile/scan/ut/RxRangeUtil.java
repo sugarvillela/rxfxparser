@@ -4,18 +4,28 @@ import erlog.Erlog;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static compile.basics.Keywords.RX_MAX_RANGE;
+
 public class RxRangeUtil {
     private static RxRangeUtil instance;
     
-    private RxRangeUtil(){}
+    private RxRangeUtil(){
+        MAX = String.valueOf(RX_MAX_RANGE);
+        RANGE_PATTERNS = new Pattern[]{
+                Pattern.compile("^.+\\{([0-9]+)\\}$"),
+                Pattern.compile("^.+\\{[-]([0-9]+)\\}$"),
+                Pattern.compile("^.+\\{([0-9]+)[-]\\}$"),
+                Pattern.compile("^.+\\{([0-9]+)[-]([0-9]+)\\}$")
+        };
+    }
     
     public static RxRangeUtil getInstance(){
         return (instance == null)? (instance = new RxRangeUtil()) : instance;
     }
 
-    private final Pattern RANGE_PATTERN = Pattern.compile("\\{[0-9]+((-[0-9]+)?|-?)\\}$");
-
-    private final String MAX = "1024";
+    private final int NUM = 0, BELOW = 1, ABOVE = 2, RANGE = 3;
+    private final Pattern[] RANGE_PATTERNS;
+    private final String MAX;
     private String truncated, low, high;
     
     public boolean findAndSetRange(String text){
@@ -38,7 +48,7 @@ public class RxRangeUtil {
                 high = "1";
                 return true;
             case '}':
-                return setRangeFromCurlys(text);
+                return setRangeFromCurly(text);
             default:
                 low = "1";
                 high = "1";
@@ -54,36 +64,36 @@ public class RxRangeUtil {
     public String getHighRange(){
         return high;
     }
-    private boolean setRangeFromCurlys(String text){
-        Matcher matcher = RANGE_PATTERN.matcher(text);
-        if(matcher.find()){
-            truncated = matcher.replaceFirst("");
-            text = matcher.group();
-            text = text.substring(1, text.length() - 1);
-            String[] toks = text.split("-");
-            System.out.println(text);
-            System.out.println(toks.length);
-
-            if(toks.length == 1){
-                if(toks[0].length() < text.length()){
-                    low = toks[0];
-                    high = MAX;
-                }
-                else{
-                    low = high = text;
+    private boolean setRangeFromCurly(String text){
+        Matcher matcher;
+        for(int paramType = 0; paramType < RANGE_PATTERNS.length; paramType++){
+            matcher = RANGE_PATTERNS[paramType].matcher(text);
+            if(matcher.find()){
+                switch(paramType){
+                    case NUM:
+                        low = high = matcher.replaceAll("$1");
+                        truncated = text.substring(0, text.length() - low.length() - 2);
+                        return true;
+                    case BELOW:
+                        low = "0";
+                        high = matcher.replaceAll("$1");
+                        truncated = text.substring(0, text.length() - low.length() - 3);
+                        return true;
+                    case ABOVE:
+                        low = matcher.replaceAll("$1");
+                        high = MAX;
+                        truncated = text.substring(0, text.length() - low.length() - 3);
+                        return true;
+                    case RANGE:
+                        low = matcher.replaceAll("$1");
+                        high = matcher.replaceAll("$2");
+                        truncated = text.substring(0, text.length() - low.length()  - high.length() - 3);
+                        return true;
                 }
             }
-            else{
-                low = toks[0];
-                high = toks[1];
-            }
-            return true;    
-
         }
-        else{
-            Erlog.get(this).set("Expected range in standard format... Example: {1-2} or {5}", text);
-            return false;
-        }
+        Erlog.get(this).set("Expected range in standard format... Example: {1-2} or {5}", text);
+        return false;
     }
 
 }

@@ -46,7 +46,7 @@ public abstract class RxlxReader extends Base_Stack{
         pauseOther();
         while(fin.hasNext()){
             Factory_Node.ScanNode currNode = fin.nextNode();
-            System.out.println(currNode);
+            //System.out.println(currNode);
             if(currNode.cmd == null || currNode.h == null){
                 er.set("Null command in rxlx file");
             }

@@ -10,7 +10,7 @@ import static compile.scan.factories.Factory_Strategy.StrategyEnum.*;
 
 public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( DATATYPE h ){
-        System.out.println("====Factory_cxs.get()====" + h.toString());
+        //System.out.println("====Factory_cxs.get()====" + h.toString());
         switch(h){
             case LIST_BOOLEAN:
             case LIST_DISCRETE:
@@ -28,8 +28,24 @@ public class Factory_ScanItem extends Factory_Strategy{
                         BACK_POP_ON_ANY_VAR,
                         MANAGE_LISTS
                     ),
-                    getPush(ON_PUSH_NO_SNIFF),
+                    getPush(ON_PUSH_LIST),
                     getPop(ON_POP_LIST)
+                );
+            case LIST_SCOPES:
+                return new ScanItem(
+                        h,
+                        null,
+                        getStrategy(
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                BACK_POP_ON_ANY_DATATYPE,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                READ_CONSTANT,
+                                BACK_POP_ON_ANY_VAR,
+                                MANAGE_SCOPES
+                        ),
+                        getPush(ON_PUSH_LIST),
+                        getPop(ON_POP_LIST)
                 );
             case COMMENT:
                 return new ScanItem(
@@ -58,7 +74,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return new ScanItem(
                     h, 
                     new DATATYPE[]{
-                        ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, INCLUDE, FUN, RXFX, RX, FX,
+                        ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES, INCLUDE, FUN, RXFX, RX, FX,
                             SCOPE, IF_ELSE, IF, ELSE, CONSTANT
                     },
                     getStrategy(

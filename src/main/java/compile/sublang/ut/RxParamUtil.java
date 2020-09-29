@@ -28,17 +28,28 @@ public class RxParamUtil extends ParamUtil{
 
     @Override
     public void findAndSetParam(TreeFactory.TreeNode leaf, String text){
-        mainText = text;
         reset();
         if(leaf.quoted){//quoted text is raw text
+            item = text;
             fixParamType(TEST_TEXT);
             outType = TEST_TEXT.datatype.outType;
         }
         else{
+            mainText = text;
             listTable = ListTable.getInstance();
             identifyPattern();
         }
     }
+
+    @Override
+    protected void setFunType(){
+        String[] tok = mainText.split("\\(");
+        funType = Keywords.RX_FUN.fromString(tok[0]);
+        if(funType == null){
+            Erlog.get(this).set("Unknown RX function", mainText);
+        }
+    }
+
     private void reset(){
         callerType = NULL;
         // paramType to be set
@@ -90,36 +101,48 @@ public class RxParamUtil extends ParamUtil{
 
                 switch(paramType.datatype){
                     case FUN:
-                        bracketText = matcher.replaceAll("$1");
-                        mainText = mainText.substring(0, mainText.length() - bracketText.length() -2);
-                        if(CONST_PAR.equals(paramType)){
-                            mainText = readConstant(mainText, bracketText);
-                            identifyPattern();
-                            return;
-                        }
-                        setTypesFromFun();
-
                         switch(paramType){
+                            case CONST_PAR:
+                                bracketText = matcher.replaceAll("$1");
+                                mainText = mainText.substring(0, mainText.length() - bracketText.length() -2);
+                                mainText = readConstant(mainText, bracketText);
+                                identifyPattern();
+                                return;
                             case NUM_PAR:
-                                intValues = new int[]{Integer.parseInt(bracketText)};
-                                break;
-                            case RANGE_PAR:
-                                rangeUtil.rangeToInt("-", bracketText);
-                                intValues = new int[]{rangeUtil.getLow(), rangeUtil.getHigh()};
-                                if(intValues[0] >= intValues[1]){
-                                    Erlog.get(this).set("Expected range in ascending order", bracketText);
-                                }
+                                intValues = new int[]{
+                                    Integer.parseInt(matcher.replaceAll("$1"))
+                                };
                                 break;
                             case RANGE_BELOW:
-                                intValues = new int[]{0, Integer.parseInt(bracketText)};
+                                intValues = new int[]{
+                                    0,
+                                    Integer.parseInt(matcher.replaceAll("$1"))
+                                };
                                 break;
                             case RANGE_ABOVE:
-                                intValues = new int[]{Integer.parseInt(bracketText), MAX};
+                                intValues = new int[]{
+                                    Integer.parseInt(matcher.replaceAll("$1")),
+                                    MAX
+                                };
+                                break;
+                            case RANGE_PAR:
+                                intValues = new int[]{
+                                        Integer.parseInt(matcher.replaceAll("$1")),
+                                        Integer.parseInt(matcher.replaceAll("$2"))
+                                };
+                                if(intValues[0] >= intValues[1]){
+                                    Erlog.get(this).set("Expected range in ascending order", mainText);
+                                }
                                 break;
                         }
+                        setFunType();
+                        callerType = funType.caller;
+                        outType = funType.outType;
                         break;
                     case BOOL_TEXT:
-                        intValues = new int[]{(mainText.charAt(0) == 'T')? 1 : 0};
+                        intValues = new int[]{
+                            (TEST_TRUE.equals(paramType))? 1 : 0
+                        };
                         outType = BOOLEAN;
                         break;
                     case NUM_TEXT:
@@ -144,20 +167,8 @@ public class RxParamUtil extends ParamUtil{
         Erlog.get(this).set("Syntax error", mainText);
     }
 
-    private void setTypesFromFun(){
-        funType = Keywords.RX_FUN.fromString(mainText);
-        if(funType == null){
-            Erlog.get(this).set( "Invalid RX Function name", mainText);
-        }
-        else{
-            //mainText = String.format("$%s(%s)", mainText, bracketText);
-            callerType = funType.caller;
-            outType = funType.outType;
-        }
-    }
-
     private void setTypesFromItem(){// error or assume?
-        String category = makeNotUserDef(mainText.substring(0, mainText.length() - bracketText.length() -2));
+        String category = mainText.substring(0, mainText.length() - bracketText.length() -2);
         if(category.equals(listTable.getCategory(bracketText))){
             item = bracketText;
             uDefCategory = category;

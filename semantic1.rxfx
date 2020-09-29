@@ -10,9 +10,9 @@ $number = 0;
 	CONSTANT $const1 D=d
 	CONSTANT $const2 DRP()
 	
-	LIST<DISCRETE>
+	LIST<SCOPES>
 		$SCOPES
-			sen phrase word char
+			ALL SENTENCE PHRASE WORD CHAR
 		
 	LIST<BOOLEAN>
 		$POS // Use all caps in these definitions
@@ -29,8 +29,8 @@ $number = 0;
 		$INT 
 			NUM_VAL INDEX GROUP EE
 
-	RX $myRx Tokyo //TODO: CHECK QUOTED SPECIAL CHARACTERS
-	FX ([2].VOTE('VERB,NOUN')|[-1].DROP($SCOPES[sen]))&[1-4].MARK(1,3,4)
+	RX $myRx Tokyo{1-2} SENTENCE=TRUE{3-} //TODO: CHECK QUOTED SPECIAL CHARACTERS
+	FX (*[2].VOTE(POS[VERB])|[-1].DROP(POS[ADJECTIVE]))&[1-4].MARK()
 
 $*/
 

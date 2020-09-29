@@ -1,1 +1,1 @@
-Error: semantic1.rxfx line 33 word 1: FxTreeNode: Symbol mismatch: ([2].VOTE('VE
+Error: semantic1.rxfx line 32 word 3: ValidatorRx: Comparing IMMUTABLE to BOOLEAN: SENTENCE = TRUE

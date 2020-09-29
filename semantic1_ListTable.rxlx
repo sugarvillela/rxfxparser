@@ -1,6 +1,14 @@
 # Generated file, do not edit
-# Last write: 09/26/2020 23:53:55
+# Last write: 09/28/2020 22:14:35
 # Defines lists, categories and items
+semantic1.rxfx|13|0,PUSH,LIST_SCOPES,-,-
+semantic1.rxfx|13|0,SET_ATTRIB,LIST_SCOPES,DEF_NAME,SCOPES
+semantic1.rxfx|13|0,ADD_TO,LIST_SCOPES,-,ALL
+semantic1.rxfx|13|0,ADD_TO,LIST_SCOPES,-,SENTENCE
+semantic1.rxfx|13|0,ADD_TO,LIST_SCOPES,-,PHRASE
+semantic1.rxfx|13|0,ADD_TO,LIST_SCOPES,-,WORD
+semantic1.rxfx|13|0,ADD_TO,LIST_SCOPES,-,CHAR
+semantic1.rxfx|13|0,POP,LIST_SCOPES,-,-
 semantic1.rxfx|24|0,PUSH,LIST_STRING,-,-
 semantic1.rxfx|24|0,SET_ATTRIB,LIST_STRING,DEF_NAME,TEXT
 semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,IN
@@ -11,13 +19,6 @@ semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,EXPAND2
 semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,NAME
 semantic1.rxfx|24|0,ADD_TO,LIST_STRING,-,SURNAME
 semantic1.rxfx|24|0,POP,LIST_STRING,-,-
-semantic1.rxfx|13|0,PUSH,LIST_DISCRETE,-,-
-semantic1.rxfx|13|0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,SCOPES
-semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,sen
-semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,phrase
-semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,word
-semantic1.rxfx|13|0,ADD_TO,LIST_DISCRETE,-,char
-semantic1.rxfx|13|0,POP,LIST_DISCRETE,-,-
 semantic1.rxfx|28|0,PUSH,LIST_NUMBER,-,-
 semantic1.rxfx|28|0,SET_ATTRIB,LIST_NUMBER,DEF_NAME,INT
 semantic1.rxfx|28|0,ADD_TO,LIST_NUMBER,-,NUM_VAL
