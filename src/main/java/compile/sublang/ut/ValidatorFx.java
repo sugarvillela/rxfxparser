@@ -21,7 +21,7 @@ public class ValidatorFx {
     }
 
     public void assertValidAccessModifier(PayNodes.FxPayNode left, PayNodes.FxPayNode right, TreeFactory.TreeNode treeNode){
-        System.out.println(left.readableContent());
+        //System.out.println(left.readableContent());
         if(!right.funType.isAllowedAccessMod(left.accessMod)){
             Erlog.get(this).set(
                 String.format(
@@ -33,7 +33,7 @@ public class ValidatorFx {
         }
     }
     public void assertValidFunParam(PayNodes.FxPayNode payNode, TreeFactory.TreeNode treeNode){
-        System.out.println(payNode.readableContent());
+        //System.out.println(payNode.readableContent());
         if(!payNode.funType.isAllowedParam(payNode.paramType)){
             Erlog.get(this).set(
                 String.format(

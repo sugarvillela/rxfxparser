@@ -70,13 +70,13 @@ public class TokenSource extends Base_TextSource {
     /* Output mode: Word trims; line keeps tabs, spaces, newlines */
     @Override
     public void setLineGetter(){
-        System.out.println("\n setLineGetter");
+        //System.out.println("\n setLineGetter");
         this.getter = this.gLine;
         this.endLn = false;
     }
     @Override
     public void setWordGetter(){
-        System.out.println("\n setWordGetter");
+        //System.out.println("\n setWordGetter");
         this.getter = this.gWord;
         this.getter.rewind();
         this.endLn = true;

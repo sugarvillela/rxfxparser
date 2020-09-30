@@ -2,10 +2,8 @@
  */
 package compile.parse;
 
-import compile.basics.Base_Stack;
+import compile.basics.*;
 
-import compile.basics.CompileInitializer;
-import compile.basics.RxlxReader;
 import erlog.Erlog;
 import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import toksource.ScanNodeSource;
@@ -56,32 +54,10 @@ public class Class_Parser extends RxlxReader {
             if(currNode.cmd == null || currNode.h == null){
                 er.set("Null command in rxlx file");
             }
-            switch (currNode.cmd){
-                case PUSH:
-                    push(this.get(currNode));
-                    break;
-                case POP://   
-                    if(!currNode.h.equals(((Base_ParseItem)getTop()).getNode().h)){
-                        er.set("POP: Stack mismatch, check source file", currNode.h.toString());
-                    }
-                    pop();
-                    break;
-                case ADD_TO:
-                    ((Base_ParseItem)getTop()).addTo(currNode.h, currNode.k, currNode.data);
-                    break;
-                case SET_ATTRIB:
-                    if(currNode.k == null){
-                        er.set("SET_ATTRIB: Null key");
-                    }
-                    ((Base_ParseItem)getTop()).setAttrib(currNode.h, currNode.k, currNode.data);
-                    break;
-                default:
-                    er.set("rxlx file improperly edited", currNode.cmd.toString());
-            }
-            //disp();
+            System.out.println(currNode);
+            //readNode(currNode);
         }
     }
-
     @Override
     public void onQuit(){
         //System.out.println( "parser onQuit" ); 

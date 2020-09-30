@@ -11,15 +11,16 @@ $number = 0;
 	CONSTANT $const2 DRP()
 	
 	LIST<SCOPES>
-		$SCOPES
 			ALL SENTENCE PHRASE WORD CHAR
 		
 	LIST<BOOLEAN>
 		$POS // Use all caps in these definitions
 			VERB NOUN ADJECTIVE ADVERB LINKING ARTICLE 
 			DETERMINER MODAL 
+			
+	LIST<BOOLEAN>
 		$STATE // Use all caps in these definitions
-			MORE
+			MORE DONE
 			
 	LIST<STRING>
 		$TEXT 
@@ -28,9 +29,12 @@ $number = 0;
 	LIST<NUMBER>
 		$INT 
 			NUM_VAL INDEX GROUP EE
+			
+	SCOPE $myBigTest POS[LINKING] {
+		RX $myRx Tokyo{1-2} POS[ADJECTIVE]=TRUE{3-} //TODO: CHECK QUOTED SPECIAL CHARACTERS
+		FX (*[2].VOTE(POS[VERB])|[-1].DROP(POS[ADJECTIVE]))&[1-4].MARK()
+	}
 
-	RX $myRx Tokyo{1-2} SENTENCE=TRUE{3-} //TODO: CHECK QUOTED SPECIAL CHARACTERS
-	FX (*[2].VOTE(POS[VERB])|[-1].DROP(POS[ADJECTIVE]))&[1-4].MARK()
 
 $*/
 

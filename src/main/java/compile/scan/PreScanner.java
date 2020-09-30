@@ -73,7 +73,7 @@ public class PreScanner extends Base_Scanner {
             }
 
             if(!restoreTextSource()){
-                System.out.println("stack empty");
+                //System.out.println("stack empty");
                 break;
             }
             //System.out.println("not empty: "+fin.loggableStatus());

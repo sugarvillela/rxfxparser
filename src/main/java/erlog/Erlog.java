@@ -51,9 +51,9 @@ public class Erlog implements ChangeListener {
     
     /**Set error, let current instance of ITextSource provide line, col number
      * @param message describes the error 
-     * @param text text that caused the error */
-    public void set( String message, String text ){
-        ErlogCore.set( message + ": " + text, className );
+     * @param at text that caused the error */
+    public void set( String message, String at ){
+        ErlogCore.set( message, at, className );
     }
     
     /**Writes accumulated errors to file */

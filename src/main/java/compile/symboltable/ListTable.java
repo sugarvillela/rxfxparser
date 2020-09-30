@@ -70,7 +70,7 @@ public class ListTable extends ListTable_RxlxReader {//
 
     public void setDefaultFieldString(Keywords.DATATYPE datatype, String category, String item){
         if(!defaults.containsKey(datatype)){
-            System.out.println(datatype+" setDefaultFieldString : " + String.format(DEFAULT_FIELD_FORMAT, category, item));
+            //System.out.println(datatype+" setDefaultFieldString : " + String.format(DEFAULT_FIELD_FORMAT, category, item));
             defaults.put(datatype, String.format(DEFAULT_FIELD_FORMAT, category, item));
         }
     }

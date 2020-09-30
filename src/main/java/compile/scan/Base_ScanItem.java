@@ -55,8 +55,8 @@ public abstract class Base_ScanItem extends Base_StackItem{
             }
         }
         hiIndex = ((Class_Scanner)P).getScanNodeList().size();
-//        String datatypeStr = (h == null)? "Null Datatype" : h.toString();
-//        System.out.println("Base_ScanItem onPop: " + datatypeStr + ", loIndex: " + hiIndex);
+        String datatypeStr = (h == null)? "Null Datatype" : h.toString();
+        //System.out.println("====onPop()====" + datatypeStr);
     }
 
     public void pushPop(String text) {

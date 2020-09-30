@@ -51,7 +51,7 @@ public class FxLogicTree  extends TreeFactory {
         ArrayList<TreeNode> leaves = leaves(root);
         readConstants(leaves);    // read constants before extend
         setPayNodes(leaves);
-        dispBreadthFirst(root);
+        //dispBreadthFirst(root);
         validateFunParam(leaves);
         //Erlog.get(this).set("Happy stop");
         return root;

@@ -1,1 +1,0 @@
-Error: semantic1.rxfx line 32 word 3: ValidatorRx: Comparing IMMUTABLE to BOOLEAN: SENTENCE = TRUE

@@ -32,7 +32,7 @@ public class ConstantTable {
     }
 
     public void setConstantName(String name){
-        System.out.println("setConstantName: "+name);
+        //System.out.println("setConstantName: "+name);
         if(symbolTable.containsKey(name)){
             Erlog.get(this).set("Identifier already exists", name);
         }
@@ -42,7 +42,7 @@ public class ConstantTable {
     }
 
     public void setValue(String value){
-        System.out.println("setValue: "+value);
+        //System.out.println("setValue: "+value);
         currNode.value = value;
         symbolTable.put(currNode.name, currNode);
         currNode = null;

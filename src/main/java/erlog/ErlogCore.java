@@ -62,6 +62,10 @@ class ErlogCore {//package private class
     public static void set( String text, String className ){
         instance.behavior.set( text, className );
     }
+
+    public static void set( String text, String at, String className ){
+        instance.behavior.set( text, at, className );
+    }
     
     /**Writes accumulated errors to file */
     public static void finish(){
@@ -115,7 +119,10 @@ class ErlogCore {//package private class
         public Behavior(){
             this.content = new ArrayList<>();
         }
+
         public abstract void set( String text, String className );
+        public abstract void set( String text, String at, String className );
+
         public void finish(){
             try( 
                 BufferedWriter file = new BufferedWriter(new FileWriter(fname));    
@@ -146,18 +153,33 @@ class ErlogCore {//package private class
                 text
             );
         }
+        protected String errText( String text, String at, String className ){
+            return String.format(
+                    "Error: %s: %s: %s at %s",
+                    textStatus.readableStatus(),
+                    className,
+                    text,
+                    at
+            );
+        }
     }
     /**Ignore: all errors passed without log, notification or exit */
     protected class Ignore extends Behavior{
         @Override
         public void set( String text, String className ){}
+        @Override
+        public void set( String text, String at, String className ){}
     }  
     
     /**Quietly log errors, no notification or exit. disp() shows errors */
     protected class Log extends Behavior{        
         @Override
         public void set( String text, String className ){
-            this.content.add(this.errText(text,className));
+            this.content.add(this.errText(text, className));
+        }
+        @Override
+        public void set( String text, String at, String className ){
+            this.content.add(this.errText(text, at, className));
         }
     }
     
@@ -169,6 +191,12 @@ class ErlogCore {//package private class
             this.content.add(errText);
             printer.print(errText);
         }
+        @Override
+        public void set( String text, String at, String className ){
+            String errText = this.errText(text, at, className);
+            this.content.add(errText);
+            printer.print(errText);
+        }
     }
     
     /**logs and prints to screen; exits on first error. */
@@ -177,9 +205,17 @@ class ErlogCore {//package private class
         public void set( String text, String className ){
             String errText = this.errText(text, className );
             this.content.add(errText);
+            printer.print(errText);
             this.finish();
-            printer.print(errText + "\nExit...");
             System.exit(0); 
+        }
+        @Override
+        public void set( String text, String at, String className ){
+            String errText = this.errText(text, at, className );
+            this.content.add(errText);
+            printer.print(errText);
+            this.finish();
+            System.exit(0);
         }
     }
     

@@ -87,8 +87,8 @@ public class FxParamUtil extends ParamUtil{
             matcher = parTypes[pari].pattern.matcher(mainText);
             if(matcher.find()){
                 paramType = parTypes[pari];
-                System.out.println("identifyPattern: paramType:" + paramType);
-                System.out.println("                  datatype:" + paramType.datatype);
+                //System.out.println("identifyPattern: paramType:" + paramType);
+                //System.out.println("                  datatype:" + paramType.datatype);
                 bracketText = matcher.replaceAll("$1");
                 setFunType();
 

@@ -37,19 +37,12 @@ public abstract class ListTable_RxlxReader extends RxlxReader implements IParseI
     public boolean contains(Keywords.DATATYPE datatype, String val){
         return symbolTable.get(datatype).containsKey(val);
     }
-    public boolean isScope(String val){
-        Map<String, Base_ParseItem> table = symbolTable.get(LIST_SCOPES);
-        if(table.containsKey(val)){
-            return true;
-        }
-        for (Map.Entry<String, Base_ParseItem> inner : table.entrySet()) {
-            if(((SymbolTableNode)inner.getValue()).contains(val)){
-                return true;
-            }
-        }
-        return false;
+    public boolean isCategory(Keywords.DATATYPE dataType, String val){
+        return symbolTable.get(LIST_SCOPES).containsKey(val);
     }
-
+    public boolean isItem(Keywords.DATATYPE dataType, String category, String val){
+        return ((SymbolTableNode)symbolTable.get(LIST_SCOPES).get(category)).contains(val);
+    }
     public Keywords.DATATYPE getDataType(String text){
         if(text != null){
             for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : symbolTable.entrySet()) {

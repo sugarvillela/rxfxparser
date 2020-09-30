@@ -29,7 +29,7 @@ public class TextSniffer {
     Base_ScanItem scanItem;
 
     public void onPush(Base_ScanItem scanItem){
-        System.out.println(state + ": TextSniffer onPush: " + scanItem.getDebugName());
+        //System.out.println(state + ": TextSniffer onPush: " + scanItem.getDebugName());
         if(state == WAIT){
             this.scanItem = scanItem;
             state = IDENTIFY;
@@ -67,7 +67,7 @@ public class TextSniffer {
         if(state == PARSE && scanItem.equals(this.scanItem)){
             //System.out.println("++++TextSniffer onPop++++");
             factoryTextNode.finishTextNode();
-            factoryTextNode.testItr();
+            //factoryTextNode.testItr();
             //System.out.println(factoryTextNode.toString());
             //System.out.println("+++++++++++++++++++++++++");
             state = WAIT;

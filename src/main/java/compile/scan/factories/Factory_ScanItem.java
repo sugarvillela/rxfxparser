@@ -12,41 +12,6 @@ public class Factory_ScanItem extends Factory_Strategy{
     public static Base_ScanItem get( DATATYPE h ){
         //System.out.println("====Factory_cxs.get()====" + h.toString());
         switch(h){
-            case LIST_BOOLEAN:
-            case LIST_DISCRETE:
-            case LIST_NUMBER:
-            case LIST_STRING:
-                return new ScanItem(
-                    h, 
-                    null,
-                    getStrategy(
-                        POP_ALL_ON_END_SOURCE,
-                        PUSH_COMMENT,
-                        BACK_POP_ON_ANY_DATATYPE,
-                        BACK_POP_ON_TARG_LANG_INSERT,
-                        READ_CONSTANT,
-                        BACK_POP_ON_ANY_VAR,
-                        MANAGE_LISTS
-                    ),
-                    getPush(ON_PUSH_LIST),
-                    getPop(ON_POP_LIST)
-                );
-            case LIST_SCOPES:
-                return new ScanItem(
-                        h,
-                        null,
-                        getStrategy(
-                                POP_ALL_ON_END_SOURCE,
-                                PUSH_COMMENT,
-                                BACK_POP_ON_ANY_DATATYPE,
-                                BACK_POP_ON_TARG_LANG_INSERT,
-                                READ_CONSTANT,
-                                BACK_POP_ON_ANY_VAR,
-                                MANAGE_SCOPES
-                        ),
-                        getPush(ON_PUSH_LIST),
-                        getPop(ON_POP_LIST)
-                );
             case COMMENT:
                 return new ScanItem(
                     h,
@@ -55,57 +20,34 @@ public class Factory_ScanItem extends Factory_Strategy{
                     getPush(ON_PUSH_NOP),// silent push pop
                     getPop(ON_POP_NOP)
                 );
-            case ATTRIB:
-                return new ScanItem(
-                    h,
-                    null,
-                    getStrategy(
-                        POP_ALL_ON_END_SOURCE,
-                        BACK_POP_ON_TARG_LANG_INSERT,
-                        PUSH_COMMENT,
-                        BACK_POP_ON_ANY_VAR,
-                        BACK_POP_ON_ANY_DATATYPE,
-                        ADD_KEY_VAL_ATTRIB
-                    ),
-                    getPush(ON_PUSH_NOP),// silent push pop
-                    getPop(ON_POP_NOP)
-                );
-            case SRCLANG:
-                return new ScanItem(
-                    h, 
-                    new DATATYPE[]{
-                        ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES, INCLUDE, FUN, RXFX, RX, FX,
-                            SCOPE, IF_ELSE, IF, ELSE, CONSTANT
-                    },
-                    getStrategy(
-                        POP_ALL_ON_END_SOURCE,
-                        PUSH_COMMENT,
-                        PUSH_TARG_LANG_INSERT,
-                        READ_VAR,
-                        PUSH_GOOD_DATATYPE,
-                        ERR
-                    )
-                );
-            case INCLUDE:
+            case FOR: // FOR and SCOPE will be treated the same
+                h = SCOPE;
+            case SCOPE:
                 return new ScanItem(
                         h,
-                        null,
+                        new DATATYPE[]{
+                                ATTRIB, RXFX, RX, FX, SCOPE
+                        },
                         getStrategy(
-                                READ_CONSTANT,
-                                READ_INCLUDE
-                        ),
-                        getPush(ON_PUSH_NOP),// silent push pop
-                        getPop(ON_POP_NOP)
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                READ_VAR,
+                                MANAGE_SCOPE,
+                                PUSH_GOOD_DATATYPE,
+                                ERR
+                        )
                 );
-            case CONSTANT:
+            case SCOPE_TEST://helper class
                 return new ScanItem(
                         h,
-                        null,
+                        new DATATYPE[]{RX},
                         getStrategy(
-                                IGNORE_CONSTANT
-                        ),
-                        getPush(ON_PUSH_NOP),// silent push pop
-                        getPop(ON_POP_NOP)
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                READ_VAR,
+                                MANAGE_SCOPE_TEST,
+                                ERR
+                        )
                 );
             case RXFX:
                 return new ScanItem(
@@ -120,6 +62,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         PUSH_GOOD_DATATYPE,
                             BACK_POP_ON_ANY_DATATYPE,
                             BACK_POP_ON_BAD_VAR,
+                        BACK_POP_ON_ITEM_CLOSE,
                         ERR
                     ),
                     getPop(RXFX_ERR_ON_POP, ON_POP)
@@ -193,18 +136,15 @@ public class Factory_ScanItem extends Factory_Strategy{
                         getPush(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
                         getPop(ON_POP)
                 );
-            case BOOL_TEST://helper class
+            case IF_TEST://helper class
                 return new ScanItem(
                         h,
                         new DATATYPE[]{SCOPE, RX},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
-                                BACK_POP_ON_ITEM_OPEN,
-                                PUSH_TARG_LANG_INSERT,
                                 READ_VAR,
-                                BACK_POP_ON_BAD_VAR,
-                                PUSH_GOOD_DATATYPE,
+                                MANAGE_IF_TEST,
                                 ERR
                         )
                 );
@@ -225,20 +165,21 @@ public class Factory_ScanItem extends Factory_Strategy{
                         getPush(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
                         getPop(ON_POP)
                 );
-            case FOR:
+            case ATTRIB:
                 return new ScanItem(
-                    h,
-                    new DATATYPE[]{SCOPE, RX},
-                    getStrategy(
-                        POP_ALL_ON_END_SOURCE,
-                        PUSH_COMMENT,
-                        READ_VAR,
-                        PUSH_GOOD_DATATYPE,
-                        BACK_POP_ON_ANY_DATATYPE,
-                        ERR
-                    )
+                        h,
+                        null,
+                        getStrategy(
+                                POP_ALL_ON_END_SOURCE,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                PUSH_COMMENT,
+                                BACK_POP_ON_ANY_VAR,
+                                BACK_POP_ON_ANY_DATATYPE,
+                                ADD_KEY_VAL_ATTRIB
+                        ),
+                        getPush(ON_PUSH_NOP),// silent push pop
+                        getPop(ON_POP_NOP)
                 );
-            // Copy and wait
             case TARGLANG_BASE:
                 return new ScanItem(
                     h, 
@@ -258,7 +199,43 @@ public class Factory_ScanItem extends Factory_Strategy{
                     getPush(ON_PUSH_NO_SNIFF),
                     getPop(ON_POP_NO_SNIFF)
                 );
-
+            case SRCLANG:
+                return new ScanItem(
+                        h,
+                        new DATATYPE[]{
+                                ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES, INCLUDE, FUN, RXFX, RX, FX,
+                                SCOPE, IF_ELSE, IF, ELSE, CONSTANT
+                        },
+                        getStrategy(
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                PUSH_TARG_LANG_INSERT,
+                                READ_VAR,
+                                PUSH_GOOD_DATATYPE,
+                                ERR
+                        )
+                );
+            case INCLUDE:
+                return new ScanItem(
+                        h,
+                        null,
+                        getStrategy(
+                                READ_CONSTANT,
+                                READ_INCLUDE
+                        ),
+                        getPush(ON_PUSH_NOP),// silent push pop
+                        getPop(ON_POP_NOP)
+                );
+            case CONSTANT:
+                return new ScanItem(
+                        h,
+                        null,
+                        getStrategy(
+                                IGNORE_CONSTANT
+                        ),
+                        getPush(ON_PUSH_NOP),// silent push pop
+                        getPop(ON_POP_NOP)
+                );
             case FUN:
                 return new ScanItem(
                         h,
@@ -267,12 +244,46 @@ public class Factory_ScanItem extends Factory_Strategy{
                         getPush(ON_PUSH_NOP),// silent push pop
                         getPop(ON_POP_NOP)
                 );
+            case LIST_BOOLEAN:
+            case LIST_DISCRETE:
+            case LIST_NUMBER:
+            case LIST_STRING:
+                return new ScanItem(
+                        h,
+                        null,
+                        getStrategy(
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                BACK_POP_ON_ANY_DATATYPE,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                READ_CONSTANT,
+                                BACK_POP_ON_ANY_VAR,
+                                MANAGE_LISTS
+                        ),
+                        getPush(ON_PUSH_LIST),
+                        getPop(ON_POP_LIST)
+                );
+            case LIST_SCOPES:
+                return new ScanItem(
+                        h,
+                        null,
+                        getStrategy(
+                                POP_ALL_ON_END_SOURCE,
+                                PUSH_COMMENT,
+                                BACK_POP_ON_ANY_DATATYPE,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                READ_CONSTANT,
+                                BACK_POP_ON_ANY_VAR,
+                                MANAGE_SCOPES_LIST
+                        ),
+                        getPush(ON_PUSH_LIST),
+                        getPop(ON_POP_LIST)
+                );
                 
             //========To implement=====================
-            case SCOPE:
-                return null;//new Scope(h);
+
             default:
-                Erlog.get("Factory_cxs").set("Developer error in get(datatype)", h.toString());
+                Erlog.get("Factory_cxs").set("Developer get(datatype)", h.toString());
                 return null;
         }
     }

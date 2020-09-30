@@ -68,13 +68,12 @@ public class Class_Scanner extends Base_Scanner {
                     backText = null;
                 }
 
-                System.out.println(fin.readableStatus() + " >>> " + text);
+                //status(text);  // display incoming text
                 ((Base_ScanItem)top).pushPop(text);
             }
-
             //
             if(!restoreTextSource()){
-                System.out.println("stack empty");
+                //System.out.println("stack empty");
                 break;
             }
             //System.out.println("not empty: "+fin.loggableStatus());
@@ -85,10 +84,13 @@ public class Class_Scanner extends Base_Scanner {
         pop();
         //Commons.disp(nodes, "\nClass_Scanner nodes");
     }
-
+    private void status(String text){
+        String topInfo = (top == null)? "null" : top.getDebugName();
+        System.out.printf("%s \t \t %s >>> %s \n", topInfo, fin.readableStatus(), text);
+    }
     @Override
     public void onQuit(){
-        System.out.println( "Scanner onQuit" );
+        //System.out.println( "Scanner onQuit" );
 
         if(
             inName == null ||

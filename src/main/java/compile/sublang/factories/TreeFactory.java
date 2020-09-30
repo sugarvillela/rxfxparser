@@ -48,7 +48,7 @@ public abstract class TreeFactory {
                 disp.add(node.readableContent());
             }
         }
-        Commons.disp(disp, "\nBreadthFirst");
+        //Commons.disp(disp, "\nBreadthFirst");
     }
     
     public void dispLeaves(TreeNode root){

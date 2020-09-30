@@ -22,8 +22,9 @@ public final class Keywords {
 
     public static final String LOGGABLE_FORMAT = "%s|%d|%d";            // file name, line, word
     public static final String STATUS_FORMAT = "%s line %d word %d";    // file name, line, word
-    public static final String DEFAULT_FIELD_FORMAT = "%s[%s]";        // category[item]
+    public static final String DEFAULT_FIELD_FORMAT = "%s[%s]";         // category[item]
     public static final String NULL_TEXT = "-";                         // nullSafe string output when a member is null
+    public static final String SCOPES_DEF_NAME = "SCOPES";              // default category name supersedes user def
     public static final int    RX_MAX_RANGE = 64;
 
     // String constants for switches: defines language behavior
@@ -78,7 +79,7 @@ public final class Keywords {
         // Non-file-generating datatypes
         ATTRIB, INCLUDE, FUN,
         // sub-datatypes not actually in the language
-        IF_ELSE, BOOL_TEST, RX_WORD, RXFX_BUILDER, FX_WORD, PAY_NODE,//RX_STATEMENT,
+        IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM, RX_WORD, RXFX_BUILDER, FX_WORD, PAY_NODE,//RX_STATEMENT,
         // datatypes whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
         // error indicator
@@ -130,10 +131,13 @@ public final class Keywords {
     // List of field names for key=value or setting attributes
     public enum FIELD {
         // Keys for setAttrib()
-        // keywords that can be specified in language
-        PROJ_NAME, KEY, VAL, WROW, WVAL, NEW_LIST_SET,
+        // keywords that can be specified in language (these have immediate effect)
+        PROJ_NAME, WROW, WVAL, NEW_LIST_SET,
+        // General keys
+        KEY, VAL,
+
         // Internal keywords for communicating between components
-        DEF_NAME, //ANON_NAME, // named and anonymous variables
+        DEF_NAME, ITEM_NAME,//ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges
         //rx
         //RX_AND1, RX_OR1, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,

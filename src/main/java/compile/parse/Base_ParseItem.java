@@ -38,7 +38,7 @@ import static compile.basics.Keywords.FIELD;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected ScanNode node;
-    protected String defName;
+    protected String outFileName;
         
     public Base_ParseItem(Factory_Node.ScanNode node){
         this.node = node;
@@ -55,13 +55,24 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     @Override
     public void setAttrib(DATATYPE datatype, FIELD key, String val) {
         switch (key){
-            case DEF_NAME:
-                defName = val;
-                break;
             default:
                 //System.out.println(key.toString() + " in Base_ParseItem setAttrib: " + val);
                 ((Base_ParseItem)below).setAttrib(datatype, key, val);
         }
+    }
+
+    @Override
+    public void onPush() {
+        System.out.println("ItemTargLang onPush");
+    }
+
+    @Override
+    public void onPop() {
+        System.out.println("ItemTargLang onPop");
+    }
+
+    public String getOutFileName(){
+        return outFileName;
     }
     
 }

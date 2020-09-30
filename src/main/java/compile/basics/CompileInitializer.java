@@ -2,11 +2,14 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
+import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.ListTable;
+import compile.symboltable.TextSniffer;
 import erlog.Erlog;
+import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -18,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -81,7 +85,7 @@ public class CompileInitializer implements ChangeListener {
         );
         PreScanner preScanner = PreScanner.getInstance();
         preScanner.onCreate();
-        System.out.println("\nConstantTable:");
+        //System.out.println("\nConstantTable:");
         //System.out.println(ConstantTable.getInstance());
         //Factory_TextNode.getInstance().testItr();
         Class_Scanner.init(
@@ -92,15 +96,18 @@ public class CompileInitializer implements ChangeListener {
         Class_Scanner scanner = Class_Scanner.getInstance();
         scanner.onCreate();
         scanner.onQuit();
+        System.out.println("Scan Complete");
 //
-//        Factory_TextNode.killInstance();
-//        TextSniffer.killInstance();
+        SymbolTable.killInstance();
+        TextSniffer.killInstance();
 
-//        Class_Parser.init(
-//            new ScanNodeSource(
-//                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-//            )
-//        );
+        Class_Parser.init(
+            new ScanNodeSource(
+                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+            )
+        );
+        Class_Parser parser = Class_Parser.getInstance();
+        parser.onCreate();
 //        System.out.println("test types...");
 //        System.out.println(SymbolTable_Enu.getInstance().getDataType("SCOPES"));
 //        System.out.println(SymbolTable_Enu.getInstance().getDataType("POS"));
