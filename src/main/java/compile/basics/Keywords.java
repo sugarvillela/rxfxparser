@@ -23,8 +23,10 @@ public final class Keywords {
     public static final String LOGGABLE_FORMAT = "%s|%d|%d";            // file name, line, word
     public static final String STATUS_FORMAT = "%s line %d word %d";    // file name, line, word
     public static final String DEFAULT_FIELD_FORMAT = "%s[%s]";         // category[item]
+    public static final String UQ_FORMAT = "%03d";                      // for unique name generator
     public static final String NULL_TEXT = "-";                         // nullSafe string output when a member is null
     public static final String SCOPES_DEF_NAME = "SCOPES";              // default category name supersedes user def
+
     public static final int    RX_MAX_RANGE = 64;
 
     // String constants for switches: defines language behavior
@@ -79,9 +81,10 @@ public final class Keywords {
         // Non-file-generating datatypes
         ATTRIB, INCLUDE, FUN,
         // sub-datatypes not actually in the language
-        IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM, RX_WORD, RXFX_BUILDER, FX_WORD, PAY_NODE,//RX_STATEMENT,
+        IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM,
+        RX_WORD, FX_WORD, RX_BUILDER, FX_BUILDER, RX_PAY_NODE, FX_PAY_NODE,//RX_STATEMENT,
         // datatypes whose text indicators are not the same as enum name
-        TARGLANG_INSERT, COMMENT, USER_DEF_LIST, USER_DEF_VAR,
+        TARGLANG_INSERT, COMMENT,
         // error indicator
         //UNKNOWN_DATATYPE,
         // test text

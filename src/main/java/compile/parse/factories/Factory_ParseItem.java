@@ -19,12 +19,10 @@ public abstract class Factory_ParseItem {
         DATATYPE h = node.h;
         switch(h){
             case LIST_BOOLEAN:
-                //return new ItemENUB(node);
+                return new ItemListBoolean(node);
             case LIST_DISCRETE:
-                //return new ItemENUD(node);
+                return new ItemListDiscrete(node);
             case SRCLANG:
-                //return new ParseItem(node);
-            case RXFX:
                 //return new ParseItem(node);
             case RX_WORD:
                 //return new ItemRxWord(node);
@@ -33,16 +31,10 @@ public abstract class Factory_ParseItem {
             case FX:
                 //return new ParseItem(node);
             case TARGLANG_BASE:
-                //return new ItemTargLangBase(node);
+                return new ItemTargLangBase(node);
             case TARGLANG_INSERT:
-                //return new ItemTargLangInsert(node);
-            case COMMENT:
-                //return new ParseItem(node);
+                return new ItemTargLangInsert(node);
             case ATTRIB:
-                //return new ParseItem(node);
-            case USER_DEF_LIST:
-                //return new ItemUserDefList(node);
-            case USER_DEF_VAR:
                 //return new ParseItem(node);
             //========To implement=====================
             case SCOPE:
@@ -59,11 +51,13 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {}
+        public void addTo(DATATYPE datatype, FIELD key, String val) {
+            System.out.printf("Add to ItemTargLangBase: %s\n", val);
+        }
 
         @Override
         /** This is the bottom of the stack, so it is the final stop for parse-time attributes.
-         * Put all general enough attributes here */
+         * Put general enough attributes here */
         public void setAttrib(DATATYPE datatype, FIELD key, String val) {
             switch(key){
                 default:
@@ -78,49 +72,26 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void onPush() {
-            System.out.println("ItemTargLangInsert onPush");
-        }
-
-        @Override
-        public void onPop() {
-            System.out.println("ItemTargLangInsert onPop");
-        }
-
-        @Override
         public void addTo(DATATYPE datatype, FIELD key, String val) {
-            if(NULL_TEXT.equals(val)){
-                er.set("No ItemTargLangInsert", val);
-            }
             System.out.printf("Add to ItemTargLangInsert: %s\n", val);
         }
     }
-    public static class ItemENUB extends Base_ParseItem{
-        protected Enum_itr itr;
-        protected int count;
+    public static class ItemListBoolean extends Base_ParseItem{
+        private Enum_itr itr;
+        private int count;
 
-        public ItemENUB(Factory_Node.ScanNode node){
+        public ItemListBoolean(Factory_Node.ScanNode node){
             super(node);
-            if(node.h == DATATYPE.LIST_BOOLEAN){// ENUD extends ENUB with different itr
-                itr = (Enum_itr)(new Uq_enumgen(CompileInitializer.getInstance().getWRow())).iterator();
-            }
-
+            itr = (Enum_itr)(new Uq_enumgen(CompileInitializer.getInstance().getWRow())).iterator();
             count = 0;
         }
         @Override
         public void addTo(DATATYPE datatype, FIELD key, String val) {
-            if(NULL_TEXT.equals(val)){
-                er.set("No variable name", val);
-            }
             int cur = itr.next();
             System.out.printf("%s = 0x%x;\n", val, cur);
             System.out.println(commons.BIT.str(cur));
         }
 
-        @Override
-        public void onPush() {
-            System.out.println("ENUB onPush");
-        }
         @Override
         public void onBeginStep(){
             if(count > 0){
@@ -133,89 +104,45 @@ public abstract class Factory_ParseItem {
         public void onEndStep(){
             System.out.println("ENUB onEndStep: name = " + node.data);
         }
-        @Override
-        public void onPop() {
-            System.out.println("ENUB onPop");
-        }
     }
-    public static class ItemENUD extends Base_ParseItem{//extends ItemENUB {
-        public ItemENUD(Factory_Node.ScanNode node){
+    public static class ItemListDiscrete extends Base_ParseItem{//extends ItemENUB {
+        private Enum_itr itr;
+        private int count;
+        public ItemListDiscrete(Factory_Node.ScanNode node){
             super(node);
-//            itr = (Enum_itr)(
-//                    new Uq_enumgen(
-//                            CompileInitializer.getInstance().getWRow(),
-//                            CompileInitializer.getInstance().getWVal()
-//                    )
-//            ).iterator();
-        }
-        @Override
-        public void onPush() {
-            System.out.println("ENUD onPush");
+            itr = (Enum_itr)(
+                    new Uq_enumgen(
+                            CompileInitializer.getInstance().getWRow(),
+                            CompileInitializer.getInstance().getWVal()
+                    )
+            ).iterator();
         }
         @Override
         public void onBeginStep(){
-//            if(count > 0){
-//                itr.newCol();
-//            }
-//            count++;
-            System.out.println("ENUD onBeginStep: name = " + node.data);
+            if(count > 0){
+                itr.newCol();
+            }
+            count++;
+            System.out.println("ItemListDiscrete onBeginStep: name = " + node.data);
         }
         @Override
         public void onEndStep(){
-            System.out.println("ENUD onEndStep: name = " + node.data);
-        }
-        @Override
-        public void onPop() {
-            System.out.println("ENUD onPop");
+            System.out.println("ItemListDiscrete onEndStep: name = " + node.data);
         }
     }
     public static class ItemRxFx extends Base_ParseItem{
-        protected DATATYPE toggle;
 
         public ItemRxFx(Factory_Node.ScanNode node){
             super(node);
         }
-        private void setErr(){
-            er.set(
-                    String.format(
-                            "Matched pairs required: %s precedes %s as cause precedes effect",
-                            RX.toString(),
-                            FX.toString())
-            );
-        }
+
         @Override
         public void addTo(DATATYPE datatype, FIELD key, String val) {
-//        if(key == FIELD.ABOVE){
-//            switch(datatype){
-//                case RX:
-//                    if(toggle != FX){
-//                        setErr();
-//                    }
-//                    break;
-//                case FX:
-//                    if(toggle != RX){
-//                        setErr();
-//                    }
-//                    break;
-//            }
-//        }
-//        else{
-//            er.set("Err in " + node.h.toString());
-//        }
+
         }
 
-        @Override
-        public void onPush() {
-            toggle = RX;
-        }
-
-        @Override
-        public void onPop() {
-            if(toggle != FX){
-                setErr();
-            }
-        }
     }
+
     public static class ItemRx extends Base_ParseItem{
         protected String low, high;
 
@@ -251,22 +178,12 @@ public abstract class Factory_ParseItem {
 
         @Override
         public void addTo(DATATYPE datatype, FIELD key, String val) {
-            if(RX_WORD != datatype){
-                er.set("Dev error", datatype.toString());
-            }
-            if(NULL_TEXT.equals(val)){
-                er.set("No rxPattern", val);
-            }
-            node.data = val;
             System.out.printf("Add to RxWord: %s\n", val);
         }
 
         @Override
         public void setAttrib(DATATYPE datatype, FIELD key, String val) {
             switch(key){
-                case DEF_NAME:
-                    //defName = val;
-                    break;
                 case LO:
                     low = val;
                     break;

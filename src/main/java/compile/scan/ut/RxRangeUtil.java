@@ -77,7 +77,7 @@ public class RxRangeUtil {
                     case BELOW:
                         low = "0";
                         high = matcher.replaceAll("$1");
-                        truncated = text.substring(0, text.length() - low.length() - 3);
+                        truncated = text.substring(0, text.length() - high.length() - 3);
                         return true;
                     case ABOVE:
                         low = matcher.replaceAll("$1");

@@ -774,7 +774,7 @@ public abstract class Factory_Strategy{
                 );
                 TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
                 //RX_TREE.dispBreadthFirst(root);
-                ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(root);
+                ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(RX, root);
                 //testRebuild(root, nodes);
                 context.addNodes(nodes);
                 context.addNode(NODE_FACTORY.newPopNode(h));
@@ -796,7 +796,7 @@ public abstract class Factory_Strategy{
             DATATYPE h = FX_WORD;
             context.addNode(NODE_FACTORY.newPushNode(h));
             TreeFactory.TreeNode root = FX_TREE.treeFromWordPattern(text);
-            ArrayList<Factory_Node.ScanNode> nodes = FX_TREE.treeToScanNodeList(root);
+            ArrayList<Factory_Node.ScanNode> nodes = FX_TREE.treeToScanNodeList(FX, root);
             //testRebuild(root, nodes);
             context.addNodes(nodes);
             context.addNode(NODE_FACTORY.newPopNode(h));

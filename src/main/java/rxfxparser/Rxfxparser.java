@@ -13,9 +13,9 @@ public class Rxfxparser {
 
     public static void main(String[] args) {
         System.out.println("Running...");
-        
-        //CompileInitializer.getInstance().init(new String[]{"semantic.rxfx", "-n"});
-        CompileInitializer.getInstance().init(args);
+
+        //CompileInitializer.getInstance().init(args);
+        uq.UqTest.uqDiscreteGen();
     }
     
 }

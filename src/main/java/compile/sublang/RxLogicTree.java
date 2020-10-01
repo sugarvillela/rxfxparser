@@ -2,7 +2,6 @@ package compile.sublang;
 
 import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.OP.*;
-import static compile.basics.Keywords.PRIM.IMMUTABLE;
 import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
 
 import compile.basics.Factory_Node;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.sublang.factories.PayNodes;
-import compile.sublang.ut.ParamUtil;
 import compile.sublang.ut.RxParamUtil;
 import compile.sublang.ut.ValidatorRx;
 import compile.symboltable.ConstantTable;
@@ -83,7 +81,8 @@ public class RxLogicTree extends TreeFactory {
         while(source.hasNext()){
             Factory_Node.ScanNode scanNode = source.nextNode();
             switch(scanNode.h){
-                case RXFX_BUILDER:
+                case RX_BUILDER:
+                case FX_BUILDER:
                     switch(scanNode.cmd){
                         case PUSH:
                             if(reroot == null){
@@ -105,7 +104,8 @@ public class RxLogicTree extends TreeFactory {
                             break;
                     }
                     break;
-                case PAY_NODE:
+                case RX_PAY_NODE:
+                case FX_PAY_NODE:
                     switch(scanNode.cmd){
                         case PUSH:
                             head.payNodes = new ArrayList<>();

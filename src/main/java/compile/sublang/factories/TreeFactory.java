@@ -5,7 +5,7 @@ import compile.basics.Keywords;
 import compile.basics.Keywords.OP;
 
 import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.DATATYPE.PAY_NODE;
+import static compile.basics.Keywords.DATATYPE.RX_PAY_NODE;
 import static compile.basics.Keywords.FIELD.VAL;
 import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.OP.NOT;
@@ -19,7 +19,7 @@ import toksource.ScanNodeSource;
 import toksource.TextSource_list;
 import toktools.TK;
 import toktools.Tokens_special;
-import unique.Unique;
+import uq.Uq;
 
 public abstract class TreeFactory {
     //protected final Keywords.DATATYPE rxOrFx;
@@ -109,7 +109,7 @@ public abstract class TreeFactory {
         while(source.hasNext()){
             Factory_Node.ScanNode scanNode = source.nextNode();
             switch(scanNode.h){
-                case RXFX_BUILDER:
+                case RX_BUILDER:
                     switch(scanNode.cmd){
                         case PUSH:
                             if(reroot == null){
@@ -131,7 +131,7 @@ public abstract class TreeFactory {
                             break;
                     }
                     break;
-                case PAY_NODE:
+                case RX_PAY_NODE:
                     switch(scanNode.cmd){
                         case PUSH:
                             head.payNodes = new ArrayList<>();
@@ -149,7 +149,17 @@ public abstract class TreeFactory {
         return reroot;
     }
 
-    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(TreeNode root){
+    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(Keywords.DATATYPE datatype, TreeNode root){
+        Keywords.DATATYPE builderType;
+        Keywords.DATATYPE payNodeType;
+        if(RX.equals(datatype)){
+            builderType = RX_BUILDER;
+            payNodeType = RX_PAY_NODE;
+        }
+        else{
+            builderType = FX_BUILDER;
+            payNodeType = FX_PAY_NODE;
+        }
         ArrayList<TreeNode> nodes = preOrder(root);
         int stackLevel = 0;
         ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
@@ -158,21 +168,21 @@ public abstract class TreeFactory {
             while(stackLevel > node.level){
                 stackLevel--;
                 cmdList.add(
-                        nodeFactory.newPopNode(RXFX_BUILDER)
+                        nodeFactory.newPopNode(builderType)
                 );
             }
             stackLevel++;
             cmdList.add(
-                    nodeFactory.newScanNode(Keywords.CMD.PUSH, RXFX_BUILDER, VAL, node.toString())
+                    nodeFactory.newScanNode(Keywords.CMD.PUSH, builderType, VAL, node.toString())
             );
             if(PAYLOAD.equals(node.op)){
-                cmdList.add(nodeFactory.newPushNode(PAY_NODE));
+                cmdList.add(nodeFactory.newPushNode(RX_PAY_NODE));
                 for(DataNode payNode : node.payNodes){
                     cmdList.add(
-                            nodeFactory.newScanNode(Keywords.CMD.ADD_TO, PAY_NODE, VAL, payNode.toString())
+                            nodeFactory.newScanNode(Keywords.CMD.ADD_TO, RX_PAY_NODE, VAL, payNode.toString())
                     );
                 }
-                cmdList.add(nodeFactory.newPopNode(PAY_NODE));
+                cmdList.add(nodeFactory.newPopNode(RX_PAY_NODE));
             }
         }
         return cmdList;
@@ -208,7 +218,7 @@ public abstract class TreeFactory {
 
     public static abstract class TreeNode{
         protected static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
-        protected static final Unique UQ = new Unique();
+        protected static final Uq uq = new Uq();
         protected ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
         public String data;         //--
@@ -225,7 +235,7 @@ public abstract class TreeFactory {
         public TreeNode(String data, int level, TreeNode parent){
             this.op = PAYLOAD;
             //connector = RX_PAYLOAD;
-            this.id = UQ.next();
+            this.id = uq.next();
             this.quoted = false;
             this.not = false;
             this.data = data;

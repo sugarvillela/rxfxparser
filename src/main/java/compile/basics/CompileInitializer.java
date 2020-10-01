@@ -15,7 +15,6 @@ import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
-import unique.Unique;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ public class CompileInitializer implements ChangeListener {
         Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);
         Widget.setDefaultLanguage(Widget.PHP);
         initTime = (new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")).format(new Date());
-        unique = new Unique();
+        //unique = new Unique();
         er = Erlog.get(this);
         listeners = new ArrayList<>();
         newEnumSet = false;
@@ -50,7 +49,7 @@ public class CompileInitializer implements ChangeListener {
 
     private final ArrayList<ChangeListener> listeners;
     private final Erlog er;
-    private final Unique unique;
+    //private final Unique unique;
     private Base_Stack currStack;
     private boolean newEnumSet;
     private String inName, projName;
@@ -150,10 +149,10 @@ public class CompileInitializer implements ChangeListener {
     }
     public String getProjName(){ return this.projName; }
 
-    public String genAnonName(Keywords.DATATYPE type){
-        String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
-        return anon;
-    }
+//    public String genAnonName(Keywords.DATATYPE type){
+//        String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
+//        return anon;
+//    }
     public void setCurrParserStack(Base_Stack currStack){
         this.currStack = currStack;
     }

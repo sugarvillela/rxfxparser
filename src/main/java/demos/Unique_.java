@@ -110,41 +110,7 @@ public class Unique_ {
 //            if(40 < i.nPrev() ){break;}
 //        }
     }
-    public static void unique_random(){
-        Unique_random uq = new Unique_random(100);
-        System.out.println("===Demo Unique Random===");
-        for( int i=1; i<=50; i++ ){
-            System.out.print( uq+" " );
-            if(i%10==0){
-                System.out.println();
-            }
-        }
-        System.out.println();
-        
-        System.out.println("===Numeric iterator: 50===");
-        uq.setInitial(50);
-        int i = 1;
-        for( int c : uq ){
-            System.out.print( uq+" " );
-            if(i++%10==0){
-                System.out.println();
-            }
-        }
-        System.out.println();
-        
-        System.out.println("===Value iterator: stop on value===");
-        uq = new Unique_random(100);
-        uq.setFinal();
-        i = 1;
-        for( int c : uq ){
-            System.out.print( uq+" " );
-            if(i++%10==0){
-                System.out.println();
-            }
-        }
-        System.out.println();
-    }
-    
+
     public static void uq_enumgen(){
         System.out.println("===Demo unique_bitpack_indexed===");
         System.out.println("Make row area too wide so we see increment sooner:");
