@@ -1,8 +1,8 @@
 package compile.sublang.ut;
 
-import commons.Commons;
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
+import compile.symboltable.ListTableItemSearch;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
 import toktools.TK;
@@ -28,11 +28,10 @@ public class FxParamUtil extends ParamUtil{
 
     private Keywords.FX_PAR paramType;
     Keywords.FX_FUN funType;
-    // mainText, bracketText inherited
     private String[] items;
     private String[] uDefCategories;
     private Keywords.DATATYPE[] listSources;
-    // int[] intValues inherited
+    protected ListTableItemSearch listTableItemSearch;
 
     private void reset(){
         // paramType to be set
@@ -62,7 +61,8 @@ public class FxParamUtil extends ParamUtil{
 
     @Override
     public void findAndSetParam(TreeFactory.TreeNode leaf, String text){
-        listTable = ListTable.getInstance();
+        //listTable = ListTableScanLoader.getInstance();
+        listTableItemSearch = ListTable.getInstance().getItemSearch();
         mainText = text;
         reset();
         identifyPattern();
@@ -168,10 +168,10 @@ public class FxParamUtil extends ParamUtil{
         }
     }
     private boolean isListItem(String bracketText_){
-        uDefCategory = listTable.getCategory(bracketText_);
+        uDefCategory = listTableItemSearch.getCategory(bracketText_);
         return(
             uDefCategory != null &&
-            (listSource = listTable.getDataType(uDefCategory)) != RAW_TEXT
+            (listSource = listTableItemSearch.getDataType(uDefCategory)) != RAW_TEXT
         );
     }
     private void funMulti(){
@@ -207,8 +207,8 @@ public class FxParamUtil extends ParamUtil{
         }
 
         if(
-            category.equals(listTable.getCategory(item)) &&
-            (listSource = listTable.getDataType(category)) != RAW_TEXT
+            category.equals(listTableItemSearch.getCategory(item)) &&
+            (listSource = listTableItemSearch.getDataType(category)) != RAW_TEXT
         ){
             items[i] =       item;
             uDefCategories[i] =  category;

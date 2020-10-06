@@ -2,7 +2,6 @@ package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
-import compile.symboltable.ListTable;
 import erlog.Erlog;
 
 import static compile.basics.Keywords.ACCESS_MOD;
@@ -29,7 +28,8 @@ public class FxAccessUtil extends ParamUtil{
             accessMod = 0;
             mainText = text;
         }
-        listTable = ListTable.getInstance();
+        //listTable = ListTableScanLoader.getInstance();
+        //listTableItemSearch = new ListTableItemSearch();
         intValues = null;
         identifyPattern();
     }

@@ -14,6 +14,7 @@ import compile.sublang.factories.PayNodes;
 import compile.sublang.ut.RxParamUtil;
 import compile.sublang.ut.ValidatorRx;
 import compile.symboltable.ConstantTable;
+import compile.symboltable.ListTableScanLoader;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
@@ -32,12 +33,12 @@ public class RxLogicTree extends TreeFactory {
     }
     protected RxLogicTree(){}
     
-    private ListTable listTable;
+    private ListTableScanLoader listTable;
     
     @Override
     public TreeNode treeFromWordPattern(String text){
         //System.out.println("tokenize start: root text: " + text);
-        listTable = ListTable.getInstance();
+        listTable = ListTable.getInstance().getScanLoader();;
         if(listTable == null){
             Erlog.get(this).set("LIST<*> items are not defined");
             return null;
@@ -66,61 +67,6 @@ public class RxLogicTree extends TreeFactory {
         validateOperations(leaves);
         //Erlog.get(this).set("Happy stop");
         return root;
-    }
-
-    /* For testing */
-    @Override
-    public TreeNode treeFromScanNodeSource(Keywords.DATATYPE rxOrFx, ArrayList<Factory_Node.ScanNode> cmdList){
-        ArrayList<String> textCommands = new ArrayList<>();
-        for(Factory_Node.ScanNode inputNode : cmdList){
-            textCommands.add(inputNode.toString());
-        }
-        ScanNodeSource source = new ScanNodeSource(new TextSource_list(textCommands));
-        PayNodes.PayNodeFactory factory = PayNodes.getFactory(rxOrFx);
-        TreeNode reroot = null, head = null;
-        while(source.hasNext()){
-            Factory_Node.ScanNode scanNode = source.nextNode();
-            switch(scanNode.h){
-                case RX_BUILDER:
-                case FX_BUILDER:
-                    switch(scanNode.cmd){
-                        case PUSH:
-                            if(reroot == null){
-                                reroot = head = TreeFactory.newTreeNode(rxOrFx, scanNode);
-                            }
-                            else{
-                                TreeNode treeNode = TreeFactory.newTreeNode(rxOrFx, scanNode);
-                                treeNode.level = head.level + 1;
-                                treeNode.parent = head;
-                                head.addChildExternal(treeNode);
-                                head = treeNode;
-                            }
-                            break;
-                        case POP:
-                            head = head.parent;
-                            if(head == null){
-                                return reroot;
-                            }
-                            break;
-                    }
-                    break;
-                case RX_PAY_NODE:
-                case FX_PAY_NODE:
-                    switch(scanNode.cmd){
-                        case PUSH:
-                            head.payNodes = new ArrayList<>();
-                            break;
-                        case ADD_TO:
-                            head.payNodes.add(factory.payNodeFromScanNode(scanNode.data));
-                            break;
-                        case POP:
-                            break;
-                    }
-                    break;
-            }
-
-        }
-        return reroot;
     }
 
     private void readConstants(ArrayList<TreeNode> leaves){

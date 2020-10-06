@@ -56,7 +56,7 @@ public class BIT {
      * @param n
      * @return 
      */
-    public static int log_ceil( int n ){
+    public static int logCeil(int n ){
         /* Returns the number of bits required to hold the given number */
         return (n==0)? 1 : (n<0)? 32 : 1 + (int)(Math.log(n)/Math.log(2));
     }
@@ -157,7 +157,7 @@ public class BIT {
          * uniform formatting as it ignores leading zeroes) */
         int out=0;
         for ( int i = 0; i < args.length-1; i+=2){
-            int w = ( args[i+1]!=0 )? args[i+1] : BIT.log_ceil( args[i] );
+            int w = ( args[i+1]!=0 )? args[i+1] : BIT.logCeil( args[i] );
             out = out << w;
             out |= BIT.subint( args[i], 0, w );
         }
@@ -172,7 +172,7 @@ public class BIT {
         int out=0;
         int shift=0;
         for ( int i = 0; i < args.length-1; i+=2){
-            int w = ( args[i+1]!=0 )? args[i+1] : BIT.log_ceil( args[i] );
+            int w = ( args[i+1]!=0 )? args[i+1] : BIT.logCeil( args[i] );
             out |= BIT.subint( args[i], 0, w ) << shift;
             shift += w;
         }
@@ -246,5 +246,21 @@ public class BIT {
     /* Math */
     public static int log2( int n ){
         return (int)(Math.log(n)/0.69314718);
+    }
+
+    public static int binStrToInt(String binStr){
+        //System.out.println(binStr);
+        int out = 0;
+        for(int i = 0; i < binStr.length(); i++){
+            char ch = binStr.charAt(i);
+            if(ch != '_'){
+                out <<= 1;
+                if(ch == '1'){
+                    out++;
+                }
+
+            }
+        }
+        return out;
     }
 }

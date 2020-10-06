@@ -87,13 +87,15 @@ public abstract class RxlxReader extends Base_Stack{
                 pop();
                 break;
             case ADD_TO:
-                ((IParseItem)getTop()).addTo(node.h, node.k, node.data);
+                //((IParseItem)getTop()).addTo(node.h, node.k, node.data);
+                ((IParseItem)getTop()).addTo(node);
                 break;
             case SET_ATTRIB:
                 if(node.k == null){
                     er.set("Null key in rxlx file");
                 }
-                ((IParseItem)getTop()).setAttrib(node.h, node.k, node.data);
+                //((IParseItem)getTop()).setAttrib(node.h, node.k, node.data);
+                ((IParseItem)getTop()).setAttrib(node);
                 break;
             default:
                 er.set("readFile: rxlx file improperly edited", node.cmd.toString());

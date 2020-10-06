@@ -19,10 +19,10 @@ public class BIT_ {
     public static void log_ceil(){
         int n=1;
         for ( int i = 0; i < 32; i++) {
-            System.out.println( BIT.str(n-1)+", c="+BIT.log_ceil(n-1) );
+            System.out.println( BIT.str(n-1)+", c="+BIT.logCeil(n-1) );
             n = n<<1;
         }
-        System.out.println( BIT.str(-1)+", c="+BIT.log_ceil(-1) );
+        System.out.println( BIT.str(-1)+", c="+BIT.logCeil(-1) );
     }
     public static void first1(){
         System.out.println("===Demo BIT.first1===");

@@ -1,5 +1,5 @@
 # Generated file, do not edit
-# Last write: 10/05/2020 17:59:46
+# Last write: 10/05/2020 17:06:27
 # Defines lists, categories and items
 semantic1.rxfx|13|0,PUSH,LIST_SCOPES,-,-
 semantic1.rxfx|13|0,SET_ATTRIB,LIST_SCOPES,DEF_NAME,SCOPES
@@ -32,29 +32,6 @@ semantic1.rxfx|16|0,ADD_TO,LIST_BOOLEAN,-,ARTICLE
 semantic1.rxfx|16|0,ADD_TO,LIST_BOOLEAN,-,DETERMINER
 semantic1.rxfx|16|0,ADD_TO,LIST_BOOLEAN,-,MODAL
 semantic1.rxfx|16|0,POP,LIST_BOOLEAN,-,-
-semantic1.rxfx|16|0,PUSH,LIST_DISCRETE,-,-
-semantic1.rxfx|16|0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,POLITICS
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,DEMOCRAT
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,REPUBLICAN
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,LIBERTARIAN
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,INDEPENDENT
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,GREEN
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,SOCIALIST
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,COMMUNIST
-semantic1.rxfx|16|0,POP,LIST_DISCRETE,-,-
-semantic1.rxfx|16|0,PUSH,LIST_DISCRETE,-,-
-semantic1.rxfx|16|0,SET_ATTRIB,LIST_DISCRETE,DEF_NAME,NUMBERS
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,ONE
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,TWO
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,THREE
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,FOUR
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,FIVE
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,SIX
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,SEVEN
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,EIGHT
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,NINE
-semantic1.rxfx|16|0,ADD_TO,LIST_DISCRETE,-,TEN
-semantic1.rxfx|16|0,POP,LIST_DISCRETE,-,-
 semantic1.rxfx|25|0,PUSH,LIST_STRING,-,-
 semantic1.rxfx|25|0,SET_ATTRIB,LIST_STRING,DEF_NAME,TEXT
 semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,IN
@@ -64,14 +41,4 @@ semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,EXPAND1
 semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,EXPAND2
 semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,NAME
 semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,SURNAME
-semantic1.rxfx|25|0,POP,LIST_STRING,-,-
-semantic1.rxfx|25|0,PUSH,LIST_STRING,-,-
-semantic1.rxfx|25|0,SET_ATTRIB,LIST_STRING,DEF_NAME,NAMES
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,BOB
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,STAN
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,LUPE
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,GUSTAVO
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,PHIL
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,TIFFANY
-semantic1.rxfx|25|0,ADD_TO,LIST_STRING,-,JULIAN
 semantic1.rxfx|25|0,POP,LIST_STRING,-,-

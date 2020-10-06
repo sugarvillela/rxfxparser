@@ -48,7 +48,7 @@ public abstract class TreeFactory {
                 disp.add(node.readableContent());
             }
         }
-        //Commons.disp(disp, "\nBreadthFirst");
+        Commons.disp(disp, "\nBreadthFirst");
     }
     
     public void dispLeaves(TreeNode root){
@@ -110,6 +110,7 @@ public abstract class TreeFactory {
             Factory_Node.ScanNode scanNode = source.nextNode();
             switch(scanNode.h){
                 case RX_BUILDER:
+                case FX_BUILDER:
                     switch(scanNode.cmd){
                         case PUSH:
                             if(reroot == null){
@@ -132,6 +133,7 @@ public abstract class TreeFactory {
                     }
                     break;
                 case RX_PAY_NODE:
+                case FX_PAY_NODE:
                     switch(scanNode.cmd){
                         case PUSH:
                             head.payNodes = new ArrayList<>();

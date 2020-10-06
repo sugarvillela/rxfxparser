@@ -6,7 +6,7 @@ import compile.sublang.ut.FxAccessUtil;
 import compile.sublang.ut.FxParamUtil;
 import compile.sublang.ut.ValidatorFx;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.ListTable;
+import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 import toktools.TK;
 import toktools.Tokens_special;
@@ -29,16 +29,14 @@ public class FxLogicTree  extends TreeFactory {
     }
     protected FxLogicTree(){}
 
-    private ListTable listTable;
-
     @Override
     public TreeNode treeFromWordPattern(String text){
         //System.out.println("tokenize start: root text: " + text);
-        listTable = ListTable.getInstance();
-        if(listTable == null){
-            Erlog.get(this).set("LIST<*> items are not defined");
-            return null;
-        }
+//        listTable = ListTableScanLoader.getInstance();
+//        if(listTable == null){
+//            Erlog.get(this).set("LIST<*> items are not defined");
+//            return null;
+//        }
         TreeNode root = TreeFactory.newTreeNode(FX, text, 0, null);
         boolean more;
         do{

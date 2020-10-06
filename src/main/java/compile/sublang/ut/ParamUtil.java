@@ -4,7 +4,8 @@ import commons.RangeUtil;
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.ListTable;
+import compile.symboltable.ListTableItemSearch;
+import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 
 import java.util.regex.Matcher;
@@ -12,7 +13,6 @@ import java.util.regex.Matcher;
 public abstract class ParamUtil {
     protected static final int MAX = 1024;
     protected final RangeUtil rangeUtil;
-    protected ListTable listTable;
     protected String mainText, bracketText;
     protected String uDefCategory, item;    // null unless text describes a list item
     protected Keywords.DATATYPE listSource; // null unless text describes a list item

@@ -135,7 +135,7 @@ public final class Keywords {
     public enum FIELD {
         // Keys for setAttrib()
         // keywords that can be specified in language (these have immediate effect)
-        PROJ_NAME, WROW, WVAL, NEW_LIST_SET,
+        PROJ_NAME, WROW, WCOL, WVAL, NEW_LIST_SET,
         // General keys
         KEY, VAL,
 

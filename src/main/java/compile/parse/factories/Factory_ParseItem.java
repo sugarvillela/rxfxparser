@@ -51,17 +51,17 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {
-            System.out.printf("Add to ItemTargLangBase: %s\n", val);
+        public void addTo(Factory_Node.ScanNode node) {
+            System.out.printf("Add to ItemTargLangBase: %s\n", node.data);
         }
 
         @Override
         /** This is the bottom of the stack, so it is the final stop for parse-time attributes.
          * Put general enough attributes here */
-        public void setAttrib(DATATYPE datatype, FIELD key, String val) {
-            switch(key){
+        public void setAttrib(Factory_Node.ScanNode node) {
+            switch(node.k){
                 default:
-                    er.set("Unknown keyword", key.toString());
+                    er.set("Unknown keyword", node.k.toString());
             }
         }
     }
@@ -72,8 +72,8 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {
-            System.out.printf("Add to ItemTargLangInsert: %s\n", val);
+        public void addTo(Factory_Node.ScanNode node) {
+            System.out.printf("Add to ItemTargLangInsert: %s\n", node.data);
         }
     }
     public static class ItemListBoolean extends Base_ParseItem{
@@ -86,9 +86,9 @@ public abstract class Factory_ParseItem {
             count = 0;
         }
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {
+        public void addTo(Factory_Node.ScanNode node) {
             int cur = itr.next();
-            System.out.printf("%s = 0x%x;\n", val, cur);
+            System.out.printf("%s = 0x%x;\n", node.data, cur);
             System.out.println(commons.BIT.str(cur));
         }
 
@@ -137,7 +137,7 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {
+        public void addTo(Factory_Node.ScanNode node) {
 
         }
 
@@ -177,21 +177,21 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(DATATYPE datatype, FIELD key, String val) {
-            System.out.printf("Add to RxWord: %s\n", val);
+        public void addTo(Factory_Node.ScanNode node) {
+            System.out.printf("Add to RxWord: %s\n", node.data);
         }
 
         @Override
-        public void setAttrib(DATATYPE datatype, FIELD key, String val) {
-            switch(key){
+        public void setAttrib(Factory_Node.ScanNode node) {
+            switch(node.k){
                 case LO:
-                    low = val;
+                    low = node.data;
                     break;
                 case HI:
-                    high = val;
+                    high = node.data;
                     break;//PROJ_NAME
                 default:
-                    ((Base_ParseItem)below).setAttrib(datatype, key, val);
+                    ((Base_ParseItem)below).setAttrib(node);
             }
         }
     }

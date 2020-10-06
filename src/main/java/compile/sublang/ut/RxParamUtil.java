@@ -2,6 +2,7 @@ package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
+import compile.symboltable.ListTableItemSearch;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
 
@@ -18,13 +19,11 @@ public class RxParamUtil extends ParamUtil{
         return (instance == null)? (instance = new RxParamUtil()): instance;
     }
 
-    //private final Keywords.RX_PAR[] parTypes;
-
     private Keywords.RX_PAR paramType;      // General description of the text
     private Keywords.PRIM callerType;       // Always NULL unless this is a function
     protected Keywords.PRIM outType;        // Depends on function type, list type or datatype interpretation of the text
     private Keywords.RX_FUN funType;        // null unless function
-
+    protected ListTableItemSearch listTableItemSearch;
 
     @Override
     public void findAndSetParam(TreeFactory.TreeNode leaf, String text){
@@ -36,7 +35,8 @@ public class RxParamUtil extends ParamUtil{
         }
         else{
             mainText = text;
-            listTable = ListTable.getInstance();
+            //listTable = ListTableScanLoader.getInstance();
+            listTableItemSearch = ListTable.getInstance().getItemSearch();;
             identifyPattern();
         }
     }
@@ -169,10 +169,10 @@ public class RxParamUtil extends ParamUtil{
 
     private void setTypesFromItem(){// error or assume?
         String category = mainText.substring(0, mainText.length() - bracketText.length() -2);
-        if(category.equals(listTable.getCategory(bracketText))){
+        if(category.equals(listTableItemSearch.getCategory(bracketText))){
             item = bracketText;
             uDefCategory = category;
-            listSource = listTable.getDataType(uDefCategory);
+            listSource = listTableItemSearch.getDataType(uDefCategory);
             outType = listSource.outType;
         }
         else{
@@ -183,11 +183,11 @@ public class RxParamUtil extends ParamUtil{
     }
 
     private void setTypesFromText(){
-        String tempCategory = listTable.getCategory(mainText);
+        String tempCategory = listTableItemSearch.getCategory(mainText);
         Keywords.DATATYPE tempListSource;
         if(
             tempCategory != null &&
-            (tempListSource = listTable.getDataType(tempCategory)) != RAW_TEXT
+            (tempListSource = listTableItemSearch.getDataType(tempCategory)) != RAW_TEXT
         ){
             fixParamType(CATEGORY_ITEM);
             item = mainText;

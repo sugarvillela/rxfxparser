@@ -18,9 +18,6 @@ import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.FIELD.*;
 
-import toksource.ScanNodeSource;
-import toksource.TextSource_file;
-
 import java.util.ArrayList;
 
 /**
@@ -124,7 +121,8 @@ public abstract class Factory_Strategy{
     private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
     private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
     private static final SymbolTable SYMBOL_TABLE = SymbolTable.getInstance();
-    private static ListTable LIST_TABLE = null;
+    private static ListTableScanLoader listTableScanLoader = null;
+    private static ListTableItemSearch listTableItemSearch = null;
 
     public static abstract class Strategy{
         Class_Scanner P;
@@ -255,6 +253,14 @@ public abstract class Factory_Strategy{
                 case WROW:
                     try{
                         CompileInitializer.getInstance().setWRow(Integer.parseInt(val));
+                    }
+                    catch(Exception e){
+                        Erlog.get(this).set("Expected numeric, found" + val, text);
+                    }
+                    return true;
+                case WCOL:
+                    try{
+                        CompileInitializer.getInstance().setWCol(Integer.parseInt(val));
                     }
                     catch(Exception e){
                         Erlog.get(this).set("Expected numeric, found" + val, text);
@@ -505,7 +511,7 @@ public abstract class Factory_Strategy{
                 case UDEF:
                     if(SYMBOL_TEST.isUserDef(text)){
                         String defName = SYMBOL_TEST.stripUserDef(text);
-                        if(LIST_TABLE.contains(h, defName)){
+                        if(listTableItemSearch.contains(h, defName)){
                             Erlog.get(this).set(
                                     String.format(
                                             "%s already exists...%s categories must be uniquely named",
@@ -524,7 +530,7 @@ public abstract class Factory_Strategy{
                     }
                     break;
                 case FIRST:
-                    LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
+                    listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
                     context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
                     context.setState(PARSE);
                     break;
@@ -547,13 +553,13 @@ public abstract class Factory_Strategy{
                         context.setState(FIRST);
                     }
                     else{
-                        LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
+                        listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
                         context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
                         context.setState(PARSE);
                     }
                     break;
                 case FIRST:
-                    LIST_TABLE.setDefaultFieldString(h, context.getDefName(),text);
+                    listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
                     context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
                     context.setState(PARSE);
                     break;
@@ -634,7 +640,7 @@ public abstract class Factory_Strategy{
                     if(RX.toString().equals(text)) {    // Explicit RX call
                         P.push(Factory_ScanItem.get(RX));
                     }
-                    else if(LIST_TABLE.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
+                    else if(listTableItemSearch.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
                         context.addNode(NODE_FACTORY.newPushNode(SCOPE_ITEM));
                         context.addNode(
                                 NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
@@ -730,7 +736,7 @@ public abstract class Factory_Strategy{
                     if(RX.toString().equals(text)) {    // Explicit RX call
                         P.push(Factory_ScanItem.get(RX));
                     }
-                    else if(LIST_TABLE.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
+                    else if(listTableItemSearch.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
                         context.addNode(NODE_FACTORY.newPushNode(SCOPE_ITEM));
                         context.addNode(
                                 NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
@@ -773,7 +779,6 @@ public abstract class Factory_Strategy{
                     CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
                 );
                 TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
-                //RX_TREE.dispBreadthFirst(root);
                 ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(RX, root);
                 //testRebuild(root, nodes);
                 context.addNodes(nodes);
@@ -784,8 +789,8 @@ public abstract class Factory_Strategy{
         }
         private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
             TreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
-            //System.out.println(">>>>RX testRebuild<<<<");
-            //RX_TREE.dispBreadthFirst(newRoot);
+            System.out.println(">>>>RX testRebuild<<<<");
+            RX_TREE.dispBreadthFirst(newRoot);
             RX_TREE.assertEqual(origRoot, newRoot);
         }
 
@@ -804,8 +809,8 @@ public abstract class Factory_Strategy{
         }
         private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
             TreeFactory.TreeNode newRoot = FX_TREE.treeFromScanNodeSource(FX, nodes);
-            //System.out.println(">>>>FX testRebuild<<<<");
-            //RX_TREE.dispBreadthFirst(newRoot);
+            System.out.println(">>>>FX testRebuild<<<<");
+            RX_TREE.dispBreadthFirst(newRoot);
             FX_TREE.assertEqual(origRoot, newRoot);
         }
     }
@@ -837,17 +842,13 @@ public abstract class Factory_Strategy{
     public static class OnPushList extends Strategy{
         // Lazy init allows specifying in attrib whether to use new list set or add to existing
         private void initListTable(){
-            ListTable.init(
-                    (CompileInitializer.getInstance().isNewEnumSet())?
-                            null :
-                            new ScanNodeSource(new TextSource_file(ListTable_RxlxReader.listTableFileName()))
-            );
-            LIST_TABLE = ListTable.getInstance();
-            LIST_TABLE.onCreate();
+
+            listTableScanLoader = ListTable.getInstance().getScanLoader();
+            listTableItemSearch = ListTable.getInstance().getItemSearch();
         }
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(LIST_TABLE == null){
+            if(listTableScanLoader == null){
                 initListTable();
             }
             context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
@@ -888,7 +889,7 @@ public abstract class Factory_Strategy{
             String defName = context.getDefName();
             //Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
             if(defName != null){
-                LIST_TABLE.readList(context.getScanNodeList());
+                listTableScanLoader.readList(context.getScanNodeList());
             }
             return false;
         }
@@ -930,9 +931,9 @@ public abstract class Factory_Strategy{
 //            SYMBOL_TABLE_VAR.write_rxlx_file(
 //                Keywords.fileName_symbolTableAll()
 //            );
-            if(LIST_TABLE != null){
-                LIST_TABLE.onQuit();
-            }
+//            if(listTableScanLoader != null){
+//                listTableScanLoader.onQuit();
+//            }
             SymbolTable.killInstance();
             return false;
         }

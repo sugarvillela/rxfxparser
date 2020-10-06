@@ -48,16 +48,17 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     public ScanNode getNode(){
         return this.node;
     }
-    
+
     @Override
-    public void addTo(DATATYPE datatype, FIELD key, String val) {}
-    
+    public void addTo(Factory_Node.ScanNode node) {}
+
+
     @Override
-    public void setAttrib(DATATYPE datatype, FIELD key, String val) {
-        switch (key){
+    public void setAttrib(Factory_Node.ScanNode node) {
+        switch (node.k){
             default:
-                //System.out.println(key.toString() + " in Base_ParseItem setAttrib: " + val);
-                ((Base_ParseItem)below).setAttrib(datatype, key, val);
+                System.out.println(node.k.toString() + " in Base_ParseItem setAttrib: " + node.data);
+                //((Base_ParseItem)below).setAttrib(node);
         }
     }
 

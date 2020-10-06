@@ -5,7 +5,7 @@ import compile.basics.Keywords;
 import compile.sublang.ut.FxAccessUtil;
 import compile.sublang.ut.FxParamUtil;
 import compile.sublang.ut.RxParamUtil;
-import compile.symboltable.ListTable;
+import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 import interfaces.DataNode;
 import toktools.TK;
@@ -23,11 +23,11 @@ public abstract class PayNodes {
 
     public static abstract class PayNodeFactory{
         protected static final Tokens_special T = new Tokens_special(",", "'", TK.IGNORESKIP );
-        protected ListTable listTable;
+        //protected ListTableScanLoader listTable;
         protected ArrayList<DataNode> payNodes;
 
         public PayNodeFactory(){
-            listTable = ListTable.getInstance();
+            //listTable = ListTableScanLoader.getInstance();
         }
 
         public ArrayList<DataNode> getPayNodes(){

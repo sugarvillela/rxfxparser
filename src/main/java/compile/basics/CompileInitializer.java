@@ -2,12 +2,10 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
-import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
-import compile.symboltable.SymbolTable;
 import compile.symboltable.ListTable;
-import compile.symboltable.TextSniffer;
+import compile.symboltable.SymbolTable;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
@@ -20,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -43,7 +40,8 @@ public class CompileInitializer implements ChangeListener {
         er = Erlog.get(this);
         listeners = new ArrayList<>();
         newEnumSet = false;
-        wrow = 8;
+        wrow = 5;
+        wcol = 3;
         wval = 4;
     }
 
@@ -54,14 +52,14 @@ public class CompileInitializer implements ChangeListener {
     private boolean newEnumSet;
     private String inName, projName;
     private String initTime;
-    private int wrow, wval;
+    private int wrow, wval, wcol;
 
 
     public void initFromProperties(String path){// TODO load from properties file
 
     }
     public void init(String[] args){
-        inName = (args.length > 0)? args[0] : "semantic1";
+        inName = (args == null || args.length == 0)?  "semantic1" : args[0];
         if(inName.endsWith(SOURCE_FILE_EXTENSION)){
             inName = inName.substring(0, inName.length() - SOURCE_FILE_EXTENSION.length());
             System.out.println(SOURCE_FILE_EXTENSION + " extension not needed.");
@@ -77,42 +75,40 @@ public class CompileInitializer implements ChangeListener {
         this.addChangeListener(Factory_Node.getInstance());
         this.addChangeListener(SymbolTable.getInstance());
 
-        PreScanner.init(
-            new TokenSource(
-                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-            )
-        );
-        PreScanner preScanner = PreScanner.getInstance();
-        preScanner.onCreate();
-        //System.out.println("\nConstantTable:");
-        //System.out.println(ConstantTable.getInstance());
-        //Factory_TextNode.getInstance().testItr();
-        Class_Scanner.init(
-            new TokenSource(
-                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-            )
-        );
-        Class_Scanner scanner = Class_Scanner.getInstance();
-        scanner.onCreate();
-        scanner.onQuit();
-        System.out.println("Scan Complete");
+//        PreScanner.init(
+//            new TokenSource(
+//                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+//            )
+//        );
+//        PreScanner preScanner = PreScanner.getInstance();
+//        preScanner.onCreate();
+//        //System.out.println("\nConstantTable:");
+//        //System.out.println(ConstantTable.getInstance());
+//        //Factory_TextNode.getInstance().testItr();
+//        Class_Scanner.init(
+//            new TokenSource(
+//                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+//            )
+//        );
+//        Class_Scanner scanner = Class_Scanner.getInstance();
+//        scanner.onCreate();
+//        if(ListTable.getInstance() != null){
+//            ListTable.getInstance().persist();
+//        }
+//        scanner.onQuit();
+//        System.out.println("Scan Complete");
 //
-        SymbolTable.killInstance();
-        TextSniffer.killInstance();
-
-        Class_Parser.init(
-            new ScanNodeSource(
-                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-            )
-        );
-        Class_Parser parser = Class_Parser.getInstance();
-        parser.onCreate();
-//        System.out.println("test types...");
-//        System.out.println(SymbolTable_Enu.getInstance().getDataType("SCOPES"));
-//        System.out.println(SymbolTable_Enu.getInstance().getDataType("POS"));
-//        System.out.println(SymbolTable_Enu.getInstance().getDataType("verb"));
-//        System.out.println(SymbolTable_Enu.getInstance().getCategory("verb"));
-        Erlog.finish();
+//        SymbolTable.killInstance();
+//        TextSniffer.killInstance();
+//
+//        Class_Parser.init(
+//            new ScanNodeSource(
+//                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+//            )
+//        );
+//        Class_Parser parser = Class_Parser.getInstance();
+//        parser.onCreate();
+//        Erlog.finish();
     }
     private void readArgs(String[] args){
         for(int i = 1; i < args.length; i++){
@@ -133,8 +129,11 @@ public class CompileInitializer implements ChangeListener {
 
     public void setWRow(int wrow){ this.wrow = wrow; }
     public int  getWRow(){ return wrow; }
+    public void setWCol(int wcol){ this.wcol = wcol; }
+    public int  getWCol(){ return wcol; }
     public void setWVal(int wval){ this.wval = wval; }
     public int  getWVal(){ return wval; }
+
     public boolean fitToWVal(String numeric){// validate numeric before calling here
         int fit = (int)Math.pow(2, wval);
         return Integer.parseInt(numeric) < fit;
@@ -180,7 +179,6 @@ public class CompileInitializer implements ChangeListener {
     public boolean isNewEnumSet(){
         return newEnumSet;
     }
-
 
     private void deleteMe(){
 //        ListTable.init(null);

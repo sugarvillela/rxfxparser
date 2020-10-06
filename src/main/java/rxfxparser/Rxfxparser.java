@@ -15,7 +15,9 @@ public class Rxfxparser {
         System.out.println("Running...");
 
         //CompileInitializer.getInstance().init(args);
-        uq.UqTest.uqDiscreteGen();
+        store.TestStore.listTable();
+        //uq.UqTest.uqBoolGenNewRow();
+        //commons.BIT.binStrToInt("0000_1111_0000_1111_0000_1111_0000_1111");
     }
     
 }
