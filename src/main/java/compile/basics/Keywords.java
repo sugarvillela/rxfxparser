@@ -41,6 +41,7 @@ public final class Keywords {
     public static final String COMMENT_TEXT = "//";    //
     public static final String CONT_LINE = "...";      // Matlab-like extension
     public static final String ACCESS_MOD = "*";       // FX access: input string instead of rx string
+    public static final String TARG = "TARG";          // Specify target-language-style regex for RX
 
     // List of commands to instruct parser
     public enum CMD { 
@@ -82,7 +83,7 @@ public final class Keywords {
         ATTRIB, INCLUDE, FUN,
         // sub-datatypes not actually in the language
         IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM,
-        RX_WORD, FX_WORD, RX_BUILDER, FX_BUILDER, RX_PAY_NODE, FX_PAY_NODE,//RX_STATEMENT,
+        RX_WORD, RX_TARGLANG, FX_WORD, RX_BUILDER, FX_BUILDER, RX_PAY_NODE, FX_PAY_NODE,//RX_STATEMENT,
         // datatypes whose text indicators are not the same as enum name
         TARGLANG_INSERT, COMMENT,
         // error indicator
@@ -135,12 +136,12 @@ public final class Keywords {
     public enum FIELD {
         // Keys for setAttrib()
         // keywords that can be specified in language (these have immediate effect)
-        PROJ_NAME, WROW, WCOL, WVAL, NEW_LIST_SET,
+        PROJ_NAME, NEW_LIST_SET, RX_TARGLANG_ON_SPECIAL,
         // General keys
         KEY, VAL,
 
         // Internal keywords for communicating between components
-        DEF_NAME, ITEM_NAME,//ANON_NAME, // named and anonymous variables
+        DEF_NAME, ITEM_NAME, DEFAULT_FIELD, SPECIAL_FIELD,//ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges
         //rx
         //RX_AND1, RX_OR1, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,

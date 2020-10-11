@@ -2,10 +2,12 @@ package compile.symboltable;
 
 import compile.basics.Keywords;
 import compile.parse.Base_ParseItem;
+import erlog.Erlog;
 
 import java.util.Map;
 
 import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
+import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
 
 public class ListTableItemSearch {
     protected final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
@@ -54,5 +56,18 @@ public class ListTableItemSearch {
             }
         }
         return null;
+    }
+
+    public ListTable.ListTableNode getListTableNode(Keywords.DATATYPE datatype, String category){
+        Base_ParseItem listTableNode = listTableMap.get(datatype).get(category);
+        if(listTableNode == null){
+            String datatypeString = (datatype == null)? "NULL" : datatype.toString();
+            Erlog.get(this).set(String.format("Can't find %s in %s", category, datatypeString));
+            return null;
+        }
+        return (ListTable.ListTableNode)listTableNode;
+    }
+    public boolean isSpecialField(Keywords.DATATYPE datatype, String category, String item){
+        return item.equals(getListTableNode(datatype, category).getSpecialField());
     }
 }

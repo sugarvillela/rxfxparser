@@ -4,11 +4,8 @@ import static compile.basics.Keywords.DATATYPE.*;
 import static compile.basics.Keywords.OP.*;
 import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
 
-import compile.basics.Factory_Node;
-
 import java.util.ArrayList;
 
-import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.sublang.factories.PayNodes;
 import compile.sublang.ut.RxParamUtil;
@@ -17,8 +14,6 @@ import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTableScanLoader;
 import compile.symboltable.ListTable;
 import erlog.Erlog;
-import toksource.ScanNodeSource;
-import toksource.TextSource_list;
 import toktools.TK;
 import toktools.Tokens_special;
 
@@ -33,13 +28,13 @@ public class RxLogicTree extends TreeFactory {
     }
     protected RxLogicTree(){}
     
-    private ListTableScanLoader listTable;
+    private ListTableScanLoader listTableScanLoader;
     
     @Override
     public TreeNode treeFromWordPattern(String text){
         //System.out.println("tokenize start: root text: " + text);
-        listTable = ListTable.getInstance().getScanLoader();;
-        if(listTable == null){
+        listTableScanLoader = ListTable.getInstance().getScanLoader();;
+        if(listTableScanLoader == null){
             Erlog.get(this).set("LIST<*> items are not defined");
             return null;
         }
@@ -135,10 +130,10 @@ public class RxLogicTree extends TreeFactory {
                 if(leaf.quoted){
                     leaf.data = "'" + leaf.data + "'";// workaround to keep leaf.quoted true when leaf is parsed
                 }
-                leaf.data = listTable.getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
+                leaf.data = listTableScanLoader.getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
                 return true;
             case NUMBER:
-                leaf.data = listTable.getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
+                leaf.data = listTableScanLoader.getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
                 return true;
             case IMMUTABLE:
                 Erlog.get(this).set(LIST_SCOPES.toString() + " is an immutable datatype for scoping; not allowed here", leaf.data);

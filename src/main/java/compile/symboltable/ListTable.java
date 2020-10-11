@@ -11,11 +11,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
+import static compile.basics.Keywords.FIELD.*;
 import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.CMD.*;
 import static compile.basics.Keywords.CMD.POP;
 import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.FIELD.DEF_NAME;
 import static java.lang.Math.max;
 
 public class ListTable {
@@ -27,8 +28,8 @@ public class ListTable {
 
     public static void killInstance(){
         if(instance != null){
-            instance.fileLoader.kill();
             instance.numGen.kill();
+            instance.scanLoader.kill();
             instance = null;
         }
     }
@@ -37,7 +38,7 @@ public class ListTable {
         instance = new ListTable();
         CompileInitializer compileInitializer = CompileInitializer.getInstance();
         if(compileInitializer.isNewEnumSet()){
-            instance.fileLoader = new ListTableFileLoader(null, instance);
+            instance.fileLoader = new ListTableFileLoader(null, instance.listTableMap);
         }
         else{
             String fName = instance.listTableFileName();
@@ -45,14 +46,14 @@ public class ListTable {
                     new ScanNodeSource(
                             new TextSource_file(fName)
                     ),
-                    instance
+                    instance.listTableMap
             );
             instance.fileLoader.onCreate();
         }
-        instance.scanLoader  = new ListTableScanLoader();
-        instance.itemSearch = new ListTableItemSearch(instance.getListTableMap());
-        instance.typeCount = new ListTableTypeCount(instance.getListTableMap());
-        instance.numGen = new ListTableNumGen(instance);
+        instance.scanLoader  = new ListTableScanLoader(instance);
+        instance.itemSearch = new ListTableItemSearch(instance.listTableMap);
+        instance.typeCount = new ListTableTypeCount(instance.listTableMap);
+        instance.numGen = new ListTableNumGen(instance, instance.listTableMap);
         return instance;
     }
 
@@ -60,7 +61,7 @@ public class ListTable {
         return instance != null;
     }
 
-    private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
+    private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;// don't let this out of ListTable class family
     private ListTableFileLoader fileLoader;
     private ListTableScanLoader scanLoader;
     private ListTableItemSearch itemSearch;
@@ -85,10 +86,10 @@ public class ListTable {
     public ListTableItemSearch getItemSearch(){
         return itemSearch;
     }
-    public ListTableTypeCount getTypeCount(){
+    public ListTableTypeCount  getTypeCount(){
         return typeCount;
     }
-    public ListTableNumGen getNumGen(){
+    public ListTableNumGen     getNumGen(){
         return numGen;
     }
 
@@ -101,12 +102,8 @@ public class ListTable {
         );
     }
 
-    public Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> getListTableMap(){
-        return listTableMap;
-    }
-
     public void persist(){
-        fileLoader.persist();
+        fileLoader.persist(listTableFileName());
     }
 
     public void disp(){
@@ -124,6 +121,7 @@ public class ListTable {
     public static class ListTableNode extends Base_ParseItem{
         private final ArrayList<String> list;
         private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable;//reference to same obj in surrounding class
+        private String category, defaultField,  specialField;
 
         public ListTableNode(ScanNode node, Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable) {
             super(node);
@@ -160,11 +158,18 @@ public class ListTable {
 
         @Override
         public void setAttrib(Factory_Node.ScanNode node) {
-            if(node.k == Keywords.FIELD.DEF_NAME && this.node.h == node.h){
-                this.node.data = node.data;
-            }
-            else{
-                Erlog.get(this).set(String.format("Expected keyword %s", DEF_NAME));
+            switch(node.k){
+                case DEF_NAME:
+                    this.node.data = category = node.data;
+                    break;
+                case DEFAULT_FIELD:
+                    defaultField = node.data;
+                    break;
+                case SPECIAL_FIELD:
+                    specialField = node.data;
+                    break;
+                default:
+                    Erlog.get(this).set(String.format("Expected keyword %s, %s or %s", DEF_NAME, DEFAULT_FIELD, SPECIAL_FIELD));
             }
         }
 
@@ -178,7 +183,9 @@ public class ListTable {
 
         public void populateScanNodes(ArrayList<Factory_Node.ScanNode> scanNodes){
             scanNodes.add(new Factory_Node.ScanNode(node.lineCol, PUSH, node.h, null, null));
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, DEF_NAME, node.data));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, DEF_NAME, category));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, DEFAULT_FIELD, defaultField));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, SPECIAL_FIELD, specialField));
 
             for(String item : list){
                 //System.out.print("     item: " + item);
@@ -190,14 +197,30 @@ public class ListTable {
         public ArrayList<String> getList(){
             return list;
         }
+
         @Override
         public String toString(){
-            return String.format("ListSource = %s \t Category = %s \t Items = {%s}", node.h.toString(), node.data,  String.join(" ", list));
+            return String.format(
+                "ListSource = %s \t Category = %s \t Items = {%s} \t Default = %s \t Special = %s",
+                node.h.toString(), category,  String.join(" ", list), defaultField, specialField
+            );
         }
 
         @Override
         public void disp(){
             System.out.println(this.toString());
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public String getDefaultField() {
+            return defaultField;
+        }
+
+        public String getSpecialField() {
+            return specialField;
         }
     }
 }

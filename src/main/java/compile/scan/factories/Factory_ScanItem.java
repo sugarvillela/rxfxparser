@@ -26,7 +26,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return new ScanItem(
                         h,
                         new DATATYPE[]{
-                                ATTRIB, RXFX, RX, FX, SCOPE
+                                COMMENT, ATTRIB, RXFX, RX, FX, SCOPE
                         },
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
@@ -40,7 +40,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             case SCOPE_TEST://helper class
                 return new ScanItem(
                         h,
-                        new DATATYPE[]{RX},
+                        new DATATYPE[]{COMMENT, RX},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
@@ -52,16 +52,16 @@ public class Factory_ScanItem extends Factory_Strategy{
             case RXFX:
                 return new ScanItem(
                     h, 
-                    new DATATYPE[]{RX, FX},
+                    new DATATYPE[]{COMMENT, RX, FX},
                     getStrategy(
                         POP_ALL_ON_END_SOURCE,
-                            BACK_POP_ON_TARG_LANG_INSERT,
+                        BACK_POP_ON_TARG_LANG_INSERT,
                         PUSH_COMMENT,
                         READ_VAR,
-                            ADD_USER_DEF_NAME,
+                        ADD_USER_DEF_NAME,
                         PUSH_GOOD_DATATYPE,
-                            BACK_POP_ON_ANY_DATATYPE,
-                            BACK_POP_ON_BAD_VAR,
+                        BACK_POP_ON_ANY_DATATYPE,
+                        BACK_POP_ON_BAD_VAR,
                         BACK_POP_ON_ITEM_CLOSE,
                         ERR
                     ),
@@ -69,17 +69,17 @@ public class Factory_ScanItem extends Factory_Strategy{
                 );
             case RX:
                 return new ScanItem(
-                    h, 
-                    null,
+                    h,
+                    new DATATYPE[]{COMMENT},
                     getStrategy(
                         POP_ALL_ON_END_SOURCE,
-                            BACK_POP_ON_TARG_LANG_INSERT,
+                        BACK_POP_ON_TARG_LANG_INSERT,
                         BACK_POP_ON_ITEM_OPEN,
                         PUSH_COMMENT,
-                            ADD_USER_DEF_NAME,
-                        READ_VAR,
-                            BACK_POP_ON_ANY_DATATYPE,
-                            BACK_POP_ON_ANY_VAR,
+                        ADD_USER_DEF_NAME,
+                        //READ_VAR,
+                        BACK_POP_ON_ANY_DATATYPE,
+                        BACK_POP_ON_ANY_VAR,
                         ADD_RX_WORD
                     ),
                     getPush(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
@@ -87,17 +87,17 @@ public class Factory_ScanItem extends Factory_Strategy{
                 );
             case FX:
                 return new ScanItem(
-                    h, 
-                    null,
+                    h,
+                    new DATATYPE[]{COMMENT},
                     getStrategy(
                         POP_ALL_ON_END_SOURCE,
-                            BACK_POP_ON_TARG_LANG_INSERT,
+                        BACK_POP_ON_TARG_LANG_INSERT,
                         PUSH_COMMENT,
-                            ADD_USER_DEF_NAME,
-                        READ_VAR,
-                            BACK_POP_ON_ANY_DATATYPE,
-                            BACK_POP_ON_ANY_VAR,
-                            BACK_POP_ON_ITEM_CLOSE,
+                        ADD_USER_DEF_NAME,
+                        //READ_VAR,
+                        BACK_POP_ON_ANY_DATATYPE,
+                        BACK_POP_ON_ANY_VAR,
+                        BACK_POP_ON_ITEM_CLOSE,
                         ADD_FX_WORD
                     ),
                     getPush(ON_PUSH, ASSERT_TOGGLE_ON_PUSH),
@@ -106,23 +106,23 @@ public class Factory_ScanItem extends Factory_Strategy{
             case IF_ELSE:
                 return new ScanItem(
                     h,
-                    new DATATYPE[]{IF, ELSE},
+                    new DATATYPE[]{COMMENT, IF, ELSE},
                     getStrategy(
                         POP_ALL_ON_END_SOURCE,
                         PUSH_TARG_LANG_INSERT,
                         PUSH_COMMENT,
                         READ_VAR,
-                            ADD_USER_DEF_NAME,
+                        ADD_USER_DEF_NAME,
                         PUSH_GOOD_DATATYPE,
-                            BACK_POP_ON_ANY_DATATYPE,
-                            BACK_POP_ON_BAD_VAR,
+                        BACK_POP_ON_ANY_DATATYPE,
+                        BACK_POP_ON_BAD_VAR,
                         ERR
                     )
                 );
             case IF:
                 return new ScanItem(
                         h,
-                        new DATATYPE[]{RXFX, RX, FX, IF_ELSE, IF, FUN},
+                        new DATATYPE[]{COMMENT, RXFX, RX, FX, IF_ELSE, IF, FUN},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
@@ -139,7 +139,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             case IF_TEST://helper class
                 return new ScanItem(
                         h,
-                        new DATATYPE[]{SCOPE, RX},
+                        new DATATYPE[]{COMMENT, SCOPE, RX},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
@@ -151,7 +151,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             case ELSE:
                 return new ScanItem(
                         h,
-                        new DATATYPE[]{RXFX, RX, FX, IF_ELSE, IF, FUN},
+                        new DATATYPE[]{COMMENT, RXFX, RX, FX, IF_ELSE, IF, FUN},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
@@ -168,7 +168,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             case ATTRIB:
                 return new ScanItem(
                         h,
-                        null,
+                        new DATATYPE[]{COMMENT},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 BACK_POP_ON_TARG_LANG_INSERT,
@@ -182,7 +182,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 );
             case TARGLANG_BASE:
                 return new ScanItem(
-                    h, 
+                    h,
                     null,
                     getStrategy(
                         PUSH_SOURCE_LANG,
@@ -203,7 +203,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                 return new ScanItem(
                         h,
                         new DATATYPE[]{
-                                ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES, INCLUDE, FUN, RXFX, RX, FX,
+                                COMMENT, INCLUDE, FUN, RXFX, RX, FX,
+                                ATTRIB, LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES,
                                 SCOPE, IF_ELSE, IF, ELSE, CONSTANT
                         },
                         getStrategy(
@@ -220,6 +221,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         h,
                         null,
                         getStrategy(
+                                PUSH_COMMENT,
                                 READ_CONSTANT,
                                 READ_INCLUDE
                         ),
@@ -231,6 +233,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                         h,
                         null,
                         getStrategy(
+                                PUSH_COMMENT,
                                 IGNORE_CONSTANT
                         ),
                         getPush(ON_PUSH_NOP),// silent push pop
@@ -250,13 +253,14 @@ public class Factory_ScanItem extends Factory_Strategy{
             case LIST_STRING:
                 return new ScanItem(
                         h,
-                        null,
+                        new DATATYPE[]{COMMENT, ATTRIB},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
-                                BACK_POP_ON_ANY_DATATYPE,
-                                BACK_POP_ON_TARG_LANG_INSERT,
                                 READ_CONSTANT,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                PUSH_GOOD_DATATYPE,
+                                BACK_POP_ON_ANY_DATATYPE,
                                 BACK_POP_ON_ANY_VAR,
                                 MANAGE_LISTS
                         ),
@@ -266,13 +270,14 @@ public class Factory_ScanItem extends Factory_Strategy{
             case LIST_SCOPES:
                 return new ScanItem(
                         h,
-                        null,
+                        new DATATYPE[]{COMMENT, ATTRIB},
                         getStrategy(
                                 POP_ALL_ON_END_SOURCE,
                                 PUSH_COMMENT,
-                                BACK_POP_ON_ANY_DATATYPE,
-                                BACK_POP_ON_TARG_LANG_INSERT,
                                 READ_CONSTANT,
+                                BACK_POP_ON_TARG_LANG_INSERT,
+                                PUSH_GOOD_DATATYPE,
+                                BACK_POP_ON_ANY_DATATYPE,
                                 BACK_POP_ON_ANY_VAR,
                                 MANAGE_SCOPES_LIST
                         ),

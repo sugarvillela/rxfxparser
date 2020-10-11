@@ -81,7 +81,6 @@ public class TestStore {
         compileInitializer.init(new String[]{});
         compileInitializer.setNewEnumSet(false);
         ListTable listTable = ListTable.getInstance();
-        listTable.getTypeCount().initCounts();
         listTable.disp();
         listTable.getNumGen().gen();
         listTable.getNumGen().disp();

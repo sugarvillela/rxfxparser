@@ -12,11 +12,7 @@ import java.util.ArrayList;
 
 public abstract class RxlxReader extends Base_Stack{
     protected final Factory_Node nodeFactory;
-
-
     protected ScanNodeSource fin;
-    private Base_Stack otherParseStack;
-    private ITextStatus otherStatusReporter;
 
     public RxlxReader(ScanNodeSource fin){
         this.fin = fin;
@@ -31,19 +27,8 @@ public abstract class RxlxReader extends Base_Stack{
             readFile();
         }
     }
-    private void pauseOther(){
-        CompileInitializer compileInitializer = CompileInitializer.getInstance();
-        otherParseStack = compileInitializer.getCurrParserStack();
-        compileInitializer.setCurrParserStack(this);
-        otherStatusReporter = Erlog.getTextStatusReporter();
-        Erlog.setTextStatusReporter(fin);
-    }
-    private void resumeOther(){
-        CompileInitializer.getInstance().setCurrParserStack(otherParseStack);
-        Erlog.setTextStatusReporter(otherStatusReporter);
-    }
     protected final void readFile(){
-        pauseOther();
+        CompileInitializer.getInstance().pauseCurrParserStack(this, fin);
         while(fin.hasNext()){
             Factory_Node.ScanNode currNode = fin.nextNode();
             //System.out.println(currNode);
@@ -54,12 +39,12 @@ public abstract class RxlxReader extends Base_Stack{
                 readNode(currNode);
             }
         }
-        resumeOther();
+        CompileInitializer.getInstance().resumeCurrParserStack();
     }
 
     public final void readList(ArrayList<Factory_Node.ScanNode> list){
         //System.out.println("++++readList++++");
-        pauseOther();
+        CompileInitializer.getInstance().pauseCurrParserStack(this, fin);
         for(Factory_Node.ScanNode node : list ){
             //System.out.println(node);
             //String topName = top==null? "NULL" : top.getDebugName();
@@ -71,7 +56,7 @@ public abstract class RxlxReader extends Base_Stack{
                 readNode(node);
             }
         }
-        resumeOther();
+        CompileInitializer.getInstance().resumeCurrParserStack();
         //System.out.println("++++++++++++++++");
     }
 

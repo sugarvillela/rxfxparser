@@ -10,6 +10,8 @@ import compile.basics.Factory_Node.ScanNode;
 
 import java.util.ArrayList;
 
+import static compile.basics.Keywords.DATATYPE.SCOPE;
+
 /**Base class provides common tasks
  * Derived classes are handlers for context-sensitive control of stack
  *
@@ -23,17 +25,20 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected Factory_Strategy.PushEnum[] onPushStrategies;
     protected Factory_Strategy.PopEnum[] onPopStrategies;
     protected String defName;
-    protected int state, loIndex, hiIndex;
+    protected int state;//, loIndex, hiIndex;
     protected final TextSniffer textSniffer;
+    protected boolean specialScope;
     
     public Base_ScanItem(){
         textSniffer = TextSniffer.getInstance();
         state = 0;
+        specialScope = false;
     }
 
     @Override
     public void onPush(){
-        loIndex = ((Class_Scanner)P).getScanNodeList().size();
+        System.out.println("Base_ScanItem onPush: P=" + P.getDebugName() + ", this=" + this.getDebugName());
+        //loIndex = Class_Scanner.getInstance().getScanNodeList().size();
 //        String datatypeStr = (h == null)? "Null Datatype" : h.toString();
 //        System.out.println("Base_ScanItem onPush: " + datatypeStr + ", loIndex: " + loIndex);
         if(onPushStrategies != null){
@@ -54,9 +59,9 @@ public abstract class Base_ScanItem extends Base_StackItem{
                 }
             }
         }
-        hiIndex = ((Class_Scanner)P).getScanNodeList().size();
+        //hiIndex = Class_Scanner.getInstance().getScanNodeList().size();
         String datatypeStr = (h == null)? "Null Datatype" : h.toString();
-        //System.out.println("====onPop()====" + datatypeStr);
+        System.out.println("====onPop()====" + datatypeStr);
     }
 
     public void pushPop(String text) {
@@ -88,6 +93,19 @@ public abstract class Base_ScanItem extends Base_StackItem{
         return this.defName;
     }
 
+    public void setSpecialScope(){
+        if(SCOPE.equals(h)){
+            specialScope = true;
+        }
+        else if (below != null){
+            ((Base_ScanItem)below).setSpecialScope();
+        }
+
+    }
+    public boolean isSpecialScope(){
+        return specialScope ||
+            (!SCOPE.equals(h) && below != null && ((Base_ScanItem)below).isSpecialScope());
+    }
     public void setState(int state){
         this.state = state;
     }
@@ -109,10 +127,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
         ((Class_Scanner)P).addNodes(newNodes);
     }
 
-    public final ArrayList<ScanNode> getScanNodeList(){
-        hiIndex = ((Class_Scanner)P).getScanNodeList().size();
-        return new ArrayList<>(((Class_Scanner)P).getScanNodeList().subList(loIndex, hiIndex));
-    }
+//    public final ArrayList<ScanNode> getScanNodeList(){
+//        hiIndex = Class_Scanner.getInstance().getScanNodeList().size();
+//        return new ArrayList<>(((Class_Scanner)P).getScanNodeList().subList(loIndex, hiIndex));
+//    }
 
 
     public final void setAllowedDatatypes(DATATYPE[] allowedDatatypes){

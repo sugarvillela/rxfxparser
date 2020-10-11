@@ -19,12 +19,14 @@ import static compile.basics.Keywords.DATATYPE.LIST_NUMBER;
 import static java.lang.Math.max;
 
 public class ListTableNumGen implements Killable {
+    private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
     private final Map<Keywords.DATATYPE, Map<String, KeyValNode>> keyValMap;
     private ListTable listTable;
     private final Uq consecutive;
 
-    public ListTableNumGen(ListTable listTable){
+    public ListTableNumGen(ListTable listTable, Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap){
         this.listTable = listTable;
+        this.listTableMap = listTableMap;
         keyValMap = new HashMap<>(8);
         keyValMap.put(LIST_BOOLEAN,  new HashMap<>(8));
         keyValMap.put(LIST_DISCRETE, new HashMap<>(8));
@@ -35,7 +37,6 @@ public class ListTableNumGen implements Killable {
 
     public void gen(){
         FieldCalculator fieldCalculator = new FieldCalculator(listTable.getTypeCount());
-        Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap = listTable.getListTableMap();
         UniqueItr uq;
         KeyValNode<String, Integer> node;
 

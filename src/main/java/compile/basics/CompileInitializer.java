@@ -2,10 +2,12 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
+import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.PreScanner;
 import compile.symboltable.ListTable;
 import compile.symboltable.SymbolTable;
+import compile.symboltable.TextSniffer;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
@@ -18,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -40,6 +43,7 @@ public class CompileInitializer implements ChangeListener {
         er = Erlog.get(this);
         listeners = new ArrayList<>();
         newEnumSet = false;
+        parseOnly = false;
         wrow = 5;
         wcol = 3;
         wval = 4;
@@ -48,8 +52,9 @@ public class CompileInitializer implements ChangeListener {
     private final ArrayList<ChangeListener> listeners;
     private final Erlog er;
     //private final Unique unique;
-    private Base_Stack currStack;
-    private boolean newEnumSet;
+    private Base_Stack currStack, pausedStack;
+    private ITextStatus pausedStatusReporter;
+    private boolean newEnumSet, parseOnly; // arg flags
     private String inName, projName;
     private String initTime;
     private int wrow, wval, wcol;
@@ -59,47 +64,55 @@ public class CompileInitializer implements ChangeListener {
 
     }
     public void init(String[] args){
-        inName = (args == null || args.length == 0)?  "semantic1" : args[0];
-        if(inName.endsWith(SOURCE_FILE_EXTENSION)){
-            inName = inName.substring(0, inName.length() - SOURCE_FILE_EXTENSION.length());
-            System.out.println(SOURCE_FILE_EXTENSION + " extension not needed.");
+        if(args == null || args.length == 0){
+            inName = "semantic1";
         }
-
+        else{
+            inName = (args[0].endsWith(SOURCE_FILE_EXTENSION))?
+                    args[0].substring(0, args[0].length() - SOURCE_FILE_EXTENSION.length()) : args[0];
+            if(args.length > 1){
+                readArgs(args);
+            }
+        }
         projName = inName;
-        if(args.length > 1){
-            readArgs(args);
-        }
+
         System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newEnumSet);
 
         this.addChangeListener(er);
         this.addChangeListener(Factory_Node.getInstance());
         this.addChangeListener(SymbolTable.getInstance());
 
-//        PreScanner.init(
-//            new TokenSource(
-//                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-//            )
-//        );
-//        PreScanner preScanner = PreScanner.getInstance();
-//        preScanner.onCreate();
-//        //System.out.println("\nConstantTable:");
-//        //System.out.println(ConstantTable.getInstance());
-//        //Factory_TextNode.getInstance().testItr();
-//        Class_Scanner.init(
-//            new TokenSource(
-//                new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-//            )
-//        );
-//        Class_Scanner scanner = Class_Scanner.getInstance();
-//        scanner.onCreate();
-//        if(ListTable.getInstance() != null){
-//            ListTable.getInstance().persist();
-//        }
-//        scanner.onQuit();
-//        System.out.println("Scan Complete");
-//
-//        SymbolTable.killInstance();
-//        TextSniffer.killInstance();
+        if(!parseOnly){
+            PreScanner.init(
+                    new TokenSource(
+                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+                    )
+            );
+            PreScanner preScanner = PreScanner.getInstance();
+            preScanner.onCreate();
+            //System.out.println("\nConstantTable:");
+            //System.out.println(ConstantTable.getInstance());
+            //Factory_TextNode.getInstance().testItr();
+            Class_Scanner.init(
+                    new TokenSource(
+                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+                    )
+            );
+            Class_Scanner scanner = Class_Scanner.getInstance();
+            scanner.onCreate();
+            if(ListTable.getInstance() != null){
+                ListTable.getInstance().persist();
+            }
+            scanner.onQuit();
+            System.out.println("Scan Complete");
+
+            SymbolTable.killInstance();
+            TextSniffer.killInstance();
+        }
+        ListTable listTable = ListTable.getInstance();
+        listTable.disp();
+        listTable.getNumGen().gen();
+        listTable.getNumGen().disp();
 //
 //        Class_Parser.init(
 //            new ScanNodeSource(
@@ -108,13 +121,16 @@ public class CompileInitializer implements ChangeListener {
 //        );
 //        Class_Parser parser = Class_Parser.getInstance();
 //        parser.onCreate();
-//        Erlog.finish();
+        //Erlog.finish();
     }
     private void readArgs(String[] args){
         for(int i = 1; i < args.length; i++){
             switch(args[i]){
-                case "-n": // start with new
+                case "-n": // lists in source file; don't use a stored rxlx list file
                     newEnumSet = true;
+                    break;
+                case "-p": // parse only
+                    parseOnly = true;
                     break;
                 default:
                     if(args[i].startsWith("-")){
@@ -122,6 +138,9 @@ public class CompileInitializer implements ChangeListener {
                     }
                     this.projName = args[i];
             }
+        }
+        if(newEnumSet && parseOnly){
+
         }
     }
 
@@ -157,6 +176,23 @@ public class CompileInitializer implements ChangeListener {
     }
     public Base_Stack getCurrParserStack(){
         return currStack;
+    }
+    public void pauseCurrParserStack(Base_Stack tempStack, ITextStatus tempStatusReporter){
+        pausedStack = currStack;
+        currStack = tempStack;
+        pausedStatusReporter = Erlog.getTextStatusReporter();
+        Erlog.setTextStatusReporter(tempStatusReporter);
+    }
+    public void pauseCurrParserStack(Base_Stack tempStack){
+        pausedStack = currStack;
+        currStack = tempStack;
+        pausedStatusReporter = null;
+    }
+    public void resumeCurrParserStack(){
+        currStack = pausedStack;
+        if(pausedStatusReporter != null){
+            Erlog.setTextStatusReporter(pausedStatusReporter);
+        }
     }
 
     public void addChangeListener(ChangeListener listener){

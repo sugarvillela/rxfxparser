@@ -30,7 +30,7 @@ public abstract class Factory_Strategy{
         PUSH_SOURCE_LANG        (new PushSourceLang()),                 // Symbol != DATATYPE, setWordGetter
         PUSH_COMMENT            (new PushComment()),                    // Symbol != DATATYPE, Silent push pop and ignore
         PUSH_TARG_LANG_INSERT   (new PushTargLangInsert()),             // Symbol != DATATYPE, no nesting
-
+        PUSH_ERR_SKIP_DATATYPE  (new PushErrSkipDatatype()),            // Ignore non-datatype, push good, err bad
 
         ADD_TEXT                (new AddText()),                        // ADD_TO command with text
         ADD_KEY_VAL_ATTRIB      (new AddKeyValAttrib()),                // SET_ATTRIB with key = val text
@@ -208,7 +208,49 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
-
+    public static class PushErrSkipDatatype extends Strategy{
+        @Override
+        public boolean go(String text, Base_ScanItem context){
+            DATATYPE newDatatype = DATATYPE.fromString(text);
+            if(newDatatype != null) {
+                if(context.isGoodDatatype(newDatatype)) {
+                    if(!addContainer(text, context, newDatatype)){
+                        P.push(Factory_ScanItem.get(newDatatype));
+                    }
+                    return true;
+                }
+                else{
+                    Erlog.get(context).set( "Disallowed datatype in " + context.getDatatype(), text);
+                }
+            }
+            return false;
+        }
+        // Some scan items require a container to enforce ordering
+        private boolean addContainer(String text, Base_ScanItem context, DATATYPE newDatatype){
+            switch(newDatatype){
+                case IF:
+                    switch(((Base_ScanItem)P.getTop()).getDatatype()){
+                        case IF_ELSE:
+                            break;
+                        default:
+                            backPush(text, context, Factory_ScanItem.get(IF_ELSE));
+                            return true;
+                    }
+                    break;
+                case RX:
+                    switch(((Base_ScanItem)P.getTop()).getDatatype()){
+                        case RXFX:
+                        case IF_TEST:
+                        case SCOPE_TEST:
+                            break;
+                        default:
+                            backPush(text, context, Factory_ScanItem.get(RXFX));
+                            return true;
+                    }
+            }
+            return false;
+        }
+    }
     public static class AddText extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -250,28 +292,12 @@ public abstract class Factory_Strategy{
                         Erlog.get(this).set("Expected true or false, found" + val, text);
                     }
                     return true;
-                case WROW:
+                case RX_TARGLANG_ON_SPECIAL:
                     try{
-                        CompileInitializer.getInstance().setWRow(Integer.parseInt(val));
+                        RxTargLangUtil.getInstance().setTargRxOnSpecial(Boolean.parseBoolean(val));
                     }
                     catch(Exception e){
-                        Erlog.get(this).set("Expected numeric, found" + val, text);
-                    }
-                    return true;
-                case WCOL:
-                    try{
-                        CompileInitializer.getInstance().setWCol(Integer.parseInt(val));
-                    }
-                    catch(Exception e){
-                        Erlog.get(this).set("Expected numeric, found" + val, text);
-                    }
-                    return true;
-                case WVAL:
-                    try{
-                        CompileInitializer.getInstance().setWVal(Integer.parseInt(val));
-                    }
-                    catch(Exception e){
-                        Erlog.get(this).set("Expected numeric, found", val);
+                        Erlog.get(this).set("Expected true or false, found" + val, text);
                     }
                     return true;
             }
@@ -307,6 +333,9 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             if(text.startsWith(COMMENT_TEXT)){// okay to discard text
+                if(!context.isGoodDatatype(COMMENT)){
+                    Erlog.get(this).set("Comment not supported here");
+                }
                 if(!Erlog.getTextStatusReporter().isEndLine()){
                     P.push(Factory_ScanItem.get(DATATYPE.COMMENT));
                 }
@@ -338,19 +367,6 @@ public abstract class Factory_Strategy{
         }
     }
 
-//    public static class PushScopeItem extends Strategy{
-//        @Override
-//        public boolean go(String text, Base_ScanItem context){
-//            if(LIST_TABLE.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){
-//                P.push( Factory_ScanItem.get(SCOPE_ITEM) );
-//                context.addNode(
-//                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
-//                );
-//                return true;
-//            }
-//            return false;
-//        }
-//    }
     public static class AddUserDefName extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -367,6 +383,7 @@ public abstract class Factory_Strategy{
             return false;
         }
     }
+
     public static class ReadConstant extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
@@ -504,38 +521,48 @@ public abstract class Factory_Strategy{
 
     public static class ManageLists extends Strategy{
         protected final int UDEF = 0, FIRST = 1, PARSE = 2;
+
+        protected void onUserDef(String text, Base_ScanItem context){
+            DATATYPE h = context.getDatatype();
+            String defName = SYMBOL_TEST.stripUserDef(text);
+            if(listTableItemSearch.contains(h, defName)){
+                Erlog.get(this).set(
+                        String.format(
+                                "%s already exists...%s categories must be uniquely named",
+                                defName, h.toString()
+                        )
+                );
+            }
+            context.setDefName(defName);
+            listTableScanLoader.addNode(
+                    NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+            );
+        }
+        protected void onNoUserDef(String text, Base_ScanItem context){
+            Erlog.get(this).set("Expected user-defined name for list " + context.getDatatype().toString(), text);
+        }
         @Override
         public boolean go(String text, Base_ScanItem context){
             DATATYPE h = context.getDatatype();
             switch(context.getState()){
                 case UDEF:
                     if(SYMBOL_TEST.isUserDef(text)){
-                        String defName = SYMBOL_TEST.stripUserDef(text);
-                        if(listTableItemSearch.contains(h, defName)){
-                            Erlog.get(this).set(
-                                    String.format(
-                                            "%s already exists...%s categories must be uniquely named",
-                                            defName, h.toString()
-                                    )
-                            );
-                        }
-                        context.setDefName(defName);
-                        context.addNode(
-                                NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
-                        );
+                        onUserDef(text, context);
                         context.setState(FIRST);
                     }
                     else{
-                        Erlog.get(this).set("Expected user-defined name for this list", text);
+                        onNoUserDef(text, context);
+                        context.setState(PARSE);
                     }
                     break;
                 case FIRST:
-                    listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
-                    context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
+                    listTableScanLoader.setDefaultCategory(h, context.getDefName());
+                    listTableScanLoader.setDefaultField(text);
+                    listTableScanLoader.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
                     context.setState(PARSE);
                     break;
                 case PARSE:
-                    context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
+                    listTableScanLoader.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
                     break;
             }
             return true;
@@ -543,31 +570,19 @@ public abstract class Factory_Strategy{
     }
     public static class ManageScopesList extends ManageLists{
         @Override
-        public boolean go(String text, Base_ScanItem context){
+        public void onUserDef(String text, Base_ScanItem context){// is def name: ignore and use default name
             DATATYPE h = context.getDatatype();
-            switch(context.getState()){
-                case UDEF:
-                    context.setDefName(SCOPES_DEF_NAME);
-                    context.addNode(NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, SCOPES_DEF_NAME ));
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        context.setState(FIRST);
-                    }
-                    else{
-                        listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
-                        context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
-                        context.setState(PARSE);
-                    }
-                    break;
-                case FIRST:
-                    listTableScanLoader.setDefaultFieldString(h, context.getDefName(),text);
-                    context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
-                    context.setState(PARSE);
-                    break;
-                case PARSE:
-                    context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
-                    break;
-            }
-            return true;
+            context.setDefName(SCOPES_DEF_NAME);
+            listTableScanLoader.addNode(NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, SCOPES_DEF_NAME ));
+        }
+        @Override
+        protected void onNoUserDef(String text, Base_ScanItem context){// is first data: add default name and add data
+            DATATYPE h = context.getDatatype();
+            context.setDefName(SCOPES_DEF_NAME);
+            listTableScanLoader.addNode(NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, SCOPES_DEF_NAME ));
+            listTableScanLoader.setDefaultCategory(h, context.getDefName());
+            listTableScanLoader.setDefaultField(text);
+            listTableScanLoader.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
         }
     }
     public static class ManageTargLangInsert extends Strategy{
@@ -737,6 +752,9 @@ public abstract class Factory_Strategy{
                         P.push(Factory_ScanItem.get(RX));
                     }
                     else if(listTableItemSearch.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
+                        if(listTableItemSearch.isSpecialField(LIST_SCOPES, SCOPES_DEF_NAME, text)){
+                            context.setSpecialScope();
+                        }
                         context.addNode(NODE_FACTORY.newPushNode(SCOPE_ITEM));
                         context.addNode(
                                 NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
@@ -763,27 +781,37 @@ public abstract class Factory_Strategy{
     public static class AddRxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            RxRangeUtil rxRangeUtil = RxRangeUtil.getInstance();
-            DATATYPE h = RX_WORD;
-
-            if(rxRangeUtil.findAndSetRange(text)){
-                text = rxRangeUtil.getTruncated();
-            }
-            if(ValidatorRx.getInstance().assertValidRxWord(text)){
+            RxTargLangUtil rxTargLangUtil = RxTargLangUtil.getInstance();
+            if(rxTargLangUtil.findRegexAndTruncate(text, context)){
+                DATATYPE h = RX_TARGLANG;
                 context.addNode(NODE_FACTORY.newPushNode(h));
-
-                context.addNode( NODE_FACTORY.newScanNode(
-                    CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
-                );
-                context.addNode( NODE_FACTORY.newScanNode(
-                    CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
-                );
-                TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
-                ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(RX, root);
-                //testRebuild(root, nodes);
-                context.addNodes(nodes);
+                context.addNode(NODE_FACTORY.newScanNode(CMD.ADD_TO, h, rxTargLangUtil.getTruncated()));
                 context.addNode(NODE_FACTORY.newPopNode(h));
                 return true;
+            }
+            else{
+                RxRangeUtil rxRangeUtil = RxRangeUtil.getInstance();
+                DATATYPE h = RX_WORD;
+
+                if(rxRangeUtil.findAndSetRange(text)){
+                    text = rxRangeUtil.getTruncated();
+                }
+                if(ValidatorRx.getInstance().assertValidRxWord(text)){
+                    context.addNode(NODE_FACTORY.newPushNode(h));
+
+                    context.addNode(
+                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
+                    );
+                    context.addNode( NODE_FACTORY.newScanNode(
+                            CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
+                    );
+                    TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
+                    ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(RX, root);
+                    //testRebuild(root, nodes);
+                    context.addNodes(nodes);
+                    context.addNode(NODE_FACTORY.newPopNode(h));
+                    return true;
+                }
             }
             return false;
         }
@@ -842,16 +870,21 @@ public abstract class Factory_Strategy{
     public static class OnPushList extends Strategy{
         // Lazy init allows specifying in attrib whether to use new list set or add to existing
         private void initListTable(){
-
             listTableScanLoader = ListTable.getInstance().getScanLoader();
             listTableItemSearch = ListTable.getInstance().getItemSearch();
         }
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(listTableScanLoader == null){
+            if(!ListTable.isInitialized()){
                 initListTable();
             }
-            context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
+            listTableScanLoader.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
+            listTableScanLoader.addNode(NODE_FACTORY.newScanNode(
+                CMD.SET_ATTRIB, context.getDatatype(), DEFAULT_FIELD, null)
+            );
+            listTableScanLoader.addNode(NODE_FACTORY.newScanNode(
+                    CMD.SET_ATTRIB, context.getDatatype(), SPECIAL_FIELD, null)
+            );
             return false;
         }
     }
@@ -885,12 +918,14 @@ public abstract class Factory_Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
             //context.assertDoneState();
-            context.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
-            String defName = context.getDefName();
-            //Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
-            if(defName != null){
-                listTableScanLoader.readList(context.getScanNodeList());
-            }
+            listTableScanLoader.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
+            listTableScanLoader.onPop();
+            //CompileInitializer.getInstance().resumeCurrParserStack();
+//            String defName = context.getDefName();
+//            //Commons.disp(context.getScanNodeList(), "\n OnPop_Enu");
+//            if(defName != null){
+//                listTableScanLoader.readList(context.getScanNodeList());
+//            }
             return false;
         }
     }

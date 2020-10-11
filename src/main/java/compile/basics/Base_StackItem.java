@@ -35,14 +35,14 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     }
     @Override
     public void pop(){
-//        String name = this.below == null? "NULL" : this.below.getDebugName();
-//        System.out.printf(
-//            "\n Popping... %s -> %s\n",
-//                this.getDebugName(),
-//                name
-//        );
+        String name = this.below == null? "NULL" : this.below.getDebugName();
+        System.out.printf(
+            "\n Popping... %s -> %s\n",
+                this.getDebugName(),
+                name
+        );
         this.above = null;
-        //System.out.println(P);
+        System.out.println(P);
         P.top = this.below;
         if( this.below != null){
             this.below.above = null;
