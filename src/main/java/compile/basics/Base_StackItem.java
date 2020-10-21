@@ -8,7 +8,6 @@ import interfaces.ILifeCycle;
  */
 public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     protected String debugName;
-    protected Erlog er;
     protected Base_Stack P;                 // containing stack
     protected Base_StackItem above, below;  // stack links
 
@@ -16,18 +15,17 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
         P = CompileInitializer.getInstance().getCurrParserStack();
-        er = Erlog.get(this);
     }
     
     /*=====IStackComponent methods============================================*/
     
     @Override
     public void push( Base_StackItem nuTop ){
-//        System.out.printf(
-//            "\n Push... %s -> %s\n",
-//                this.getDebugName(),
-//                nuTop.getDebugName()
-//        );
+        System.out.printf(
+            "\n Push... %s -> %s\n",
+                this.getDebugName(),
+                nuTop.getDebugName()
+        );
         
         nuTop.below = this;
         this.above = nuTop;
@@ -42,7 +40,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
                 name
         );
         this.above = null;
-        System.out.println(P);
+        //System.out.println(P);
         P.top = this.below;
         if( this.below != null){
             this.below.above = null;

@@ -1,13 +1,8 @@
 package compile.basics;
 
 import compile.parse.Base_ParseItem;
-import erlog.Erlog;
 import toksource.ScanNodeSource;
-import toksource.interfaces.ITextStatus;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class RxlxReader extends Base_Stack{
@@ -32,7 +27,7 @@ public abstract class RxlxReader extends Base_Stack{
         while(fin.hasNext()){
             Factory_Node.ScanNode currNode = fin.nextNode();
             //System.out.println(currNode);
-            if(currNode.cmd == null || currNode.h == null){
+            if(currNode.cmd == null || currNode.datatype == null){
                 er.set("Null command in rxlx file");
             }
             else{
@@ -49,7 +44,7 @@ public abstract class RxlxReader extends Base_Stack{
             //System.out.println(node);
             //String topName = top==null? "NULL" : top.getDebugName();
             //System.out.println("readList: "+ stackSize +". top = " + topName);
-            if(node.cmd == null || node.h == null){
+            if(node.cmd == null || node.datatype == null){
                 er.set("Null command in rxlx file");
             }
             else{
@@ -66,8 +61,8 @@ public abstract class RxlxReader extends Base_Stack{
                 push(this.get(node));
                 break;
             case POP:
-                if(!node.h.equals(((Base_ParseItem)getTop()).getNode().h)){
-                    er.set("POP: Stack mismatch", node.h.toString());
+                if(!node.datatype.equals(((Base_ParseItem)getTop()).getNode().datatype)){
+                    er.set("POP: Stack mismatch", node.datatype.toString());
                 }
                 pop();
                 break;
@@ -76,7 +71,7 @@ public abstract class RxlxReader extends Base_Stack{
                 ((IParseItem)getTop()).addTo(node);
                 break;
             case SET_ATTRIB:
-                if(node.k == null){
+                if(node.field == null){
                     er.set("Null key in rxlx file");
                 }
                 //((IParseItem)getTop()).setAttrib(node.h, node.k, node.data);

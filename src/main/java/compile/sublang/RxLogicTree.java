@@ -1,11 +1,13 @@
 package compile.sublang;
 
 import static compile.basics.Keywords.DATATYPE.*;
+import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
 import static compile.basics.Keywords.OP.*;
 import static compile.basics.Keywords.RX_PAR.CATEGORY_ITEM;
 
 import java.util.ArrayList;
 
+import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.sublang.factories.PayNodes;
 import compile.sublang.ut.RxParamUtil;
@@ -27,14 +29,14 @@ public class RxLogicTree extends TreeFactory {
         return (instance == null)? (instance = new RxLogicTree()) : instance;
     }
     protected RxLogicTree(){}
-    
-    private ListTableScanLoader listTableScanLoader;
+
+    private ListTable listTable;
     
     @Override
     public TreeNode treeFromWordPattern(String text){
         //System.out.println("tokenize start: root text: " + text);
-        listTableScanLoader = ListTable.getInstance().getScanLoader();;
-        if(listTableScanLoader == null){
+        listTable = ListTable.getInstance();;
+        if(listTable == null){
             Erlog.get(this).set("LIST<*> items are not defined");
             return null;
         }
@@ -106,6 +108,11 @@ public class RxLogicTree extends TreeFactory {
         }
         return '\0';
     }
+    private String getDefaultFieldString(Keywords.DATATYPE datatype){
+        String category = listTable.getFirstCategory(datatype);
+        ListTable.ListTableNode node = listTable.getItemSearch().getListTableNode(datatype, category);
+        return String.format(DEFAULT_FIELD_FORMAT, category, node.getFirstField());
+    }
     private boolean balanceLeaf(TreeNode leaf, String leafData){
         {
             String[] tok = dotTokenizer.toArr(leafData);
@@ -130,10 +137,10 @@ public class RxLogicTree extends TreeFactory {
                 if(leaf.quoted){
                     leaf.data = "'" + leaf.data + "'";// workaround to keep leaf.quoted true when leaf is parsed
                 }
-                leaf.data = listTableScanLoader.getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
+                leaf.data = getDefaultFieldString(LIST_STRING) + "=" + leaf.data;
                 return true;
             case NUMBER:
-                leaf.data = listTableScanLoader.getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
+                leaf.data = getDefaultFieldString(LIST_NUMBER) + "=" + leaf.data;
                 return true;
             case IMMUTABLE:
                 Erlog.get(this).set(LIST_SCOPES.toString() + " is an immutable datatype for scoping; not allowed here", leaf.data);

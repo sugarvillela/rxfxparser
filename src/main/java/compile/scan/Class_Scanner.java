@@ -11,6 +11,10 @@ import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
+import compile.symboltable.ConstantTable;
+import compile.symboltable.ListTable;
+import compile.symboltable.SymbolTable;
+import compile.symboltable.TextSniffer;
 import toksource.Base_TextSource;
 import toksource.TokenSource;
 
@@ -19,10 +23,6 @@ import toksource.TokenSource;
  * @author Dave Swanson
  */
 public class Class_Scanner extends Base_Scanner {
-    private final ArrayList<ScanNode> nodes;
-
-    protected String backText;   // repeat lines
-
     private static Class_Scanner instance;
     
     public Class_Scanner(Base_TextSource fin){
@@ -40,6 +40,9 @@ public class Class_Scanner extends Base_Scanner {
         instance = null;
     }
 
+    private final ArrayList<ScanNode> nodes;
+    protected String backText;   // repeat lines
+
     // Runs Scanner
     @Override
     public void onCreate(){
@@ -47,12 +50,43 @@ public class Class_Scanner extends Base_Scanner {
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
         this.onTextSourceChange(fin);
-        CompileInitializer.getInstance().setCurrParserStack(this);
+
+        readFile();
+
+        if(Factory_ScanItem.isPreScanMode()){
+            dispPreScanResult();
+        }
+        else{
+            dispScanResult();
+        }
+        //readFile();
+
+    }
+
+    private void dispPreScanResult(){
+        System.out.println("==============================================");
+        System.out.println("==============================================");
+        System.out.println("Constant Table Result");
+        System.out.println(ConstantTable.getInstance().toString());
+
+        System.out.println("\nList Table Result");
+        ListTable.getInstance().disp();
+    }
+
+    private void dispScanResult(){
+        System.out.println("==============================================");
+        System.out.println("==============================================");
+
+        System.out.println("\nSymbol Table Result");
+        System.out.println(SymbolTable.getInstance().toString());
+    }
+
+    private final void readFile(){
         backText = null;
         String text;
-        
+
         // start with a target language datatype
-        push(Factory_ScanItem.get(DATATYPE.TARGLANG_BASE));//Factory_cxs
+        push(Factory_ScanItem.getInstance().get(DATATYPE.TARGLANG_BASE));//Factory_cxs
         // start in line mode for target language
         fin.setLineGetter();
         while(true){// outer loop on INCLUDE file stack level
@@ -84,13 +118,15 @@ public class Class_Scanner extends Base_Scanner {
         pop();
         //Commons.disp(nodes, "\nClass_Scanner nodes");
     }
+
     private void status(String text){
         String topInfo = (top == null)? "null" : top.getDebugName();
         System.out.printf("%s \t \t %s >>> %s \n", topInfo, fin.readableStatus(), text);
     }
+
     @Override
     public void onQuit(){
-        //System.out.println( "Scanner onQuit" );
+        System.out.println( "Scanner onQuit" );
 
         if(
             inName == null ||

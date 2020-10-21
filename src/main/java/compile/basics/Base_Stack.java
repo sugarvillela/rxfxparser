@@ -45,10 +45,10 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeN
         }
         else{
             String name = top == null? "NULLY" : top.getDebugName();
-            System.out.println("pop: stackSize="+stackSize+", top="+name);
+            //System.out.println("pop: stackSize="+stackSize+", top="+name);
             top.onPop();
             String name2 = top == null? "NULLY" : top.getDebugName();
-            System.out.println("pop: stackSize="+stackSize+", top="+name2);
+            //System.out.println("pop: stackSize="+stackSize+", top="+name2);
             top.pop();
             stackSize--;
         }

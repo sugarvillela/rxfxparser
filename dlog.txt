@@ -1,1 +1,1 @@
-Error: semantic1.rxfx line 17 word 0: ListTableNode: LIST_SCOPES: Expected keyword DEF_NAME
+Error: semantic1.rxfx line 38 word 2: TextSniffer: Sleuthy stop at ScanItem: SCOPE

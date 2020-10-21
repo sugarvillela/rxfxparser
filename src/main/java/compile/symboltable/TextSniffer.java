@@ -1,6 +1,7 @@
 package compile.symboltable;
 
 import compile.scan.Base_ScanItem;
+import erlog.Erlog;
 
 import static compile.basics.Keywords.USERDEF_OPEN;
 
@@ -9,68 +10,102 @@ public class TextSniffer {
 
     private TextSniffer(){
         symbolTest = SymbolTest.getInstance();
-        factoryTextNode = SymbolTable.getInstance();
-        state = WAIT;
+        symbolTable = SymbolTable.getInstance();
+        setState(WAIT);
+        showStatus = false;
     }
 
+    public static void init(){// call in CompileInitializer
+        instance = new TextSniffer();
+    }
     public static TextSniffer getInstance(){
-        return (instance == null)? (instance = new TextSniffer()) : instance;
+        return instance;
     }
     public static void killInstance(){
         instance = null;
     }
 
-    private final int WAIT = 0, IDENTIFY = 1, PARSE = 2;
+    private final int WAIT = 0, IDENTIFY = 1, PARSE = 2, SLEEP = 3;
     private int state;
-    private int popCount;
+    private boolean showStatus;
 
     private final SymbolTest symbolTest;
-    private final SymbolTable factoryTextNode;
+    private final SymbolTable symbolTable;
     Base_ScanItem scanItem;
 
-    public void onPush(Base_ScanItem scanItem){
-        //System.out.println(state + ": TextSniffer onPush: " + scanItem.getDebugName());
-        if(state == WAIT){
+    private void setState(int newState){
+        state = newState;
+    }
+    private void status(String funct, String text){
+        if(showStatus){
+            String stateStr = "";
+            switch(state){
+                case SLEEP:
+                    stateStr = "SLEEP";
+                    break;
+                case WAIT:
+                    stateStr = "WAIT";
+                    break;
+                case PARSE:
+                    stateStr = "PARSE";
+                    break;
+                case IDENTIFY:
+                    stateStr = "IDENTIFY";
+                    break;
+            }
+            System.out.printf("TextSniffer: State = %s: %s: %s \n",  stateStr, funct, text);
+        }
+    }
+    public final void onPush(Base_ScanItem scanItem){
+        status("onPush", scanItem.getDebugName());
+        if(scanItem.cacheable && state == WAIT){
             this.scanItem = scanItem;
-            state = IDENTIFY;
+            setState(IDENTIFY);
         }
     }
 
-    public boolean isSniffing(){
-        return state != WAIT;
-    }
-
-    public void sniff(String text){
+    public final void sniff(String text){
+        status("sniff", text);
         switch(state){
+            case SLEEP:
+            case WAIT:
+                break;
+            case PARSE:
+                symbolTable.addWord(text);
+                break;
             case IDENTIFY:
                 if(symbolTest.isUserDef(text)){
                     String textName = text.substring(USERDEF_OPEN.length());
-                    factoryTextNode.startTextNode(scanItem.getDatatype());
-                    factoryTextNode.setTextName(textName);
-                    factoryTextNode.addWord(scanItem.getDatatype().toString());
-                    state = PARSE;
+                    symbolTable.startTextNode(scanItem.getDatatype());
+                    symbolTable.setTextName(textName);
+                    symbolTable.addWord(scanItem.getDatatype().toString());
+                    setState(PARSE);
                 }
                 else{
-                    state = WAIT;
+                    setState(WAIT);
                 }
                 break;
-            case PARSE:
-                factoryTextNode.addWord(text);
         }
     }
-    public void back(){
-        factoryTextNode.back();
+    public final void back(){
+        status("back", "");
+        symbolTable.back();
     }
-    public void onPop(Base_ScanItem scanItem){
-
-        //System.out.println(state + ": TextSniffer onPop: " + scanItem.getDebugName());
+    public final void onPop(Base_ScanItem scanItem){
+        status("onPop", scanItem.getDebugName());
         if(state == PARSE && scanItem.equals(this.scanItem)){
             //System.out.println("++++TextSniffer onPop++++");
-            factoryTextNode.finishTextNode();
+            symbolTable.finishTextNode();
             //factoryTextNode.testItr();
             //System.out.println(factoryTextNode.toString());
             //System.out.println("+++++++++++++++++++++++++");
-            state = WAIT;
+            setState(WAIT);;
         }
+    }
+    public final void sleep(){
+        setState(SLEEP);
+    }
+    public final void wake(){
+        setState(WAIT);
     }
 }

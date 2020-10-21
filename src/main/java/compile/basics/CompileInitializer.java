@@ -2,14 +2,11 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
-import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
-import compile.scan.PreScanner;
-import compile.symboltable.ListTable;
+import compile.scan.factories.Factory_ScanItem;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
-import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -20,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -83,36 +79,48 @@ public class CompileInitializer implements ChangeListener {
         this.addChangeListener(SymbolTable.getInstance());
 
         if(!parseOnly){
-            PreScanner.init(
-                    new TokenSource(
-                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-                    )
-            );
-            PreScanner preScanner = PreScanner.getInstance();
-            preScanner.onCreate();
-            //System.out.println("\nConstantTable:");
-            //System.out.println(ConstantTable.getInstance());
-            //Factory_TextNode.getInstance().testItr();
+            TextSniffer.init();
+            TextSniffer.getInstance().sleep();
+
+            Factory_ScanItem.init();
+            Factory_ScanItem.enterPreScanMode();
+
             Class_Scanner.init(
                     new TokenSource(
                             new TextSource_file(inName + SOURCE_FILE_EXTENSION)
                     )
             );
             Class_Scanner scanner = Class_Scanner.getInstance();
+            setCurrParserStack(scanner);
             scanner.onCreate();
-            if(ListTable.getInstance() != null){
-                ListTable.getInstance().persist();
-            }
+
+//            if(ListTable.getInstance() != null){
+//                ListTable.getInstance().persist();
+//            }
+            System.out.println("Pre-Scan Complete");
+
+            TextSniffer.getInstance().wake();
+            Factory_ScanItem.enterScanMode();
+
+            Class_Scanner.init(
+                    new TokenSource(
+                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+                    )
+            );
+            scanner = Class_Scanner.getInstance();
+            setCurrParserStack(scanner);
+            scanner.onCreate();
+
             scanner.onQuit();
             System.out.println("Scan Complete");
 
             SymbolTable.killInstance();
             TextSniffer.killInstance();
         }
-        ListTable listTable = ListTable.getInstance();
-        listTable.disp();
-        listTable.getNumGen().gen();
-        listTable.getNumGen().disp();
+        //ListTable listTable = ListTable.getInstance();
+        //listTable.disp();
+        //listTable.getNumGen().gen();
+        //listTable.getNumGen().disp();
 //
 //        Class_Parser.init(
 //            new ScanNodeSource(

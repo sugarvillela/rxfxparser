@@ -33,8 +33,6 @@ import compile.basics.Base_StackItem;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.ScanNode;
 import compile.basics.IParseItem;
-import static compile.basics.Keywords.DATATYPE;
-import static compile.basics.Keywords.FIELD;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected ScanNode node;
@@ -42,7 +40,7 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
         
     public Base_ParseItem(Factory_Node.ScanNode node){
         this.node = node;
-        this.debugName = node.h.toString();
+        this.debugName = node.datatype.toString();
     }
     
     public ScanNode getNode(){
@@ -55,9 +53,9 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
 
     @Override
     public void setAttrib(Factory_Node.ScanNode node) {
-        switch (node.k){
+        switch (node.field){
             default:
-                System.out.println(node.k.toString() + " in Base_ParseItem setAttrib: " + node.data);
+                System.out.println(node.field.toString() + " in Base_ParseItem setAttrib: " + node.data);
                 //((Base_ParseItem)below).setAttrib(node);
         }
     }

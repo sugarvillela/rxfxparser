@@ -7,7 +7,6 @@ import erlog.Erlog;
 import java.util.Map;
 
 import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
-import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
 
 public class ListTableItemSearch {
     protected final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
@@ -68,6 +67,6 @@ public class ListTableItemSearch {
         return (ListTable.ListTableNode)listTableNode;
     }
     public boolean isSpecialField(Keywords.DATATYPE datatype, String category, String item){
-        return item.equals(getListTableNode(datatype, category).getSpecialField());
+        return item.equals(getListTableNode(datatype, category).getLastField());
     }
 }

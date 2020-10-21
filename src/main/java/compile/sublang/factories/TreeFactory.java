@@ -108,7 +108,7 @@ public abstract class TreeFactory {
         TreeNode reroot = null, head = null;
         while(source.hasNext()){
             Factory_Node.ScanNode scanNode = source.nextNode();
-            switch(scanNode.h){
+            switch(scanNode.datatype){
                 case RX_BUILDER:
                 case FX_BUILDER:
                     switch(scanNode.cmd){

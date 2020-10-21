@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static compile.basics.Keywords.DEFAULT_FIELD_FORMAT;
 import static compile.basics.Keywords.FIELD.*;
 import static compile.basics.Keywords.NULL_TEXT;
 import static compile.basics.Keywords.CMD.*;
@@ -38,15 +37,14 @@ public class ListTable {
         instance = new ListTable();
         CompileInitializer compileInitializer = CompileInitializer.getInstance();
         if(compileInitializer.isNewEnumSet()){
-            instance.fileLoader = new ListTableFileLoader(null, instance.listTableMap);
+            instance.fileLoader = new ListTableFileLoader(null, instance.listTableMap, instance.firstCategory);
         }
         else{
             String fName = instance.listTableFileName();
             instance.fileLoader = new ListTableFileLoader(
-                    new ScanNodeSource(
-                            new TextSource_file(fName)
-                    ),
-                    instance.listTableMap
+                new ScanNodeSource(new TextSource_file(fName)),
+                instance.listTableMap,
+                instance.firstCategory
             );
             instance.fileLoader.onCreate();
         }
@@ -62,6 +60,7 @@ public class ListTable {
     }
 
     private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;// don't let this out of ListTable class family
+    private final Map <Keywords.DATATYPE, String> firstCategory;
     private ListTableFileLoader fileLoader;
     private ListTableScanLoader scanLoader;
     private ListTableItemSearch itemSearch;
@@ -75,6 +74,7 @@ public class ListTable {
         listTableMap.put(LIST_NUMBER,   new HashMap<>(8));
         listTableMap.put(LIST_STRING,   new HashMap<>(8));
         listTableMap.put(LIST_SCOPES,   new HashMap<>(8));
+        firstCategory = new HashMap<>(8);
     }
 
     public ListTableScanLoader getScanLoader(){
@@ -102,6 +102,21 @@ public class ListTable {
         );
     }
 
+    public void setFirstCategory(Keywords.DATATYPE datatype, String category){
+        if(!firstCategory.containsKey(datatype)){
+            firstCategory.put(datatype, category);
+        }
+    }
+    public String getFirstCategory(Keywords.DATATYPE datatype){
+        if(!firstCategory.containsKey(datatype)){
+            String datatypeString = (datatype == null)? "NULL" : datatype.toString();
+            Erlog.get(this).set(
+                    "No category/item is defined in list", datatypeString
+            );
+        }
+        return firstCategory.get(datatype);
+    }
+
     public void persist(){
         fileLoader.persist(listTableFileName());
     }
@@ -112,7 +127,7 @@ public class ListTable {
             System.out.println();
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
                 System.out.println(inner.getKey() + ": Count = " + ((ListTableNode)inner.getValue()).size());
-                ((ListTableNode)inner.getValue()).disp();
+                (inner.getValue()).disp();
             }
         }
         System.out.println("===================");
@@ -121,7 +136,7 @@ public class ListTable {
     public static class ListTableNode extends Base_ParseItem{
         private final ArrayList<String> list;
         private final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable;//reference to same obj in surrounding class
-        private String category, defaultField,  specialField;
+        //private String category;
 
         public ListTableNode(ScanNode node, Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable) {
             super(node);
@@ -138,7 +153,7 @@ public class ListTable {
                 Erlog.get(this).set("Bad rxlx file");
             }
             else{
-                parentTable.get(node.h).put(node.data, this);
+                parentTable.get(node.datatype).put(node.data, this);
             }
         }
 
@@ -148,28 +163,22 @@ public class ListTable {
 //            System.out.println(datatype);
 //            System.out.println(node.h);
 //            System.out.println("_______________");
-            if(this.node.h == node.h){
-                list.add(node.data);
-            }
-            else{
+            if(this.node.datatype != node.datatype){
                 Erlog.get(this).set("Bad rxlx file");
             }
+            list.add(node.data);
         }
 
         @Override
         public void setAttrib(Factory_Node.ScanNode node) {
-            switch(node.k){
-                case DEF_NAME:
-                    this.node.data = category = node.data;
-                    break;
-                case DEFAULT_FIELD:
-                    defaultField = node.data;
-                    break;
-                case SPECIAL_FIELD:
-                    specialField = node.data;
+            System.out.println("ListTableNode setAttrib: " + node.toString());
+            switch(node.field){
+                case DEF_NAME: // = category
+                    this.node.data = node.data;
+                    ListTable.getInstance().setFirstCategory(node.datatype, node.data);
                     break;
                 default:
-                    Erlog.get(this).set(String.format("Expected keyword %s, %s or %s", DEF_NAME, DEFAULT_FIELD, SPECIAL_FIELD));
+                    Erlog.get(this).set(String.format("Expected keyword %s", DEF_NAME));
             }
         }
 
@@ -182,16 +191,14 @@ public class ListTable {
         }
 
         public void populateScanNodes(ArrayList<Factory_Node.ScanNode> scanNodes){
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, PUSH, node.h, null, null));
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, DEF_NAME, category));
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, DEFAULT_FIELD, defaultField));
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.h, SPECIAL_FIELD, specialField));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, PUSH, node.datatype, null, null));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, SET_ATTRIB, node.datatype, DEF_NAME, getCategory()));
 
             for(String item : list){
                 //System.out.print("     item: " + item);
-                scanNodes.add(new Factory_Node.ScanNode(node.lineCol, ADD_TO, node.h, null, item));
+                scanNodes.add(new Factory_Node.ScanNode(node.lineCol, ADD_TO, node.datatype, null, item));
             }
-            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, POP, node.h, null, null));
+            scanNodes.add(new Factory_Node.ScanNode(node.lineCol, POP, node.datatype, null, null));
         }
 
         public ArrayList<String> getList(){
@@ -201,8 +208,8 @@ public class ListTable {
         @Override
         public String toString(){
             return String.format(
-                "ListSource = %s \t Category = %s \t Items = {%s} \t Default = %s \t Special = %s",
-                node.h.toString(), category,  String.join(" ", list), defaultField, specialField
+                "ListSource = %s \t Category = %s \t Items = {%s} \t First = %s \t Last = %s",
+                node.datatype.toString(), getCategory(),  String.join(" ", list), getFirstField(), getLastField()
             );
         }
 
@@ -212,15 +219,21 @@ public class ListTable {
         }
 
         public String getCategory() {
-            return category;
+            return node.data;
         }
 
-        public String getDefaultField() {
-            return defaultField;
+        public String getFirstField() {
+            if(list.isEmpty()){
+                Erlog.get(this).set("Empty List Table category");
+            }
+            return list.get(0);
         }
 
-        public String getSpecialField() {
-            return specialField;
+        public String getLastField() {
+            if(list.isEmpty()){
+                Erlog.get(this).set("Empty List Table category");
+            }
+            return list.get(list.size() - 1);
         }
     }
 }

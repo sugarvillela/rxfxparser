@@ -38,8 +38,8 @@ public class Factory_Node implements ChangeListener {
     public ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, String setData){
         return new ScanNode(textStatus.loggableStatus(), setCommand, setDatatype, null, setData);
     }
-    public ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord, String setData){
-        return new ScanNode(textStatus.loggableStatus(), setCommand, setDatatype, setKWord, setData);
+    public ScanNode newScanNode(Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setField, String setData){
+        return new ScanNode(textStatus.loggableStatus(), setCommand, setDatatype, setField, setData);
     }
     public ScanNode newPushNode(Keywords.DATATYPE setDatatype){
         return new ScanNode(textStatus.loggableStatus(), PUSH, setDatatype, null, null);
@@ -53,27 +53,27 @@ public class Factory_Node implements ChangeListener {
         public static final int NUM_FIELDS = 5;
         public final String lineCol;
         public final Keywords.CMD cmd;
-        public final Keywords.DATATYPE h;
-        public final Keywords.FIELD k;
+        public final Keywords.DATATYPE datatype;
+        public final Keywords.FIELD field;
         public String data;
         
-        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setKWord, String setData){
-            this.lineCol = lineCol;
-            h = setDatatype;
-            cmd = setCommand;
-            k = setKWord;
-            data = setData;
+        public ScanNode(String lineCol, Keywords.CMD setCommand, Keywords.DATATYPE setDatatype, Keywords.FIELD setField, String setData){
+            this.lineCol =  lineCol;
+            datatype =      setDatatype;
+            cmd =           setCommand;
+            field =         setField;
+            data =          setData;
         }
 
         @Override
         public String readableContent() {
             ArrayList<String> out = new ArrayList<>();
-            if(lineCol != null) {out.add("lineCol: " +  lineCol);}
-            if(cmd != null)     {out.add("cmd: " +      cmd.toString());}
-            if(cmd != null)     {out.add("cmd: " +      cmd.toString());}
-            if(h != null)       {out.add("h: " +        h.toString());}
-            if(k != null)       {out.add("k: " +        k.toString());}
-            if(data != null)    {out.add("data: " +     data);}
+            if(lineCol != null)     {out.add("lineCol: " +   lineCol);}
+            if(cmd != null)         {out.add("cmd: " +       cmd.toString());}
+            if(cmd != null)         {out.add("cmd: " +       cmd.toString());}
+            if(datatype != null)    {out.add("datatype: " +  datatype.toString());}
+            if(field != null)       {out.add("field: " +     field.toString());}
+            if(data != null)        {out.add("data: " +      data);}
             return String.join(", ", out);
         }
 
@@ -85,29 +85,14 @@ public class Factory_Node implements ChangeListener {
                 "%s,%s,%s,%s,%s",
                 lineCol,
                 Commons.nullSafe(cmd),
-                Commons.nullSafe(h),
-                Commons.nullSafe(k),
+                Commons.nullSafe(datatype),
+                Commons.nullSafe(field),
                 Commons.nullSafe(data)
             );
         }
     }
+
     /*========================================================================*/
-    
-    public static GroupNode newGroupNode(String name, int n){
-        return new GroupNode(name, n);
-    }
-    public static class GroupNode{
-        public final String n;
-        public final int s, e;
-        public GroupNode( String name, int n ){
-            this.n = name;
-            this.s = this.e = n;
-        }
-        @Override
-        public String toString(){
-            return this.n + ": start=" + s + " end=" + e;
-        }
-    }
 
     public boolean persist(String path, ArrayList<Factory_Node.ScanNode> scanNodes){
         return persist(path, scanNodes, null);
@@ -133,6 +118,24 @@ public class Factory_Node implements ChangeListener {
         }
         catch(IOException e){
             return false;
+        }
+    }
+
+    /*=====Unused=============================================================*/
+
+    public static GroupNode newGroupNode(String name, int n){
+        return new GroupNode(name, n);
+    }
+    public static class GroupNode{
+        public final String n;
+        public final int s, e;
+        public GroupNode( String name, int n ){
+            this.n = name;
+            this.s = this.e = n;
+        }
+        @Override
+        public String toString(){
+            return this.n + ": start=" + s + " end=" + e;
         }
     }
 }

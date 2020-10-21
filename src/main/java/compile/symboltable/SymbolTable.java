@@ -18,7 +18,7 @@ public class SymbolTable implements ChangeListener {
     private static SymbolTable instance;
 
     private SymbolTable() {
-        symbolTable = new HashMap<>();
+        symbolTableMap = new HashMap<>();
         busy = false;
     }
 
@@ -30,7 +30,7 @@ public class SymbolTable implements ChangeListener {
         instance = null;
     }
 
-    private Map<String, Base_TextNode> symbolTable;
+    private Map<String, Base_TextNode> symbolTableMap;
     //        nodeName   textNode with loader and iterator
 
     private Base_TextNode currNode;
@@ -41,9 +41,11 @@ public class SymbolTable implements ChangeListener {
 
     public void startTextNode(Keywords.DATATYPE type){
         if(busy){
+            //System.out.println("Don't nest named definitions: " + type.toString());
             Erlog.get(this).set("Don't nest named definitions", type.toString());
         }
         else{
+            //System.out.println("startTextNode: " + type.toString());
             currNode = new TextNode(this.textStatus);
             currNode.setType(type);
             busy = true;
@@ -51,15 +53,17 @@ public class SymbolTable implements ChangeListener {
     }
 
     public void setTextName(String textName){
-        if(symbolTable.containsKey(textName)){
+        if(symbolTableMap.containsKey(textName)){
             Erlog.get(this).set("Identifier already exists", textName);
         }
         else{
+            //System.out.println("setTextName: " + textName);
             currNode.setName(textName);
         }
     }
 
     public void addWord(String text){
+        //System.out.println("addWord: " + text);
         currNode.addWord(text);
     }
 
@@ -70,42 +74,43 @@ public class SymbolTable implements ChangeListener {
     }
     public void finishTextNode(){
         currNode.finishTextNode();
-        symbolTable.put(currNode.getName(), currNode);
-        currNode = null;
+        symbolTableMap.put(currNode.getName(), currNode);
         busy = false;
-        //System.out.println("finishTextNode: name: " + currNode.getName());
-        //System.out.println(currNode);
-        //testItr();
-        //System.out.println("end finishTextNode: name: " + currNode.getName());
+//        System.out.println("finishTextNode: name: " + currNode.getName());
+//        System.out.println(currNode);
+//        testItr();
+//        System.out.println("end finishTextNode: name: " + currNode.getName());
+        currNode = null;
     }
 
     //=====Methods used by Scanner to iterate node data=====================================
 
     public Base_TextNode readVar(String text){
         if(SYMBOL_TEST.isUserDef(text)){
-            return symbolTable.get(SYMBOL_TEST.stripUserDef(text));
+            return symbolTableMap.get(SYMBOL_TEST.stripUserDef(text));
         }
         return null;
     }
     public boolean isTextNode(String textNodeName){
-        return symbolTable.containsKey(textNodeName);
+        return symbolTableMap.containsKey(textNodeName);
     }
 
     public Base_TextNode getTextNode(String textNodeName){
-        return symbolTable.get(textNodeName);
+        return symbolTableMap.get(textNodeName);
     }
 
     @Override
     public String toString(){
+        System.out.println("SymbolTable toString: ");
         ArrayList<String> out = new ArrayList<>();
-        for (Map.Entry<String, Base_TextNode> entry : symbolTable.entrySet()) {
+        for (Map.Entry<String, Base_TextNode> entry : symbolTableMap.entrySet()) {
             System.out.println("toString: text node: " + entry.getKey());
             out.add(entry.getValue().toString());
         }
         return String.join("\n", out);
     }
     public void testItr(){
-        for (Map.Entry<String, Base_TextNode> entry : symbolTable.entrySet()) {
+        for (Map.Entry<String, Base_TextNode> entry : symbolTableMap.entrySet()) {
             System.out.println("testItr: text node: " + entry.getKey());
             entry.getValue().testItr();
         }

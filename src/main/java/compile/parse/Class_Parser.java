@@ -4,12 +4,9 @@ package compile.parse;
 
 import compile.basics.*;
 
-import erlog.Erlog;
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import toksource.ScanNodeSource;
 import compile.basics.Factory_Node.ScanNode;
 import compile.parse.factories.Factory_ParseItem;
-import toksource.TextSource_file;
 
 /**
  * @author Dave Swanson
@@ -51,7 +48,7 @@ public class Class_Parser extends RxlxReader {
             ScanNode currNode = ((ScanNodeSource)fin).nextNode();
             //System.out.println("\nNode: " + currNode.toString());
             
-            if(currNode.cmd == null || currNode.h == null){
+            if(currNode.cmd == null || currNode.datatype == null){
                 er.set("Null command in rxlx file");
             }
             System.out.println(currNode);

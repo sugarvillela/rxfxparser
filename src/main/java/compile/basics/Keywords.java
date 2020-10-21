@@ -141,7 +141,7 @@ public final class Keywords {
         KEY, VAL,
 
         // Internal keywords for communicating between components
-        DEF_NAME, ITEM_NAME, DEFAULT_FIELD, SPECIAL_FIELD,//ANON_NAME, // named and anonymous variables
+        DEF_NAME, ITEM_NAME,//ANON_NAME, // named and anonymous variables
         LO, HI // RX ranges
         //rx
         //RX_AND1, RX_OR1, RX_EQUAL, RX_GT, RX_LT, RX_PAYLOAD, RX_NEGATE,

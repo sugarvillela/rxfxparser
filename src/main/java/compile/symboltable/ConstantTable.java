@@ -1,6 +1,5 @@
 package compile.symboltable;
 
-import compile.basics.Keywords;
 import erlog.Erlog;
 
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ public class ConstantTable {
     private static ConstantTable instance;
 
     private ConstantTable () {
-        symbolTable = new HashMap<>();
+        constantTableMap = new HashMap<>();
     }
 
     public static ConstantTable getInstance(){
@@ -22,7 +21,7 @@ public class ConstantTable {
         instance = null;
     }
 
-    private Map<String, ConstantNode> symbolTable;
+    private Map<String, ConstantNode> constantTableMap;
     private ConstantNode currNode;
 
     //=====Methods to populate nodes=====================================
@@ -33,7 +32,7 @@ public class ConstantTable {
 
     public void setConstantName(String name){
         //System.out.println("setConstantName: "+name);
-        if(symbolTable.containsKey(name)){
+        if(constantTableMap.containsKey(name)){
             Erlog.get(this).set("Identifier already exists", name);
         }
         else{
@@ -44,7 +43,7 @@ public class ConstantTable {
     public void setValue(String value){
         //System.out.println("setValue: "+value);
         currNode.value = value;
-        symbolTable.put(currNode.name, currNode);
+        constantTableMap.put(currNode.name, currNode);
         currNode = null;
     }
 
@@ -61,16 +60,16 @@ public class ConstantTable {
     }
 
     public boolean isConstant(String constantName){
-        return symbolTable.containsKey(constantName);
+        return constantTableMap.containsKey(constantName);
     }
 
-    public String getValue(String textNodeName){
-        return symbolTable.get(textNodeName).value;
+    public String getValue(String constantName){
+        return constantTableMap.get(constantName).value;
     }
 
     public String toString(){
         ArrayList<String> out = new ArrayList<>();
-        for (Map.Entry<String, ConstantNode> entry : symbolTable.entrySet()) {
+        for (Map.Entry<String, ConstantNode> entry : constantTableMap.entrySet()) {
             out.add(entry.getValue().toString());
         }
         return String.join("\n", out);

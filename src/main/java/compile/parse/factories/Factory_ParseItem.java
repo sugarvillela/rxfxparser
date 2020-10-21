@@ -11,12 +11,11 @@ import unique.Enum_itr;
 import unique.Uq_enumgen;
 
 import static compile.basics.Keywords.*;
-import static compile.basics.Keywords.DATATYPE.*;
 
 public abstract class Factory_ParseItem {
     public static Base_ParseItem get(ScanNode node){
         //System.out.println("====Base_ParseItem.get()====" + node.h.toString());
-        DATATYPE h = node.h;
+        DATATYPE h = node.datatype;
         switch(h){
             case LIST_BOOLEAN:
                 return new ItemListBoolean(node);
@@ -59,9 +58,9 @@ public abstract class Factory_ParseItem {
         /** This is the bottom of the stack, so it is the final stop for parse-time attributes.
          * Put general enough attributes here */
         public void setAttrib(Factory_Node.ScanNode node) {
-            switch(node.k){
+            switch(node.field){
                 default:
-                    er.set("Unknown keyword", node.k.toString());
+                    Erlog.get(this).set("Unknown keyword", node.field.toString());
             }
         }
     }
@@ -183,7 +182,7 @@ public abstract class Factory_ParseItem {
 
         @Override
         public void setAttrib(Factory_Node.ScanNode node) {
-            switch(node.k){
+            switch(node.field){
                 case LO:
                     low = node.data;
                     break;
