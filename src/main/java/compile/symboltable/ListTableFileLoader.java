@@ -5,6 +5,7 @@ import compile.basics.IParseItem;
 import compile.basics.Keywords;
 import compile.basics.RxlxReader;
 import compile.parse.Base_ParseItem;
+import erlog.DevErr;
 import erlog.Erlog;
 import toksource.ScanNodeSource;
 
@@ -38,13 +39,13 @@ public class ListTableFileLoader extends RxlxReader implements IParseItem {
 
     @Override
     public void addTo(Factory_Node.ScanNode node) {
-        Erlog.get(this).set("found usage: addTo: ", node.toString());
+        DevErr.get(this).kill("found usage: addTo: ", node.toString());
         listTableMap.get(node.datatype).get(currCategory).addTo(node);
     }
 
     @Override
     public void setAttrib(Factory_Node.ScanNode node) {
-        Erlog.get(this).set("found usage: setAttrib: ", node.toString());
+        DevErr.get(this).kill("found usage: setAttrib: ", node.toString());
 //        System.out.println("setAttrib: " + node.toString());
 //        if(!firstCategory.containsKey(node.datatype)){  // First category set? Save in separate map for defaults
 //            firstCategory.put(node.datatype, node.data);

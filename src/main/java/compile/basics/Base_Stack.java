@@ -57,6 +57,12 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeN
     public Base_StackItem getTop(){
         return top;
     }
+
+    @Override
+    public void setTop(Base_StackItem nuTop){
+        top = nuTop;
+    }
+
     @Override
     public int getStackSize(){
         return this.stackSize;

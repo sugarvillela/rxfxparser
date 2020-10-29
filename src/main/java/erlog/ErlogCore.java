@@ -154,6 +154,7 @@ class ErlogCore {//package private class
             );
         }
         protected String errText( String text, String at, String className ){
+            //System.out.println(textStatus);
             return String.format(
                     "Error: %s: %s: %s at %s",
                     textStatus.readableStatus(),

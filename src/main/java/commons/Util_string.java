@@ -32,27 +32,14 @@ public class Util_string {
         }
         return f+"."+ext;
     }
-//    /**Returns number of occurrences of char c in string text
-//     * @param c count these
-//     * @param text in this
-//     * @author Dave Swanson
-//     */
-//    public static int countOccurs( char c, String text ){
-//        int count = 0;
-//        for(int i=0; i<text.length(); i++){
-//            if( text.charAt(i) == c ){
-//                count++;
-//            }
-//        }
-//        return count;
-//    }
+
     public static String toPascalCase( String text ){
-        return fromSnakeCase(text, true);
+        return fromSnakeCase(text, true).trim();
     }
     public static String toCamelCase( String text ){
-        return fromSnakeCase(text, false);
+        return fromSnakeCase(text, false).trim();
     }
-    public static String fromSnakeCase( String text, boolean capFirst ){
+    private static String fromSnakeCase( String text, boolean capFirst ){
         char[] out = new char[text.length()+1];
         boolean forceCap = capFirst, lastCap = true;
         for(int i=0, j=0; i<text.length(); i++){
@@ -117,9 +104,11 @@ public class Util_string {
                 underscoreLast = false;
             }
         }
-        return new String(out);
+        return new String(out).trim();
     }
-    
+    public static String toScreamingSnake( String text ){
+        return toSnakeCase(text).toUpperCase();
+    }
     /**Returns trimmed string if first and last chars equal openClose
      * @param openClose single or double quote
      * @param text original text

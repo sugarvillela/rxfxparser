@@ -1,48 +1,50 @@
 package compile.parse.factories;
 
 
-import compile.basics.CompileInitializer;
 import compile.basics.Factory_Node;
-import erlog.Erlog;
-import compile.parse.Base_ParseItem;
-
 import compile.basics.Factory_Node.ScanNode;
-import unique.Enum_itr;
-import unique.Uq_enumgen;
+import compile.parse.Base_ParseItem;
+import compile.parse.Class_Parser;
+import compile.parse.ut.FlatTreeBuilder;
+import compile.sublang.factories.TreeFactory;
+import compile.sublang.ut.FlatTree;
+import erlog.Erlog;
 
-import static compile.basics.Keywords.*;
+import static compile.basics.Keywords.DATATYPE;
 
 public abstract class Factory_ParseItem {
     public static Base_ParseItem get(ScanNode node){
         //System.out.println("====Base_ParseItem.get()====" + node.h.toString());
         DATATYPE h = node.datatype;
         switch(h){
-            case LIST_BOOLEAN:
-                return new ItemListBoolean(node);
-            case LIST_DISCRETE:
-                return new ItemListDiscrete(node);
             case SRCLANG:
-                //return new ParseItem(node);
+                return new ParseItem(node);
             case RX_WORD:
-                //return new ItemRxWord(node);
-            case RX:
-                //return new ParseItem(node);
-            case FX:
-                //return new ParseItem(node);
+            case FX_WORD:
+                return new ItemRxWord(node);
             case TARGLANG_BASE:
-                return new ItemTargLangBase(node);
+                //return new ItemTargLangBase(node);
             case TARGLANG_INSERT:
-                return new ItemTargLangInsert(node);
+                //return new ItemTargLangInsert(node);
             case ATTRIB:
                 //return new ParseItem(node);
             //========To implement=====================
             case SCOPE:
                 //return null;//new Scope(node);
             default:
-                Erlog.get("Factory_cxs").set("Developer error in get(datatype)", node.toString());
-                return null;
+
+//                DevErr.get("Factory_cxs").kill("Developer error in get(datatype)", node.toString());
+//                return null;
+        }
+        return new ParseItem(node);
+    }
+    public static class ParseItem extends Base_ParseItem{
+        public ParseItem(ScanNode node) {
+            super(node);
+            System.out.println("ParseItem Constructor: " + node);
         }
     }
+
     public static class ItemTargLangBase extends Base_ParseItem{
 
         public ItemTargLangBase(Factory_Node.ScanNode node){
@@ -75,60 +77,7 @@ public abstract class Factory_ParseItem {
             System.out.printf("Add to ItemTargLangInsert: %s\n", node.data);
         }
     }
-    public static class ItemListBoolean extends Base_ParseItem{
-        private Enum_itr itr;
-        private int count;
 
-        public ItemListBoolean(Factory_Node.ScanNode node){
-            super(node);
-            itr = (Enum_itr)(new Uq_enumgen(CompileInitializer.getInstance().getWRow())).iterator();
-            count = 0;
-        }
-        @Override
-        public void addTo(Factory_Node.ScanNode node) {
-            int cur = itr.next();
-            System.out.printf("%s = 0x%x;\n", node.data, cur);
-            System.out.println(commons.BIT.str(cur));
-        }
-
-        @Override
-        public void onBeginStep(){
-            if(count > 0){
-                itr.newRow();
-            }
-            count++;
-            System.out.println("ENUB onBeginStep: name = " + node.data);
-        }
-        @Override
-        public void onEndStep(){
-            System.out.println("ENUB onEndStep: name = " + node.data);
-        }
-    }
-    public static class ItemListDiscrete extends Base_ParseItem{//extends ItemENUB {
-        private Enum_itr itr;
-        private int count;
-        public ItemListDiscrete(Factory_Node.ScanNode node){
-            super(node);
-            itr = (Enum_itr)(
-                    new Uq_enumgen(
-                            CompileInitializer.getInstance().getWRow(),
-                            CompileInitializer.getInstance().getWVal()
-                    )
-            ).iterator();
-        }
-        @Override
-        public void onBeginStep(){
-            if(count > 0){
-                itr.newCol();
-            }
-            count++;
-            System.out.println("ItemListDiscrete onBeginStep: name = " + node.data);
-        }
-        @Override
-        public void onEndStep(){
-            System.out.println("ItemListDiscrete onEndStep: name = " + node.data);
-        }
-    }
     public static class ItemRxFx extends Base_ParseItem{
 
         public ItemRxFx(Factory_Node.ScanNode node){
@@ -142,24 +91,17 @@ public abstract class Factory_ParseItem {
 
     }
 
-    public static class ItemRx extends Base_ParseItem{
-        protected String low, high;
+    public static abstract class RxFxWord extends Base_ParseItem {
+        protected FlatTreeBuilder builder;
+        protected FlatTree flatTree;
 
-        public ItemRx(Factory_Node.ScanNode node){
+        public RxFxWord(ScanNode node) {
             super(node);
         }
-
-        @Override
-        public void onPush() {
-            //((Base_ParseItem)below).addTo(node.h, FIELD.ABOVE, node.h.toString());
-        }
-
-        @Override
-        public void onPop() {}
     }
-
-    public class ItemRxWord extends Base_ParseItem{
+    public static class ItemRxWord extends RxFxWord{
         protected String low, high;
+
 
         public ItemRxWord(Factory_Node.ScanNode node){
             super(node);
@@ -167,7 +109,12 @@ public abstract class Factory_ParseItem {
 
         @Override
         public void onPush() {
-            System.out.println("RxWord onPush");
+            System.out.println("RxFxWord onPush: datatype = " + node.datatype);
+            builder = new FlatTreeBuilder(node.datatype, ((Class_Parser)P).getScanNodeSource(), this);
+            builder.build();
+            flatTree = builder.get();
+            flatTree.disp();
+            P.pop();
         }
 
         @Override
@@ -188,7 +135,7 @@ public abstract class Factory_ParseItem {
                     break;
                 case HI:
                     high = node.data;
-                    break;//PROJ_NAME
+                    break;
                 default:
                     ((Base_ParseItem)below).setAttrib(node);
             }

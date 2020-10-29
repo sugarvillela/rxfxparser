@@ -25,7 +25,7 @@ public abstract class Widget {
         defLang = setDefLang;
     }
     public static Widget getNewWidget(){
-        System.out.println("defLang="+defLang);
+        //System.out.println("defLang="+defLang);
         switch (defLang){
             case JAVA:
                 return new Widget_java();
@@ -41,7 +41,23 @@ public abstract class Widget {
                 return null;
         }
     }
-    
+    public static String getFileExt(){
+        //System.out.println("defLang="+defLang);
+        switch (defLang){
+            case JAVA:
+                return "java";
+            case PHP:
+                return "php";
+            case PYTHON:
+                return "py";
+            case CPP:
+                return "cpp";
+            case CPPH:
+                return "h";
+            default:
+                return null;
+        }
+    }
     //==========================================================================
 
     //Below: Base class utilities and overridable methods

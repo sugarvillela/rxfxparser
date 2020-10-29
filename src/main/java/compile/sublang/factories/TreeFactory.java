@@ -19,6 +19,7 @@ import toksource.ScanNodeSource;
 import toksource.TextSource_list;
 import toktools.TK;
 import toktools.Tokens_special;
+import unique.Unique;
 import uq.Uq;
 
 public abstract class TreeFactory {
@@ -40,6 +41,7 @@ public abstract class TreeFactory {
     /*=====Root display methods=======================================================================================*/
 
     public void dispBreadthFirst(TreeNode root){
+        //System.out.println("Size: " + root.size());
         ArrayList<TreeNode>[] levels = breadthFirst(root);
         ArrayList<String> disp = new ArrayList<>();
         for(int i = 0; i < levels.length; i++){
@@ -151,6 +153,11 @@ public abstract class TreeFactory {
         return reroot;
     }
 
+    /*=====Tree build and convert methods=============================================================================*/
+
+    public int size(TreeNode root){
+        return preOrder(root).size();
+    }
     public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(Keywords.DATATYPE datatype, TreeNode root){
         Keywords.DATATYPE builderType;
         Keywords.DATATYPE payNodeType;
@@ -169,23 +176,25 @@ public abstract class TreeFactory {
 
             while(stackLevel > node.level){
                 stackLevel--;
-                cmdList.add(
-                        nodeFactory.newPopNode(builderType)
-                );
+                cmdList.add(nodeFactory.newPopNode(builderType));
             }
             stackLevel++;
             cmdList.add(
                     nodeFactory.newScanNode(Keywords.CMD.PUSH, builderType, VAL, node.toString())
             );
             if(PAYLOAD.equals(node.op)){
-                cmdList.add(nodeFactory.newPushNode(RX_PAY_NODE));
+                cmdList.add(nodeFactory.newPushNode(payNodeType));
                 for(DataNode payNode : node.payNodes){
                     cmdList.add(
-                            nodeFactory.newScanNode(Keywords.CMD.ADD_TO, RX_PAY_NODE, VAL, payNode.toString())
+                            nodeFactory.newScanNode(Keywords.CMD.ADD_TO, payNodeType, VAL, payNode.toString())
                     );
                 }
-                cmdList.add(nodeFactory.newPopNode(RX_PAY_NODE));
+                cmdList.add(nodeFactory.newPopNode(payNodeType));
             }
+        }
+        while(stackLevel > 0){
+            stackLevel--;
+            cmdList.add(nodeFactory.newPopNode(builderType));
         }
         return cmdList;
     }
@@ -221,7 +230,7 @@ public abstract class TreeFactory {
     public static abstract class TreeNode{
         protected static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP );
         protected static final Uq uq = new Uq();
-        protected ArrayList<TreeNode> nodes;//--
+        public ArrayList<TreeNode> nodes;//--
         public TreeNode parent;     //--
         public String data;         //--
         public OP op;//, parentOp;//--
@@ -464,7 +473,7 @@ public abstract class TreeFactory {
             }
             return String.join("\n", out);
         }
-        public String leafOp(){
+        public String leafOpToString(){
             if(op == null || nodes == null || nodes.size() < 2){
                 return "";
             }

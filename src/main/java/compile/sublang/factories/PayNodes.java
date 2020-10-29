@@ -5,7 +5,6 @@ import compile.basics.Keywords;
 import compile.sublang.ut.FxAccessUtil;
 import compile.sublang.ut.FxParamUtil;
 import compile.sublang.ut.RxParamUtil;
-import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 import interfaces.DataNode;
 import toktools.TK;
@@ -68,6 +67,7 @@ public abstract class PayNodes {
         @Override
         public DataNode payNodeFromScanNode(String scanNodeText){
             String[] tok = T.toArr(scanNodeText);
+            // Commons.disp(tok, "RxPayNodeFactory");
             if(tok.length != RxPayNode.NUM_FIELDS){
                 Erlog.get(this).set("Bad scan node text size" + tok.length, scanNodeText);
                 return null;
@@ -80,7 +80,7 @@ public abstract class PayNodes {
                     (NULL_TEXT.equals(tok[4]))? null : tok[4],
                     (NULL_TEXT.equals(tok[5]))? null : tok[5],
                     (NULL_TEXT.equals(tok[6]))? null : Keywords.DATATYPE.fromString(tok[6]),
-                    Commons.undoNullSafe_int(tok[7])
+                    Commons.undoNullSafe_intArray(tok[7])
             );
         }
     }
@@ -134,6 +134,7 @@ public abstract class PayNodes {
         @Override
         public DataNode payNodeFromScanNode(String scanNodeText) {
             String[] tok = T.toArr(scanNodeText);
+            //Commons.disp(tok, "FxPayNodeFactory");
             if(tok.length != FxPayNode.NUM_FIELDS){
                 Erlog.get(this).set("Bad scan node text size: " + tok.length, scanNodeText);
                 return null;
@@ -142,10 +143,10 @@ public abstract class PayNodes {
                     Keywords.FX_ACCESS.fromString(tok[0]),
                     Keywords.FX_PAR.fromString(tok[1]),
                     Keywords.FX_FUN.fromString(tok[2]),
-                    Commons.undoNullSafes(tok[3]),
-                    Commons.undoNullSafes(tok[4]),
+                    Commons.undoNullSafe_stringArray(tok[3]),
+                    Commons.undoNullSafe_stringArray(tok[4]),
                     Keywords.DATATYPE.fromStrings(tok[5]),
-                    Commons.undoNullSafe_int(tok[6]),
+                    Commons.undoNullSafe_intArray(tok[6]),
                     Integer.parseInt(tok[7])
             );
         }

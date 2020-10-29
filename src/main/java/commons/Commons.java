@@ -40,7 +40,7 @@ public class Commons {
     public static String undoNullSafe(String text){
         return (text == NULL_TEXT)? null : text;
     }
-    public static String[] undoNullSafes(String text){
+    public static String[] undoNullSafe_stringArray(String text){
         if(NULL_TEXT.equals(text)){
             return null;
         }
@@ -50,7 +50,7 @@ public class Commons {
         }
         return toks;
     }
-    public static int[] undoNullSafe_int(String text){
+    public static int[] undoNullSafe_intArray(String text){
         if(NULL_TEXT.equals(text)){
             return null;
         }
@@ -60,6 +60,13 @@ public class Commons {
             out[i] = Integer.parseInt(toks[i]);
         }
         return out;
+    }
+    public static int undoNullSafe_int(String text){
+        try{
+            return Integer.parseInt(text);
+        }catch(NumberFormatException e){
+            return 0;
+        }
     }
 
     public static String join(String delimiter, Object[] objects){
@@ -76,6 +83,7 @@ public class Commons {
         }
         return String.join(delimiter, out);
     }
+
     public static int indexOf( String needle, String[] haystack ){
         for(int i=0; i<haystack.length; i++){
             if( needle.equals(haystack[i]) ){
@@ -117,7 +125,8 @@ public class Commons {
         }
         return -1;
     }
-    public static int binarySearch( String[] haystack, String needle ){ 
+
+    public static int binarySearch( String[] haystack, String needle ){
         int left = 0, right = haystack.length - 1, mid, result; 
         while (left <= right) { 
             mid = left + (right - left) / 2; 
@@ -253,5 +262,40 @@ public class Commons {
             f = f.substring(0, f.length() - ext.length()-1);
         }
         return f + "." + ext;
+    }
+
+    public static String[] wrapAll(String[] strings, char oChar, char cChar){
+        String[] out = new String[strings.length];
+        for(int i = 0; i < strings.length; i++){
+            out[i] = oChar + strings[i] + cChar;
+        }
+        return out;
+    }
+    public static String[] randomContent(int returnSize){
+        String[] words = new String[]{
+                "Interdum","et","malesuada","fames","ac","ante","ipsum","primis",
+                "in","faucibus.","Proin","dui","tellus,","imperdiet","in",
+                "felis","sodales,","molestie","facilisis","nulla.","Vestibulum",
+                "purus","nibh,","aliquet","non","tortor","vitae,","fermentum",
+                "elementum","eros.","Cras","rutrum","risus","nisi,","quis",
+                "scelerisque","massa","mattis","nec.","Nullam","pellentesque",
+                "nibh","commodo","ante","posuere,","iaculis","imperdiet","sapien",
+                "vestibulum.","In","tempor","volutpat","pellentesque.","Nam","sed",
+                "dolor","at","ex","sodales","tempor","pellentesque","lobortis","diam.",
+                "Aenean","ut","nisl","at","est","mattis","consequat.","Vestibulum","ultrices",
+                "vitae","turpis","et","vulputate.","Orci","varius","natoque","penatibus",
+                "et","magnis","dis","parturient","montes,","nascetur","ridiculus","mus.",
+                "Aenean","sodales","nulla","vel","nisl","se mper","dictum.","Nulla","rutrum",
+                "condimentum","metus","eget","varius.","Maecenas","non","lorem","quis","metus",
+                "porttitor","dignissim","nec","sit","amet","nisl.","Integer","neque","tortor,",
+                "tempor","ut","dignissim","sed,","dictum","at","risus.","Vivamus","sed","sagittis","quam."
+        };
+        String[] out = new String[returnSize];
+        int len = words.length;
+        int start = (int)(Math.random() * (len - returnSize));
+        for(int i = 0, j = start; i < returnSize; i++, j++){
+            out[i] = words[j];
+        }
+        return out;
     }
 }

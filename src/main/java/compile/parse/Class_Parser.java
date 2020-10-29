@@ -36,7 +36,10 @@ public class Class_Parser extends RxlxReader {
     public static void killInstance(){
         staticInstance = null;
     }
-    
+
+    public ScanNodeSource getScanNodeSource(){
+        return this.fin;
+    }
     @Override
     public void onCreate(){
         //fin = new ScanNodeSource(new TextSource_file(inName + INTERIM_FILE_EXTENSION));
@@ -51,8 +54,8 @@ public class Class_Parser extends RxlxReader {
             if(currNode.cmd == null || currNode.datatype == null){
                 er.set("Null command in rxlx file");
             }
-            System.out.println(currNode);
-            //readNode(currNode);
+            //System.out.println(currNode);
+            readNode(currNode);
         }
     }
     @Override

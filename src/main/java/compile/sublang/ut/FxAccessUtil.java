@@ -2,6 +2,7 @@ package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
+import erlog.DevErr;
 import erlog.Erlog;
 
 import static compile.basics.Keywords.ACCESS_MOD;
@@ -71,7 +72,7 @@ public class FxAccessUtil extends ParamUtil{
                         }
                         break;
                     default:
-                        Erlog.get(this).set("Developer", mainText);
+                        DevErr.get(this).kill("Developer", mainText);
                         break;
                 }
                 mainText = null; // don't need these

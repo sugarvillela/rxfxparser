@@ -23,7 +23,8 @@ public final class Keywords {
     public static final String LOGGABLE_FORMAT = "%s|%d|%d";            // file name, line, word
     public static final String STATUS_FORMAT = "%s line %d word %d";    // file name, line, word
     public static final String DEFAULT_FIELD_FORMAT = "%s[%s]";         // category[item]
-    public static final String UQ_FORMAT = "%03d";                      // for unique name generator
+    public static final String UQ_FORMAT = "gen%03d";                   // for unique name generator
+    public static final int UQ_FORMAT_LEN = 6;                          // for unpacking names generated with UQ_FORMAT
     public static final String NULL_TEXT = "-";                         // nullSafe string output when a member is null
     public static final String SCOPES_DEF_NAME = "SCOPES";              // default category name supersedes user def
 
@@ -138,7 +139,7 @@ public final class Keywords {
         // keywords that can be specified in language (these have immediate effect)
         PROJ_NAME, NEW_LIST_SET, RX_TARGLANG_ON_SPECIAL,
         // General keys
-        KEY, VAL,
+        KEY, VAL, LENGTH,
 
         // Internal keywords for communicating between components
         DEF_NAME, ITEM_NAME,//ANON_NAME, // named and anonymous variables

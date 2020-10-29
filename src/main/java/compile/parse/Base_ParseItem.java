@@ -37,6 +37,7 @@ import compile.basics.IParseItem;
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected ScanNode node;
     protected String outFileName;
+    protected String defName;
         
     public Base_ParseItem(Factory_Node.ScanNode node){
         this.node = node;
@@ -50,10 +51,12 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     @Override
     public void addTo(Factory_Node.ScanNode node) {}
 
-
     @Override
     public void setAttrib(Factory_Node.ScanNode node) {
         switch (node.field){
+            case DEF_NAME:
+                defName = node.data;
+                break;
             default:
                 System.out.println(node.field.toString() + " in Base_ParseItem setAttrib: " + node.data);
                 //((Base_ParseItem)below).setAttrib(node);
@@ -62,12 +65,12 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
 
     @Override
     public void onPush() {
-        System.out.println("ItemTargLang onPush");
+        //System.out.println("ItemTargLang onPush");
     }
 
     @Override
     public void onPop() {
-        System.out.println("ItemTargLang onPop");
+        //System.out.println("ItemTargLang onPop");
     }
 
     public String getOutFileName(){

@@ -1,6 +1,7 @@
 package compile.scan.factories;
 
 import compile.symboltable.TextSniffer;
+import erlog.DevErr;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import static compile.basics.Keywords.DATATYPE;
@@ -174,7 +175,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 //========To implement=====================
 
                 default:
-                    Erlog.get("Factory_cxs").set("Developer get(datatype)", h.toString());
+                    DevErr.get("Factory_cxs").kill("Developer get(datatype)", h.toString());
                     return null;
             }
         }
@@ -412,7 +413,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                     );
 
                 default:
-                    Erlog.get("Factory_cxs").set("Developer get(datatype)", h.toString());
+                    DevErr.get("Factory_cxs").kill("Developer get(datatype)", h.toString());
                     return null;
             }
         }

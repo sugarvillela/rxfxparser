@@ -1,1 +1,1 @@
-Error: semantic1.rxfx line 38 word 2: TextSniffer: Sleuthy stop at ScanItem: SCOPE
+Error: source semantic1.rxfx|38|2 interim semantic1.rxlx line 19 word -1: FlatNode: Bad scan node text size6 at =,0,-1,2,1|2,0

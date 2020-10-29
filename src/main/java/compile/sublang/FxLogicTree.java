@@ -32,11 +32,6 @@ public class FxLogicTree  extends TreeFactory {
     @Override
     public TreeNode treeFromWordPattern(String text){
         //System.out.println("tokenize start: root text: " + text);
-//        listTable = ListTableScanLoader.getInstance();
-//        if(listTable == null){
-//            Erlog.get(this).set("LIST<*> items are not defined");
-//            return null;
-//        }
         TreeNode root = TreeFactory.newTreeNode(FX, text, 0, null);
         boolean more;
         do{

@@ -3,6 +3,7 @@ package compile.symboltable;
 import commons.BIT;
 import compile.basics.Keywords;
 import compile.parse.Base_ParseItem;
+import erlog.DevErr;
 import erlog.Erlog;
 import interfaces.Killable;
 import uq.UniqueItr;
@@ -145,7 +146,7 @@ public class ListTableNumGen implements Killable {
         }
         private void init(int wRowDefault, int count){
             if(wRowDefault < 1 || count <= 0){
-                Erlog.get(this).set("Houston, we have a problem...");
+                DevErr.get(this).kill("Houston, we have a problem...");
                 return;
             }
 

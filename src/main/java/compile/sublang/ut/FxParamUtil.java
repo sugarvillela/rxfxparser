@@ -4,6 +4,7 @@ import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.symboltable.ListTableItemSearch;
 import compile.symboltable.ListTable;
+import erlog.DevErr;
 import erlog.Erlog;
 import toktools.TK;
 import toktools.Tokens_special;
@@ -149,7 +150,7 @@ public class FxParamUtil extends ParamUtil{
                         funCatMulti();
                         break;
                     default:
-                        Erlog.get(this).set("Developer", mainText);
+                        DevErr.get(this).kill("Developer", mainText);
                 }
                 mainText = null; // don't need these
                 bracketText = null; // don't need these

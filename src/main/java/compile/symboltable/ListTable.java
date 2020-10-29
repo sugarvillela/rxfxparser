@@ -171,7 +171,7 @@ public class ListTable {
 
         @Override
         public void setAttrib(Factory_Node.ScanNode node) {
-            System.out.println("ListTableNode setAttrib: " + node.toString());
+            //System.out.println("ListTableNode setAttrib: " + node.toString());
             switch(node.field){
                 case DEF_NAME: // = category
                     this.node.data = node.data;

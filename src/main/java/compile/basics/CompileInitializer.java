@@ -2,11 +2,14 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
+import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
+import compile.symboltable.ListTable;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
+import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -17,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -50,7 +54,7 @@ public class CompileInitializer implements ChangeListener {
     //private final Unique unique;
     private Base_Stack currStack, pausedStack;
     private ITextStatus pausedStatusReporter;
-    private boolean newEnumSet, parseOnly; // arg flags
+    private boolean newEnumSet, scanOnly, parseOnly; // arg flags
     private String inName, projName;
     private String initTime;
     private int wrow, wval, wcol;
@@ -94,9 +98,10 @@ public class CompileInitializer implements ChangeListener {
             setCurrParserStack(scanner);
             scanner.onCreate();
 
-//            if(ListTable.getInstance() != null){
-//                ListTable.getInstance().persist();
-//            }
+            if(ListTable.getInstance() != null){
+                ListTable.getInstance().persist();
+            }
+
             System.out.println("Pre-Scan Complete");
 
             TextSniffer.getInstance().wake();
@@ -117,18 +122,26 @@ public class CompileInitializer implements ChangeListener {
             SymbolTable.killInstance();
             TextSniffer.killInstance();
         }
-        //ListTable listTable = ListTable.getInstance();
-        //listTable.disp();
-        //listTable.getNumGen().gen();
-        //listTable.getNumGen().disp();
-//
-//        Class_Parser.init(
-//            new ScanNodeSource(
-//                new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-//            )
-//        );
-//        Class_Parser parser = Class_Parser.getInstance();
-//        parser.onCreate();
+        if(!scanOnly){
+            System.out.println("ListTable build or rebuild");
+
+            ListTable listTable = ListTable.getInstance();
+//            listTable.disp();
+//            listTable.getNumGen().gen();
+//            listTable.getNumGen().disp();
+
+            System.out.println("Begin Parse");
+
+            Class_Parser.init(
+                    new ScanNodeSource(
+                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+                    )
+            );
+            Class_Parser parser = Class_Parser.getInstance();
+            setCurrParserStack(parser);
+            parser.onCreate();
+        }
+
         //Erlog.finish();
     }
     private void readArgs(String[] args){
@@ -140,6 +153,9 @@ public class CompileInitializer implements ChangeListener {
                 case "-p": // parse only
                     parseOnly = true;
                     break;
+                case "-s": // parse only
+                    scanOnly = true;
+                    break;
                 default:
                     if(args[i].startsWith("-")){
                         er.set("Unknown argument", args[i]);
@@ -147,8 +163,14 @@ public class CompileInitializer implements ChangeListener {
                     this.projName = args[i];
             }
         }
-        if(newEnumSet && parseOnly){
 
+        if(parseOnly){
+            if(newEnumSet){
+                er.set("-n with -p: list tables will not be created");
+            }
+            if(scanOnly){
+                er.set("-s with -p: nothing will happen");
+            }
         }
     }
 

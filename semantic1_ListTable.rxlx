@@ -1,6 +1,13 @@
 # Generated file, do not edit
-# Last write: 10/19/2020 22:06:18
+# Last write: 10/25/2020 09:50:16
 # Defines lists, categories and items
+semantic1.rxfx|30|0,PUSH,LIST_NUMBER,-,-
+semantic1.rxfx|30|0,SET_ATTRIB,LIST_NUMBER,DEF_NAME,INT
+semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,NUM_VAL
+semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,INDEX
+semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,GROUP
+semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,EE
+semantic1.rxfx|30|0,POP,LIST_NUMBER,-,-
 semantic1.rxfx|14|0,PUSH,LIST_SCOPES,-,-
 semantic1.rxfx|14|0,SET_ATTRIB,LIST_SCOPES,DEF_NAME,SCOPES
 semantic1.rxfx|14|0,ADD_TO,LIST_SCOPES,-,ALL
@@ -35,13 +42,6 @@ semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,ARTICLE
 semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,DETERMINER
 semantic1.rxfx|17|0,ADD_TO,LIST_BOOLEAN,-,MODAL
 semantic1.rxfx|17|0,POP,LIST_BOOLEAN,-,-
-semantic1.rxfx|30|0,PUSH,LIST_NUMBER,-,-
-semantic1.rxfx|30|0,SET_ATTRIB,LIST_NUMBER,DEF_NAME,INT
-semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,NUM_VAL
-semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,INDEX
-semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,GROUP
-semantic1.rxfx|30|0,ADD_TO,LIST_NUMBER,-,EE
-semantic1.rxfx|30|0,POP,LIST_NUMBER,-,-
 semantic1.rxfx|26|0,PUSH,LIST_STRING,-,-
 semantic1.rxfx|26|0,SET_ATTRIB,LIST_STRING,DEF_NAME,TEXT
 semantic1.rxfx|26|0,ADD_TO,LIST_STRING,-,IN

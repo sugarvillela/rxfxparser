@@ -15,6 +15,7 @@ import compile.sublang.ut.ValidatorRx;
 import compile.symboltable.ConstantTable;
 import compile.symboltable.ListTableScanLoader;
 import compile.symboltable.ListTable;
+import erlog.DevErr;
 import erlog.Erlog;
 import toktools.TK;
 import toktools.Tokens_special;
@@ -145,7 +146,7 @@ public class RxLogicTree extends TreeFactory {
             case IMMUTABLE:
                 Erlog.get(this).set(LIST_SCOPES.toString() + " is an immutable datatype for scoping; not allowed here", leaf.data);
         }
-        Erlog.get(this).set("Syntax error", leafData);
+        DevErr.get(this).kill("Syntax error", leafData);
         return false;
     }
     private void setPayNodes(ArrayList<TreeNode> leaves){

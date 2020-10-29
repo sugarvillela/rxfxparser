@@ -89,19 +89,22 @@ public class Commons_ {
             "myValue_int",
             "Many____UnderscoresMake_Trouble"
         };
-//        System.out.println("\nToPascal");
-//        for(String str : strings){
-//            //System.out.printf("%s: is all cap: %b\n", str, Util_string.isAllCap(str));
-//            System.out.printf("%s: %s\n", str, Util_string.toPascalCase(str));
-//        }
-//        System.out.println("\nToCamel");
-//        for(String str : strings){
-//            System.out.printf("%s: %s\n", str, Util_string.toCamelCase(str));
-//        }
+        System.out.println("\nToPascal");
+        for(String str : strings){
+            System.out.printf("%s: is all cap: %b\n", str, Util_string.isAllCap(str));
+            System.out.printf("%s: %s\n", str, Util_string.toPascalCase(str));
+        }
+        System.out.println("\nToCamel");
+        for(String str : strings){
+            System.out.printf("%s: %s\n", str, Util_string.toCamelCase(str));
+        }
         System.out.println("\nToSnake");
         for(String str : strings){
-            //Util_string.toSnakeCase(str);
             System.out.printf("%s: %s\n", str, Util_string.toSnakeCase(str));
+        }
+        System.out.println("\nToScreamingSnake");
+        for(String str : strings){
+            System.out.printf("%s: %s\n", str, Util_string.toScreamingSnake(str));
         }
     }
     public static void assertFileExt(){

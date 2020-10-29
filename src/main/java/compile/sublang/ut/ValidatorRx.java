@@ -61,7 +61,7 @@ public class ValidatorRx {
                         String.format("Expected %s input to be %s, found %s",
                                 rxPayNode.callerType.toString(), identifier, last.toString()
                         ),
-                        parent.leafOp()
+                        parent.leafOpToString()
                 );
             }
             last = rxPayNode.outType;
@@ -71,12 +71,12 @@ public class ValidatorRx {
     private void assertValidTest(Keywords.PRIM left, Keywords.OP op, Keywords.PRIM right, TreeFactory.TreeNode parent){
         if(left != right){
             Erlog.get(this).set(
-                    String.format("Comparing %s to %s", left.toString(), right.toString()), parent.leafOp()
+                    String.format("Comparing %s to %s", left.toString(), right.toString()), parent.leafOpToString()
             );
         }
         if(!left.isAllowedOp(op)){
             Erlog.get(this).set(
-                    String.format("%s %C %s not allowed", left.toString(), op.asChar, right.toString()), parent.leafOp()
+                    String.format("%s %C %s not allowed", left.toString(), op.asChar, right.toString()), parent.leafOpToString()
             );
         }
     }
