@@ -48,14 +48,14 @@ public class ArrayJava implements IArray {
         else if(isSplit){
             if(content.isEmpty()){
                 if(size == null){
-                    unSizedField(formatUtil);   // int[] array;
+                    this.unSizedField(formatUtil);   // int[] array;
                 }
                 else{
-                    sizedField(formatUtil);     // array = new int[5];
+                    this.sizedField(formatUtil);     // array = new int[5];
                 }
             }
             else{
-                contentField(formatUtil);       // array = new int[]{1,2,3,4,5};
+                this.contentField(formatUtil);       // array = new int[]{1,2,3,4,5};
             }
         }
         else{
@@ -64,11 +64,11 @@ public class ArrayJava implements IArray {
                     DevErr.get(this).kill("Size or content required unless split definition");
                 }
                 else{
-                    sizedLocal(formatUtil);     // int array[] = new int[5];
+                    this.sizedLocal(formatUtil);     // int array[] = new int[5];
                 }
             }
             else{
-                contentLocal(formatUtil);       // int array[] = new int[]{1,2,3,4,5};
+                this.contentLocal(formatUtil);       // int array[] = new int[]{1,2,3,4,5};
             }
         }
         return this;
@@ -103,7 +103,7 @@ public class ArrayJava implements IArray {
         formatUtil.addLine(
                 prefix() + String.format("%s = new %s[] {", name, type)
         );
-        addContent(formatUtil);
+        this.addContent(formatUtil);
         formatUtil.addLineSegment("}" + SEMICOLON);
     }
 
@@ -117,7 +117,7 @@ public class ArrayJava implements IArray {
         formatUtil.addLine(
                 prefix() + String.format("%s[] %s = new %s[] {", type, name, type)
         );
-        addContent(formatUtil);
+        this.addContent(formatUtil);
         formatUtil.addLineSegment("}" + SEMICOLON);
     }
 
@@ -128,7 +128,7 @@ public class ArrayJava implements IArray {
     }
 
     public static class ArrayBuilder implements IArrayBuilder{
-        private ArrayJava built;
+        private final ArrayJava built;
 
         public ArrayBuilder() {
             built = new ArrayJava();

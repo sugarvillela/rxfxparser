@@ -35,6 +35,12 @@ public class MethodJava implements IMethod {
     }
 
     @Override
+    public IMethod add(String... text) {
+        content.add(new TextJava().add(text));
+        return this;
+    }
+
+    @Override
     public IWidget finish(FormatUtil formatUtil) {
         genHeader(formatUtil);
         formatUtil.addTabLines(content);
@@ -73,7 +79,10 @@ public class MethodJava implements IMethod {
             header.add(name);
         }
 
-        if(params != null){
+        if(params == null){
+            header.add("()");
+        }
+        else{
             header.add("(" + String.join(", ", params) + ")");
         }
         header.add("{");
@@ -82,11 +91,11 @@ public class MethodJava implements IMethod {
 
     @Override
     public String toString(){
-        return name + "()";
+        return String.format("%s(%s)", name, String.join(", ", params));
     }
 
     public static class MethodBuilder implements IMethodBuilder{
-        private MethodJava built;
+        private final MethodJava built;
 
         public MethodBuilder() {
             built = new MethodJava();

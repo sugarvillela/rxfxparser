@@ -1,8 +1,8 @@
 package compile.parse.importtable;
 
 import codegen.Widget;
+import codegen.ut.NameGen;
 import commons.Util_string;
-import compile.basics.CompileInitializer;
 import compile.basics.Keywords;
 
 import java.util.HashMap;
@@ -25,13 +25,13 @@ public class ImportTable {
 
     private ImportTable(){
         String projName = "semantic"; // CompileInitializer.getInstance().getProjName();
-        NameGen.init(projName);
+        //NameGen.init(projName);
         nameGen = NameGen.getInstance();
         importTableMap = new HashMap<>();
     }
 
     public String add(Keywords.DATATYPE datatype){
-        String name = nameGen.fileName(datatype);
+        String name = nameGen.className(datatype.toString());
         return name;
     }
     public Keywords.DATATYPE unpackType(String name){

@@ -2,25 +2,24 @@ package compile.basics;
 
 import codegen.Widget;
 import commons.Dev;
-import compile.parse.Class_Parser;
+import codegen.ut.NameGen;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
 import compile.symboltable.ListTable;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
-import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -37,7 +36,7 @@ public class CompileInitializer implements ChangeListener {
     private CompileInitializer(){
         Dev.dispOn();
         Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);
-        Widget.setDefaultLanguage(Widget.PHP);
+        Widget.setDefaultLanguage(Widget.JAVA);
         initTime = (new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")).format(new Date());
         //unique = new Unique();
         er = Erlog.get(this);
@@ -47,6 +46,9 @@ public class CompileInitializer implements ChangeListener {
         wrow = 5;
         wcol = 3;
         wval = 4;
+        //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
+        genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
+        genPackage = "generated";
     }
 
     private final ArrayList<ChangeListener> listeners;
@@ -58,6 +60,7 @@ public class CompileInitializer implements ChangeListener {
     private String inName, projName;
     private String initTime;
     private int wrow, wval, wcol;
+    private String genPath, genPackage;
 
 
     public void initFromProperties(String path){// TODO load from properties file
@@ -123,23 +126,26 @@ public class CompileInitializer implements ChangeListener {
             TextSniffer.killInstance();
         }
         if(!scanOnly){
+            NameGen.init(projName);
             System.out.println("ListTable build or rebuild");
 
             ListTable listTable = ListTable.getInstance();
-//            listTable.disp();
-//            listTable.getNumGen().gen();
-//            listTable.getNumGen().disp();
+            listTable.disp();
+            listTable.getNumGen().gen();
+            listTable.getNumGen().disp();
 
-            System.out.println("Begin Parse");
-
-            Class_Parser.init(
-                    new ScanNodeSource(
-                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-                    )
-            );
-            Class_Parser parser = Class_Parser.getInstance();
-            setCurrParserStack(parser);
-            parser.onCreate();
+            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
+            listTranslator.translate();
+//            System.out.println("Begin Parse");
+//
+//            Class_Parser.init(
+//                    new ScanNodeSource(
+//                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+//                    )
+//            );
+//            Class_Parser parser = Class_Parser.getInstance();
+//            setCurrParserStack(parser);
+//            parser.onCreate();
         }
 
         //Erlog.finish();
@@ -196,7 +202,16 @@ public class CompileInitializer implements ChangeListener {
         this.projName = projName; 
     }
     public String getProjName(){ return this.projName; }
-
+    public String getGenPath(String... dirs){
+        return (dirs == null || dirs.length == 0)?
+                genPath :
+                genPath  + File.separator + String.join(File.separator, dirs);
+    }
+    public String getGenPackage(String... dirs){
+        return (dirs == null || dirs.length == 0)?
+                genPackage :
+                genPackage  + "." + String.join(".", dirs);
+    }
 //    public String genAnonName(Keywords.DATATYPE type){
 //        String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
 //        return anon;

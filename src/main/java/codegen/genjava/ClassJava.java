@@ -4,10 +4,12 @@ import codegen.interfaces.*;
 import codegen.ut.FormatUtil;
 import codegen.ut.PathUtil;
 import commons.Commons;
+import compile.basics.CompileInitializer;
 import erlog.DevErr;
 
 import java.util.ArrayList;
 
+import static codegen.genjava.ConditionJava.CONNECTOR.AND_;
 import static codegen.interfaces.enums.ENDL;
 import static codegen.interfaces.enums.SEMICOLON;
 import static codegen.interfaces.enums.VISIBILITY.PROTECTED_;
@@ -17,6 +19,9 @@ import static codegen.genjava.MethodJava.*;
 import static codegen.genjava.VarJava.*;
 import static codegen.genjava.SwitchJava.*;
 import static codegen.genjava.ArrayJava.*;
+import static codegen.genjava.ControlJava.*;
+import static codegen.genjava.ConditionJava.*;
+import static codegen.genjava.ConditionJava.CONNECTOR.*;
 
 public class ClassJava implements IClass {
     private final ArrayList<IWidget> content;
@@ -42,6 +47,12 @@ public class ClassJava implements IClass {
     }
 
     @Override
+    public IClass add(String... text) {
+        content.add(new TextJava().add(text));
+        return this;
+    }
+
+    @Override
     public IWidget finish(FormatUtil formatUtil) {
         genPackage(formatUtil);
         genImports(formatUtil);
@@ -51,9 +62,8 @@ public class ClassJava implements IClass {
         return this;
     }
 
-
     private void genPackage(FormatUtil formatUtil){
-        formatUtil.add("package " + PathUtil.getInstance().fixPackage(subPackages) + SEMICOLON + ENDL);
+        formatUtil.add("package " + CompileInitializer.getInstance().getGenPackage(subPackages) + SEMICOLON + ENDL);
     }
     private void genImports(FormatUtil formatUtil){
         if(imports != null){
@@ -81,6 +91,7 @@ public class ClassJava implements IClass {
             DevErr.get(this).kill("name field is required");
         }
         else{
+            header.add("class");
             header.add(name);
         }
         if(extends_ != null){
@@ -104,7 +115,7 @@ public class ClassJava implements IClass {
         return name;
     }
     public static class ClassJavaBuilder implements IClassBuilder{
-        private ClassJava built;
+        private final ClassJava built;
 
         public ClassJavaBuilder() {
             built = new ClassJava();
@@ -162,38 +173,5 @@ public class ClassJava implements IClass {
         public IClass build() {
             return built;
         }
-    }
-
-    public static void demo(){
-        String[] demo1 = Commons.randomContent(20);
-        String[] demo2 = Commons.randomContent(25);
-        FormatUtil formatUtil = new FormatUtil();
-        IWidget classJava = new ClassJavaBuilder().setName("MyClass").setVisibility(PUBLIC_).setAbstract().
-                setExtends("MyParentClass").setImplements("CrazyInterface", "BadInterface").
-                setImports("Munchkin","FeeFoo").setSubPackages("subby").build().
-                add(
-                        new CommentBuilder().setLong().build().add("This is a short part and this is a much much longer part with lots of extra words and it should definitely be split into two lines!"),
-                        new ArrayBuilder().setName("myArray").setType("String").setSplit().build(),
-                    new MethodBuilder().setName("MyClass").setIsConstructor().build().add(
-                            new CommentBuilder().build().add("Inside the method"),
-                            new ArrayBuilder().setName("myArray").setType("String").setSplit().build().add(demo1)
-                    ),
-                    new MethodBuilder().setName("doSomething").setFinal().build().add(
-                            new CommentBuilder().build().add("Inside the method: doSomething"),
-                            new ArrayBuilder().setName("myArray").setType("String").build().add(demo2)
-                    ),
-                    new MethodBuilder().setName("doSomethingElse").setVisibility(PROTECTED_).setFinal().setReturnType("int").build().add(
-                            new CommentBuilder().build().add("Inside the method: doSomethingElse"),
-                            new VarBuilder().setType("int").setName("myVar").seValue("7").build(),
-                            new SwitchBuilder().setTestObject("myVar").build().
-                                startCase("6").add(
-                                    new SimpleText.SimpleTextBuilder().build().add("System.out.println(\"Foo Boo\");")
-                                ).finishCase().startCase("7").add(
-                                    new SimpleText.SimpleTextBuilder().build().add("System.out.println(\"Meh\");"),
-                                    new AssignmentBuilder().setName("myVar").seValue("22").build()
-                            ).finishCase()
-                    )
-        ).finish(formatUtil);
-        Commons.disp(formatUtil.finish(), "Classy");
     }
 }

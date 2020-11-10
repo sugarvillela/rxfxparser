@@ -1,20 +1,24 @@
 package codegen.genjava;
 
-import codegen.interfaces.ISimpleText;
+import codegen.interfaces.IText;
 import codegen.ut.FormatUtil;
 
 import java.util.ArrayList;
 
-public class SimpleText implements ISimpleText {
+public class TextJava implements IText {
     private final ArrayList<String> content;
     private boolean indent;
 
-    public SimpleText() {
+    public TextJava() {
         content = new ArrayList<>();
     }
 
+    public static IText set(String... text){
+        return new TextBuilder().build().add(text);
+    }
+
     @Override
-    public ISimpleText add(String... text) {// exactly as-is
+    public IText add(String... text) {// exactly as-is
         for(String t : text){
             content.add(t);
         }
@@ -22,7 +26,7 @@ public class SimpleText implements ISimpleText {
     }
 
     @Override
-    public ISimpleText finish(FormatUtil formatUtil) {
+    public IText finish(FormatUtil formatUtil) {
         if(indent){
             formatUtil.inc();
             for(String text : content){
@@ -35,7 +39,6 @@ public class SimpleText implements ISimpleText {
                 formatUtil.addLine(text);
             }
         }
-
         return this;
     }
 
@@ -44,21 +47,21 @@ public class SimpleText implements ISimpleText {
         return String.join(" ", content);
     }
 
-    public static class SimpleTextBuilder implements ISimpleTextBuilder {
-        private SimpleText built;
+    public static class TextBuilder implements ITextBuilder {
+        private final TextJava built;
 
-        public SimpleTextBuilder() {
-            built = new SimpleText();
+        public TextBuilder() {
+            built = new TextJava();
         }
 
         @Override
-        public ISimpleTextBuilder setIndent() {
+        public ITextBuilder setIndent() {
             built.indent = true;
             return this;
         }
 
         @Override
-        public ISimpleText build() {
+        public IText build() {
             return built;
         }
     }

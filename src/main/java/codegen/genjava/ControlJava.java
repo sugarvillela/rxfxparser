@@ -1,6 +1,5 @@
 package codegen.genjava;
 
-import codegen.interfaces.IBool;
 import codegen.interfaces.IControl;
 import codegen.interfaces.IWidget;
 import codegen.ut.FormatUtil;
@@ -15,7 +14,7 @@ public class ControlJava implements IControl {
 
     private final ArrayList<IWidget> content;
     private CONTROL_TYPE controlType;
-    private IBool condition;
+    private IWidget condition;
     private String lo, hi, inc;
     private String type, itemName, arrayName;
     private boolean isSet;
@@ -30,6 +29,12 @@ public class ControlJava implements IControl {
         for(IWidget w : widget){
             content.add(w);
         }
+        return this;
+    }
+
+    @Override
+    public IControl add(String... text) {
+        content.add(new TextJava().add(text));
         return this;
     }
 
@@ -89,7 +94,7 @@ public class ControlJava implements IControl {
     }
 
     public static class ControlBuilder implements IControlBuilder{
-        private ControlJava built;
+        private final ControlJava built;
 
         public ControlBuilder() {
             built = new ControlJava();
@@ -102,7 +107,7 @@ public class ControlJava implements IControl {
         }
 
         @Override
-        public IControlBuilder setIf(IBool condition) {
+        public IControlBuilder setIf(IWidget condition) {
             assertOnce();
             built.controlType = CONTROL_TYPE.IF_;
             built.condition = condition;
@@ -117,7 +122,7 @@ public class ControlJava implements IControl {
         }
 
         @Override
-        public IControlBuilder setWhile(IBool condition) {
+        public IControlBuilder setWhile(IWidget condition) {
             assertOnce();
             built.controlType = CONTROL_TYPE.WHILE_;
             built.condition = condition;
@@ -125,7 +130,7 @@ public class ControlJava implements IControl {
         }
 
         @Override
-        public IControlBuilder setDoWhile(IBool condition) {
+        public IControlBuilder setDoWhile(IWidget condition) {
             assertOnce();
             built.controlType = CONTROL_TYPE.DO_WHILE_;
             built.condition = condition;
@@ -144,6 +149,7 @@ public class ControlJava implements IControl {
 
         @Override
         public IControlBuilder setFor(String lo, String hi) {
+            assertOnce();
             built.controlType = CONTROL_TYPE.FOR_;
             built.lo = lo;
             built.hi = hi;
@@ -152,6 +158,7 @@ public class ControlJava implements IControl {
 
         @Override
         public IControlBuilder setFor(String hi) {
+            assertOnce();
             built.controlType = CONTROL_TYPE.FOR_;
             built.lo = "0";
             built.hi = hi;

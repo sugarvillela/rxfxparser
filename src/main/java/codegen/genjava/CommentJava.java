@@ -55,7 +55,7 @@ public class CommentJava implements IComment {
         return String.join("\n// ", content);
     }
     public static class CommentBuilder implements ICommentBuilder{
-        private CommentJava built;
+        private final CommentJava built;
 
         public CommentBuilder() {
             built = new CommentJava();

@@ -1,23 +1,18 @@
 package codegen.genjava;
 
-import codegen.interfaces.ISimpleText;
 import codegen.interfaces.ISwitch;
-import codegen.interfaces.IVar;
 import codegen.interfaces.IWidget;
 import codegen.ut.FormatUtil;
 import erlog.DevErr;
 
 import java.util.ArrayList;
 
-import static codegen.interfaces.ISwitch.*;
-import static codegen.interfaces.enums.SEMICOLON;
-
 public class SwitchJava implements ISwitch {
     private String testObject;
     private final ArrayList<String> cases;
     private final ArrayList<ArrayList<IWidget>> actions;
     private ArrayList<IWidget> currActions;
-    private boolean defaultAdded;
+    private boolean noBreaks, defaultAdded;
 
     public SwitchJava() {
         cases = new ArrayList<>();
@@ -46,6 +41,12 @@ public class SwitchJava implements ISwitch {
         for(IWidget w : widget){
             currActions.add(w);
         }
+        return this;
+    }
+
+    @Override
+    public ISwitch add(String... text) {
+        currActions.add(new TextJava().add(text));
         return this;
     }
 
@@ -91,13 +92,16 @@ public class SwitchJava implements ISwitch {
                 for(IWidget line : lines){
                     line.finish(formatUtil);
                 }
-            formatUtil.addLineSegment("break" + SEMICOLON);
+            if(!noBreaks){
+                formatUtil.addLineSegment("break;");
+            }
+
             formatUtil.dec();
             i++;
         }
     }
     public static class SwitchBuilder implements ISwitchBuilder{
-        private SwitchJava built;
+        private final SwitchJava built;
 
         public SwitchBuilder() {
             built = new SwitchJava();
@@ -107,6 +111,13 @@ public class SwitchJava implements ISwitch {
             built.testObject = testObject;
             return this;
         }
+
+        @Override
+        public ISwitchBuilder setNoBreaks() {
+            built.noBreaks = true;
+            return this;
+        }
+
         public ISwitch build(){
             return built;
         }

@@ -3,6 +3,7 @@ package codegen.ut;
 import genobj.GenObjAdaptor;
 
 import java.io.File;
+import java.net.URL;
 
 public class PathUtil {
     private static PathUtil instance;
@@ -17,11 +18,18 @@ public class PathUtil {
         setGenPath();
     }
     public final void setGenPath(String... dirs){// path to genObj
-        String dest = GenObjAdaptor.class.getCanonicalName();
-        int lastIndex = dest.lastIndexOf(".");
-        this.path = (dirs == null || dirs.length == 0)?
-                dest.substring(0, lastIndex) :
-                dest.substring(0, lastIndex) + File.separator + String.join(File.separator, dirs);
+        ClassLoader cl = GenObjAdaptor.class.getClassLoader();
+        System.out.println("ClassLoader = " + cl.toString());
+        URL u = cl.getResource(".");
+        System.out.println("Url=" + u);
+        String dest = u.toString();//GenObjAdaptor.class.getCanonicalName();
+//        int lastIndex = dest.lastIndexOf(".");
+//        //String pathToDir = "src" + File.separator + "main" + File.separator + "java" + File.separator + dest.substring(0, lastIndex);
+//        String pathToDir = dest.substring(0, lastIndex);
+//        this.path = (dirs == null || dirs.length == 0)?
+//                pathToDir :
+//                pathToDir + File.separator + String.join(File.separator, dirs);
+        this.path = dest;
     }
     public final void setUserPath(String... dirs){
         String userHome = System.getProperty("user.home");

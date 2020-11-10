@@ -52,7 +52,7 @@ public class VarJava implements IVar {
         return name;
     }
     public static class FieldBuilder implements IFieldBuilder {
-        private VarJava built;
+        private final VarJava built;
 
         public FieldBuilder() {
             built = new VarJava();
@@ -101,7 +101,7 @@ public class VarJava implements IVar {
     }
 
     public static class VarBuilder implements IVarBuilder {
-        private VarJava built;
+        private final VarJava built;
 
         public VarBuilder() {
             built = new VarJava();
@@ -132,7 +132,7 @@ public class VarJava implements IVar {
     }
 
     public static class AssignmentBuilder implements IAssignmentBuilder {
-        private VarJava built;
+        private final VarJava built;
 
         public AssignmentBuilder() {
             built = new VarJava();

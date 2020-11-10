@@ -1,31 +1,26 @@
 package codegen.ut;
 
+import commons.Commons;
 import compile.basics.CompileInitializer;
-import genobj.GenObjAdaptor;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class GenFileUtil {
 
-    public boolean persist(String name, ArrayList<String> content){
-        return persist(name, content, null);
-    }
-    public boolean persist(String name, ArrayList<String> content, String comment){
+    public boolean persist(ArrayList<String> content, String... subpath){
+        Commons.disp(content);
+        String path = CompileInitializer.getInstance().getGenPath(subpath);
+        System.out.println("GenFileUtil: path = " + path);
         try(
-            BufferedWriter file = new BufferedWriter(new FileWriter(PathUtil.getInstance().fixPath(name)))
+            BufferedWriter file = new BufferedWriter(new FileWriter(path))
         ){
-            file.write("# Generated file, do not edit");
+            file.write("// Generated file, do not edit");
             file.newLine();
-//            file.write("# Last write: " + CompileInitializer.getInstance().getInitTime());
-//            file.newLine();
-            if(comment != null){
-                file.write("# " + comment);
-                file.newLine();
-            }
+            file.write("// Last write: " + CompileInitializer.getInstance().getInitTime());
+            file.newLine();
 
             for (String line: content) {
                 file.write(line);
@@ -35,8 +30,10 @@ public class GenFileUtil {
             return true;
         }
         catch(IOException e){
-            return false;
+            System.out.println("GenFileUtil: exception = " + e);
+            System.exit(-1);
         }
+        return false;
     }
 
 }

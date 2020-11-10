@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public interface IClass extends IWidget{
     IClass add(IWidget... widget);
+    IClass add(String... text);
 
     interface IClassBuilder{
         IClassBuilder setVisibility(enums.VISIBILITY visibility);

@@ -7,35 +7,23 @@ import java.util.ArrayList;
 
 public class FormatUtil {
     static final int MARGIN = 70;           // Constant formatting value
+    static final int TAB = 4;
 
     private final ArrayList<String> content;
-    protected int tab;                      // formatting value for indent
+    protected int indent;                      // formatting value for indent
 
     public FormatUtil() {
         this.content = new ArrayList<>();
-        tab = 0;
+        indent = 0;
     }
 
-    public final String tab( String text ){
-        switch (this.tab){
-            case 0:
-                return text;
-            case 1:
-                return "    "+text;
-            case 2:
-                return "        "+text;
-            case 3:
-                return "            "+text;
-            case 4:
-                return "                "+text;
-            default:
-                return "                    "+text;
-        }
+    public final String tab(String text){
+        return new String(new char[indent * TAB]).replace('\0', ' ') + text;
     }
-    public final void clear(){this.tab=0;}
-    public final void inc(){this.tab++;}
+    public final void clear(){this.indent = 0;}
+    public final void inc(){this.indent++;}
     public final void dec(){
-        this.tab=(this.tab>0)? this.tab-1 : 0;
+        this.indent = (this.indent > 0)? this.indent -1 : 0;
     }
 
     private int nextSpace( String text, int i ){
@@ -45,21 +33,25 @@ public class FormatUtil {
         return i+1;
     }
 
-
-    // To add content as-is, no formatting
+    /** To add content as-is, no formatting or splitting ling line
+     * @param text exact text, no indent */
     public final void add( String text ){
         this.content.add( text );
     }
 
-    // The primary way to add content; takes care of formatting and line splitting
+    /**The primary way to add content; takes care of formatting and line splitting
+     * @param text any length */
     public final void addLine(String text ){
         int i = 0;
         while((text = addLineSegment(text)) != null && i++ < 10){}
     }
 
+    /**Stores a single line up to MARGIN length
+     * @param text any length
+     * @return the remaining text not added, null if finished */
     public final String addLineSegment(String text ){
-        System.out.println("===" + text + "===");
-        text=tab( text );
+        //System.out.println("===" + text + "===");
+        text=tab(text);
         if(text.length()<=MARGIN){
             this.content.add( text );
             return null;
@@ -73,12 +65,16 @@ public class FormatUtil {
         return (text.isEmpty())? null : text;
     }
 
+    /**Add multiple lines directly from IWidget object
+     * @param widgets nested objects containing widgets or text */
     public final void addLines(ArrayList<IWidget> widgets){
         for(IWidget widget : widgets){
             widget.finish(this);
         }
     }
 
+    /**Same as addLines() but indent the content
+     * @param widgets nested objects containing widgets or text */
     public final void addTabLines(ArrayList<IWidget> widgets){
         inc();
         for(IWidget widget : widgets){
@@ -87,6 +83,7 @@ public class FormatUtil {
         dec();
     }
 
+    /** @return the final result of all operations: element = line */
     public ArrayList<String> finish(){
         return content;
     }

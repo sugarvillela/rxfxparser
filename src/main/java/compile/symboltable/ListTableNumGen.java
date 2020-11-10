@@ -4,7 +4,6 @@ import commons.BIT;
 import compile.basics.Keywords;
 import compile.parse.Base_ParseItem;
 import erlog.DevErr;
-import erlog.Erlog;
 import interfaces.Killable;
 import uq.UniqueItr;
 import uq.Uq;
@@ -39,18 +38,23 @@ public class ListTableNumGen implements Killable {
     public void gen(){
         FieldCalculator fieldCalculator = new FieldCalculator(listTable.getTypeCount());
         UniqueItr uq;
-        KeyValNode<String, Integer> node;
+        KeyValNode node;
 
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {// list source
             uq = getUqSource(outer.getKey(), fieldCalculator);
             if(uq != null){
                 for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {// category
-                    node = new KeyValNode<>();
-                    node.put(inner.getKey(), uq.next());
+                    node = new KeyValNode();
+                    //node.put(inner.getKey(), uq.next());
                     keyValMap.get(outer.getKey()).put(inner.getKey(), node);
                     for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
                         node.put(item, uq.next());
                     }
+
+                    node.setGroupName(inner.getKey());
+                    node.setRowNumber(fieldCalculator.getRow(uq.curr()));
+                    node.setColNumber(fieldCalculator.getCol(uq.curr()));
+
                     uq.newRow();
                 }
             }
@@ -69,6 +73,20 @@ public class ListTableNumGen implements Killable {
                 return null;
         }
     }
+
+    public Map<String, KeyValNode> getKeyValMap(Keywords.DATATYPE datatype){
+        return keyValMap.get(datatype);
+    }
+    public KeyValNode[] keyValMapAsArray(Keywords.DATATYPE datatype){
+        Map<String, KeyValNode> map = keyValMap.get(datatype);
+        KeyValNode[] nodes = new KeyValNode[map.size()];
+        int i = 0;
+        for (Map.Entry<String, KeyValNode> inner : map.entrySet()){
+            nodes[i++] = inner.getValue();
+        }
+        return nodes;
+    }
+
     @Override
     public void kill() {
         this.listTable = null;
@@ -86,9 +104,11 @@ public class ListTableNumGen implements Killable {
         System.out.println("===================");
     }
 
-    public static class  KeyValNode <K, V>{
-        private final ArrayList<K> keys;
-        private final ArrayList<V> vals;
+    public static class  KeyValNode{
+        private final ArrayList<String> keys;
+        private final ArrayList<Integer> vals;
+        private String groupName;
+        private int rowNumber, colNumber;
         int kIndex, vIndex;
 
         public KeyValNode(){
@@ -96,9 +116,45 @@ public class ListTableNumGen implements Killable {
             vals = new ArrayList<>();
         }
 
-        public void put(K key, V val){
+        public void put(String key, Integer val){
             keys.add(key);
             vals.add(val);
+        }
+
+
+        public void setGroupName(String groupName){
+            this.groupName = groupName;
+        }
+        public String getGroupName(){
+            return this.groupName;
+        }
+
+        public void setRowNumber(int rowNumber){
+            this.rowNumber = rowNumber;
+        }
+        public int getRowNumber(){
+            return this.rowNumber;
+        }
+
+        public void setColNumber(int colNumber){
+            this.colNumber = colNumber;
+        }
+        public int getColNumber(){
+            return this.colNumber;
+        }
+
+        public int getRangeLow(){
+            return vals.get(0);
+        }
+        public int getRangeHi(){
+            return vals.get(vals.size() - 1);
+        }
+        public int size(){
+            return keys.size();
+        }
+
+        public boolean isEmpty(){
+            return keys.isEmpty();
         }
 
         public void rewind(){
@@ -110,17 +166,17 @@ public class ListTableNumGen implements Killable {
             return kIndex < keys.size() && vIndex < vals.size();
         }
 
-        public K nextKey(){
+        public String nextKey(){
             return keys.get(kIndex++);
         }
 
-        public V nextVal(){
+        public Integer nextVal(){
             return vals.get(vIndex++);
         }
 
         public void disp(){
             for(int i = 0; i < keys.size(); i++){
-                System.out.println(i + ": " + keys.get(i) + " = " + vals.get(i));
+                System.out.printf("%d02: %s = %X08 \n", i, keys.get(i), vals.get(i));
             }
         }
     }
@@ -131,6 +187,7 @@ public class ListTableNumGen implements Killable {
         public final int listDiscreteSize;
         public final int listStringSize;
         public final int listNumberSize;
+        public final int rowMask, colMask;
         public int wrow, wcol, wval;
 
         public FieldCalculator(ListTableTypeCount typeCount){// Expect ListTable is initialized
@@ -143,6 +200,10 @@ public class ListTableNumGen implements Killable {
             listNumberSize = typeCount.getDatatypeCount(LIST_NUMBER);
             init(WROW_DEFAULT, 5);
             System.out.printf("\nwrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
+            rowMask = ~((1 << (Integer.SIZE - wrow)) - 1);
+            colMask = ~rowMask - ((1 << (Integer.SIZE - wrow - wcol)) - 1);
+            BIT.disp(rowMask);
+            BIT.disp(colMask);
         }
         private void init(int wRowDefault, int count){
             if(wRowDefault < 1 || count <= 0){
@@ -174,6 +235,12 @@ public class ListTableNumGen implements Killable {
             wrow = wRowB;
             wcol = wColD;
             wval = wValD;
+        }
+        public int getRow(int n){
+            return n & rowMask;
+        }
+        public int getCol(int n){
+            return n & colMask;
         }
     }
 }
