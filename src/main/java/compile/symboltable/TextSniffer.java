@@ -15,7 +15,7 @@ public class TextSniffer {
         showStatus = false;
     }
 
-    public static void init(){// call in CompileInitializer
+    public static void init(){// call in RunState init
         instance = new TextSniffer();
     }
     public static TextSniffer getInstance(){

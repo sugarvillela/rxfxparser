@@ -1,7 +1,6 @@
 package compile.basics;
-import compile.parse.Class_Parser;
-import erlog.Erlog;
 import interfaces.ILifeCycle;
+import runstate.RunState;
 
 /**For separation of concerns, this class handles the self-stacking of items
  * @author Dave Swanson
@@ -14,7 +13,7 @@ public abstract class Base_StackItem implements IStackComponent, ILifeCycle{
     public Base_StackItem(){
         this.above=null;                // for linked stack
         this.below=null;                // for linked stack
-        P = CompileInitializer.getInstance().getCurrParserStack();
+        P = RunState.getInstance().getCurrParserStack();
     }
     
     /*=====IStackComponent methods============================================*/

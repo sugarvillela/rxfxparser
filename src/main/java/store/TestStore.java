@@ -1,8 +1,6 @@
 package store;
 
 import commons.BIT;
-import compile.basics.CompileInitializer;
-import listtable.ListTable;
 
 public class TestStore {
     public static void discrete(){

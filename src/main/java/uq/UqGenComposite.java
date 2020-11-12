@@ -7,4 +7,5 @@ public interface UqGenComposite extends UqGen{
     UqGen getRowGen();
     UqGen getColGen();
     int currRowCol();
+    int curRowOffset();
 }

@@ -1,10 +1,10 @@
 package listtable;
 
-import compile.basics.CompileInitializer;
+import runstate.RunState;
 
 public class ListTableTest {
     public static void numGen(){
-        CompileInitializer.getInstance().init(new String[]{"semantic1", "-p"});
+        RunState.getInstance().init(new String[]{"semantic1", "-p"});
 
     }
 }

@@ -48,9 +48,10 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
                 DevErr.get(this).kill("Developer: " + datatype);
         }
     }
+
     private void treeFromTree(TreeNode root){
         FlatNode newParent = newFlatNode(root, null);
-        depthFirst(root, newParent);
+        BuildUsingDepthFirst(root, newParent);
         disp();
     }
     private FlatNode newFlatNode(TreeNode treeSelf, FlatNode flatParent){
@@ -58,14 +59,14 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
         int iParent = (flatParent == null)? -1 : flatParent.self;
         return (treeArray[iNew] = new FlatNode(iNew, iParent, treeSelf));
     }
-    private void depthFirst(TreeNode treeParent, FlatNode flatParent){
+    private void BuildUsingDepthFirst(TreeNode treeParent, FlatNode flatParent){
         //System.out.println(oneToString(flatParent));
         if(treeParent.nodes != null){
             ArrayList<TreeNode> treeChildNodes = treeParent.nodes;
             for(TreeNode treeSelf : treeChildNodes){
                 FlatNode newParent = newFlatNode(treeSelf, flatParent);
                 flatParent.addChild(iNew);
-                depthFirst(treeSelf, newParent);
+                BuildUsingDepthFirst(treeSelf, newParent);
             }
         }
     }

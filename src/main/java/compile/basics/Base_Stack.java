@@ -2,6 +2,7 @@ package compile.basics;
 
 import erlog.Erlog;
 import interfaces.ILifeCycle;
+import runstate.RunState;
 import toksource.Base_TextSource;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
@@ -121,6 +122,6 @@ public abstract class Base_Stack implements ILifeCycle, IStackComponent, ChangeN
     // ChangeNotifier implementation
     @Override
     public void onTextSourceChange(ITextStatus textStatus) {
-        CompileInitializer.getInstance().onTextSourceChange(textStatus, this);
+        RunState.getInstance().onTextSourceChange(textStatus, this);
     }
 }

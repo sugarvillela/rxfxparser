@@ -5,10 +5,11 @@
  */
 package compile.basics;
 
+import listtable.ListTable;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static compile.basics.Keywords.FX_PAR.*;//FX_DATATYPE
 import static compile.basics.Keywords.FX_DATATYPE.*;
 
 /**Contains the language definition, including enums, constants:
@@ -223,6 +224,10 @@ public final class Keywords {
             }
             return null;
         }
+
+        /**This will break if called before parse (need ListTable.NumGen initialized)
+         * @param text
+         * @return STRING, NUMBER, DISCREET or BOOLEAN */
         public PRIM whatIsIt(String text){
             PRIM out = STRING;
             for(PRIM p : values()){
@@ -232,12 +237,18 @@ public final class Keywords {
                 }
             }
             if(out == DISCRETE){
-                return (CompileInitializer.getInstance().fitToWVal(text))? DISCRETE : NUMBER;
+                return fitToWVal(text)? DISCRETE : NUMBER;
             }
             else{
                 return out;
             }
         }
+        private boolean fitToWVal(String numeric){// validate numeric before calling here
+            int wval = ListTable.getInstance().getNumGen().getWVal();
+            int fit = (int)Math.pow(2, wval);
+            return Integer.parseInt(numeric) < fit;
+        }
+
         public boolean isAllowedOp(OP op){
             for(OP allowedOp: allowedOps){
                 if(allowedOp.equals(op)){

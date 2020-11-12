@@ -36,9 +36,9 @@ public class ListJava {
         String className, fileExt = "." + Widget.getFileExt();
         ArrayList<String> toFile;
         StatUtil statUtil = new StatUtil();
-        KeyValNode[] nodes;
+        CategoryNode[] nodes;
 
-        nodes = numGen.keyValsByType(LIST_STRING);
+        nodes = numGen.categoryNodesByType(LIST_STRING);
         if(nodes.length > 0){
             className = nameGen.className(LIST_STRING.toString());
             toFile = genList(nodes, className);
@@ -52,7 +52,7 @@ public class ListJava {
             statUtil.addNulls();
         }
 
-        nodes = numGen.keyValsByType(LIST_NUMBER);
+        nodes = numGen.categoryNodesByType(LIST_NUMBER);
         if(nodes.length > 0){
             className = nameGen.className(LIST_NUMBER.toString());
             toFile = genList(nodes, className);
@@ -66,7 +66,7 @@ public class ListJava {
             statUtil.addNulls();
         }
 
-        nodes = numGen.keyValsByType(LIST_DISCRETE);
+        nodes = numGen.categoryNodesByType(LIST_DISCRETE);
         if(nodes.length > 0){
             className = nameGen.className(LIST_DISCRETE.toString());
             toFile = genCompositeList(nodes, className);
@@ -80,7 +80,7 @@ public class ListJava {
             statUtil.addNulls();
         }
 
-        nodes = numGen.keyValsByType(LIST_BOOLEAN);
+        nodes = numGen.categoryNodesByType(LIST_BOOLEAN);
         if(nodes.length > 0){
             className = nameGen.className(LIST_BOOLEAN.toString());
             toFile = genCompositeList(nodes, className);
@@ -94,12 +94,12 @@ public class ListJava {
             statUtil.addNulls();
         }
 
-        toFile = statUtil.genStats();
+        toFile = statUtil.genStats(numGen);
         Commons.disp(toFile, "stats");
         genFileUtil.persist(toFile, PATH_PACKAGE, STAT_CLASS_NAME + fileExt);
     }
 
-    private ArrayList<String> genList(KeyValNode[] nodes, String className){
+    private ArrayList<String> genList(CategoryNode[] nodes, String className){
         FormatUtil formatUtil = new FormatUtil();
         new ClassJava.ClassJavaBuilder().setPathPackages(PATH_PACKAGE).
                 setVisibility(PUBLIC_).setName(className).build().
@@ -118,7 +118,7 @@ public class ListJava {
         return formatUtil.finish();
     }
 
-    private ArrayList<String> genCompositeList(KeyValNode[] nodes, String className){
+    private ArrayList<String> genCompositeList(CategoryNode[] nodes, String className){
         FormatUtil formatUtil = new FormatUtil();
         new ClassJava.ClassJavaBuilder().setPathPackages(PATH_PACKAGE).
             setVisibility(PUBLIC_).setName(className).build().
@@ -126,15 +126,15 @@ public class ListJava {
                 add(genMethodCategoryByRange(nodes)).
                 add(genMethodCategoryByBaseIndex(nodes)).
                 add(genMethodBaseIndexByRange(nodes)).
-                add(genMethodOffsetZero()).
+                add(genMethodCompositeOffset(nodes[0])).
                 finish(formatUtil);
         return formatUtil.finish();
     }
 
-    private IText genListContent(KeyValNode[] nodes){
+    private IText genListContent(CategoryNode[] nodes){
         TextJava textJava = (TextJava)new TextJava.TextBuilder().build();
 
-        for (ListTableNumGen.KeyValNode node : nodes) {
+        for (CategoryNode node : nodes) {
             //inner.getValue().disp();
             //System.out.println("\nCategory: " + node.getCategoryName());
             textJava.add(String.format(KEY_VAL_FORMAT, node.getCategoryName(), node.getCategoryEnum()));
@@ -148,12 +148,12 @@ public class ListJava {
         return textJava;
     }
 
-    private IMethod genMethodCategoryByRange(KeyValNode[] nodes){
+    private IMethod genMethodCategoryByRange(CategoryNode[] nodes){
         MethodJava method = (MethodJava)new MethodJava.MethodBuilder().
                 setReturnType("String").setName("categoryByRange").setStatic().
                 setParams("int index").
                 build();
-        for (ListTableNumGen.KeyValNode node : nodes) {
+        for (CategoryNode node : nodes) {
             method.add(
                     new ControlJava.ControlBuilder().setIf(
                             new ConditionJava.ConditionBuilder().build().add(
@@ -167,12 +167,12 @@ public class ListJava {
         return method.add("return null;");
     }
 
-    private IMethod genMethodBaseIndexByRange(KeyValNode[] nodes){
+    private IMethod genMethodBaseIndexByRange(CategoryNode[] nodes){
         MethodJava method = (MethodJava)new MethodJava.MethodBuilder().
                 setReturnType("int").setName("baseIndexByRange").setStatic().
                 setParams("int index").
                 build();
-        for (ListTableNumGen.KeyValNode node : nodes) {
+        for (CategoryNode node : nodes) {
             method.add(
                     new ControlJava.ControlBuilder().setIf(
                             new ConditionJava.ConditionBuilder().build().add(
@@ -186,13 +186,13 @@ public class ListJava {
         return method.add("return -1;");
     }
 
-    private IMethod genMethodCategoryByBaseIndex(KeyValNode[] nodes){
+    private IMethod genMethodCategoryByBaseIndex(CategoryNode[] nodes){
         MethodJava method = (MethodJava)new MethodJava.MethodBuilder().
                 setReturnType("String").setName("categoryByBaseIndex").setStatic().
                 setParams("int index").
                 build();
         SwitchJava switchJava = (SwitchJava)new SwitchBuilder().setTestObject("index").setNoBreaks().build();
-        for (ListTableNumGen.KeyValNode node : nodes) {
+        for (CategoryNode node : nodes) {
             switchJava.startCase(String.format(VAL_FORMAT, node.getCategoryEnum())).
             add(
                 String.format(RETURN_STRING, node.getCategoryName())
@@ -203,33 +203,35 @@ public class ListJava {
         return method.add(switchJava);
     }
 
-    private IMethod genMethodOffset(KeyValNode node){
+    private IMethod genMethodOffset(CategoryNode node){
         return new MethodJava.MethodBuilder().
             setReturnType("int").setName("offset").setStatic().
             build().add(
                 String.format(RETURN_INT, node.getCategoryEnum())
             );
     }
-    private IMethod genMethodOffsetZero(){
+
+    private IMethod genMethodCompositeOffset(CategoryNode node){
         return new MethodJava.MethodBuilder().
             setReturnType("int").setName("offset").setStatic().
-            build().add("return 0;");
+            build().add(
+                String.format(RETURN_INT, node.getRowOffset())
+            );
     }
 
     private class StatUtil{
-        private final Keywords.DATATYPE[] listOrder;
+        private Keywords.DATATYPE[] listOrder;
         private final int[] stats;
         private int index;
 
         public StatUtil() {
-            listOrder = ListTable.getInstance().getNumGen().getListOrder();
             stats = new int[12];
             index = 0;
         }
 
-        public void addStats(KeyValNode[] nodes){
+        public void addStats(CategoryNode[] nodes){
             int totalSize = 0;
-            for(KeyValNode node : nodes){
+            for(CategoryNode node : nodes){
                 totalSize += node.size();
             }
             stats[index++] = totalSize;
@@ -240,7 +242,9 @@ public class ListJava {
             index+=3;
         }
 
-        public ArrayList<String> genStats(){
+        public ArrayList<String> genStats(ListTableNumGen numGen){
+            listOrder = numGen.getListOrder();
+
             FormatUtil formatUtil = new FormatUtil();
             ClassJava classJava = (ClassJava)new ClassJava.ClassJavaBuilder().
                 setImports(
@@ -250,8 +254,17 @@ public class ListJava {
                             setName("DATATYPE").setStatic().setWildcard().build()
                 ).
                 setPathPackages(PATH_PACKAGE).setVisibility(PUBLIC_).
-                setName(STAT_CLASS_NAME).build().add(genMethodFlagTypeByRange());
-                genStatsMethods(classJava);
+                setName(STAT_CLASS_NAME).build().
+                    add(
+                        new CommentJava.CommentBuilder().build().add("Pass enu value to get type:"),
+                        genMethodFlagTypeByRange(),
+                        new CommentJava.CommentBuilder().build().add("Store Settings:"),
+                        genMethodGetW("getWRow", numGen.getWRow()),
+                        genMethodGetW("getWCol", numGen.getWCol()),
+                        genMethodGetW("getWVal", numGen.getWVal()),
+                        new CommentJava.CommentBuilder().build().add("Stats by type:")
+                    );
+                addGenMethodGetX(classJava);
                 classJava.finish(formatUtil);
             return formatUtil.finish();
         }
@@ -273,23 +286,31 @@ public class ListJava {
             }
             return method.add("return null;");
         }
-        private void genStatsMethods(ClassJava classJava){
+
+        private IMethod genMethodGetW(String methodName, int w){
+            return new MethodJava.MethodBuilder().
+                    setReturnType("int").setName(methodName).setStatic().build().
+                    add(String.format("return %d;", w));
+        }
+
+        private void addGenMethodGetX(ClassJava classJava){
             String methodName;
             index = 0;
             for(Keywords.DATATYPE datatype : listOrder){
                 methodName = nameGen.functionName("getSize" + datatype);
-                classJava.add(genMethodGetStats(methodName));
+                classJava.add(genMethodGetX(methodName));
                 methodName = nameGen.functionName("getLowIndex" + datatype);
-                classJava.add(genMethodGetStats(methodName));
+                classJava.add(genMethodGetX(methodName));
                 methodName = nameGen.functionName("getHighIndex" + datatype);
-                classJava.add(genMethodGetStats(methodName));
+                classJava.add(genMethodGetX(methodName));
             }
         }
-        private IMethod genMethodGetStats(String methodName){
+        private IMethod genMethodGetX(String methodName){
             return new MethodJava.MethodBuilder().
                     setReturnType("int").setName(methodName).setStatic().build().
                     add(String.format("return %d;", stats[index++]));
         }
+
 
     }
 }

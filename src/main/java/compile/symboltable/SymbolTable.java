@@ -1,6 +1,6 @@
 package compile.symboltable;
 
-import compile.basics.CompileInitializer;
+import runstate.RunState;
 import compile.basics.Keywords;
 import erlog.Erlog;
 import toksource.Base_TextSource;
@@ -26,7 +26,7 @@ public class SymbolTable implements ChangeListener {
         return (instance == null)? (instance = new SymbolTable()) : instance;
     }
     public static void killInstance(){
-        CompileInitializer.getInstance().removeChangeListener(instance);
+        RunState.getInstance().removeChangeListener(instance);
         instance = null;
     }
 

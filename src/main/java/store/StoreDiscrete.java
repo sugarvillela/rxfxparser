@@ -12,10 +12,9 @@ public class StoreDiscrete implements BitStore{
 
     public StoreDiscrete(int maxRow) {
         store = new int[maxRow + 1];
-        //CompileInitializer compileInitializer = CompileInitializer.getInstance();
-        this.wrow = 8;//compileInitializer.getWRow();
-        this.wcol = 4;//compileInitializer.getWCol();
-        this.wval = 4;//compileInitializer.getWVal();
+        this.wrow = 8;
+        this.wcol = 4;
+        this.wval = 4;
 
         rowStart = Integer.SIZE - wrow;
         colStart = Integer.SIZE - wrow - wcol;

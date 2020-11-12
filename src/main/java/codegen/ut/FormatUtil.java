@@ -6,11 +6,11 @@ import commons.Commons;
 import java.util.ArrayList;
 
 public class FormatUtil {
-    static final int MARGIN = 70;           // Constant formatting value
+    static final int MARGIN = 70;           // Constant formatting values
     static final int TAB = 4;
 
     private final ArrayList<String> content;
-    protected int indent;                      // formatting value for indent
+    protected int indent;                   // formatting value for indent
 
     public FormatUtil() {
         this.content = new ArrayList<>();
@@ -86,12 +86,5 @@ public class FormatUtil {
     /** @return the final result of all operations: element = line */
     public ArrayList<String> finish(){
         return content;
-    }
-
-    public static void demo(){
-        String text = "This is a short part and this is a much much longer part with lots of extra words and it should definitely be split into two lines!";
-        FormatUtil ut = new FormatUtil();
-        ut.addLine(text);
-        Commons.disp(ut.finish(), text);
     }
 }

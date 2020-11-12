@@ -4,6 +4,7 @@ import compile.basics.*;
 import compile.basics.Factory_Node.ScanNode;
 import compile.parse.Base_ParseItem;
 import erlog.Erlog;
+import runstate.RunState;
 import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 
@@ -35,8 +36,8 @@ public class ListTable {
 
     public static ListTable init(){
         instance = new ListTable();
-        CompileInitializer compileInitializer = CompileInitializer.getInstance();
-        if(compileInitializer.isNewEnumSet()){
+        RunState runState = RunState.getInstance();
+        if(runState.isNewEnumSet()){
             instance.fileLoader = new ListTableFileLoader(null, instance.listTableMap, instance.firstCategory);
         }
         else{
@@ -96,7 +97,7 @@ public class ListTable {
     public String listTableFileName(){
         return String.format(
                 "%s_%s%s",
-                CompileInitializer.getInstance().getInName(),
+                RunState.getInstance().getInName(),
                 this.getClass().getSimpleName(),
                 Keywords.INTERIM_FILE_EXTENSION
         );

@@ -46,6 +46,11 @@ public class UqBoolGen implements UqGenComposite {
     }
 
     @Override
+    public int curRowOffset() {
+        return row.curr();
+    }
+
+    @Override
     public int next(){
         if(!val.hasNext()){
             val.rewind();

@@ -1,6 +1,6 @@
 package compile.scan.factories;
 
-import compile.basics.CompileInitializer;
+import runstate.RunState;
 import compile.basics.Factory_Node;
 import compile.sublang.FxLogicTree;
 import compile.sublang.RxLogicTree;
@@ -139,17 +139,15 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         public Strategy(){}
 
         protected Class_Scanner getScanner(){
-//            Object object = CompileInitializer.getInstance().getCurrParserStack();
-//            System.out.println("getScanner: " + object);
-            return (Class_Scanner)CompileInitializer.getInstance().getCurrParserStack();
+            return (Class_Scanner) RunState.getInstance().getCurrParserStack();
         }
         public void push(DATATYPE datatype){
-            CompileInitializer.getInstance().getCurrParserStack().push(
+            RunState.getInstance().getCurrParserStack().push(
                     Factory_ScanItem.getInstance().get(datatype)
             );
         }
         public void pop(){
-            CompileInitializer.getInstance().getCurrParserStack().pop();
+            RunState.getInstance().getCurrParserStack().pop();
         }
         public void back(String text){
             TextSniffer.getInstance().back();//don't sniff keyword because it will be repeated
@@ -315,10 +313,10 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         private void setAttrib(){
             switch(key){
                 case PROJ_NAME:
-                    CompileInitializer.getInstance().setProjName(val);
+                    RunState.getInstance().setProjName(val);
                     break;
                 case NEW_LIST_SET:
-                    CompileInitializer.getInstance().setNewEnumSet(parseBool());
+                    RunState.getInstance().setNewEnumSet(parseBool());
                     break;
                 case RX_TARGLANG_ON_SPECIAL:
                     RxTargLangUtil.getInstance().setTargRxOnSpecial(parseBool());

@@ -1,14 +1,18 @@
-package compile.basics;
+package runstate;
 
 import codegen.Widget;
 import commons.Dev;
 import codegen.ut.NameGen;
+import compile.basics.Base_Stack;
+import compile.basics.Factory_Node;
+import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
 import listtable.ListTable;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
+import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -20,32 +24,31 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
  *
  * @author Dave Swanson
  */
-public class CompileInitializer implements ChangeListener {
-    private static CompileInitializer instance;
+// TODO refactor this into smaller classes
+// TODO rename LIST datatypes to FLAG
+public class RunState implements ChangeListener {
+    private static RunState instance;
     
-    public static CompileInitializer getInstance(){
+    public static RunState getInstance(){
         return (instance == null)?
-                (instance = new CompileInitializer()) : instance;
+                (instance = new RunState()) : instance;
     }
-    private CompileInitializer(){
+    private RunState(){
         Dev.dispOn();
         Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);
         Widget.setDefaultLanguage(Widget.JAVA);
         initTime = (new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")).format(new Date());
-        //unique = new Unique();
         er = Erlog.get(this);
         listeners = new ArrayList<>();
         newEnumSet = false;
         parseOnly = false;
-        wrow = 5;
-        wcol = 3;
-        wval = 4;
         genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
         //genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
@@ -59,9 +62,7 @@ public class CompileInitializer implements ChangeListener {
     private boolean newEnumSet, scanOnly, parseOnly; // arg flags
     private String inName, projName;
     private String initTime;
-    private int wrow, wval, wcol;
     private String genPath, genPackage;
-
 
     public void initFromProperties(String path){// TODO load from properties file
 
@@ -130,23 +131,23 @@ public class CompileInitializer implements ChangeListener {
             System.out.println("ListTable build or rebuild");
 
             ListTable listTable = ListTable.getInstance();
-            listTable.disp();
-            listTable.getNumGen().genKeyValMap();
-            //listTable.getNumGen().disp();
-
-            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
-            listTranslator.translate();
-
-//            System.out.println("Begin Parse");
+//            listTable.disp();
+            listTable.getNumGen().initCategoryNodes();
+//            listTable.getNumGen().disp();
 //
-//            Class_Parser.init(
-//                    new ScanNodeSource(
-//                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-//                    )
-//            );
-//            Class_Parser parser = Class_Parser.getInstance();
-//            setCurrParserStack(parser);
-//            parser.onCreate();
+//            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
+//            listTranslator.translate();
+
+            System.out.println("Begin Parse");
+
+            Class_Parser.init(
+                    new ScanNodeSource(
+                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+                    )
+            );
+            Class_Parser parser = Class_Parser.getInstance();
+            setCurrParserStack(parser);
+            parser.onCreate();
         }
 
         //Erlog.finish();
@@ -183,26 +184,15 @@ public class CompileInitializer implements ChangeListener {
 
     public String getInitTime(){ return this.initTime; }
 
-    public void setWRow(int wrow){ this.wrow = wrow; }
-    public int  getWRow(){ return wrow; }
-    public void setWCol(int wcol){ this.wcol = wcol; }
-    public int  getWCol(){ return wcol; }
-    public void setWVal(int wval){ this.wval = wval; }
-    public int  getWVal(){ return wval; }
-
-    public boolean fitToWVal(String numeric){// validate numeric before calling here
-        int fit = (int)Math.pow(2, wval);
-        return Integer.parseInt(numeric) < fit;
-    }
-
     public String getInName(){
         return this.inName;
     }
-    public void setProjName(String projName){ 
-        //System.out.println("CompileInitializer.setProjName: " + projName);
+
+    public void setProjName(String projName){
         this.projName = projName; 
     }
     public String getProjName(){ return this.projName; }
+
     public String getGenPath(String... dirs){
         return (dirs == null || dirs.length == 0)?
                 genPath :
@@ -213,6 +203,7 @@ public class CompileInitializer implements ChangeListener {
                 genPackage :
                 genPackage  + "." + String.join(".", dirs);
     }
+
 //    public String genAnonName(Keywords.DATATYPE type){
 //        String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
 //        return anon;
@@ -247,6 +238,7 @@ public class CompileInitializer implements ChangeListener {
     public void removeChangeListener(ChangeListener listener){
         listeners.remove(listener);
     }
+
     @Override
     public void onTextSourceChange(ITextStatus textStatus, ChangeNotifier caller){
         for(ChangeListener listener : listeners){
@@ -255,6 +247,7 @@ public class CompileInitializer implements ChangeListener {
             }
         }
     }
+
     public void setNewEnumSet(boolean newEnumSet){
         this.newEnumSet = newEnumSet;
     }

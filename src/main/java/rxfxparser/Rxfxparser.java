@@ -1,9 +1,6 @@
 package rxfxparser;
 
-import codegen.genjava.ClassJava;
-import commons.Commons;
-import compile.basics.CompileInitializer;
-import demos.Codegen_;
+import runstate.RunState;
 
 /**Code generator and translator for RXFX language
  *
@@ -19,7 +16,7 @@ public class Rxfxparser {
         //FormatUtil.demo();
 
 
-        CompileInitializer.getInstance().init(new String[]{"semantic1", "-p"});//
+        RunState.getInstance().init(new String[]{"semantic1", "-p"});//
         //store.TestStore.listTable();
         //uq.UqTest.uqBoolGenNewRow();
         //commons.BIT.binStrToInt("0000_1111_0000_1111_0000_1111_0000_1111");

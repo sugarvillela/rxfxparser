@@ -42,7 +42,7 @@ public class ListTableTypeCount {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
                 m = max(m, ((ListTable.ListTableNode)inner.getValue()).size());
             }
-            System.out.println(outer.getKey() + ": max = " + m);
+            //System.out.println(outer.getKey() + ": max = " + m);
             listSourceMaxes.put(outer.getKey(), m);
         }
     }

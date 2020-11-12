@@ -92,6 +92,12 @@ public class UqDiscreteGen  implements UqGenComposite {
     public int currRowCol() {
         return (row.curr() << rowStart) | (col.curr() << colStart);
     }
+
+    @Override
+    public int curRowOffset() {
+        return row.curr();
+    }
+
     @Override
     public int next(){
         if(!val.hasNext()){

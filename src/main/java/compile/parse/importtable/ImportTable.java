@@ -24,7 +24,7 @@ public class ImportTable {
     private final Map<String, String> importTableMap;
 
     private ImportTable(){
-        String projName = "semantic"; // CompileInitializer.getInstance().getProjName();
+        String projName = "semantic"; // RunState.getInstance().getProjName();
         //NameGen.init(projName);
         nameGen = NameGen.getInstance();
         importTableMap = new HashMap<>();
@@ -35,7 +35,7 @@ public class ImportTable {
         return name;
     }
     public Keywords.DATATYPE unpackType(String name){
-        String projName = "semantic"; // CompileInitializer.getInstance().getProjName();
+        String projName = "semantic"; // RunState.getInstance().getProjName();
         int start = projName.length();
         int end = name.length() - UQ_FORMAT_LEN - Widget.getFileExt().length() - 1;
         return Keywords.DATATYPE.fromString(

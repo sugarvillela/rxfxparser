@@ -1,7 +1,7 @@
 package compile.scan;
 
 import compile.basics.Base_Stack;
-import compile.basics.CompileInitializer;
+import runstate.RunState;
 import compile.basics.Factory_Node;
 import toksource.Base_TextSource;
 import toksource.TextSource_file;
@@ -17,7 +17,7 @@ public class Base_Scanner  extends Base_Stack {
     protected final Factory_Node nodeFactory;
 
     public Base_Scanner(Base_TextSource fin) {
-        this.inName = CompileInitializer.getInstance().getInName();
+        this.inName = RunState.getInstance().getInName();
         this.fileStack = new Stack<>();
         this.fin = fin;
         this.nodeFactory = Factory_Node.getInstance();

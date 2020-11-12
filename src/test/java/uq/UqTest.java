@@ -45,6 +45,7 @@ public class UqTest {
             if(!uq1.hasNext()){break;}
         }
         System.out.println("change");
+        System.out.println("offset="+uq1.curRowOffset());
         UqGenComposite uq2 = new UqBoolGen(uq1);
         for(int i = 0; i<30; i++){
             System.out.printf("%02d: %s \n", i, BIT.str(uq2.next(), 3));

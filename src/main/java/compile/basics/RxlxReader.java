@@ -1,6 +1,7 @@
 package compile.basics;
 
 import compile.parse.Base_ParseItem;
+import runstate.RunState;
 import toksource.ScanNodeSource;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public abstract class RxlxReader extends Base_Stack{
         }
     }
     protected final void readFile(){
-        CompileInitializer.getInstance().pauseCurrParserStack(this, fin);
+        RunState.getInstance().pauseCurrParserStack(this, fin);
         while(fin.hasNext()){
             Factory_Node.ScanNode currNode = fin.nextNode();
             //System.out.println(currNode);
@@ -34,12 +35,12 @@ public abstract class RxlxReader extends Base_Stack{
                 readNode(currNode);
             }
         }
-        CompileInitializer.getInstance().resumeCurrParserStack();
+        RunState.getInstance().resumeCurrParserStack();
     }
 
     public final void readList(ArrayList<Factory_Node.ScanNode> list){
         //System.out.println("++++readList++++");
-        CompileInitializer.getInstance().pauseCurrParserStack(this, fin);
+        RunState.getInstance().pauseCurrParserStack(this, fin);
         for(Factory_Node.ScanNode node : list ){
             //System.out.println(node);
             //String topName = top==null? "NULL" : top.getDebugName();
@@ -51,7 +52,7 @@ public abstract class RxlxReader extends Base_Stack{
                 readNode(node);
             }
         }
-        CompileInitializer.getInstance().resumeCurrParserStack();
+        RunState.getInstance().resumeCurrParserStack();
         //System.out.println("++++++++++++++++");
     }
 

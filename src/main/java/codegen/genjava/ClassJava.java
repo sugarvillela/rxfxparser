@@ -2,7 +2,7 @@ package codegen.genjava;
 
 import codegen.interfaces.*;
 import codegen.ut.FormatUtil;
-import compile.basics.CompileInitializer;
+import runstate.RunState;
 import erlog.DevErr;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class ClassJava implements IClass {
     }
 
     private void genPackage(FormatUtil formatUtil){
-        formatUtil.add("package " + CompileInitializer.getInstance().getGenPackage(pathPackages) + SEMICOLON + ENDL);
+        formatUtil.add("package " + RunState.getInstance().getGenPackage(pathPackages) + SEMICOLON + ENDL);
     }
     private void genImports(FormatUtil formatUtil){
         if(imports != null){
@@ -195,7 +195,7 @@ public class ClassJava implements IClass {
 //                    dotSeparated.add(package_);
 //                }
 //            }
-            dotSeparated.add(CompileInitializer.getInstance().getGenPackage(pathPackages));
+            dotSeparated.add(RunState.getInstance().getGenPackage(pathPackages));
 
             if(name == null){
                 DevErr.get(this).kill("import name field is required");

@@ -4,6 +4,7 @@ package compile.parse;
 
 import compile.basics.*;
 
+import runstate.RunState;
 import toksource.ScanNodeSource;
 import compile.basics.Factory_Node.ScanNode;
 import compile.parse.factories.Factory_ParseItem;
@@ -18,7 +19,7 @@ public class Class_Parser extends RxlxReader {
     
     private Class_Parser(ScanNodeSource fin){
         super(fin);
-        this.inName = CompileInitializer.getInstance().getInName();
+        this.inName = RunState.getInstance().getInName();
         this.outName = outName;
         //er = Erlog.get(this);
     }
