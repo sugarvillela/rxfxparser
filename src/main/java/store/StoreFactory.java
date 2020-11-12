@@ -1,12 +1,7 @@
 package store;
 
-import commons.BIT;
 import compile.basics.Keywords;
-import compile.symboltable.ListTableTypeCount;
-import compile.symboltable.ListTable;
-import erlog.Erlog;
 
-import static compile.basics.Keywords.DATATYPE.*;
 import static java.lang.Math.max;
 
 public class StoreFactory {

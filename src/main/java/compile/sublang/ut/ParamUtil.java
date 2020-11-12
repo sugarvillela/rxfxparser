@@ -4,8 +4,6 @@ import commons.RangeUtil;
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.ListTableItemSearch;
-import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 
 import java.util.regex.Matcher;

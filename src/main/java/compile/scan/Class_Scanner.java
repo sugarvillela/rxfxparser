@@ -2,7 +2,6 @@
 package compile.scan;
 
 import compile.basics.Keywords.DATATYPE;
-import compile.basics.CompileInitializer;
 
 import java.util.ArrayList;
 
@@ -12,9 +11,8 @@ import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 import compile.basics.Factory_Node.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.ListTable;
+import listtable.ListTable;
 import compile.symboltable.SymbolTable;
-import compile.symboltable.TextSniffer;
 import toksource.Base_TextSource;
 import toksource.TokenSource;
 

@@ -11,17 +11,44 @@ public class UqTest {
         }
     }
     public static void uqShift(){
-        UqShift uq = new UqShift();
+        UqShift uq = new UqShift(16);
         for(int i = 0; i<35; i++){
             BIT.disp(uq.next());
             if(!uq.hasNext()){break;}
         }
     }
     public static void uqBoolGen(){
-        UqBoolGen uq = new UqBoolGen(16);
+        UqBoolGen uq = new UqBoolGen(24);
         for(int i = 0; i<50; i++){
             System.out.printf("%02d: %s \n", i, BIT.str(uq.next()));
             if(!uq.hasNext()){break;}
+        }
+    }
+    public static void uqBoolPrevState(){
+        UqGenComposite uq1 = new UqBoolGen(24);
+        for(int i = 0; i<20; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq1.next()));
+            if(!uq1.hasNext()){break;}
+        }
+        System.out.println("change");
+        UqGenComposite uq2 = new UqBoolGen(uq1);
+        for(int i = 0; i<30; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq2.next()));
+            if(!uq2.hasNext()){break;}
+        }
+    }
+    public static void uqBoolPrevDisc(){
+        UqGenComposite uq1 = new UqDiscreteGen(14, 3, 3);
+        uq1.newRow();
+        for(int i = 0; i<45; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq1.next(), 3));
+            if(!uq1.hasNext()){break;}
+        }
+        System.out.println("change");
+        UqGenComposite uq2 = new UqBoolGen(uq1);
+        for(int i = 0; i<30; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq2.next(), 3));
+            if(!uq2.hasNext()){break;}
         }
     }
     public static void uqBoolGenNewRow(){
@@ -35,11 +62,26 @@ public class UqTest {
             if(!uq.hasNext()){break;}
         }
     }
+
     public static void uqDiscreteGen(){
         UqDiscreteGen uq = new UqDiscreteGen(14, 3, 3);
         for(int i = 0; i<50; i++){
             System.out.printf("%02d: %s \n", i, BIT.str(uq.next(), 3));
             if(!uq.hasNext()){break;}
+        }
+    }
+    public static void uqDiscPrevState(){
+        UqDiscreteGen uq1 = new UqDiscreteGen(14, 3, 3);
+        for(int i = 0; i<45; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq1.next(), 3));
+            if(!uq1.hasNext()){break;}
+        }
+
+        System.out.println("change");
+        UqGenComposite uq2 = new UqDiscreteGen(uq1);
+        for(int i = 0; i<40; i++){
+            System.out.printf("%02d: %s \n", i, BIT.str(uq2.next(), 3));
+            if(!uq2.hasNext()){break;}
         }
     }
     public static void uqDiscreteGenNewCol(){

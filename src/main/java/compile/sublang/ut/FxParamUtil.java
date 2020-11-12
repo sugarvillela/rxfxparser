@@ -2,8 +2,8 @@ package compile.sublang.ut;
 
 import compile.basics.Keywords;
 import compile.sublang.factories.TreeFactory;
-import compile.symboltable.ListTableItemSearch;
-import compile.symboltable.ListTable;
+import listtable.ListTableItemSearch;
+import listtable.ListTable;
 import erlog.DevErr;
 import erlog.Erlog;
 import toktools.TK;

@@ -2,7 +2,7 @@ package store;
 
 import commons.BIT;
 import compile.basics.CompileInitializer;
-import compile.symboltable.ListTable;
+import listtable.ListTable;
 
 public class TestStore {
     public static void discrete(){
@@ -74,16 +74,5 @@ public class TestStore {
         System.out.println("\nAfter drop wilma");
         store.drop(wilma);
         store.disp();
-    }
-    public static void listTable(){
-        ListTable.killInstance();
-        CompileInitializer  compileInitializer = CompileInitializer.getInstance();
-        compileInitializer.init(new String[]{});
-        compileInitializer.setNewEnumSet(false);
-        ListTable listTable = ListTable.getInstance();
-        listTable.disp();
-        listTable.getNumGen().gen();
-        listTable.getNumGen().disp();
-        //StoreFactory storeFactory = StoreFactory.getInstance();
     }
 }

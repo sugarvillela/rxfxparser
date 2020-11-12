@@ -6,7 +6,6 @@ import compile.sublang.ut.FxAccessUtil;
 import compile.sublang.ut.FxParamUtil;
 import compile.sublang.ut.ValidatorFx;
 import compile.symboltable.ConstantTable;
-import compile.symboltable.ListTableScanLoader;
 import erlog.Erlog;
 import toktools.TK;
 import toktools.Tokens_special;

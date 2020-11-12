@@ -2,26 +2,13 @@ package codegen.genjava;
 
 import codegen.interfaces.*;
 import codegen.ut.FormatUtil;
-import codegen.ut.PathUtil;
-import commons.Commons;
 import compile.basics.CompileInitializer;
 import erlog.DevErr;
 
 import java.util.ArrayList;
 
-import static codegen.genjava.ConditionJava.CONNECTOR.AND_;
 import static codegen.interfaces.enums.ENDL;
 import static codegen.interfaces.enums.SEMICOLON;
-import static codegen.interfaces.enums.VISIBILITY.PROTECTED_;
-import static codegen.interfaces.enums.VISIBILITY.PUBLIC_;
-import static codegen.genjava.CommentJava.*;
-import static codegen.genjava.MethodJava.*;
-import static codegen.genjava.VarJava.*;
-import static codegen.genjava.SwitchJava.*;
-import static codegen.genjava.ArrayJava.*;
-import static codegen.genjava.ControlJava.*;
-import static codegen.genjava.ConditionJava.*;
-import static codegen.genjava.ConditionJava.CONNECTOR.*;
 
 public class ClassJava implements IClass {
     private final ArrayList<IWidget> content;
@@ -30,9 +17,9 @@ public class ClassJava implements IClass {
     private boolean static_;
     private String name;
     private String extends_;
-    private String[] subPackages;
+    private String[] pathPackages;
     private String[] implements_;
-    private String[] imports;
+    private IImport[] imports;
 
     public ClassJava(){
         content = new ArrayList<>();
@@ -63,12 +50,12 @@ public class ClassJava implements IClass {
     }
 
     private void genPackage(FormatUtil formatUtil){
-        formatUtil.add("package " + CompileInitializer.getInstance().getGenPackage(subPackages) + SEMICOLON + ENDL);
+        formatUtil.add("package " + CompileInitializer.getInstance().getGenPackage(pathPackages) + SEMICOLON + ENDL);
     }
     private void genImports(FormatUtil formatUtil){
         if(imports != null){
-            for(String import_ : imports){
-                formatUtil.add("import " + import_ + SEMICOLON);
+            for(IImport import_ : imports){
+                import_.finish(formatUtil);
             }
             formatUtil.add("");
         }
@@ -103,6 +90,7 @@ public class ClassJava implements IClass {
         header.add("{");
         formatUtil.add(String.join(" ", header));
     }
+
     private void genContent(FormatUtil formatUtil){
         formatUtil.inc();
         for(IWidget widget : content){
@@ -110,10 +98,12 @@ public class ClassJava implements IClass {
         }
         formatUtil.dec();
     }
+
     @Override
     public String toString(){
         return name;
     }
+
     public static class ClassJavaBuilder implements IClassBuilder{
         private final ClassJava built;
 
@@ -158,19 +148,100 @@ public class ClassJava implements IClass {
         }
 
         @Override
-        public IClassBuilder setSubPackages(String... subPackages) {
-            built.subPackages = subPackages;
+        public IClassBuilder setPathPackages(String... pathPackages) {
+            built.pathPackages = pathPackages;
             return this;
         }
 
         @Override
-        public IClassBuilder setImports(String... imports) {
+        public IClassBuilder setImports(IImport... imports) {
             built.imports = imports;
             return this;
         }
 
         @Override
         public IClass build() {
+            return built;
+        }
+    }
+
+    public static class ImportJava implements IImport{
+        private final ArrayList<IWidget> content;
+        private boolean wildcard;
+        private boolean static_;
+        private String name;
+        private String[] pathPackages;
+
+        public ImportJava() {
+            content = new ArrayList<>();
+        }
+
+        @Override
+        public IWidget finish(FormatUtil formatUtil) {
+            ArrayList<String> header = new ArrayList<>();
+            header.add("import");
+            if(static_){
+                header.add("static");
+            }
+            header.add(genDotSep());
+            formatUtil.add(String.join(" ", header) + SEMICOLON);
+            return this;
+        }
+
+        private String genDotSep(){
+            ArrayList<String> dotSeparated = new ArrayList<>();
+//            if(pathPackages != null){
+//                for(String package_ : pathPackages){
+//                    dotSeparated.add(package_);
+//                }
+//            }
+            dotSeparated.add(CompileInitializer.getInstance().getGenPackage(pathPackages));
+
+            if(name == null){
+                DevErr.get(this).kill("import name field is required");
+            }
+            else{
+                dotSeparated.add(name);
+            }
+            if(wildcard){
+                dotSeparated.add("*");
+            }
+            return String.join(".", dotSeparated);
+        }
+    }
+    public static class ImportBuilder implements IImportBuilder{
+        private final ImportJava built;
+
+        public ImportBuilder() {
+            built = new ImportJava();
+        }
+
+        @Override
+        public IImportBuilder setPathPackages(String... pathPackages) {
+            built.pathPackages = pathPackages;
+            return this;
+        }
+
+        @Override
+        public IImportBuilder setName(String name) {
+            built.name = name;
+            return this;
+        }
+
+        @Override
+        public IImportBuilder setStatic() {
+            built.static_ = true;
+            return this;
+        }
+
+        @Override
+        public IImportBuilder setWildcard() {
+            built.wildcard = true;
+            return this;
+        }
+
+        @Override
+        public IImport build() {
             return built;
         }
     }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class GenFileUtil {
 
     public boolean persist(ArrayList<String> content, String... subpath){
-        Commons.disp(content);
+        //Commons.disp(content);
         String path = CompileInitializer.getInstance().getGenPath(subpath);
         System.out.println("GenFileUtil: path = " + path);
         try(

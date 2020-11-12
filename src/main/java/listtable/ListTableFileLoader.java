@@ -1,4 +1,4 @@
-package compile.symboltable;
+package listtable;
 
 import compile.basics.Factory_Node;
 import compile.basics.IParseItem;
@@ -6,7 +6,6 @@ import compile.basics.Keywords;
 import compile.basics.RxlxReader;
 import compile.parse.Base_ParseItem;
 import erlog.DevErr;
-import erlog.Erlog;
 import toksource.ScanNodeSource;
 
 import java.util.ArrayList;

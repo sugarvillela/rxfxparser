@@ -5,6 +5,7 @@ package commons;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static compile.basics.Keywords.NULL_TEXT;
 
@@ -246,6 +247,29 @@ public class Commons {
             System.out.println( "\t" + elem );
         }
         System.out.println("End Display: " + label+"\n");
+    }
+    public static String toHexString(int n){
+        return String.format("0x%X", n);
+    }
+    public static String toHexString(int[] arr){
+        if( arr==null || arr.length==0 ){
+            return "[]";
+        }
+        String[] out = new String[arr.length];
+        for(int i = 0; i < arr.length; i++){
+            out[i] = String.format("0x%X", arr[i]);
+        }
+        return "[" + String.join(", ", out) + "]";
+    }
+    public static String toHexString(List<Integer> list){
+        if( list == null || list.size() == 0 ){
+            return "[]";
+        }
+        String[] out = new String[list.size()];
+        for(int i = 0; i < list.size(); i++){
+            out[i] = String.format("0x%X", list.get(i));
+        }
+        return "[" + String.join(", ", out) + "]";
     }
     public static int boolInt(boolean bool){// Java can't cast bool to int
         return bool? 1 : 0;

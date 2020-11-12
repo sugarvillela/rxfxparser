@@ -1,11 +1,8 @@
 package uq;
 
 import commons.BIT;
-import unique.Factory;
 
-import static compile.basics.Keywords.UQ_FORMAT;
-
-public class UqShift implements UniqueItr {
+public class UqShift implements UqGen {
     private int c, halt;
 
     public UqShift(){
@@ -18,6 +15,11 @@ public class UqShift implements UniqueItr {
     }
     public final void rewind(){
         c = 1;
+    }
+
+    @Override
+    public void rewind(int setStart) {
+        c = setStart;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package compile.symboltable;
+package listtable;
 
 import compile.basics.*;
 import compile.basics.Factory_Node.ScanNode;

@@ -2,7 +2,7 @@ package uq;
 
 import static compile.basics.Keywords.UQ_FORMAT;
 
-public class Uq implements UniqueItr{
+public class Uq implements UqGen {
     private final int halt;
     private int c;
 
@@ -14,10 +14,19 @@ public class Uq implements UniqueItr{
         this.halt = halt;
         rewind();
     }
+    public Uq(UqGen prevState){
+        halt = 1 << (Integer.SIZE-1);
+        rewind(prevState.next());
+    }
 
     @Override
     public final void rewind(){
         c = -1;
+    }
+
+    @Override
+    public void rewind(int setStart) {
+        c = setStart - 1;
     }
 
     @Override
@@ -41,10 +50,10 @@ public class Uq implements UniqueItr{
     @Override
     public void newRow() {}
 
-    @Override
-    public String toString(){
-        return String.format(UQ_FORMAT, next());
-    }
+//    @Override
+//    public String toString(){
+//        return String.format(UQ_FORMAT, next());
+//    }
 
     public String toString(String prefix){
         return prefix + String.format(UQ_FORMAT, next());

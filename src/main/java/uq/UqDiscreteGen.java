@@ -32,25 +32,38 @@ package uq;
  See class StoreBool for the decoding algorithms for row, col and val
  */
 
-public class UqDiscreteGen  implements UniqueItr{
+public class UqDiscreteGen  implements UqGenComposite {
+    private final int wrow, wcol, wval;
     private int rowStart, colStart;
     private int rowHalt;//,  colHalt, valHalt;
-    private int wval, valShift;
-    private Uq row, col, val;
+    private int valShift;
+    private UqGen row, col, val;
 
     public UqDiscreteGen(int wrow, int wcol, int wval){
+        this.wrow = wrow;
+        this.wcol = wcol;
+        this.wval = wval;
         rowStart = Integer.SIZE - wrow;
         colStart = Integer.SIZE - wrow - wcol;
         int colHalt = colStart/wcol;
         row = new Uq((1 << wrow)+1);
         col = new Uq(colHalt+1);
         val = new Uq(1 << wval);
-        this.wval = wval;
         rowHalt = (1 << wrow) - 1;
-        System.out.printf("rowStart=%x, colStart=%x, colHalt=%x\n", rowStart, colStart, colHalt);
         rewind();
     }
-
+    public UqDiscreteGen(UqDiscreteGen prevState){
+        this.wrow = prevState.getWRow();
+        this.wcol = prevState.getWCol();
+        this.wval = prevState.getWVal();
+        rowStart = Integer.SIZE - wrow;
+        colStart = Integer.SIZE - wrow - wcol;
+        int colHalt = colStart/wcol;
+        row = prevState.getRowGen();
+        col = prevState.getColGen();
+        val = new Uq(1 << wval);
+        rowHalt = (1 << wrow) - 1;
+    }
     @Override
     public final void rewind(){
         row.rewind();
@@ -62,10 +75,23 @@ public class UqDiscreteGen  implements UniqueItr{
     }
 
     @Override
+    public void rewind(int setStart) {
+        row.rewind(setStart);
+        col.rewind();
+        val.rewind();
+        row.next();
+        col.next();
+        valShift = 0;
+    }
+
+    @Override
     public int curr() {//?
         return (row.curr() << rowStart) | (col.curr() << colStart) | (val.curr() << valShift);
     }
-
+    @Override
+    public int currRowCol() {
+        return (row.curr() << rowStart) | (col.curr() << colStart);
+    }
     @Override
     public int next(){
         if(!val.hasNext()){
@@ -96,11 +122,41 @@ public class UqDiscreteGen  implements UniqueItr{
 
     @Override
     public void newRow(){
-        newCol();
+        col.rewind();
+        val.rewind();
+        row.next();
+        col.next();
+        valShift = 0;
+        //newCol();
 //        col.rewind();
 //        col.next();
 //        val.rewind();
 //        row.next();
 //        valShift = 0;
+    }
+
+    @Override
+    public int getWRow() {
+        return wrow;
+    }
+
+    @Override
+    public int getWCol() {
+        return wcol;
+    }
+
+    @Override
+    public int getWVal() {
+        return wval;
+    }
+
+    @Override
+    public UqGen getRowGen() {
+        return new Uq(row);
+    }
+
+    @Override
+    public UqGen getColGen()  {
+        return new Uq(col);
     }
 }

@@ -15,6 +15,9 @@ import compile.scan.Base_ScanItem;
 import compile.scan.Class_Scanner;
 import compile.basics.Keywords.DATATYPE;
 import compile.basics.Keywords.CMD;
+import listtable.ListTable;
+import listtable.ListTableItemSearch;
+import listtable.ListTableScanLoader;
 
 import static compile.basics.Keywords.*;
 import static compile.basics.Keywords.DATATYPE.*;

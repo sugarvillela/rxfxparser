@@ -5,7 +5,7 @@ import commons.Dev;
 import codegen.ut.NameGen;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
-import compile.symboltable.ListTable;
+import listtable.ListTable;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
@@ -46,8 +46,8 @@ public class CompileInitializer implements ChangeListener {
         wrow = 5;
         wcol = 3;
         wval = 4;
-        //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
-        genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
+        genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
+        //genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
     }
 
@@ -131,11 +131,12 @@ public class CompileInitializer implements ChangeListener {
 
             ListTable listTable = ListTable.getInstance();
             listTable.disp();
-            listTable.getNumGen().gen();
-            listTable.getNumGen().disp();
+            listTable.getNumGen().genKeyValMap();
+            //listTable.getNumGen().disp();
 
             codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
             listTranslator.translate();
+
 //            System.out.println("Begin Parse");
 //
 //            Class_Parser.init(

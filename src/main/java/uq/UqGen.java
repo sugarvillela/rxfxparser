@@ -1,7 +1,8 @@
 package uq;
 
-public interface UniqueItr {
+public interface UqGen {
     void rewind();
+    void rewind(int setStart);
     int curr();
     int next();
     boolean hasNext();

@@ -29,9 +29,8 @@ public class Codegen_ {
         String[] demo2 = Commons.randomContent(25);
         FormatUtil formatUtil = new FormatUtil();
         IWidget classJava = new ClassJava.ClassJavaBuilder().setName("MyClass").setVisibility(PUBLIC_).setAbstract().
-                setExtends("MyParentClass").setImplements("CrazyInterface", "BadInterface").
-                setImports("Munchkin","Frito").setSubPackages("subby").build().
-                add(
+                //setImports("Munchkin","Frito").setPathPackages("subby").build().
+                setExtends("MyParentClass").setImplements("CrazyInterface", "BadInterface").build().add(
                         new CommentBuilder().setLong().build().add("This is a short part and this is a much much longer part with lots of extra words and it should definitely be split into two lines!"),
                         new ArrayBuilder().setName("myArray").setType("String").setSplit().build(),
                         new MethodBuilder().setName("MyClass").setIsConstructor().build().add(
