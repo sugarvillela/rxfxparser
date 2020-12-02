@@ -25,9 +25,12 @@ public class ListJava {
     private static final String RANGE_TEST_FORMAT = "0x0%X <= index && index <= 0x0%X";
     private static final String RETURN_STRING = "return \"%s\";";
     private static final String RETURN_INT = "return 0x0%X;";
+    private static final String RETURN_DATATYPE = "return %s;";
     private static final String STAT_CLASS_NAME = "FlagStats";
     private static final String PATH_PACKAGE = "lists";
-    private NameGen nameGen;
+    private static final String EXCEPTION = "throw new IllegalStateException(\"Dev err: unknown datatype\");";
+
+    private NameGen nameGen;// "time":"
 
     public void translate(){
         ListTableNumGen numGen = ListTable.getInstance().getNumGen();
@@ -35,7 +38,7 @@ public class ListJava {
         GenFileUtil genFileUtil = new GenFileUtil();
         String className, fileExt = "." + Widget.getFileExt();
         ArrayList<String> toFile;
-        StatUtil statUtil = new StatUtil();
+        StatUtil statUtil = new StatUtil(numGen);
         CategoryNode[] nodes;
 
         nodes = numGen.categoryNodesByType(LIST_STRING);
@@ -47,6 +50,7 @@ public class ListJava {
             toFile.clear();
 
             statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
         }
         else{
             statUtil.addNulls();
@@ -61,6 +65,7 @@ public class ListJava {
             toFile.clear();
 
             statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
         }
         else{
             statUtil.addNulls();
@@ -75,6 +80,7 @@ public class ListJava {
             toFile.clear();
 
             statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
         }
         else{
             statUtil.addNulls();
@@ -89,6 +95,7 @@ public class ListJava {
             toFile.clear();
 
             statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
         }
         else{
             statUtil.addNulls();
@@ -164,7 +171,7 @@ public class ListJava {
                     )
             );
         }
-        return method.add("return null;");
+        return method.add(EXCEPTION);
     }
 
     private IMethod genMethodBaseIndexByRange(CategoryNode[] nodes){
@@ -183,7 +190,7 @@ public class ListJava {
                     )
             );
         }
-        return method.add("return -1;");
+        return method.add(EXCEPTION);
     }
 
     private IMethod genMethodCategoryByBaseIndex(CategoryNode[] nodes){
@@ -199,7 +206,7 @@ public class ListJava {
             ).
             finishCase();
         }
-        switchJava.startDefault().add("return null;").finishCase();
+        switchJava.startDefault().add(EXCEPTION).finishCase();
         return method.add(switchJava);
     }
 
@@ -222,29 +229,41 @@ public class ListJava {
     private class StatUtil{
         private Keywords.DATATYPE[] listOrder;
         private final int[] stats;
-        private int index;
+        private final int[][] baseIndices;
+        private int iStat, iBase;
 
-        public StatUtil() {
-            stats = new int[12];
-            index = 0;
+        public StatUtil( ListTableNumGen numGen) {
+            listOrder = numGen.getListOrder();
+            stats = new int[listOrder.length * 3];
+            baseIndices = new int[listOrder.length][];
+            iStat = 0;
+            iBase = 0;
         }
 
         public void addStats(CategoryNode[] nodes){
             int totalSize = 0;
             for(CategoryNode node : nodes){
-                totalSize += node.size();
+                totalSize += node.size() + 1; // plus one for category enu
             }
-            stats[index++] = totalSize;
-            stats[index++] = nodes[0].getRangeLow();
-            stats[index++] = nodes[nodes.length -1].getRangeHi();
+            stats[iStat++] = totalSize;
+            stats[iStat++] = nodes[0].getRangeLow();
+            stats[iStat++] = nodes[nodes.length -1].getRangeHi();
         }
         public void addNulls(){
-            index+=3;
+            iStat +=3;
+            iBase++;
+        }
+
+        public void addBaseIndices(CategoryNode[] nodes){
+            int[] categoryIndices = new int[nodes.length];
+            int i = 0;
+            for(CategoryNode node : nodes){
+                categoryIndices[i++] = node.getCategoryEnum();
+            }
+            baseIndices[iBase++] = categoryIndices;
         }
 
         public ArrayList<String> genStats(ListTableNumGen numGen){
-            listOrder = numGen.getListOrder();
-
             FormatUtil formatUtil = new FormatUtil();
             ClassJava classJava = (ClassJava)new ClassJava.ClassJavaBuilder().
                 setImports(
@@ -258,13 +277,18 @@ public class ListJava {
                     add(
                         new CommentJava.CommentBuilder().build().add("Pass enu value to get type:"),
                         genMethodFlagTypeByRange(),
+                        new CommentJava.CommentBuilder().build().add("Pass base index (category name) to get type:"),
+                        genMethodFlagTypeByBaseIndex(),
                         new CommentJava.CommentBuilder().build().add("Store Settings:"),
                         genMethodGetW("getWRow", numGen.getWRow()),
                         genMethodGetW("getWCol", numGen.getWCol()),
                         genMethodGetW("getWVal", numGen.getWVal()),
-                        new CommentJava.CommentBuilder().build().add("Stats by type:")
+                        new CommentJava.CommentBuilder().build().add("Stats by type:"),
+                            genMethodGetByDatatype("getSize", 0),
+                            genMethodGetByDatatype("getLowIndex", 1),
+                            genMethodGetByDatatype("getHighIndex", 2)
                     );
-                addGenMethodGetX(classJava);
+                //addGenMethodGetX(classJava);
                 classJava.finish(formatUtil);
             return formatUtil.finish();
         }
@@ -277,38 +301,61 @@ public class ListJava {
                 method.add(
                         new ControlJava.ControlBuilder().setIf(
                             new ConditionJava.ConditionBuilder().build().add(
-                                    String.format(RANGE_TEST_FORMAT, stats[i-1], stats[i])
+                                String.format(RANGE_TEST_FORMAT, stats[i-1], stats[i])
                             )
                         ).build().add(
-                            "return " + listOrder[j] + ";"
+                            String.format(RETURN_DATATYPE, listOrder[j])
                         )
                 );
             }
-            return method.add("return null;");
+            return method.add(EXCEPTION);
+        }
+
+        private IMethod genMethodFlagTypeByBaseIndex(){
+            MethodJava method = (MethodJava)new MethodJava.MethodBuilder().
+                    setReturnType("DATATYPE").setName("flagTypeByBaseIndex").setStatic().
+                    setParams("int index").
+                    build();
+            SwitchJava switchJava = (SwitchJava)new SwitchBuilder().setTestObject("index").setNoBreaks().build();
+
+            for(int i = 0; i < baseIndices.length; i++){
+                if(baseIndices[i] != null){
+                    for(int j = 0; j < baseIndices[i].length; j++){
+                        switchJava.startCase(String.format(VAL_FORMAT, baseIndices[i][j]));
+
+                        System.out.printf("%d: %d: %X\n", i, j, baseIndices[i][j]);
+                    }
+                    switchJava.add(
+                        String.format(RETURN_DATATYPE, listOrder[i])
+                    ).finishCase();
+                }
+
+            }
+            switchJava.startDefault().add(EXCEPTION).finishCase();
+            return method.add(switchJava);
         }
 
         private IMethod genMethodGetW(String methodName, int w){
             return new MethodJava.MethodBuilder().
                     setReturnType("int").setName(methodName).setStatic().build().
-                    add(String.format("return %d;", w));
+                    add(String.format("return %d;", w)); // more readable if not in hex
         }
 
-        private void addGenMethodGetX(ClassJava classJava){
-            String methodName;
-            index = 0;
-            for(Keywords.DATATYPE datatype : listOrder){
-                methodName = nameGen.functionName("getSize" + datatype);
-                classJava.add(genMethodGetX(methodName));
-                methodName = nameGen.functionName("getLowIndex" + datatype);
-                classJava.add(genMethodGetX(methodName));
-                methodName = nameGen.functionName("getHighIndex" + datatype);
-                classJava.add(genMethodGetX(methodName));
+        private IMethod genMethodGetByDatatype(String methodName, int index){
+            MethodJava method = (MethodJava) new MethodJava.MethodBuilder().
+                    setReturnType("int").setName(methodName).setParams("DATATYPE datatype").setStatic().build();
+            SwitchJava switchJava = (SwitchJava)new SwitchBuilder().setTestObject("datatype").setNoBreaks().build();
+            for (Keywords.DATATYPE datatype : listOrder) {
+                //System.out.printf("--- %s: %d: %s: %d\n", methodName, index, datatype.toString(), stats[index]);
+                switchJava.startCase(datatype.toString()).
+                        add(
+                                String.format(RETURN_INT, stats[index])
+                        ).
+                        finishCase();
+                index += 3;
             }
-        }
-        private IMethod genMethodGetX(String methodName){
-            return new MethodJava.MethodBuilder().
-                    setReturnType("int").setName(methodName).setStatic().build().
-                    add(String.format("return %d;", stats[index++]));
+            switchJava.startDefault().add(EXCEPTION).finishCase();
+            return method.add(switchJava);
         }
 
 

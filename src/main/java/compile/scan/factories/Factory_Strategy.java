@@ -5,7 +5,7 @@ import compile.basics.Factory_Node;
 import compile.sublang.FxLogicTree;
 import compile.sublang.RxLogicTree;
 import compile.sublang.factories.TreeFactory;
-import compile.sublang.ut.FlatTree;
+import flattree.FlatTree;
 import compile.sublang.ut.ValidatorRx;
 import compile.scan.ut.*;
 import compile.symboltable.*;

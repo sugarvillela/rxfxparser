@@ -46,7 +46,6 @@ public class RxLogicTree extends TreeFactory {
             more = false;
             more |= root.split(RX, AND.asChar);
             more |= root.split(RX, OR.asChar);
-//            more |= root.split(CHAR_EQUAL);
             more |= root.negate();
             more |= root.unwrap(OPAR.asChar, CPAR.asChar);
             more |= root.unquote(SQUOTE.asChar);

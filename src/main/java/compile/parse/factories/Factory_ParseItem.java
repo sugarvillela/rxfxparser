@@ -1,13 +1,13 @@
 package compile.parse.factories;
 
 
+import commons.Commons;
 import compile.basics.Factory_Node;
 import compile.basics.Factory_Node.ScanNode;
 import compile.parse.Base_ParseItem;
 import compile.parse.Class_Parser;
 import compile.parse.ut.FlatTreeBuilder;
-import compile.sublang.factories.TreeFactory;
-import compile.sublang.ut.FlatTree;
+import flattree.FlatTree;
 import erlog.Erlog;
 
 import static compile.basics.Keywords.DATATYPE;
@@ -114,6 +114,10 @@ public abstract class Factory_ParseItem {
             builder.build();
             flatTree = builder.get();
             flatTree.disp();
+            System.out.println("===================================");
+            //Commons.disp(flatTree.breadthFirst(), "BREADTHFIRST");
+            flatTree.buildString();
+            System.out.println("===================================");
             P.pop();
         }
 

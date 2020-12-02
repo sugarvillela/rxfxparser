@@ -72,6 +72,7 @@ public class ListTable {
         listTableMap = new HashMap<>(8);
         listTableMap.put(LIST_BOOLEAN,  new HashMap<>(8));
         listTableMap.put(LIST_DISCRETE, new HashMap<>(8));
+        listTableMap.put(LIST_VOTE,     new HashMap<>(8));
         listTableMap.put(LIST_NUMBER,   new HashMap<>(8));
         listTableMap.put(LIST_STRING,   new HashMap<>(8));
         listTableMap.put(LIST_SCOPES,   new HashMap<>(8));
@@ -87,10 +88,10 @@ public class ListTable {
     public ListTableItemSearch getItemSearch(){
         return itemSearch;
     }
-    public ListTableTypeCount  getTypeCount(){
+    public ListTableTypeCount  getTypeCount (){
         return typeCount;
     }
-    public ListTableNumGen     getNumGen(){
+    public ListTableNumGen     getNumGen    (){
         return numGen;
     }
 

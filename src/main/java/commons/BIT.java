@@ -38,6 +38,14 @@ public class BIT {
         }
         return String.valueOf(fstring);
     }
+
+    public static String str( long n ){
+        String right = str((int)n);
+        String left = str((int)(n >> 32));
+
+        return left + "_|_" + right;
+    }
+
     public static void disp( int n ){
         System.out.printf( "%s \t %08X \n", BIT.str( n, "0000_0000_0000_0000_0000_0000_0000_0000" ), n );
     }

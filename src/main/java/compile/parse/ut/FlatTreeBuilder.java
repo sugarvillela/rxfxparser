@@ -4,7 +4,7 @@ import compile.basics.Factory_Node;
 import compile.basics.Keywords;
 import compile.parse.Base_ParseItem;
 import compile.sublang.factories.PayNodes;
-import compile.sublang.ut.FlatTree;
+import flattree.FlatTree;
 import toksource.ScanNodeSource;
 
 import static compile.basics.Keywords.DATATYPE.*;
@@ -68,7 +68,7 @@ public class FlatTreeBuilder{
                 }
                 break;
             case ADD_TO:
-                flatTree.addTo(new FlatTree.FlatNode(currNode.data));
+                flatTree.addTo(currNode.data);
                 break;
             case PUSH:
             case POP:

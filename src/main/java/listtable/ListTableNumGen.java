@@ -36,20 +36,20 @@ public class ListTableNumGen implements Killable {
 
     public void initCategoryNodes(){// follows listOrder
         fieldSizeCalculations = new FieldSizeCalculations(listTable.getTypeCount());
-        GeneratedList[] generators = new GeneratedList[]{
+        GeneratedList[] generatedLists = new GeneratedList[]{
                 new SimpleList(listTableMap, LIST_STRING),
                 new SimpleList(listTableMap, LIST_NUMBER),
                 new DiscreteList(listTableMap, fieldSizeCalculations),
                 new BooleanList(listTableMap, fieldSizeCalculations)
         };
 
-        GeneratedList prevList = null;
-        for(GeneratedList generator : generators){
-            generator.setPrevList(prevList);
-            generator.genKeyValList(fieldSizeCalculations);
-            generator.get(keyValMap);
-            prevList = generator;
-        }
+//        GeneratedList prevList = null;
+//        for(GeneratedList generatedList : generatedLists){
+//            generatedList.setPrevList(prevList);
+//            generatedList.genKeyValList(fieldSizeCalculations);
+//            generatedList.get(keyValMap);
+//            prevList = generatedList;
+//        }
     }
 
     public CategoryNode[] categoryNodesByType(Keywords.DATATYPE datatype){
@@ -174,7 +174,7 @@ public class ListTableNumGen implements Killable {
     }
 
     private static class FieldSizeCalculations {
-        private static final int WROW_DEFAULT = 4, DATA_WIDTH_DEFAULT = 16, WVAL_DEFAULT = 4;
+        private static final int WORD_LEN = Long.SIZE, WROW_DEFAULT = 8, DATA_WIDTH_DEFAULT = 48, WVAL_DEFAULT = 4;
         public final int maxBool, maxDiscrete;
         public final int listBoolSize;
         public final int listDiscreteSize;
@@ -192,7 +192,7 @@ public class ListTableNumGen implements Killable {
             listNumberSize = typeCount.getDatatypeCount(LIST_NUMBER);// plain old array
 
             init(WROW_DEFAULT, 5);
-            //System.out.printf("\nFieldCalculator: wrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
+            System.out.printf("\nFieldCalculator: wrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
         }
         private void init(int wRowDefault, int count){
             if(wRowDefault < 1 || count <= 0){
@@ -202,20 +202,20 @@ public class ListTableNumGen implements Killable {
 
             int wData = max(DATA_WIDTH_DEFAULT, maxBool);
             int wRowB = max(wRowDefault, BIT.logCeil(listBoolSize/wData));
-            if(Integer.SIZE - wRowB - wData < 0){
+            if(WORD_LEN - wRowB - wData < 0){
                 init(wRowDefault - 1, count - 1);
                 return;
             }
 
             int wValD = max(WVAL_DEFAULT, BIT.logCeil(maxDiscrete));
-            int nCols = (Integer.SIZE - wRowB)/wValD;
+            int nCols = (WORD_LEN - wRowB)/wValD;
             int wColD = BIT.logCeil(nCols);
-            int colStart = Integer.SIZE - wRowB - wColD;
+            int colStart = WORD_LEN - wRowB - wColD;
             while(colStart % wValD != 0){
                 wColD++;
-                colStart = Integer.SIZE - wRowB - wColD;
+                colStart = WORD_LEN - wRowB - wColD;
             }
-            nCols =  colStart/wValD;
+            nCols = colStart/wValD;
             int wrowD = BIT.logCeil(listDiscreteSize/nCols);
             if(wrowD > wRowB){
                 init(wRowDefault + 1, count - 1);

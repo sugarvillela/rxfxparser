@@ -3,14 +3,16 @@ package codegen.genjava;
 import codegen.interfaces.ISwitch;
 import codegen.interfaces.IWidget;
 import codegen.ut.FormatUtil;
+import commons.Commons;
 import erlog.DevErr;
 
 import java.util.ArrayList;
 
 public class SwitchJava implements ISwitch {
     private String testObject;
-    private final ArrayList<String> cases;
+    private final ArrayList<ArrayList<String>> cases;
     private final ArrayList<ArrayList<IWidget>> actions;
+    private ArrayList<String> currCases;
     private ArrayList<IWidget> currActions;
     private boolean noBreaks, defaultAdded;
 
@@ -22,10 +24,23 @@ public class SwitchJava implements ISwitch {
 
     @Override
     public ISwitch startCase(String case_) {
-        cases.add(case_);
-        currActions = new ArrayList<>();
+        if(currCases == null){
+            currCases = new ArrayList<>();
+        }
+        currCases.add(case_);
         return this;
     }
+
+//    @Override
+//    public ISwitch startCase(String case_, boolean addToExisting) {
+//        System.out.printf("startCase : %s: %b\n", case_, addToExisting);
+//        cases.add(case_);
+//        Commons.disp(cases, "startCase");
+//        if(!addToExisting){
+//            currActions = new ArrayList<>();
+//        }
+//        return this;
+//    }
 
     @Override
     public ISwitch startDefault() {
@@ -36,7 +51,7 @@ public class SwitchJava implements ISwitch {
     @Override
     public ISwitch add(IWidget... widget) {
         if(currActions == null){
-            DevErr.get(this).kill("Call startCase() before adding");
+            currActions = new ArrayList<>();
         }
         for(IWidget w : widget){
             currActions.add(w);
@@ -46,16 +61,23 @@ public class SwitchJava implements ISwitch {
 
     @Override
     public ISwitch add(String... text) {
-        currActions.add(new TextJava().add(text));
+        if(currActions == null){
+            currActions = new ArrayList<>();
+        }
+        for(String t : text){
+            currActions.add(new TextJava().add(text));
+        }
         return this;
     }
 
     @Override
     public ISwitch finishCase() {
-        if(currActions == null){
+        if(currCases == null || currActions == null){
             DevErr.get(this).kill("Call startCase() and add content before finishCase()");
         }
+        cases.add(currCases);
         actions.add(currActions);
+        currCases = null;
         currActions = null;
         return this;
     }
@@ -81,13 +103,15 @@ public class SwitchJava implements ISwitch {
     private void genContent(FormatUtil formatUtil) {
         int i = 0;
         for(ArrayList<IWidget> lines : actions){
-            String case_ = cases.get(i);
-            if("default".equals(case_)){
-                formatUtil.addLineSegment("default:");
+            for(String case_ : cases.get(i)){
+                if("default".equals(case_)){
+                    formatUtil.addLineSegment("default:");
+                }
+                else{
+                    formatUtil.addLineSegment("case " + case_ + ":");
+                }
             }
-            else{
-                formatUtil.addLineSegment("case " + case_ + ":");
-            }
+
             formatUtil.inc();
                 for(IWidget line : lines){
                     line.finish(formatUtil);

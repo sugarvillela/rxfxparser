@@ -49,8 +49,8 @@ public class RunState implements ChangeListener {
         listeners = new ArrayList<>();
         newEnumSet = false;
         parseOnly = false;
-        genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
-        //genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
+        //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
+        genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
     }
 
@@ -134,20 +134,20 @@ public class RunState implements ChangeListener {
 //            listTable.disp();
             listTable.getNumGen().initCategoryNodes();
 //            listTable.getNumGen().disp();
-//
+
 //            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
 //            listTranslator.translate();
+//
+//            System.out.println("Begin Parse");
 
-            System.out.println("Begin Parse");
-
-            Class_Parser.init(
-                    new ScanNodeSource(
-                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
-                    )
-            );
-            Class_Parser parser = Class_Parser.getInstance();
-            setCurrParserStack(parser);
-            parser.onCreate();
+//            Class_Parser.init(
+//                    new ScanNodeSource(
+//                            new TextSource_file(this.inName + INTERIM_FILE_EXTENSION)
+//                    )
+//            );
+//            Class_Parser parser = Class_Parser.getInstance();
+//            setCurrParserStack(parser);
+//            parser.onCreate();
         }
 
         //Erlog.finish();

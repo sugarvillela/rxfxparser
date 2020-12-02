@@ -64,6 +64,7 @@ public final class Keywords {
         //NONE            (PRIM.NULL),
         LIST_BOOLEAN    (PRIM.BOOLEAN),
         LIST_DISCRETE   (PRIM.DISCRETE),
+        LIST_VOTE       (PRIM.DISCRETE),
         LIST_STRING     (PRIM.STRING),
         LIST_NUMBER     (PRIM.NUMBER),
         LIST_SCOPES     (PRIM.IMMUTABLE),
@@ -171,7 +172,8 @@ public final class Keywords {
         OPAR    ('('),
         CPAR    (')'),
         SQUOTE  ('\''),
-        PAYLOAD ('P')
+        PAYLOAD ('P'),
+        STR_EQ  ('#')
         ;
         
         public final char asChar;
@@ -303,15 +305,16 @@ public final class Keywords {
             }
             return null;
         }
-
     }
 
     public enum RX_FUN {
         // function names for Rx logic
-        FIRST   (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},                                                 PRIM.STRING),
-        LAST    (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},                                                 PRIM.STRING),
-        LEN     (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},                                                 PRIM.NUMBER),
-        RANGE   (PRIM.NUMBER, new RX_PAR[]{RX_PAR.NUM_PAR, RX_PAR.RANGE_PAR, RX_PAR.RANGE_BELOW, RX_PAR.RANGE_ABOVE},  PRIM.BOOLEAN),
+        FIRST   (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
+        LAST    (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
+        LEN     (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.NUMBER),
+        RANGE   (PRIM.NUMBER, new RX_PAR[]{
+                                RX_PAR.NUM_PAR, RX_PAR.RANGE_PAR,
+                                RX_PAR.RANGE_BELOW, RX_PAR.RANGE_ABOVE},    PRIM.BOOLEAN),
         ;
 
         public final PRIM outType;

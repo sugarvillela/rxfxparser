@@ -1,46 +1,48 @@
-package uq;
+package uqlong;
+
+import uq.UqGen;
 
 import static compile.basics.Keywords.UQ_FORMAT;
 
-public class Uq implements UqGen {
-    private final int halt;
-    private int c;
+public class UqLong implements UqGenLong{
+    private final long halt;
+    private long c;
 
-    public Uq(){
-        halt = 1 << (Integer.SIZE-1);
+    public UqLong(){
+        halt = 1 << (Long.SIZE-2);
         rewind();
     }
-    public Uq(int halt){
+    public UqLong(long halt){
         this.halt = halt;
         rewind();
     }
-    public Uq(UqGen prevState){
-        halt = 1 << (Integer.SIZE-1);
+    public UqLong(UqGenLong prevState){
+        halt = 1 << (Long.SIZE-2);
         rewind(prevState.next());
     }
 
     @Override
-    public final void rewind(){
+    public void rewind() {
         c = -1;
     }
 
     @Override
-    public void rewind(int setStart) {
+    public void rewind(long setStart) {
         c = setStart - 1;
     }
 
     @Override
-    public int curr(){
+    public long curr() {
         return c;
     }
 
     @Override
-    public int next(){
+    public long next() {
         return ++c;
     }
 
     @Override
-    public boolean hasNext(){
+    public boolean hasNext() {
         return (c + 1) < halt;
     }
 
