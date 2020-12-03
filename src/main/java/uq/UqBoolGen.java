@@ -4,64 +4,63 @@ import commons.BIT;
 
 public class UqBoolGen implements UqGenComposite {
     private final int wrow;
-    private final int rowStart, halt;
-    private UqShift val;
-    private UqGen row;
+    private final int rowStart;
+    private final UqShift valGen;
+    private final UqGen rowGen;
 
     public UqBoolGen(int wrow){
         this.wrow = wrow;
         rowStart = Integer.SIZE - wrow;
-        halt = (1 << wrow) - 1;
-        val = new UqShift(rowStart);
-        row = new Uq();
-        row.next();
+        valGen = new UqShift(rowStart);
+        rowGen = new Uq(1 << wrow);
+        rowGen.next();
         rewind();
     }
     public UqBoolGen(UqGenComposite prevState){
         this.wrow = prevState.getWRow();
         rowStart = Integer.SIZE - wrow;
-        halt = (1 << wrow) - 1;
-        val = new UqShift(rowStart);
-        row = prevState.getRowGen();
+        valGen = new UqShift(rowStart);
+        rowGen = prevState.getRowGen();
         this.newRow(); // next row after prev state
     }
     @Override
     public final void rewind(){
-        val.rewind();
+        valGen.rewind();
     }
 
     @Override
     public void rewind(int setStart) {
-        val.rewind(setStart);
+        valGen.rewind(setStart);
     }
 
     @Override
     public int curr() {//?
-        return (row.curr() << rowStart) | val.curr();
+        return (rowGen.curr() << rowStart) | valGen.curr();
     }
 
     @Override
     public int currRowCol() {
-        return (row.curr() << rowStart);
+        return (rowGen.curr() << rowStart);
     }
 
     @Override
     public int curRowOffset() {
-        return row.curr();
+        return rowGen.curr();
     }
 
     @Override
     public int next(){
-        if(!val.hasNext()){
-            val.rewind();
-            row.next();
+        if(!valGen.hasNext()){// rowGen.hasNext() &&
+            valGen.rewind();
+            rowGen.next();
         }
-        return val.next() | (row.curr() << rowStart);
+        return valGen.next() | (rowGen.curr() << rowStart);
     }
 
     @Override
     public boolean hasNext(){
-        return row.curr() < halt || (row.curr() == halt && val.hasNext());
+        //System.out.printf("%b, %b \n", rowGen.hasNext(), valGen.hasNext());
+        return rowGen.hasNext() || valGen.hasNext();
     }
 
     @Override
@@ -69,8 +68,13 @@ public class UqBoolGen implements UqGenComposite {
 
     @Override
     public void newRow() {
-        val.rewind();
-        row.next();
+        valGen.rewind();
+        rowGen.next();
+    }
+
+    @Override
+    public int getHalt() {
+        return rowGen.getHalt();
     }
 
     @Override
@@ -95,7 +99,7 @@ public class UqBoolGen implements UqGenComposite {
 
     @Override
     public UqGen getRowGen() {
-        return new Uq(row);
+        return new Uq(rowGen);
     }
 
     @Override

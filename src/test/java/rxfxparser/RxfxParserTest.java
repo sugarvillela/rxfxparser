@@ -3,7 +3,7 @@ package rxfxparser;
 public class RxfxParserTest {
     public static void main(String[] args) {
         System.out.println("RxfxParserTest running...");
-        //uqlong.UqLongTest.uqDiscreteGenHalt();
+        //uq.UqTest.uqDiscreteGen();
         listtable.ListTableTest.numGen();
     }
 }

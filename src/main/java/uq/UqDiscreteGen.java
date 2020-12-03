@@ -1,5 +1,7 @@
 package uq;
 
+import commons.BIT;
+
 /**
  The idea is to use these as enumerations and store their values in
  an integer array to hold states, accessing them by their enum name
@@ -35,9 +37,8 @@ package uq;
 public class UqDiscreteGen  implements UqGenComposite {
     private final int wrow, wcol, wval;
     private int rowStart, colStart;
-    private int rowHalt;//,  colHalt, valHalt;
     private int valShift;
-    private UqGen row, col, val;
+    private UqGen rowGen, colGen, valGen;
 
     public UqDiscreteGen(int wrow, int wcol, int wval){
         this.wrow = wrow;
@@ -45,11 +46,11 @@ public class UqDiscreteGen  implements UqGenComposite {
         this.wval = wval;
         rowStart = Integer.SIZE - wrow;
         colStart = Integer.SIZE - wrow - wcol;
-        int colHalt = colStart/wcol;
-        row = new Uq((1 << wrow)+1);
-        col = new Uq(colHalt+1);
-        val = new Uq(1 << wval);
-        rowHalt = (1 << wrow) - 1;
+        int colHalt = colStart/wcol + 1;
+        //System.out.println("UqDiscreteGen constructor1: colHalt: " + colHalt);
+        rowGen = new Uq(1 << wrow);
+        colGen = new Uq(colHalt);
+        valGen = new Uq(1 << wval);
         rewind();
     }
     public UqDiscreteGen(UqDiscreteGen prevState){
@@ -58,87 +59,88 @@ public class UqDiscreteGen  implements UqGenComposite {
         this.wval = prevState.getWVal();
         rowStart = Integer.SIZE - wrow;
         colStart = Integer.SIZE - wrow - wcol;
-        int colHalt = colStart/wcol;
-        row = prevState.getRowGen();
-        col = prevState.getColGen();
-        val = new Uq(1 << wval);
-        rowHalt = (1 << wrow) - 1;
+        rowGen = prevState.getRowGen();
+        colGen = prevState.getColGen();
+        valGen = new Uq(1 << wval);
+        newRow();
     }
     @Override
     public final void rewind(){
-        row.rewind();
-        col.rewind();
-        val.rewind();
-        row.next();
-        col.next();
+        rowGen.rewind();
+        colGen.rewind();
+        valGen.rewind();
+        rowGen.next();
+        colGen.next();
         valShift = 0;
     }
 
     @Override
     public void rewind(int setStart) {
-        row.rewind(setStart);
-        col.rewind();
-        val.rewind();
-        row.next();
-        col.next();
+        rowGen.rewind(setStart);
+        colGen.rewind();
+        valGen.rewind();
+        rowGen.next();
+        colGen.next();
         valShift = 0;
     }
 
     @Override
     public int curr() {//?
-        return (row.curr() << rowStart) | (col.curr() << colStart) | (val.curr() << valShift);
+        return (rowGen.curr() << rowStart) | (colGen.curr() << colStart) | (valGen.curr() << valShift);
     }
     @Override
     public int currRowCol() {
-        return (row.curr() << rowStart) | (col.curr() << colStart);
+        return (rowGen.curr() << rowStart) | (colGen.curr() << colStart);
     }
 
     @Override
     public int curRowOffset() {
-        return row.curr();
+        return rowGen.curr();
     }
 
     @Override
     public int next(){
-        if(!val.hasNext()){
+        if(!valGen.hasNext()){
             newCol();
         }
-        int cRow = row.curr(), cCol = col.curr(), cVal = val.next();
+        int cRow = rowGen.curr(), cCol = colGen.curr(), cVal = valGen.next();
         //System.out.printf("row=%x, col=%x, val=%x, shift=%x\n", cRow, cCol, cVal, valShift);
         return (cRow << rowStart) | (cCol << colStart) | (cVal << valShift);
     }
 
     @Override
     public boolean hasNext(){
-        return row.hasNext();
+        return rowGen.hasNext();
     }
 
     @Override
     public void newCol(){
-        col.next();
-        val.rewind();
+        //System.out.printf("newCol 1: halt=%d, colGen.curr=%d, hasNext=%b\n", colGen.getHalt(), colGen.curr(), colGen.hasNext());
+        colGen.next();
+        //System.out.printf("newCol 2: halt=%d, colGen.curr=%d, hasNext=%b\n", colGen.getHalt(), colGen.curr(), colGen.hasNext());
+        valGen.rewind();
         valShift += wval;
-        if(!col.hasNext()){//(valShift) >= colStart
-            col.rewind();
-            col.next();
-            row.next();
+        if(!colGen.hasNext()){//(valShift) >= colStart
+            //System.out.println("!col.hasNext()");
+            colGen.rewind();
+            colGen.next();
+            rowGen.next();
             valShift = 0;
         }
     }
 
     @Override
     public void newRow(){
-        col.rewind();
-        val.rewind();
-        row.next();
-        col.next();
+        colGen.rewind();
+        valGen.rewind();
+        rowGen.next();
+        colGen.next();
         valShift = 0;
-        //newCol();
-//        col.rewind();
-//        col.next();
-//        val.rewind();
-//        row.next();
-//        valShift = 0;
+    }
+
+    @Override
+    public int getHalt() {
+        return rowGen.getHalt();
     }
 
     @Override
@@ -158,11 +160,11 @@ public class UqDiscreteGen  implements UqGenComposite {
 
     @Override
     public UqGen getRowGen() {
-        return new Uq(row);
+        return rowGen;
     }
 
     @Override
     public UqGen getColGen()  {
-        return new Uq(col);
+        return colGen;
     }
 }

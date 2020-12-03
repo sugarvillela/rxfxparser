@@ -13,11 +13,18 @@ $number = 0;
 	// Use all caps in these definitions
 	LIST<SCOPES>
 			ALL SENTENCE PHRASE WORD CHAR
-		
-	LIST<BOOLEAN>
+			
+	LIST<DISCRETE>
+			A B C D E
+			
+	LIST<VOTE>
 		$POS 
 			VERB NOUN ADJECTIVE ADVERB LINKING ARTICLE 
 			DETERMINER MODAL 
+		
+	LIST<BOOLEAN>
+		$POS 
+			F G H I J K L
 			
 	LIST<BOOLEAN>
 		$STATE

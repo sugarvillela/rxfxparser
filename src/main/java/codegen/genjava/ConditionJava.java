@@ -15,45 +15,10 @@ public class ConditionJava implements ICondition {
         return new ConditionBuilder().setNot().build().add(text);
     }
 
-    public enum CONNECTOR implements ICondition{
-        AND_    ("&&"),
-        OR_     ("||"),
-        EQUALS_ ("=="),
-        GT_     (">"),
-        GTE_    (">="),
-        LT_     ("<"),
-        LTE_    ("<="),
-        NOT_    ("!")
-        ;
 
-        private final String symbol;
-
-        CONNECTOR(String symbol) {
-            this.symbol = symbol;
-        }
-
-        @Override
-        public IWidget finish(FormatUtil formatUtil) {
-            return null;
-        }
-        @Override
-        public String toString(){
-            return symbol;
-        }
-
-        @Override
-        public ICondition add(ICondition... condition) {
-            return null;
-        }
-
-        @Override
-        public ICondition add(String... text) {
-            return null;
-        }
-    }
     private final ArrayList<IWidget> content;
+    private CONNECTOR connector;
     private boolean negateAll;
-
 
     public ConditionJava(){
         content = new ArrayList<>();
@@ -85,8 +50,9 @@ public class ConditionJava implements ICondition {
         for(IWidget w : content){
             out.add(w.toString());
         }
-        String formatString = (negateAll)? "!(%s)" : "%s";
-        return String.format(formatString, String.join(" ", out));
+        String formatString = (negateAll)? "!(%s)" : "(%s)";
+        String delim = (connector == null)? " " : connector.toString();
+        return String.format(formatString, String.join(delim, out));
     }
 
     public static class ConditionBuilder implements IConditionBuilder{
@@ -94,6 +60,12 @@ public class ConditionJava implements ICondition {
 
         public ConditionBuilder() {
             built = new ConditionJava();
+        }
+
+        @Override
+        public IConditionBuilder setConnector(CONNECTOR connector) {
+            built.connector = connector;
+            return this;
         }
 
         @Override

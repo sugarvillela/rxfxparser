@@ -131,12 +131,12 @@ public class RunState implements ChangeListener {
             System.out.println("ListTable build or rebuild");
 
             ListTable listTable = ListTable.getInstance();
-//            listTable.disp();
+            //listTable.disp();
             listTable.getNumGen().initCategoryNodes();
-//            listTable.getNumGen().disp();
-
-//            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
-//            listTranslator.translate();
+            //listTable.getNumGen().disp();
+//
+            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
+            listTranslator.translate();
 //
 //            System.out.println("Begin Parse");
 

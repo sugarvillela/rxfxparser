@@ -8,6 +8,7 @@ import codegen.interfaces.IWidget;
 import codegen.ut.FormatUtil;
 import commons.Commons;
 
+import static codegen.interfaces.ICondition.CONNECTOR.*;
 import static codegen.interfaces.enums.VISIBILITY.PROTECTED_;
 import static codegen.interfaces.enums.VISIBILITY.PUBLIC_;
 import static codegen.genjava.CommentJava.*;
@@ -17,7 +18,6 @@ import static codegen.genjava.SwitchJava.*;
 import static codegen.genjava.ArrayJava.*;
 import static codegen.genjava.ControlJava.*;
 import static codegen.genjava.ConditionJava.*;
-import static codegen.genjava.ConditionJava.CONNECTOR.*;
 
 /**
  *

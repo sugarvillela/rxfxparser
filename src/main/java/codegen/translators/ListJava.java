@@ -86,6 +86,36 @@ public class ListJava {
             statUtil.addNulls();
         }
 
+        nodes = numGen.categoryNodesByType(LIST_SCOPES);
+        if(nodes.length > 0){
+            className = nameGen.className(LIST_SCOPES.toString());
+            toFile = genCompositeList(nodes, className);
+            Commons.disp(toFile, "LIST_SCOPES");
+            genFileUtil.persist(toFile, PATH_PACKAGE, className + fileExt);
+            toFile.clear();
+
+            statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
+        }
+        else{
+            statUtil.addNulls();
+        }
+
+        nodes = numGen.categoryNodesByType(LIST_VOTE);
+        if(nodes.length > 0){
+            className = nameGen.className(LIST_VOTE.toString());
+            toFile = genCompositeList(nodes, className);
+            Commons.disp(toFile, "LIST_VOTE");
+            genFileUtil.persist(toFile, PATH_PACKAGE, className + fileExt);
+            toFile.clear();
+
+            statUtil.addStats(nodes);
+            statUtil.addBaseIndices(nodes);
+        }
+        else{
+            statUtil.addNulls();
+        }
+
         nodes = numGen.categoryNodesByType(LIST_BOOLEAN);
         if(nodes.length > 0){
             className = nameGen.className(LIST_BOOLEAN.toString());

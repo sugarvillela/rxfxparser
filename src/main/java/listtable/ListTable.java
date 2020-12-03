@@ -142,6 +142,7 @@ public class ListTable {
 
         public ListTableNode(ScanNode node, Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> parentTable) {
             super(node);
+            // System.out.println("ListTableNode: " + node);
             this.parentTable = parentTable;
             list = new ArrayList<>();
         }

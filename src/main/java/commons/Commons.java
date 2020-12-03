@@ -271,6 +271,21 @@ public class Commons {
         }
         return "[" + String.join(", ", out) + "]";
     }
+
+    public static String toHexString(long n){
+        return String.format("0x%X", n);
+    }
+    public static String toHexString(long[] arr){
+        if( arr==null || arr.length==0 ){
+            return "[]";
+        }
+        String[] out = new String[arr.length];
+        for(int i = 0; i < arr.length; i++){
+            out[i] = String.format("0x%X", arr[i]);
+        }
+        return "[" + String.join(", ", out) + "]";
+    }
+
     public static int boolInt(boolean bool){// Java can't cast bool to int
         return bool? 1 : 0;
     }

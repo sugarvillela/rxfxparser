@@ -8,4 +8,5 @@ public interface UqGen {
     boolean hasNext();
     void newCol();
     void newRow();
+    int getHalt(); // for debug
 }

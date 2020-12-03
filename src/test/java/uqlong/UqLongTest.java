@@ -47,7 +47,7 @@ public class UqLongTest {
         }
     }
     public static void uqDiscPrevState(){
-        UqDiscreteGenLong uq1 = new UqDiscreteGenLong(60, 2, 2);
+        UqDiscreteGenLong uq1 = new UqDiscreteGenLong(58, 2, 4);
         for(int i = 0; i<45; i++){
             System.out.printf("%02d: %s \n", i, BIT.str(uq1.next()));
             if(!uq1.hasNext()){break;}

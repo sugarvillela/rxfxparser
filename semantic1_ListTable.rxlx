@@ -69,6 +69,16 @@ semantic1.rxfx|26|0,ADD_TO,LIST_DISCRETE,-,FUTURE
 semantic1.rxfx|26|0,ADD_TO,LIST_DISCRETE,-,COMPARATIVE
 semantic1.rxfx|26|0,ADD_TO,LIST_DISCRETE,-,SUPURLATIVE
 semantic1.rxfx|26|0,POP,LIST_DISCRETE,-,-
+semantic1.rxfx|26|0,PUSH,LIST_VOTE,-,-
+semantic1.rxfx|26|0,SET_ATTRIB,LIST_VOTE,DEF_NAME,DWARVES
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,SLEEPY
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,SNEEZY
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,DOC
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,HAPPY
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,HORNY
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,GREEDY
+semantic1.rxfx|26|0,ADD_TO,LIST_VOTE,-,GROUCHY
+semantic1.rxfx|26|0,POP,LIST_VOTE,-,-
 semantic1.rxfx|26|0,PUSH,LIST_STRING,-,-
 semantic1.rxfx|26|0,SET_ATTRIB,LIST_STRING,DEF_NAME,NAMES
 semantic1.rxfx|26|0,ADD_TO,LIST_STRING,-,DAVE

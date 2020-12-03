@@ -30,26 +30,34 @@ public class ListTableNumGen implements Killable {
         this.listTable = listTable;
         this.listTableMap = listTableMap;
         keyValMap = new HashMap<>(8);
-        listOrder = new Keywords.DATATYPE[]{LIST_STRING, LIST_NUMBER, LIST_DISCRETE, LIST_BOOLEAN};
-
+        listOrder = new Keywords.DATATYPE[]{
+                LIST_STRING,
+                LIST_NUMBER,
+                LIST_DISCRETE,
+                LIST_SCOPES,
+                LIST_VOTE,
+                LIST_BOOLEAN
+        };
     }
 
     public void initCategoryNodes(){// follows listOrder
         fieldSizeCalculations = new FieldSizeCalculations(listTable.getTypeCount());
         GeneratedList[] generatedLists = new GeneratedList[]{
-                new SimpleList(listTableMap, LIST_STRING),
-                new SimpleList(listTableMap, LIST_NUMBER),
-                new DiscreteList(listTableMap, fieldSizeCalculations),
-                new BooleanList(listTableMap, fieldSizeCalculations)
+                new SimpleList(    listTableMap, LIST_STRING),
+                new SimpleList(    listTableMap, LIST_NUMBER),
+                new DiscreteList(  listTableMap, LIST_DISCRETE, fieldSizeCalculations),
+                new DiscreteList(  listTableMap, LIST_SCOPES, fieldSizeCalculations),
+                new VoteList(      listTableMap, LIST_VOTE, fieldSizeCalculations),
+                new BooleanList(   listTableMap, fieldSizeCalculations)
         };
 
-//        GeneratedList prevList = null;
-//        for(GeneratedList generatedList : generatedLists){
-//            generatedList.setPrevList(prevList);
-//            generatedList.genKeyValList(fieldSizeCalculations);
-//            generatedList.get(keyValMap);
-//            prevList = generatedList;
-//        }
+        GeneratedList prevList = null;
+        for(GeneratedList generatedList : generatedLists){
+            generatedList.setPrevList(prevList);
+            generatedList.genKeyValList();
+            generatedList.saveToMap(keyValMap);
+            prevList = generatedList;
+        }
     }
 
     public CategoryNode[] categoryNodesByType(Keywords.DATATYPE datatype){
@@ -77,9 +85,9 @@ public class ListTableNumGen implements Killable {
 
     public void disp(){
         System.out.println("Display keyValMap");
-        for (Map.Entry<Keywords.DATATYPE, CategoryNode[]> outer : keyValMap.entrySet()) {
-            System.out.println("\nDatatype: " + outer.getKey());
-            for (CategoryNode categoryNode : outer.getValue()) {
+        for(Keywords.DATATYPE datatype : listOrder){
+            System.out.println("\nDatatype: " + datatype);
+            for (CategoryNode categoryNode : keyValMap.get(datatype)) {
                 categoryNode.disp();
             }
         }
@@ -174,36 +182,46 @@ public class ListTableNumGen implements Killable {
     }
 
     private static class FieldSizeCalculations {
-        private static final int WORD_LEN = Long.SIZE, WROW_DEFAULT = 8, DATA_WIDTH_DEFAULT = 48, WVAL_DEFAULT = 4;
+        private static final int WORD_LEN = Long.SIZE, WROW_DEFAULT = 8, DATA_WIDTH_DEFAULT = 24, WVAL_DEFAULT = 4;
         public final int maxBool, maxDiscrete;
         public final int listBoolSize;
         public final int listDiscreteSize;
         public final int listStringSize;
         public final int listNumberSize;
+
+        public final int listBoolCategories;
+        public final int listDiscreteCategories;
         public int wrow, wcol, wval;
 
         public FieldSizeCalculations(ListTableTypeCount typeCount){// Expect ListTable is initialized
             typeCount.initCounts();
+
             maxBool = typeCount.getMaxCount(LIST_BOOLEAN);          // Each bool category gets own row; need bit space in int >= largest category
             maxDiscrete = typeCount.getMaxCount(LIST_DISCRETE) + 1; // Each disc category gets own col; need log_2 space for largest category. Add 1 to make room for category enum
-            listBoolSize = typeCount.getDatatypeCount(LIST_BOOLEAN);      // need log_2 space for bool rows
-            listDiscreteSize = typeCount.getDatatypeCount(LIST_DISCRETE); // need log_2 space for disc rows (fewer than bool due to compactness)
-            listStringSize = typeCount.getDatatypeCount(LIST_STRING);// plain old array
-            listNumberSize = typeCount.getDatatypeCount(LIST_NUMBER);// plain old array
 
-            init(WROW_DEFAULT, 5);
-            System.out.printf("\nFieldCalculator: wrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
+            listBoolSize = typeCount.getDatatypeCount(LIST_BOOLEAN);      // need log_2 space for bool rows
+            listDiscreteSize = typeCount.getDatatypeCount(LIST_DISCRETE) + typeCount.getDatatypeCount(LIST_SCOPES); // need log_2 space for disc rows (fewer than bool due to compactness)
+            listStringSize = typeCount.getDatatypeCount(LIST_STRING);     // plain old array
+            listNumberSize = typeCount.getDatatypeCount(LIST_NUMBER);     // plain old array
+
+            listBoolCategories = typeCount.getCategoryCount(LIST_BOOLEAN);
+            listDiscreteCategories = typeCount.getCategoryCount(LIST_DISCRETE) + typeCount.getCategoryCount(LIST_SCOPES) + typeCount.getDatatypeCount(LIST_VOTE);
+            System.out.printf("\nSizes: listBoolSize=%s, listDiscreteSize=%s \n ", listBoolSize, listDiscreteSize);
+            System.out.printf("Categories: bool=%s, discrete=%s \n ", listBoolCategories, listDiscreteCategories);
+
+            init(WROW_DEFAULT, WVAL_DEFAULT,5);
+            System.out.printf("FieldCalculator: wrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
         }
-        private void init(int wRowDefault, int count){
+        private void init(int wRowDefault, int wValDefault, int count){
             if(wRowDefault < 1 || count <= 0){
                 DevErr.get(this).kill("Houston, we have a problem...");
                 return;
             }
 
             int wData = max(DATA_WIDTH_DEFAULT, maxBool);
-            int wRowB = max(wRowDefault, BIT.logCeil(listBoolSize/wData));
+            int wRowB = max(wRowDefault, BIT.logCeil(rowsNeeded(wValDefault)));
             if(WORD_LEN - wRowB - wData < 0){
-                init(wRowDefault - 1, count - 1);
+                init(wRowDefault - 1, wValDefault,count - 1);
                 return;
             }
 
@@ -218,12 +236,15 @@ public class ListTableNumGen implements Killable {
             nCols = colStart/wValD;
             int wrowD = BIT.logCeil(listDiscreteSize/nCols);
             if(wrowD > wRowB){
-                init(wRowDefault + 1, count - 1);
+                init(wRowDefault + 1, wColD,count - 1);
                 return;
             }
             wrow = wRowB;
             wcol = wColD;
             wval = wValD;
+        }
+        private int rowsNeeded(int nCols){
+            return listBoolCategories + listDiscreteCategories/nCols + 1;
         }
     }
 
@@ -243,8 +264,8 @@ public class ListTableNumGen implements Killable {
         }
 
         public abstract void setPrevList(GeneratedList prevList);
-        public abstract void genKeyValList(FieldSizeCalculations fieldSizeCalculations);  // expect fieldCalcuator is initialized
-        public void get(Map<Keywords.DATATYPE, CategoryNode[]> keyValMap){
+        public abstract void genKeyValList();
+        public void saveToMap(Map<Keywords.DATATYPE, CategoryNode[]> keyValMap){
             keyValMap.put(
                 datatype,
                 categoryNodes.toArray(new CategoryNode[categoryNodes.size()])
@@ -280,7 +301,7 @@ public class ListTableNumGen implements Killable {
         }
 
         @Override
-        public void genKeyValList(FieldSizeCalculations fieldSizeCalculations) {
+        public void genKeyValList() {
             Map<String, Base_ParseItem> listItems = listTableMap.get(datatype);
             CategoryNode node;
 
@@ -298,19 +319,21 @@ public class ListTableNumGen implements Killable {
         }
     }
     private static class DiscreteList extends GeneratedList{
-        private final FieldSizeCalculations fieldSizeCalculations;
+        protected final FieldSizeCalculations fieldSizeCalculations;
 
         public DiscreteList(
                 Map<Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap,
+                Keywords.DATATYPE datatype,
                 FieldSizeCalculations fieldSizeCalculations
         ) {
-            super(listTableMap, LIST_DISCRETE);
+            super(listTableMap, datatype);
             this.fieldSizeCalculations = fieldSizeCalculations;
         }
 
         @Override
         public void setPrevList(GeneratedList prevList) {
             if(prevList == null || !(prevList.getUqGen() instanceof UqDiscreteGen)){
+                //System.out.println("setPrevList if: " + datatype);
                 uqGen = new UqDiscreteGen(
                         fieldSizeCalculations.wrow,
                         fieldSizeCalculations.wcol,
@@ -319,12 +342,13 @@ public class ListTableNumGen implements Killable {
                 uqGen.newRow();
             }
             else{
+                //System.out.println("setPrevList else: " + datatype);
                 uqGen = new UqDiscreteGen((UqDiscreteGen)prevList.getUqGen());
             }
         }
 
         @Override
-        public void genKeyValList(FieldSizeCalculations fieldSizeCalculations) {
+        public void genKeyValList() {
             Map<String, Base_ParseItem> listItems = listTableMap.get(datatype);
             CategoryNode node;
 
@@ -339,6 +363,37 @@ public class ListTableNumGen implements Killable {
                 }
                 categoryNodes.add(node);
                 uqGen.newCol();
+            }
+        }
+    }
+    private static class VoteList extends DiscreteList{
+        public VoteList(
+                Map<Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap,
+                Keywords.DATATYPE datatype,
+                FieldSizeCalculations fieldSizeCalculations
+        ) {
+            super(listTableMap, datatype, fieldSizeCalculations);
+        }
+
+        @Override
+        public void genKeyValList() {
+            Map<String, Base_ParseItem> listItems = listTableMap.get(datatype);
+            CategoryNode node;
+
+            for (Map.Entry<String, Base_ParseItem> inner : listItems.entrySet()) {// category
+                node = new CategoryNode();
+
+                node.setCategoryName(inner.getKey());
+                node.setCategoryEnum(uqGen.next());
+                node.setRowOffset(((UqGenComposite)uqGen).curRowOffset());
+                for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
+                    node.put(item, uqGen.next());
+                    //System.out.println("put: " + item);
+                    uqGen.newCol();
+                    uqGen.next();
+                }
+                categoryNodes.add(node);
+                //uqGen.newCol();
             }
         }
     }
@@ -367,7 +422,7 @@ public class ListTableNumGen implements Killable {
         }
 
         @Override
-        public void genKeyValList(FieldSizeCalculations fieldSizeCalculations) {
+        public void genKeyValList() {
             Map<String, Base_ParseItem> listItems = listTableMap.get(datatype);
             CategoryNode node;
 

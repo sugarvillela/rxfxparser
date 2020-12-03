@@ -42,7 +42,7 @@ public class UqBoolGenLong  implements UqGenCompositeLong {
 
     @Override
     public long currRowCol() {
-        return (row.curr() << rowStart);
+        return ((row.curr() << (long)rowStart));
     }
 
     @Override

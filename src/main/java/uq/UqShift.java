@@ -4,6 +4,7 @@ import commons.BIT;
 
 public class UqShift implements UqGen {
     private int c, halt;
+    private boolean done;
 
     public UqShift(){
         halt = 0;
@@ -15,11 +16,13 @@ public class UqShift implements UqGen {
     }
     public final void rewind(){
         c = 1;
+        done = false;
     }
 
     @Override
     public void rewind(int setStart) {
         c = setStart;
+        done = false;
     }
 
     @Override
@@ -33,7 +36,10 @@ public class UqShift implements UqGen {
         return temp;
     }
     public boolean hasNext(){
-        return c != halt; // c == 1 || (c >> 1 ) != halt;
+        if(c == halt){
+            done = true;
+        }
+        return !done;
     }
 
     @Override
@@ -41,6 +47,11 @@ public class UqShift implements UqGen {
 
     @Override
     public void newRow() {}
+
+    @Override
+    public int getHalt() {
+        return halt;
+    }
 
     @Override
     public String toString(){

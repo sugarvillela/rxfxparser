@@ -39,19 +39,14 @@ public class ListTableFileLoader extends RxlxReader implements IParseItem {
     @Override
     public void addTo(Factory_Node.ScanNode node) {
         DevErr.get(this).kill("found usage: addTo: ", node.toString());
-        listTableMap.get(node.datatype).get(currCategory).addTo(node);
+//        listTableMap.get(node.datatype).get(currCategory).addTo(node);
     }
 
     @Override
     public void setAttrib(Factory_Node.ScanNode node) {
         DevErr.get(this).kill("found usage: setAttrib: ", node.toString());
-//        System.out.println("setAttrib: " + node.toString());
-//        if(!firstCategory.containsKey(node.datatype)){  // First category set? Save in separate map for defaults
-//            firstCategory.put(node.datatype, node.data);
-//            System.out.println("adding " + node.data);
-//        }
-        listTableMap.get(node.datatype).put(node.data, this.get(node));// Add new node to map
-        currCategory = node.data;                       // Use this category for subsequent adds to that node
+//        listTableMap.get(node.datatype).put(node.data, this.get(node));// Add new node to map
+//        currCategory = node.data;                       // Use this category for subsequent adds to that node
     }
 
     public void persist(String fileName){
