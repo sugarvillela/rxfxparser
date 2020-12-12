@@ -27,7 +27,7 @@ public class ListTableScanLoader implements Killable {
     public void onPop(){
         //commons.Commons.disp(nodes, "ListTableScanLoader nodes");
         listTable.getFileLoader().readList(nodes);
-        listTable.disp();
+        //listTable.disp();
         nodes.clear();
     }
 

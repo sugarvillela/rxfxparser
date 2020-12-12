@@ -6,7 +6,7 @@ import java.util.ArrayList;
  *
  * @author Dave Swanson
  */
-public interface Tokens {
+public interface Tokens {// TODO fix hangup on blank line
     // main method
     void parse( String text );
     

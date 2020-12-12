@@ -6,6 +6,7 @@ import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import static compile.basics.Keywords.DATATYPE;
 import static compile.basics.Keywords.DATATYPE.*;
+import static compile.basics.Keywords.USERDEF_OPEN;
 import static compile.scan.factories.Factory_Strategy.PushEnum.*;
 import static compile.scan.factories.Factory_Strategy.PopEnum.*;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.*;
@@ -30,6 +31,7 @@ public class Factory_ScanItem extends Factory_Strategy{
 
     public static void enterScanMode(){
         System.out.println("====================== enterScanMode");
+        //Erlog.get("Factory_ScanItem").set("happy stop at enterScanMode");
         instance = scanMode;
     }
 
@@ -87,8 +89,8 @@ public class Factory_ScanItem extends Factory_Strategy{
                     return new ScanItem(
                             h,
                             new DATATYPE[]{
-                                    COMMENT, INCLUDE, FUN, CONSTANT, ATTRIB,
-                                    LIST_BOOLEAN, LIST_DISCRETE, LIST_STRING, LIST_NUMBER, LIST_SCOPES
+                                    COMMENT, INCLUDE, FUN, CONSTANT, ATTRIB, LIST_SCOPES,
+                                    LIST_STRING, LIST_NUMBER, LIST_BOOLEAN, LIST_VOTE, LIST_DISCRETE,
                             },
                             getStrategy(
                                     POP_ALL_ON_END_SOURCE,
@@ -136,6 +138,7 @@ public class Factory_ScanItem extends Factory_Strategy{
                 case LIST_DISCRETE:
                 case LIST_NUMBER:
                 case LIST_STRING:
+                case LIST_VOTE:
                     return new ScanItem(
                             h,
                             new DATATYPE[]{COMMENT, ATTRIB},

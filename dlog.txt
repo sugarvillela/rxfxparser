@@ -1,1 +1,1 @@
-Error: source semantic1.rxfx|38|2 interim semantic1.rxlx line 19 word -1: FlatNode: Bad scan node text size6 at =,0,-1,2,1|2,0
+Error: semantic1.rxfx line 15 word 2: RxParamUtil: LINKING not an item in POS[LINKING] at POS[LINKING][LINKING]

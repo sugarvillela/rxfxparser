@@ -100,7 +100,7 @@ public class Class_Scanner extends Base_Scanner {
                     backText = null;
                 }
 
-                //status(text);  // display incoming text
+                status(text);  // display incoming text
                 ((Base_ScanItem)top).pushPop(text);
             }
             //

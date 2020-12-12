@@ -1,5 +1,5 @@
 # Generated file, do not edit
-# Last write: 10/25/2020 09:50:16
+# Last write: 12/03/2020 21:23:09
 # Interim file containing parser instructions
 semantic1.rxfx|0|0,PUSH,TARGLANG_BASE,-,-
 semantic1.rxfx|1|0,ADD_TO,TARGLANG_BASE,-,<?php
@@ -8,88 +8,13 @@ semantic1.rxfx|3|0,ADD_TO,TARGLANG_BASE,-,$number = 0;
 semantic1.rxfx|4|0,ADD_TO,TARGLANG_BASE,-,-
 semantic1.rxfx|5|0,PUSH,SRCLANG,-,-
 semantic1.rxfx|7|0,SET_ATTRIB,SRCLANG,PROJ_NAME,semantic99
-semantic1.rxfx|38|0,PUSH,SCOPE,-,-
-semantic1.rxfx|38|1,PUSH,SCOPE_TEST,-,-
-semantic1.rxfx|38|2,PUSH,RX,-,-
-semantic1.rxfx|38|2,PUSH,RX_WORD,-,-
-semantic1.rxfx|38|2,SET_ATTRIB,RX_WORD,LO,1
-semantic1.rxfx|38|2,SET_ATTRIB,RX_WORD,HI,1
-semantic1.rxfx|38|2,PUSH,RX_BUILDER,-,-
-semantic1.rxfx|38|2,SET_ATTRIB,RX_BUILDER,LENGTH,3
-semantic1.rxfx|38|2,ADD_TO,RX_BUILDER,VAL,=,0,-1,2,1|2,0
-semantic1.rxfx|38|2,ADD_TO,RX_BUILDER,VAL,P,1,0,0,-,1
-semantic1.rxfx|38|2,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|38|2,ADD_TO,RX_PAY_NODE,VAL,NULL,CATEGORY_ITEM,BOOLEAN,-,LINKING,POS,LIST_BOOLEAN,-
-semantic1.rxfx|38|2,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|38|2,ADD_TO,RX_BUILDER,VAL,P,2,0,0,-,1
-semantic1.rxfx|38|2,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|38|2,ADD_TO,RX_PAY_NODE,VAL,NULL,TEST_TRUE,BOOLEAN,-,-,-,-,1
-semantic1.rxfx|38|2,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|38|2,POP,RX_BUILDER,-,-
-semantic1.rxfx|38|2,POP,RX_WORD,-,-
-semantic1.rxfx|38|3,POP,RX,-,-
-semantic1.rxfx|38|3,POP,SCOPE_TEST,-,-
-semantic1.rxfx|39|0,PUSH,RXFX,-,-
-semantic1.rxfx|39|0,PUSH,RX,-,-
-semantic1.rxfx|39|1,PUSH,RX_WORD,-,-
-semantic1.rxfx|39|1,SET_ATTRIB,RX_WORD,LO,1
-semantic1.rxfx|39|1,SET_ATTRIB,RX_WORD,HI,1
-semantic1.rxfx|39|1,PUSH,RX_BUILDER,-,-
-semantic1.rxfx|39|1,SET_ATTRIB,RX_BUILDER,LENGTH,7
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,&,0,-1,2,1|4,0
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,=,1,0,2,2|3,0
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,P,2,1,0,-,1
-semantic1.rxfx|39|1,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_PAY_NODE,VAL,NULL,CATEGORY_ITEM,STRING,-,IN,TEXT,LIST_STRING,-
-semantic1.rxfx|39|1,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,P,3,1,0,-,1
-semantic1.rxfx|39|1,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_PAY_NODE,VAL,NULL,TEST_TEXT,STRING,-,Tokyo{1-2},-,-,-
-semantic1.rxfx|39|1,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,=,4,0,2,5|6,0
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,P,5,4,0,-,1
-semantic1.rxfx|39|1,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_PAY_NODE,VAL,NULL,CATEGORY_ITEM,BOOLEAN,-,LINKING,POS,LIST_BOOLEAN,-
-semantic1.rxfx|39|1,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_BUILDER,VAL,P,6,4,0,-,1
-semantic1.rxfx|39|1,PUSH,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,ADD_TO,RX_PAY_NODE,VAL,NULL,TEST_TRUE,BOOLEAN,-,-,-,-,1
-semantic1.rxfx|39|1,POP,RX_PAY_NODE,-,-
-semantic1.rxfx|39|1,POP,RX_BUILDER,-,-
-semantic1.rxfx|39|1,POP,RX_WORD,-,-
-semantic1.rxfx|40|0,POP,RX,-,-
-semantic1.rxfx|40|0,PUSH,FX,-,-
-semantic1.rxfx|40|1,PUSH,FX_WORD,-,-
-semantic1.rxfx|40|1,PUSH,FX_BUILDER,-,-
-semantic1.rxfx|40|1,SET_ATTRIB,FX_BUILDER,LENGTH,5
-semantic1.rxfx|40|1,ADD_TO,FX_BUILDER,VAL,&,0,-1,2,1|4,0
-semantic1.rxfx|40|1,ADD_TO,FX_BUILDER,VAL,|,1,0,2,2|3,0
-semantic1.rxfx|40|1,ADD_TO,FX_BUILDER,VAL,P,2,1,0,-,2
-semantic1.rxfx|40|1,PUSH,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,ACCESS_NUM,-,-,-,-,-,2,1
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,-,FUN_CAT,VOTE,VERB,POS,LIST_BOOLEAN,-,0
-semantic1.rxfx|40|1,POP,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,ADD_TO,FX_BUILDER,VAL,P,3,1,0,-,2
-semantic1.rxfx|40|1,PUSH,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,ACCESS_BELOW,-,-,-,-,-,1,0
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,-,FUN_CAT,DROP,ADJECTIVE,POS,LIST_BOOLEAN,-,0
-semantic1.rxfx|40|1,POP,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,ADD_TO,FX_BUILDER,VAL,P,4,0,0,-,2
-semantic1.rxfx|40|1,PUSH,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,ACCESS_RANGE,-,-,-,-,-,1|4,0
-semantic1.rxfx|40|1,ADD_TO,FX_PAY_NODE,VAL,-,FUN_EMPTY,MARK,-,-,-,-,0
-semantic1.rxfx|40|1,POP,FX_PAY_NODE,-,-
-semantic1.rxfx|40|1,POP,FX_BUILDER,-,-
-semantic1.rxfx|40|1,POP,FX_WORD,-,-
-semantic1.rxfx|41|0,POP,FX,-,-
-semantic1.rxfx|41|0,POP,RXFX,-,-
-semantic1.rxfx|41|0,POP,SCOPE,-,-
-semantic1.rxfx|46|0,POP,SRCLANG,-,-
-semantic1.rxfx|47|0,ADD_TO,TARGLANG_BASE,-,-
-semantic1.rxfx|48|0,ADD_TO,TARGLANG_BASE,-,-
-semantic1.rxfx|49|0,ADD_TO,TARGLANG_BASE,-,function anotherFunction(){
-semantic1.rxfx|50|0,ADD_TO,TARGLANG_BASE,-,	$number+=2;
-semantic1.rxfx|51|0,ADD_TO,TARGLANG_BASE,-,}
-semantic1.rxfx|52|0,ADD_TO,TARGLANG_BASE,-,-
-semantic1.rxfx|53|0,ADD_TO,TARGLANG_BASE,-,?>
-semantic1.rxfx|53|0,POP,TARGLANG_BASE,-,-
+semantic1.rxfx|8|0,SET_ATTRIB,SRCLANG,NEW_LIST_SET,true
+semantic1.rxfx|23|0,POP,SRCLANG,-,-
+semantic1.rxfx|24|0,ADD_TO,TARGLANG_BASE,-,-
+semantic1.rxfx|25|0,ADD_TO,TARGLANG_BASE,-,-
+semantic1.rxfx|26|0,ADD_TO,TARGLANG_BASE,-,function anotherFunction(){
+semantic1.rxfx|27|0,ADD_TO,TARGLANG_BASE,-,	$number+=2;
+semantic1.rxfx|28|0,ADD_TO,TARGLANG_BASE,-,}
+semantic1.rxfx|29|0,ADD_TO,TARGLANG_BASE,-,-
+semantic1.rxfx|30|0,ADD_TO,TARGLANG_BASE,-,?>
+semantic1.rxfx|30|0,POP,TARGLANG_BASE,-,-

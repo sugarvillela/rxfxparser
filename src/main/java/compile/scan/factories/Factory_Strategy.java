@@ -461,6 +461,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class PopOnEndLine extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
+            System.out.println("PopOnEndLine: " + text);
             if(Erlog.getTextStatusReporter().isEndLine()){
                 pop();
                 return true;
