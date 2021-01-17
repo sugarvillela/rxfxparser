@@ -8,6 +8,7 @@ public interface IClass extends IWidget{
         IClassBuilder setVisibility(enums.VISIBILITY visibility);
         IClassBuilder setAbstract();
         IClassBuilder setStatic();
+        IClassBuilder setInner();
         IClassBuilder setName(String name);
         IClassBuilder setExtends(String extends_);
         IClassBuilder setImplements(String... implements_);

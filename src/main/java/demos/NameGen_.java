@@ -3,12 +3,12 @@ package demos;
 import codegen.Widget;
 import compile.basics.Keywords;
 import compile.parse.importtable.ImportTable;
-import codegen.ut.NameGen;
+import codegen.namegen.NameGenSimple;
 
 public class NameGen_ {
     public static void demo(){
-        NameGen.init("semantic");
-        NameGen nameGen = NameGen.getInstance();
+        NameGenSimple.init("semantic");
+        NameGenSimple nameGen = NameGenSimple.getInstance();
 
         System.out.println(nameGen.functionName(Keywords.DATATYPE.TARGLANG_INSERT.toString()));
         System.out.println(nameGen.className(Keywords.DATATYPE.RX_WORD.toString()));

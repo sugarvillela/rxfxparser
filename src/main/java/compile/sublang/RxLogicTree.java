@@ -128,8 +128,10 @@ public class RxLogicTree extends TreeFactory {
                     PARAM_UTIL.getItem()
             );
         }
+        System.out.println("getOutType: " + PARAM_UTIL.getOutType());
         switch(PARAM_UTIL.getOutType()){
             case BOOLEAN:
+            case DISCRETE://TODO make discrete and vote compatible with this
                 leaf.data += "=TRUE";
                 return true;
             case STRING:

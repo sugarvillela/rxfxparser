@@ -12,11 +12,8 @@ $number = 0;
 	
 	INCLUDE flags.rxfx
 			
-	// SCOPE $myBigTest POS[VERB] {
-	//	RX Tokyo{1-2}&POS[VERB] //TODO: CHECK QUOTED SPECIAL CHARACTERS
-	//	FX (*[2].VOTE(POS[VERB])|[-1].DROP(POS[ADJECTIVE]))&[1-4].MARK()
-	// }
-	
+		RX Tokyo{1-2}&WORD_CONTAINS[ALGEBRA] //TODO: CHECK QUOTED SPECIAL CHARACTERS
+		FX (*[2].VOTE(POS[VERB])|[-1].DROP(POS[ADJ]))&[1-4].MARK()
 	// $myBigTest
 
 

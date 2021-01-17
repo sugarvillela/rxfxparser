@@ -15,6 +15,7 @@ public class ClassJava implements IClass {
     private enums.VISIBILITY visibility;
     private boolean abstract_;
     private boolean static_;
+    private boolean inner;          // denotes inner/nested class
     private String name;
     private String extends_;
     private String[] pathPackages;
@@ -41,8 +42,10 @@ public class ClassJava implements IClass {
 
     @Override
     public IWidget finish(FormatUtil formatUtil) {
-        genPackage(formatUtil);
-        genImports(formatUtil);
+        if(!inner){
+            genPackage(formatUtil);
+            genImports(formatUtil);
+        }
         genHeader(formatUtil);
         formatUtil.addTabLines(content);
         formatUtil.add("}");
@@ -126,6 +129,12 @@ public class ClassJava implements IClass {
         @Override
         public IClassBuilder setStatic() {
             built.static_ = true;
+            return this;
+        }
+
+        @Override
+        public IClassBuilder setInner() {
+            built.inner = true;
             return this;
         }
 

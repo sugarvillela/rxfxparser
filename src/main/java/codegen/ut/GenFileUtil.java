@@ -1,6 +1,7 @@
 package codegen.ut;
 
 import runstate.RunState;
+import runstate.StaticState;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -18,7 +19,7 @@ public class GenFileUtil {
         ){
             file.write("// Generated file, do not edit");
             file.newLine();
-            file.write("// Last write: " + RunState.getInstance().getInitTime());
+            file.write("// Last write: " + StaticState.getInstance().getInitTime());
             file.newLine();
 
             for (String line: content) {

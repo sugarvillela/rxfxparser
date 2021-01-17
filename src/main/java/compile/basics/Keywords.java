@@ -5,6 +5,8 @@
  */
 package compile.basics;
 
+import codegen.translators.interfaces.RxFunGen;
+import codegen.translators.rx.RxFunJava;
 import listtable.ListTable;
 
 import java.util.regex.Matcher;
@@ -163,17 +165,17 @@ public final class Keywords {
 
     //Rx ops
     public enum OP{
-        AND     ('&'),
-        OR      ('|'),
-        EQUAL   ('='),
-        GT      ('>'),
-        LT      ('<'),
-        NOT     ('~'),
-        OPAR    ('('),
-        CPAR    (')'),
-        SQUOTE  ('\''),
-        PAYLOAD ('P'),
-        STR_EQ  ('#')
+        AND             ('&'),
+        OR              ('|'),
+        COMPARE_EQUAL   ('='),
+        COMPARE_GT      ('>'),
+        COMPARE_LT      ('<'),
+        NOT             ('~'),
+        OPAR            ('('),
+        CPAR            (')'),
+        SQUOTE          ('\''),
+        PAYLOAD         ('P'),
+        STR_EQ          ('#')
         ;
         
         public final char asChar;
@@ -203,11 +205,11 @@ public final class Keywords {
 
     // Actual data types in the language
     public enum PRIM {// PRIMITIVE
-        BOOLEAN    (Pattern.compile("^(TRUE)|(FALSE)$"),    new OP[]{OP.EQUAL}),
-        DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
-        NUMBER     (Pattern.compile("^[0-9]+$"),            new OP[]{OP.GT, OP.LT, OP.EQUAL}),
-        STRING     (Pattern.compile("."),                   new OP[]{OP.EQUAL}),
-        NULL       (Pattern.compile("null"),                new OP[]{OP.EQUAL}),
+        BOOLEAN    (Pattern.compile("^(TRUE)|(FALSE)$"),    new OP[]{OP.COMPARE_EQUAL}),
+        DISCRETE   (Pattern.compile("^[0-9]+$"),            new OP[]{OP.COMPARE_GT, OP.COMPARE_LT, OP.COMPARE_EQUAL}),
+        NUMBER     (Pattern.compile("^[0-9]+$"),            new OP[]{OP.COMPARE_GT, OP.COMPARE_LT, OP.COMPARE_EQUAL}),
+        STRING     (Pattern.compile("."),                   new OP[]{OP.COMPARE_EQUAL}),
+        NULL       (Pattern.compile("null"),                new OP[]{OP.COMPARE_EQUAL}),
         IMMUTABLE  (null,                            new OP[]{}),
         ;
 
@@ -309,19 +311,83 @@ public final class Keywords {
 
     public enum RX_FUN {
         // function names for Rx logic
-        FIRST   (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
-        LAST    (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
-        LEN     (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.NUMBER),
-        RANGE   (PRIM.NUMBER, new RX_PAR[]{
-                                RX_PAR.NUM_PAR, RX_PAR.RANGE_PAR,
-                                RX_PAR.RANGE_BELOW, RX_PAR.RANGE_ABOVE},    PRIM.BOOLEAN),
+//        FIRST   (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
+//        LAST    (PRIM.STRING, new RX_PAR[]{RX_PAR.EMPTY_PAR},               PRIM.STRING),
+        STORE_GET_STRING(
+                new RxFunJava.CategoryParam("StoreGetString"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.CATEGORY_ITEM},
+                PRIM.STRING
+        ),
+        STORE_GET_NUMBER(
+                new RxFunJava.CategoryParam("StoreGetNumber"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.CATEGORY_ITEM},
+                PRIM.NUMBER
+        ),
+        STORE_GET_BOOLEAN(
+                new RxFunJava.CategoryParam("StoreGetBoolean"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.CATEGORY_ITEM},
+                PRIM.BOOLEAN
+        ),
+        STORE_GET_STATE(
+                new RxFunJava.CategoryParam("StoreGetState"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.CATEGORY_ITEM},
+                PRIM.NUMBER
+        ),
+        VAL_CONTAINER_INT(
+                new RxFunJava.SingleIntParam("ValContainerInt"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.NUM_PAR, RX_PAR.TEST_TRUE, RX_PAR.TEST_FALSE},
+                PRIM.NUMBER
+        ),
+        VAL_CONTAINER_OBJECT(
+                new RxFunJava.StringParam("ValContainerObject"),
+                PRIM.NULL,
+                new RX_PAR[]{RX_PAR.NUM_PAR},
+                PRIM.STRING
+        ),
+        LEN(
+                new RxFunJava.EmptyClass("Len"),
+                PRIM.STRING,
+                new RX_PAR[]{RX_PAR.EMPTY_PAR},
+                PRIM.NUMBER
+        ),
+        STARTS_WITH(
+                new RxFunJava.StringParam("StartsWith"),
+                PRIM.STRING,
+                new RX_PAR[]{RX_PAR.EMPTY_PAR},
+                PRIM.BOOLEAN
+        ),
+        ENDS_WITH(
+                new RxFunJava.StringParam("EndsWith"),
+                PRIM.STRING,
+                new RX_PAR[]{RX_PAR.EMPTY_PAR},
+                PRIM.BOOLEAN
+        ),
+        SUBSTRING(
+                new RxFunJava.DoubleIntParam("Substring"),
+                PRIM.STRING,
+                new RX_PAR[]{RX_PAR.NUM_PAR, RX_PAR.RANGE_PAR},
+                PRIM.STRING
+        ),
+        RANGE(
+                new RxFunJava.DoubleIntParam("Range"),
+                PRIM.NUMBER,
+                new RX_PAR[]{RX_PAR.NUM_PAR, RX_PAR.RANGE_PAR, RX_PAR.RANGE_BELOW, RX_PAR.RANGE_ABOVE},
+                PRIM.BOOLEAN
+        )
         ;
 
+        public final RxFunGen translator;
         public final PRIM outType;
         public final RX_PAR[] parTypes;
         public final PRIM caller;
 
-        private RX_FUN(PRIM caller, RX_PAR[] parTypes, PRIM outType){
+        private RX_FUN(RxFunGen translator, PRIM caller, RX_PAR[] parTypes, PRIM outType){
+            this.translator = translator;
             this.outType =outType;
             this.parTypes = parTypes;
             this.caller = caller;

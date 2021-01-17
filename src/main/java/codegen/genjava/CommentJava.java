@@ -54,6 +54,7 @@ public class CommentJava implements IComment {
     public String toString(){
         return String.join("\n// ", content);
     }
+
     public static class CommentBuilder implements ICommentBuilder{
         private final CommentJava built;
 
@@ -71,5 +72,9 @@ public class CommentJava implements IComment {
         public IComment build() {
             return built;
         }
+    }
+
+    public static IComment quickComment(String text){
+        return new CommentBuilder().build().add(text);
     }
 }

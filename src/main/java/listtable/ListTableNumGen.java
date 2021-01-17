@@ -134,16 +134,31 @@ public class ListTableNumGen implements Killable {
             this.rowOffset = rowOffset;
         }
 
-        public int getRangeLow(){
+        public String getKeyFirst(){
+            return keys.get(0);
+        }
+        public String getKeyLast(){
+            return keys.get(keys.size() - 1);
+        }
+
+        public int getValFirst(){
             return vals.get(0);
         }
-        public int getRangeHi(){
+        public int getValLast(){
             return vals.get(vals.size() - 1);
+        }
+
+        public ArrayList<String> getKeys(){
+            return this.keys;
+        }
+        public ArrayList<Integer> getVals(){
+            return this.vals;
         }
 
         public int size(){
             return keys.size();
         }
+
         public boolean isEmpty(){
             return keys.isEmpty();
         }
@@ -192,6 +207,7 @@ public class ListTableNumGen implements Killable {
         public final int listBoolCategories;
         public final int listDiscreteCategories;
         public int wrow, wcol, wval;
+        public final int indexMask;
 
         public FieldSizeCalculations(ListTableTypeCount typeCount){// Expect ListTable is initialized
             typeCount.initCounts();
@@ -211,6 +227,8 @@ public class ListTableNumGen implements Killable {
 
             init(WROW_DEFAULT, WVAL_DEFAULT,5);
             System.out.printf("FieldCalculator: wrow=%s, wcol=%s, wval=%s \n ", wrow, wcol, wval);
+            indexMask = ~((1 << (WORD_LEN - wrow - wval)) - 1);
+            System.out.printf("indexMask: 0x%X \n ", indexMask);
         }
         private void init(int wRowDefault, int wValDefault, int count){
             if(wRowDefault < 1 || count <= 0){
@@ -282,6 +300,7 @@ public class ListTableNumGen implements Killable {
             }
         }
     }
+
     private static class SimpleList extends  GeneratedList{
         public SimpleList(
                 Map<Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap,
@@ -318,6 +337,7 @@ public class ListTableNumGen implements Killable {
             }
         }
     }
+
     private static class DiscreteList extends GeneratedList{
         protected final FieldSizeCalculations fieldSizeCalculations;
 
@@ -354,8 +374,8 @@ public class ListTableNumGen implements Killable {
 
             for (Map.Entry<String, Base_ParseItem> inner : listItems.entrySet()) {// category
                 node = new CategoryNode();
-
                 node.setCategoryName(inner.getKey());
+
                 node.setCategoryEnum(uqGen.next());
                 node.setRowOffset(((UqGenComposite)uqGen).curRowOffset());
                 for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
@@ -366,6 +386,7 @@ public class ListTableNumGen implements Killable {
             }
         }
     }
+
     private static class VoteList extends DiscreteList{
         public VoteList(
                 Map<Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap,
@@ -379,24 +400,29 @@ public class ListTableNumGen implements Killable {
         public void genKeyValList() {
             Map<String, Base_ParseItem> listItems = listTableMap.get(datatype);
             CategoryNode node;
-
+            int next = -1;
             for (Map.Entry<String, Base_ParseItem> inner : listItems.entrySet()) {// category
                 node = new CategoryNode();
-
                 node.setCategoryName(inner.getKey());
-                node.setCategoryEnum(uqGen.next());
+
+                node.setCategoryEnum((next == -1)? uqGen.next() : next);
+                //node.setCategoryEnum(uqGen.next());
                 node.setRowOffset(((UqGenComposite)uqGen).curRowOffset());
+                //node.setCategoryEnum(next & fieldSizeCalculations.indexMask);
+
                 for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
                     node.put(item, uqGen.next());
                     //System.out.println("put: " + item);
                     uqGen.newCol();
-                    uqGen.next();
+                    //uqGen.next();
+                    next = uqGen.next();
                 }
                 categoryNodes.add(node);
                 //uqGen.newCol();
             }
         }
     }
+
     private static class BooleanList extends GeneratedList{
         private final FieldSizeCalculations fieldSizeCalculations;
 

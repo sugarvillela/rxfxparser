@@ -163,6 +163,7 @@ public abstract class PayNodes {
         public final String uDefCategory;
         public final Keywords.DATATYPE listSource;
         public final int[] values;
+        private String funName;
 
         public RxPayNode(Keywords.PRIM callerType, Keywords.RX_PAR paramType, Keywords.PRIM outType, Keywords.RX_FUN funType, String item, String uDefCategory, Keywords.DATATYPE listSource, int[] values) {
             this.callerType = callerType;
@@ -173,6 +174,12 @@ public abstract class PayNodes {
             this.uDefCategory = uDefCategory;
             this.listSource = listSource;
             this.values = values;
+        }
+        public void setFunName(String funName){
+            this.funName = funName;
+        }
+        public String getFunName(){
+            return this.funName;
         }
 
         @Override

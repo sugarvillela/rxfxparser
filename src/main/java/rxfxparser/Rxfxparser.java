@@ -13,7 +13,7 @@ public class Rxfxparser {
         //Codegen_.widget_java();
         //FormatUtil.demo();
 
-        args = new String[]{"semantic1"};//, "-s"
+        args = new String[]{"semantic1", "-s"};//, "-s"
         RunState.getInstance().init(args);
         //store.TestStore.listTable();
         //uq.UqTest.uqBoolGenNewRow();

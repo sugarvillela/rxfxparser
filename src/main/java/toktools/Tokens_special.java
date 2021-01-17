@@ -105,7 +105,8 @@ public class Tokens_special  implements Tokens{
     
     // main method
     @Override
-    public void parse( String text ){ // save a step if repeating parse
+    public void parse( String text ){
+        // save a step if repeating parse
         //System.out.printf("\nParse: holding=%b, text=%s\n", cSymb!=0, text);
         initParse();
 

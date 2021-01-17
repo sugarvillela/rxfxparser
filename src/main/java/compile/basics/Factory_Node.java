@@ -6,6 +6,7 @@ import static compile.basics.Keywords.CMD.PUSH;
 import commons.Commons;
 import interfaces.DataNode;
 import runstate.RunState;
+import runstate.StaticState;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
@@ -103,7 +104,7 @@ public class Factory_Node implements ChangeListener {
         ){
             file.write("# Generated file, do not edit");
             file.newLine();
-            file.write("# Last write: " + RunState.getInstance().getInitTime());
+            file.write("# Last write: " + StaticState.getInstance().getInitTime());
             file.newLine();
             if(comment != null){
                 file.write("# " + comment);

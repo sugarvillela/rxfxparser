@@ -1,22 +1,22 @@
-package codegen.ut;
+package codegen.namegen;
 
 import commons.Util_string;
 import uq.Uq;
 
-public class NameGen {
-    private static NameGen instance;
+public class NameGenSimple {
+    private static NameGenSimple instance;
 
     public static void init(String projName){
-        instance = new NameGen(projName);
+        instance = new NameGenSimple(projName);
     }
-    public static NameGen getInstance(){
+    public static NameGenSimple getInstance(){
         return instance;
     }
 
     private Uq uq;
     String projName;
 
-    private NameGen(String projName){
+    private NameGenSimple(String projName){
         this.projName = projName;
         uq = new Uq();
     }
@@ -31,9 +31,9 @@ public class NameGen {
     public String className(String identifier){
         return Util_string.toPascalCase(raw(identifier));
     }
-    public String classNameGen(String identifier){
-        return Util_string.toPascalCase(rawGen(identifier));
-    }
+//    public String classNameGen(String identifier){
+//        return Util_string.toPascalCase(rawGen(identifier));
+//    }
     public String functionName(String identifier){
         return Util_string.toCamelCase(raw(identifier.toString()));
     }

@@ -1,24 +1,30 @@
 package codegen.ut;
 
 import codegen.interfaces.IWidget;
-import commons.Commons;
 
 import java.util.ArrayList;
 
 public class FormatUtil {
-    static final int MARGIN = 70;           // Constant formatting values
-    static final int TAB = 4;
-
     private final ArrayList<String> content;
-    protected int indent;                   // formatting value for indent
+    protected int indent, tab, margin;
+    private final Accumulator accumulator;
 
     public FormatUtil() {
         this.content = new ArrayList<>();
+        margin = 70;
+        tab = 4;
         indent = 0;
+        accumulator = new Accumulator();
+    }
+    public void setTab(int tab){
+        this.tab = tab;
+    }
+    public void setMargin(int margin){
+        this.margin = margin;
     }
 
     public final String tab(String text){
-        return new String(new char[indent * TAB]).replace('\0', ' ') + text;
+        return new String(new char[indent * tab]).replace('\0', ' ') + text;
     }
     public final void clear(){this.indent = 0;}
     public final void inc(){this.indent++;}
@@ -52,13 +58,13 @@ public class FormatUtil {
     public final String addLineSegment(String text ){
         //System.out.println("===" + text + "===");
         text=tab(text);
-        if(text.length()<=MARGIN){
+        if(text.length()<= margin){
             this.content.add( text );
             return null;
         }
 
         // text too long for margin: break line
-        int len = nextSpace( text, MARGIN );
+        int len = nextSpace( text, margin);
         this.content.add( text.substring( 0, len ) );
         text = text.substring( len );
 
@@ -83,8 +89,44 @@ public class FormatUtil {
         dec();
     }
 
+    public final void accumulate(String word){
+        accumulator.add(word);
+    }
+
+    public final void finishAccumulate(){
+        accumulator.finish();
+    }
     /** @return the final result of all operations: element = line */
     public ArrayList<String> finish(){
         return content;
+    }
+
+
+
+    private class Accumulator{
+        private final ArrayList<String> acc;
+        private int currIndent, currLen;
+
+        public Accumulator() {
+            this.acc = new ArrayList<>();
+            currLen = currIndent = indent * tab;
+        }
+        public void add(String text){
+            acc.add(text);
+            currLen += text.length() + 1;
+            if(currLen > margin){
+                this.dump();
+            }
+        }
+        public void finish(){
+            if(acc.size() > 0){
+                this.dump();
+            }
+        }
+        private void dump(){
+            content.add(tab(String.join(" ", acc)));
+            currLen = currIndent;
+            acc.clear();
+        }
     }
 }

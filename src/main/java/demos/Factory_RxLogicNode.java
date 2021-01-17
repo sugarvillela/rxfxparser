@@ -1,18 +1,6 @@
 
 package demos;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords.OP;
-import static compile.basics.Keywords.OP.AND;
-import static compile.basics.Keywords.OP.OR;
-import static compile.basics.Keywords.OP.EQUAL;
-import static compile.basics.Keywords.OP.GT;
-import static compile.basics.Keywords.OP.LT;
-import static compile.basics.Keywords.OP.PAYLOAD;
-import erlog.Erlog;
-import flagobj.FlagObject;
-import java.util.ArrayList;
-
 public abstract class Factory_RxLogicNode {
 //    public static LogicNode getLogicNode(Factory_Node.ScanNode scanNode){
 ////        switch (scanNode.op){

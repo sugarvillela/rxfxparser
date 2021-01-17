@@ -1,7 +1,7 @@
 package compile.parse.importtable;
 
 import codegen.Widget;
-import codegen.ut.NameGen;
+import codegen.namegen.NameGenSimple;
 import commons.Util_string;
 import compile.basics.Keywords;
 
@@ -20,13 +20,13 @@ public class ImportTable {
         return instance;
     }
 
-    private final NameGen nameGen;
+    private final NameGenSimple nameGen;
     private final Map<String, String> importTableMap;
 
     private ImportTable(){
         String projName = "semantic"; // RunState.getInstance().getProjName();
         //NameGen.init(projName);
-        nameGen = NameGen.getInstance();
+        nameGen = NameGenSimple.getInstance();
         importTableMap = new HashMap<>();
     }
 

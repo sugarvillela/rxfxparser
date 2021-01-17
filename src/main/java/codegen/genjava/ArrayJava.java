@@ -123,7 +123,10 @@ public class ArrayJava implements IArray {
 
     private void addContent(FormatUtil formatUtil){
         formatUtil.inc();
-        formatUtil.addLine(String.join(", ", content));
+        for(String item : content){
+            formatUtil.accumulate(item + ", ");
+        }
+        formatUtil.finishAccumulate();
         formatUtil.dec();
     }
 

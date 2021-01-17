@@ -1,18 +1,17 @@
 package runstate;
 
 import codegen.Widget;
+import codegen.translators.list.ListJava;
 import commons.Dev;
-import codegen.ut.NameGen;
+import codegen.namegen.NameGenSimple;
 import compile.basics.Base_Stack;
 import compile.basics.Factory_Node;
-import compile.parse.Class_Parser;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
 import listtable.ListTable;
 import compile.symboltable.SymbolTable;
 import compile.symboltable.TextSniffer;
 import erlog.Erlog;
-import toksource.ScanNodeSource;
 import toksource.TextSource_file;
 import toksource.TokenSource;
 import toksource.interfaces.ChangeListener;
@@ -20,11 +19,8 @@ import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
 import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
@@ -44,7 +40,6 @@ public class RunState implements ChangeListener {
         Dev.dispOn();
         Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);
         Widget.setDefaultLanguage(Widget.JAVA);
-        initTime = (new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")).format(new Date());
         er = Erlog.get(this);
         listeners = new ArrayList<>();
         newEnumSet = false;
@@ -52,8 +47,10 @@ public class RunState implements ChangeListener {
         //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
         genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
+        staticState = StaticState.init();
     }
 
+    private final StaticState staticState;
     private final ArrayList<ChangeListener> listeners;
     private final Erlog er;
     //private final Unique unique;
@@ -61,8 +58,8 @@ public class RunState implements ChangeListener {
     private ITextStatus pausedStatusReporter;
     private boolean newEnumSet, scanOnly, parseOnly; // arg flags
     private String inName, projName;
-    private String initTime;
     private String genPath, genPackage;
+
 
     public void initFromProperties(String path){// TODO load from properties file
 
@@ -127,7 +124,7 @@ public class RunState implements ChangeListener {
             TextSniffer.killInstance();
         }
         if(!scanOnly){
-            NameGen.init(projName);
+            NameGenSimple.init(projName);
             System.out.println("ListTable build or rebuild");
 
             ListTable listTable = ListTable.getInstance();
@@ -135,7 +132,7 @@ public class RunState implements ChangeListener {
             listTable.getNumGen().initCategoryNodes();
             //listTable.getNumGen().disp();
 //
-            codegen.translators.ListJava listTranslator = new codegen.translators.ListJava();
+            ListJava listTranslator = new ListJava();
             listTranslator.translate();
 //
 //            System.out.println("Begin Parse");
@@ -181,8 +178,6 @@ public class RunState implements ChangeListener {
             }
         }
     }
-
-    public String getInitTime(){ return this.initTime; }
 
     public String getInName(){
         return this.inName;

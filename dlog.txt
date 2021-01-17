@@ -1,1 +1,1 @@
-Error: semantic1.rxfx line 15 word 2: RxParamUtil: LINKING not an item in POS[LINKING] at POS[LINKING][LINKING]
+Error: semantic1.rxfx line 16 word 1: FxParamUtil: ADJECTIVE not an item in POS at POS[ADJECTIVE]
