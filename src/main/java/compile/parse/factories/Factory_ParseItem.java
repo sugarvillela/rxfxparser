@@ -1,16 +1,14 @@
 package compile.parse.factories;
 
 
-import commons.Commons;
-import compile.basics.Factory_Node;
-import compile.basics.Factory_Node.ScanNode;
+import scannode.ScanNode;
 import compile.parse.Base_ParseItem;
 import compile.parse.Class_Parser;
 import compile.parse.ut.FlatTreeBuilder;
 import flattree.FlatTree;
 import erlog.Erlog;
 
-import static compile.basics.Keywords.DATATYPE;
+import static langdef.Keywords.DATATYPE;
 
 public abstract class Factory_ParseItem {
     public static Base_ParseItem get(ScanNode node){
@@ -41,25 +39,25 @@ public abstract class Factory_ParseItem {
     public static class ParseItem extends Base_ParseItem{
         public ParseItem(ScanNode node) {
             super(node);
-            System.out.println("ParseItem Constructor: " + node);
+            //System.out.println("ParseItem Constructor: " + node);
         }
     }
 
     public static class ItemTargLangBase extends Base_ParseItem{
 
-        public ItemTargLangBase(Factory_Node.ScanNode node){
+        public ItemTargLangBase(ScanNode node){
             super(node);
         }
 
         @Override
-        public void addTo(Factory_Node.ScanNode node) {
+        public void addTo(ScanNode node) {
             System.out.printf("Add to ItemTargLangBase: %s\n", node.data);
         }
 
         @Override
         /** This is the bottom of the stack, so it is the final stop for parse-time attributes.
          * Put general enough attributes here */
-        public void setAttrib(Factory_Node.ScanNode node) {
+        public void setAttrib(ScanNode node) {
             switch(node.field){
                 default:
                     Erlog.get(this).set("Unknown keyword", node.field.toString());
@@ -68,24 +66,24 @@ public abstract class Factory_ParseItem {
     }
 
     public static class ItemTargLangInsert extends Base_ParseItem{
-        public ItemTargLangInsert(Factory_Node.ScanNode node){
+        public ItemTargLangInsert(ScanNode node){
             super(node);
         }
 
         @Override
-        public void addTo(Factory_Node.ScanNode node) {
+        public void addTo(ScanNode node) {
             System.out.printf("Add to ItemTargLangInsert: %s\n", node.data);
         }
     }
 
     public static class ItemRxFx extends Base_ParseItem{
 
-        public ItemRxFx(Factory_Node.ScanNode node){
+        public ItemRxFx(ScanNode node){
             super(node);
         }
 
         @Override
-        public void addTo(Factory_Node.ScanNode node) {
+        public void addTo(ScanNode node) {
 
         }
 
@@ -103,7 +101,7 @@ public abstract class Factory_ParseItem {
         protected String low, high;
 
 
-        public ItemRxWord(Factory_Node.ScanNode node){
+        public ItemRxWord(ScanNode node){
             super(node);
         }
 
@@ -127,12 +125,12 @@ public abstract class Factory_ParseItem {
         }
 
         @Override
-        public void addTo(Factory_Node.ScanNode node) {
+        public void addTo(ScanNode node) {
             System.out.printf("Add to RxWord: %s\n", node.data);
         }
 
         @Override
-        public void setAttrib(Factory_Node.ScanNode node) {
+        public void setAttrib(ScanNode node) {
             switch(node.field){
                 case LO:
                     low = node.data;

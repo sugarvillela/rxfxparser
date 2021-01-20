@@ -1,16 +1,15 @@
 package listtable;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords;
-import interfaces.Killable;
+import scannode.ScanNode;
+import langdef.Keywords;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ListTableScanLoader implements Killable {
+public class ListTableScanLoader {
     private ListTable listTable;
-    private final ArrayList<Factory_Node.ScanNode> nodes;
+    private final ArrayList<ScanNode> nodes;
 
     private final Map <Keywords.DATATYPE, String> defaultCategory;
 
@@ -20,7 +19,7 @@ public class ListTableScanLoader implements Killable {
         nodes = new ArrayList<>();
     }
 
-    public void addNode(Factory_Node.ScanNode node){
+    public void addNode(ScanNode node){
         nodes.add(node);
     }
 
@@ -41,10 +40,5 @@ public class ListTableScanLoader implements Killable {
             System.out.println(outer.getKey() + ": " + outer.getValue());
         }
         System.out.println("===================");
-    }
-
-    @Override
-    public void kill() {
-        listTable = null;
     }
 }

@@ -1,16 +1,16 @@
 package flattree;
 
 import commons.Commons;
-import compile.sublang.factories.PayNodes;
-import compile.sublang.factories.TreeFactory;
+import sublang.factories.PayNodes;
 import erlog.Erlog;
 import interfaces.DataNode;
+import sublang.treenode.TreeNodeBase;
 import toktools.TK;
 import toktools.Tokens_special;
 
 import java.util.ArrayList;
 
-import static compile.basics.Keywords.OP.PAYLOAD;
+import static langdef.Keywords.OP.PAYLOAD;
 
 public class FlatNode extends DataNode {
     private static final Tokens_special tokenizer = new Tokens_special(",", "'", TK.IGNORESKIP );
@@ -24,7 +24,7 @@ public class FlatNode extends DataNode {
     private int iPayNode;
     private final FlatNode[] treeArr;
 
-    public FlatNode(int iSelf, int iParent, TreeFactory.TreeNode treeNode, FlatNode[] treeArr) {
+    public FlatNode(int iSelf, int iParent, TreeNodeBase treeNode, FlatNode[] treeArr) {
         this.op = treeNode.op.asChar;
         self = iSelf;
         parent = iParent;

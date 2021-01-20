@@ -1,8 +1,8 @@
 package compile.symboltable;
 
-import runstate.RunState;
-import compile.basics.Keywords;
+import langdef.Keywords;
 import erlog.Erlog;
+import runstate.Glob;
 import toksource.Base_TextSource;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
@@ -14,7 +14,6 @@ import java.util.Map;
 
 /** Saves named text to an iterable node to use as text source during scanning */
 public class SymbolTable implements ChangeListener {
-    private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
     private static SymbolTable instance;
 
     private SymbolTable() {
@@ -22,12 +21,8 @@ public class SymbolTable implements ChangeListener {
         busy = false;
     }
 
-    public static SymbolTable getInstance(){
+    public static SymbolTable init(){
         return (instance == null)? (instance = new SymbolTable()) : instance;
-    }
-    public static void killInstance(){
-        RunState.getInstance().removeChangeListener(instance);
-        instance = null;
     }
 
     private Map<String, Base_TextNode> symbolTableMap;
@@ -86,8 +81,8 @@ public class SymbolTable implements ChangeListener {
     //=====Methods used by Scanner to iterate node data=====================================
 
     public Base_TextNode readVar(String text){
-        if(SYMBOL_TEST.isUserDef(text)){
-            return symbolTableMap.get(SYMBOL_TEST.stripUserDef(text));
+        if(Glob.SYMBOL_TEST.isUserDef(text)){
+            return symbolTableMap.get(Glob.SYMBOL_TEST.stripUserDef(text));
         }
         return null;
     }

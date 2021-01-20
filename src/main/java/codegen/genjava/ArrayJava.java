@@ -3,7 +3,7 @@ package codegen.genjava;
 import codegen.interfaces.IArray;
 import codegen.interfaces.IWidget;
 import codegen.interfaces.enums;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 import erlog.DevErr;
 
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
 package compile.scan.ut;
 
-import compile.basics.Keywords;
-import static compile.basics.Keywords.DATATYPE.RX;
-import static compile.basics.Keywords.DATATYPE.FX;
+import langdef.Keywords;
+import static langdef.Keywords.DATATYPE.RX;
+import static langdef.Keywords.DATATYPE.FX;
 import erlog.Erlog;
 
 /**

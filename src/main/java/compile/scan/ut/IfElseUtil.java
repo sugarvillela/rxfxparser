@@ -1,9 +1,9 @@
 package compile.scan.ut;
 
-import compile.basics.Keywords;
+import langdef.Keywords;
 import erlog.Erlog;
 
-import static compile.basics.Keywords.DATATYPE.*;
+import static langdef.Keywords.DATATYPE.*;
 
 public class IfElseUtil {
     protected Keywords.DATATYPE toggle;

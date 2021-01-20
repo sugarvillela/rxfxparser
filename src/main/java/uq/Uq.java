@@ -1,6 +1,6 @@
 package uq;
 
-import static compile.basics.Keywords.UQ_FORMAT;
+import static langdef.Keywords.UQ_FORMAT;
 
 public class Uq implements UqGen {
     private final int halt;

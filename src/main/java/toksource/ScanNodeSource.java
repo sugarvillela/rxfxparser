@@ -6,11 +6,11 @@
 package toksource;
 
 import java.util.ArrayList;
-import compile.basics.Keywords;
-import compile.basics.Factory_Node.ScanNode;
+import langdef.Keywords;
+import scannode.ScanNode;
 
-import static compile.basics.Factory_Node.ScanNode.NUM_FIELDS;
-import static compile.basics.Keywords.*;
+import static scannode.ScanNode.NUM_FIELDS;
+import static langdef.Keywords.*;
 
 import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
@@ -118,13 +118,7 @@ public class ScanNodeSource implements ITextSource, ITextWordOrLine, ILifeCycle 
 
     @Override
     public void onPush() {}
-    
-    @Override
-    public void onBeginStep(){}
-    
-    @Override
-    public void onEndStep(){}
-    
+
     @Override
     public void onPop() {}
 

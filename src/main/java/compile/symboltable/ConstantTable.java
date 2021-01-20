@@ -1,24 +1,21 @@
 package compile.symboltable;
 
 import erlog.Erlog;
+import runstate.Glob;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ConstantTable {
-    private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
     private static ConstantTable instance;
 
     private ConstantTable () {
         constantTableMap = new HashMap<>();
     }
 
-    public static ConstantTable getInstance(){
+    public static ConstantTable init(){
         return (instance == null)? (instance = new ConstantTable ()) : instance;
-    }
-    public static void killInstance(){
-        instance = null;
     }
 
     private Map<String, ConstantNode> constantTableMap;
@@ -49,11 +46,11 @@ public class ConstantTable {
 
     //=====Methods to access table data==================================
 
-    public String readConstant(String text){
-        if(SYMBOL_TEST.isUserDef(text)){
-            String defName = SYMBOL_TEST.stripUserDef(text);
+    public String getConstantValue(String text){
+        if(Glob.SYMBOL_TEST.isUserDef(text)){
+            String defName = Glob.SYMBOL_TEST.stripUserDef(text);
             if(isConstant(defName)){
-                return getValue(defName);
+                return constantTableMap.get(defName).value;
             }
         }
         return null;
@@ -61,10 +58,6 @@ public class ConstantTable {
 
     public boolean isConstant(String constantName){
         return constantTableMap.containsKey(constantName);
-    }
-
-    public String getValue(String constantName){
-        return constantTableMap.get(constantName).value;
     }
 
     public String toString(){

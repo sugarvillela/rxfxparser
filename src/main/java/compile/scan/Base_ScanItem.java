@@ -1,16 +1,17 @@
 package compile.scan;
 
-import compile.basics.Base_StackItem;
+import compile.implitem.Base_StackItem;
 import compile.scan.factories.Factory_Strategy;
 import compile.symboltable.TextSniffer;
 
 import java.util.Arrays;
-import compile.basics.Keywords.DATATYPE;
-import compile.basics.Factory_Node.ScanNode;
+import langdef.Keywords.DATATYPE;
+import runstate.Glob;
+import scannode.ScanNode;
 
 import java.util.ArrayList;
 
-import static compile.basics.Keywords.DATATYPE.SCOPE;
+import static langdef.Keywords.DATATYPE.SCOPE;
 
 /**Base class provides common tasks
  * Derived classes are handlers for context-sensitive control of stack
@@ -25,7 +26,7 @@ public abstract class Base_ScanItem extends Base_StackItem{
     protected Factory_Strategy.PushEnum[] onPushStrategies;
     protected Factory_Strategy.PopEnum[] onPopStrategies;
     protected String defName;
-    protected int state;//, loIndex, hiIndex;
+    protected int state;
     protected final TextSniffer textSniffer;
     public final boolean cacheable;
     protected boolean specialScope;
@@ -34,8 +35,10 @@ public abstract class Base_ScanItem extends Base_StackItem{
         state = 0;
         this.cacheable = cacheable;
         specialScope = false;
-        this.textSniffer = TextSniffer.getInstance();
+        this.textSniffer = Glob.TEXT_SNIFFER;
     }
+
+    /*=====IStackItem methods============================================*/
 
     @Override
     public void onPush(){
@@ -65,6 +68,8 @@ public abstract class Base_ScanItem extends Base_StackItem{
 //        System.out.println("====onPop()====" + datatypeStr);
     }
 
+    /*=====ScanItem methods==============================================*/
+
     public void pushPop(String text) {
         if(strategies != null){
             //System.out.println("====pushPop====" + getDebugName());
@@ -77,9 +82,7 @@ public abstract class Base_ScanItem extends Base_StackItem{
         }
 
     }
-//    public void back(){
-//        textSniffer.back();
-//    }
+
     public void setDatatype(DATATYPE datatype){
         this.datatype = datatype;
     }
@@ -107,14 +110,12 @@ public abstract class Base_ScanItem extends Base_StackItem{
         return specialScope ||
             (!SCOPE.equals(datatype) && below != null && ((Base_ScanItem)below).isSpecialScope());
     }
+
     public void setState(int state){
         this.state = state;
     }
     public int getState(){
         return this.state;
-    }
-    public boolean isDoneState(){
-        return state == 0;
     }
     public void assertDoneState(){
         if(state != 0){
@@ -122,12 +123,14 @@ public abstract class Base_ScanItem extends Base_StackItem{
             //Erlog.get(this).set("A language structure is incomplete");
         }
     }
+
     public final void addNode(ScanNode node){
         ((Class_Scanner)P).addNode(node);
     }
     public final void addNodes(ArrayList<ScanNode> newNodes){
         ((Class_Scanner)P).addNodes(newNodes);
     }
+
     public final void setAllowedDatatypes(DATATYPE[] allowedDatatypes){
         this.allowedDatatypes = allowedDatatypes;
     }

@@ -1,12 +1,9 @@
 package toksource;
 
-import static compile.basics.Keywords.STATUS_FORMAT;
 import erlog.Erlog;
-import interfaces.ILifeCycle;
-import toksource.interfaces.ITextSource;
+
 import java.util.ArrayList;
 
-import toksource.interfaces.ITextWordOrLine;
 import toktools.*;
 
 /** Word/line iterator; changes modes on the fly; doesn't preserve half-lines
@@ -55,10 +52,7 @@ public class TokenSource extends Base_TextSource {
     }
     @Override
     public void onPush(){}
-    @Override
-    public void onBeginStep(){}
-    @Override
-    public void onEndStep(){}
+
     @Override
     public void onPop(){}
     @Override

@@ -3,12 +3,10 @@ package codegen.genjava;
 import codegen.interfaces.IMethod;
 import codegen.interfaces.IWidget;
 import codegen.interfaces.enums;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 import erlog.DevErr;
 
 import java.util.ArrayList;
-
-import static codegen.interfaces.enums.VISIBILITY.PUBLIC_;
 
 public class MethodJava implements IMethod {
     private final ArrayList<IWidget> content;

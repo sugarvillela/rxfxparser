@@ -1,13 +1,10 @@
 package demos;
 
-import commons.Commons;
-import compile.basics.Factory_Node;
-import compile.sublang.RxLogicTree;
-import compile.sublang.factories.TreeFactory;
-import compile.sublang.factories.TreeFactory.TreeNode;
+import scannode.ScanNode;
+import sublang.TreeBuildUtil;
+import sublang.treenode.TreeNodeBase;
 import java.util.ArrayList;//RX_AND, RX_OR, RX_NOT, RX_EQ,
 
-import static compile.basics.Keywords.DATATYPE.RX;
 
 public class RxTree_ {
     private static RxTree_ instance;
@@ -16,52 +13,52 @@ public class RxTree_ {
         return (instance == null)? (instance = new RxTree_()) : instance;
     }
     protected RxTree_(){
-        rxTree = RxLogicTree.getInstance();
+        //rxTree = RxLogicTree.getInstance();
     }
     
-    private final TreeFactory rxTree;
+    private TreeBuildUtil rxTree;
     
     public void test1(){
-        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromWordPattern(text);
-        rxTree.dispBreadthFirst(root);
-        //rxTree.dispPreOrder(root);
+//        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
+//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
+//        rxTree.dispBreadthFirst(root);
+//        //rxTree.dispPreOrder(root);
     }
     public void test2(){
-        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromWordPattern(text);
-        //rxTree.dispPreOrder(root);
-        //rxTree.dispLeaves(root);
-        rxTree.dispBreadthFirst(root);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(RX, root);
-        //Commons.disp(cmdList, "\nCommandList");
-        ArrayList<String> strList = scanNodesToString(cmdList);
-        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
-        //rxTree.dispPreOrder(reroot);
-        //rxTree.dispBreadthFirst(root);
+//        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
+//        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
+//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
+//        //rxTree.dispPreOrder(root);
+//        //rxTree.dispLeaves(root);
+//        rxTree.dispBreadthFirst(root);
+//        ArrayList<ScanNode> cmdList = rxTree.treeToScanNodeList(RX, root);
+//        //Commons.disp(cmdList, "\nCommandList");
+//        ArrayList<String> strList = scanNodesToString(cmdList);
+//        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
+//        //rxTree.dispPreOrder(reroot);
+//        //rxTree.dispBreadthFirst(root);
     }
     public void test3(){
-        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-        String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
-        TreeNode root = rxTree.treeFromWordPattern(text);
-        ArrayList<Factory_Node.ScanNode> cmdList = rxTree.treeToScanNodeList(RX, root);
-        Commons.disp(cmdList);
-        ArrayList<String> strList = scanNodesToString(cmdList);
-        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
-        //assertEqual(root, reroot);
+//        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
+//        String text = "~(A=a&B='b')";//"dru='&'&LEN()=2";
+//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
+//        ArrayList<ScanNode> cmdList = rxTree.treeToScanNodeList(RX, root);
+//        Commons.disp(cmdList);
+//        ArrayList<String> strList = scanNodesToString(cmdList);
+//        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
+//        //assertEqual(root, reroot);
     }
     public void test4(){
-        String text = "~((myFunction()=6&myAge<65)&(C=c&D>d))&~(weightOfEarth>157pounds&state.done=true)&'G'";
-        //String text = "~(~(A=a&B=~'b'))";//&(C=c)&'D'='d'|~(E=e&F=f)&'G'
-        TreeNode root = rxTree.treeFromWordPattern(text);
-        rxTree.dispBreadthFirst(root);
-        //rxLeafUtil.finishAndValidate(root);
+//        String text = "~((myFunction()=6&myAge<65)&(C=c&D>d))&~(weightOfEarth>157pounds&state.done=true)&'G'";
+//        //String text = "~(~(A=a&B=~'b'))";//&(C=c)&'D'='d'|~(E=e&F=f)&'G'
+//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
+//        rxTree.dispBreadthFirst(root);
+//        //rxLeafUtil.finishAndValidate(root);
 //        rxTree.dispBreadthFirst(root);
     }
-    public boolean assertEqual(TreeNode root1, TreeNode root2){
-        ArrayList<TreeNode>[] levels1 = rxTree.breadthFirst(root1);
-        ArrayList<TreeNode>[] levels2 = rxTree.breadthFirst(root2);
+    public boolean assertEqual(TreeNodeBase root1, TreeNodeBase root2){
+        ArrayList<TreeNodeBase>[] levels1 = rxTree.breadthFirst(root1);
+        ArrayList<TreeNodeBase>[] levels2 = rxTree.breadthFirst(root2);
         if(levels1.length != levels2.length){
             System.out.println("fail: levels1.length != levels2.length");
             return false;
@@ -87,9 +84,9 @@ public class RxTree_ {
     }
     
 
-    public ArrayList<String> scanNodesToString(ArrayList<Factory_Node.ScanNode> scanNodes){
+    public ArrayList<String> scanNodesToString(ArrayList<ScanNode> scanNodes){
         ArrayList<String> nodesToString = new ArrayList<>();
-        for(Factory_Node.ScanNode node : scanNodes){
+        for(ScanNode node : scanNodes){
             nodesToString.add(node.toString());
         }
         return nodesToString;

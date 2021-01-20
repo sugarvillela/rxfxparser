@@ -1,6 +1,6 @@
 package compile.symboltable;
 
-import compile.basics.Keywords;
+import langdef.Keywords;
 
 public interface                                                                                                                                                                       ISymbolNode {
     void setName(String name);

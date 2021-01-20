@@ -1,11 +1,12 @@
 package erlog;
 
-import compile.basics.IStackComponent;
+import compile.interfaces.Debuggable;
 import toksource.interfaces.ChangeListener;
 import toksource.interfaces.ChangeNotifier;
 import toksource.interfaces.ITextStatus;
 
-/** Decorator pattern for ErlogCore: adds per-instance caller class name
+/** Error reporting for writer of rxfx source code, not java implementation.
+ *  Decorator pattern for ErlogCore: adds per-instance caller class name
  * @author Dave Swanson */
 public class Erlog implements ChangeListener {
     
@@ -28,8 +29,8 @@ public class Erlog implements ChangeListener {
     public static Erlog get(String text){// same erasure for string and object
         return new Erlog(text);
     }
-    public static Erlog get(IStackComponent stackComponent){// same erasure for string and object
-        return new Erlog(stackComponent.getDebugName());
+    public static Erlog get(Debuggable debuggable){// same erasure for string and object
+        return new Erlog(debuggable.getDebugName());
     }
     public static Erlog get(Object object){// same erasure for string and object
         return new Erlog(object.getClass().getSimpleName());

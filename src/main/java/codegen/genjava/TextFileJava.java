@@ -2,7 +2,7 @@ package codegen.genjava;
 
 import codegen.interfaces.ITextFile;
 import codegen.interfaces.IWidget;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 import toksource.Base_TextSource;
 import toksource.TextSource_file;
 

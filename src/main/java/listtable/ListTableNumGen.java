@@ -2,21 +2,20 @@ package listtable;
 
 import commons.BIT;
 import commons.Commons;
-import compile.basics.Keywords;
+import langdef.Keywords;
 import compile.parse.Base_ParseItem;
 import erlog.DevErr;
-import interfaces.Killable;
 import uq.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.DATATYPE.LIST_NUMBER;
+import static langdef.Keywords.DATATYPE.*;
+import static langdef.Keywords.DATATYPE.LIST_NUMBER;
 import static java.lang.Math.max;
 
-public class ListTableNumGen implements Killable {
+public class ListTableNumGen {
     private final Map<Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
     private final Map<Keywords.DATATYPE, CategoryNode[]> keyValMap;
     private final Keywords.DATATYPE[] listOrder;
@@ -76,11 +75,6 @@ public class ListTableNumGen implements Killable {
     }
     public int getWVal(){
         return fieldSizeCalculations.wval;
-    }
-
-    @Override
-    public void kill() {
-        this.listTable = null;
     }
 
     public void disp(){
@@ -330,7 +324,7 @@ public class ListTableNumGen implements Killable {
                 node.setCategoryName(inner.getKey());
                 node.setCategoryEnum(uqGen.next());
 
-                for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
+                for(String item : ((ListTableNode)inner.getValue()).getList()){ // item
                     node.put(item, uqGen.next());
                 }
                 categoryNodes.add(node);
@@ -378,7 +372,7 @@ public class ListTableNumGen implements Killable {
 
                 node.setCategoryEnum(uqGen.next());
                 node.setRowOffset(((UqGenComposite)uqGen).curRowOffset());
-                for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
+                for(String item : ((ListTableNode)inner.getValue()).getList()){ // item
                     node.put(item, uqGen.next());
                 }
                 categoryNodes.add(node);
@@ -410,7 +404,7 @@ public class ListTableNumGen implements Killable {
                 node.setRowOffset(((UqGenComposite)uqGen).curRowOffset());
                 //node.setCategoryEnum(next & fieldSizeCalculations.indexMask);
 
-                for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
+                for(String item : ((ListTableNode)inner.getValue()).getList()){ // item
                     node.put(item, uqGen.next());
                     //System.out.println("put: " + item);
                     uqGen.newCol();
@@ -456,7 +450,7 @@ public class ListTableNumGen implements Killable {
                 node = new CategoryNode();
 
                 node.setCategoryName(inner.getKey());
-                for(String item : ((ListTable.ListTableNode)inner.getValue()).getList()){ // item
+                for(String item : ((ListTableNode)inner.getValue()).getList()){ // item
                     node.put(item, uqGen.next());
                 }
 

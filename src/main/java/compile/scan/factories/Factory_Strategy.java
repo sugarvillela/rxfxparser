@@ -1,27 +1,24 @@
 package compile.scan.factories;
 
+import runstate.Glob;
+import scannode.ScanNode;
 import runstate.RunState;
-import compile.basics.Factory_Node;
-import compile.sublang.FxLogicTree;
-import compile.sublang.RxLogicTree;
-import compile.sublang.factories.TreeFactory;
-import flattree.FlatTree;
-import compile.sublang.ut.ValidatorRx;
+import sublang.TreeBuildUtil;
+import sublang.treenode.TreeNodeBase;
 import compile.scan.ut.*;
 import compile.symboltable.*;
 import erlog.DevErr;
 import erlog.Erlog;
 import compile.scan.Base_ScanItem;
 import compile.scan.Class_Scanner;
-import compile.basics.Keywords.DATATYPE;
-import compile.basics.Keywords.CMD;
-import listtable.ListTable;
+import langdef.Keywords.DATATYPE;
+import langdef.Keywords.CMD;
 import listtable.ListTableItemSearch;
 import listtable.ListTableScanLoader;
 
-import static compile.basics.Keywords.*;
-import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.FIELD.*;
+import static langdef.Keywords.*;
+import static langdef.Keywords.DATATYPE.*;
+import static langdef.Keywords.FIELD.*;
 
 import java.util.ArrayList;
 
@@ -122,14 +119,8 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     }
 
     public static final int IDENTIFY = 0, BEGIN = 1, PARSE = 2, IGNORE = 3;//, IGNORE2 = 4;
-    private static final Factory_Node NODE_FACTORY = Factory_Node.getInstance();
-    private static final TreeFactory RX_TREE = RxLogicTree.getInstance();
-    private static final TreeFactory FX_TREE = FxLogicTree.getInstance();
     private static final RxFxUtil RXFX_UTIL = new RxFxUtil();
     private static final IfElseUtil IF_ELSE_UTIL = new IfElseUtil();
-    private static final SymbolTest SYMBOL_TEST = SymbolTest.getInstance();
-    private static final ConstantTable CONSTANT_TABLE = ConstantTable.getInstance();
-    private static final SymbolTable SYMBOL_TABLE = SymbolTable.getInstance();
     private static ListTableScanLoader listTableScanLoader = null;
     private static ListTableItemSearch listTableItemSearch = null;
 
@@ -139,18 +130,18 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         public Strategy(){}
 
         protected Class_Scanner getScanner(){
-            return (Class_Scanner) RunState.getInstance().getCurrParserStack();
+            return (Class_Scanner) RunState.getInstance().getActiveParserStack();
         }
         public void push(DATATYPE datatype){
-            RunState.getInstance().getCurrParserStack().push(
+            RunState.getInstance().getActiveParserStack().push(
                     Factory_ScanItem.getInstance().get(datatype)
             );
         }
         public void pop(){
-            RunState.getInstance().getCurrParserStack().pop();
+            RunState.getInstance().getActiveParserStack().pop();
         }
         public void back(String text){
-            TextSniffer.getInstance().back();//don't sniff keyword because it will be repeated
+            Glob.TEXT_SNIFFER.back();//don't sniff keyword because it will be repeated
             getScanner().back(text);//repeat keyword so next datatype can push it
         }
         public void backPush(String text, DATATYPE datatype){
@@ -274,7 +265,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class AddText extends Strategy{// targ lang base
         @Override
         public boolean go(String text, Base_ScanItem context){
-            context.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, context.getDatatype(), text));
+            context.addNode(Glob.SCAN_NODE_FACTORY.newScanNode( CMD.ADD_TO, context.getDatatype(), text));
             return true;
         }
     }
@@ -316,10 +307,10 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                     RunState.getInstance().setProjName(val);
                     break;
                 case NEW_LIST_SET:
-                    RunState.getInstance().setNewEnumSet(parseBool());
+                    RunState.getInstance().setNewListSet(parseBool());
                     break;
                 case RX_TARGLANG_ON_SPECIAL:
-                    RxTargLangUtil.getInstance().setTargRxOnSpecial(parseBool());
+                    Glob.RX_TARG_LANG_UTIL.setTargRxOnSpecial(parseBool());
                     break;
                 default:
                     DevErr.get(this).kill("Developer: unknown key");
@@ -340,7 +331,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             Base_ScanItem below = (Base_ScanItem)context.getBelow();
             if(below != null){
                 context.addNode(
-                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, below.getDatatype(), key, val )
+                        Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, below.getDatatype(), key, val )
                 );
             }
             else{
@@ -413,12 +404,12 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         public boolean go(String text, Base_ScanItem context){
             if(context.getState() == IDENTIFY){
                 context.setState(PARSE);
-                if(SYMBOL_TEST.isUserDef(text)){
-                    String defName = SYMBOL_TEST.stripUserDef(text);
-                    if(SYMBOL_TEST.isNew(defName)){
+                if(Glob.SYMBOL_TEST.isUserDef(text)){
+                    String defName = Glob.SYMBOL_TEST.stripUserDef(text);
+                    if(Glob.SYMBOL_TEST.isNew(defName)){
                         context.setDefName(defName);
                         context.addNode(
-                                NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, context.getDatatype(), DEF_NAME, defName)
+                                Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, context.getDatatype(), DEF_NAME, defName)
                         );
                         return true;
                     }
@@ -431,7 +422,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class ReadConstant extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            String read = CONSTANT_TABLE.readConstant(text);
+            String read = Glob.CONSTANT_TABLE.getConstantValue(text);
             if(read != null){
                 back(read);
                 return true;
@@ -443,7 +434,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class ReadVar extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            SymbolTable.Base_TextNode node = SYMBOL_TABLE.readVar(text);
+            SymbolTable.Base_TextNode node = Glob.SYMBOL_TABLE.readVar(text);
             if(node != null && context.isGoodDatatype(node.getType())){
                 if(context.isGoodDatatype(node.getType())){
                     getScanner().changeTextSource(node);
@@ -461,7 +452,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class PopOnEndLine extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            System.out.println("PopOnEndLine: " + text);
+            //System.out.println("PopOnEndLine: " + text);
             if(Erlog.getTextStatusReporter().isEndLine()){
                 pop();
                 return true;
@@ -483,7 +474,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         @Override
         public boolean go(String text, Base_ScanItem context){
             //System.out.println("PopOnVar: " + context.getDatatype());
-            if(SYMBOL_TEST.isUserDef(text) && SYMBOL_TABLE.isTextNode(SYMBOL_TEST.stripUserDef(text))){
+            if(Glob.SYMBOL_TEST.isUserDef(text) && Glob.SYMBOL_TABLE.isTextNode(Glob.SYMBOL_TEST.stripUserDef(text))){
                 //System.out.println("isUserDef and isNode: " + text);
                 backPop(text, context);
                 return true;
@@ -496,10 +487,10 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         @Override
         public boolean go(String text, Base_ScanItem context){
             //System.out.println("ReadVar: " + context.getDatatype());
-            if(SYMBOL_TEST.isUserDef(text)){
+            if(Glob.SYMBOL_TEST.isUserDef(text)){
                 //System.out.println("isUserDef" + text);
-                String defName = SYMBOL_TEST.stripUserDef(text);
-                SymbolTable.Base_TextNode node = SYMBOL_TABLE.getTextNode(defName);
+                String defName = Glob.SYMBOL_TEST.stripUserDef(text);
+                SymbolTable.Base_TextNode node = Glob.SYMBOL_TABLE.getTextNode(defName);
                 if(node != null && !context.isGoodDatatype(node.getType())){
                     backPop(text, context);
                     return true;
@@ -559,11 +550,11 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         public boolean go(String text, Base_ScanItem context){
             switch(context.getState()){
                 case IDENTIFY:
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        String defName = SYMBOL_TEST.stripUserDef(text);
-                        SYMBOL_TEST.assertNew(defName);
-                        CONSTANT_TABLE.startConstant();
-                        CONSTANT_TABLE.setConstantName(defName);
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
+                        String defName = Glob.SYMBOL_TEST.stripUserDef(text);
+                        Glob.SYMBOL_TEST.assertNew(defName);
+                        Glob.CONSTANT_TABLE.startConstant();
+                        Glob.CONSTANT_TABLE.setConstantName(defName);
                         context.setState(PARSE);
                     }
                     else{
@@ -571,7 +562,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                     }
                     break;
                 case PARSE:
-                    CONSTANT_TABLE.setValue(text);
+                    Glob.CONSTANT_TABLE.setValue(text);
                     context.setState(999);
                     break;
                 default:
@@ -585,10 +576,10 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         public boolean go(String text, Base_ScanItem context){
             switch(context.getState()){
                 case IDENTIFY:// Function keyword must be followed by a user def identifier
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        String defName = SYMBOL_TEST.stripUserDef(text);
-                        SYMBOL_TEST.assertNew(defName);
-                        SYMBOL_TABLE.setTextName(defName);
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
+                        String defName = Glob.SYMBOL_TEST.stripUserDef(text);
+                        Glob.SYMBOL_TEST.assertNew(defName);
+                        Glob.SYMBOL_TABLE.setTextName(defName);
                         context.setState(BEGIN);
                     }else{
                         Erlog.get(this).set("Expected " + USERDEF_OPEN + "identifier here", text);
@@ -604,12 +595,12 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                 case PARSE:// have opening symbol; add words until closing symbol
                     if(ITEM_CLOSE.equals(text)){
                         //System.out.println("end function: " + text);
-                        SYMBOL_TABLE.finishTextNode();
+                        Glob.SYMBOL_TABLE.finishTextNode();
                         context.setState(IDENTIFY);
                         pop();
                     }
                     else{
-                        SYMBOL_TABLE.addWord(text);
+                        Glob.SYMBOL_TABLE.addWord(text);
                     }
                     break;
             }
@@ -617,33 +608,31 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
         }
     }
     public static class ManageLists extends Strategy{
-        //public static final int UDEF = 0, PARSE = 1, IGNORE = 2;
-
         protected void onUserDef(String text, Base_ScanItem context){
             DATATYPE h = context.getDatatype();
-            String defName = SYMBOL_TEST.stripUserDef(text);
+            String defName = Glob.SYMBOL_TEST.stripUserDef(text);
             if(listTableItemSearch.contains(h, defName)){
                 context.setState(IGNORE);
             }
             else{
                 context.setDefName(defName);
                 listTableScanLoader.addNode(
-                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
+                        Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, DEF_NAME, defName )
                 );
             }
         }
         protected void onNoUserDef(String text, Base_ScanItem context){
             Erlog.get(this).set("Expected user-defined name for list " + context.getDatatype().toString(), text);
         }
+
         @Override
         public boolean go(String text, Base_ScanItem context){
-            DATATYPE h = context.getDatatype();
             switch(context.getState()){
                 case IGNORE:
                     return true;
                 case IDENTIFY:
                     context.setState(PARSE);
-                    if(SYMBOL_TEST.isUserDef(text)){
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
                         onUserDef(text, context);
                     }
                     else{
@@ -651,7 +640,9 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                     }
                     break;
                 case PARSE:
-                    listTableScanLoader.addNode(NODE_FACTORY.newScanNode( CMD.ADD_TO, h, text));
+                    listTableScanLoader.addNode(
+                            Glob.SCAN_NODE_FACTORY.newScanNode( CMD.ADD_TO, context.getDatatype(), text)
+                    );
                     break;
             }
             return true;
@@ -666,7 +657,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             else{
                 context.setDefName(SCOPES_DEF_NAME);
                 listTableScanLoader.addNode(
-                    NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, LIST_SCOPES, DEF_NAME, SCOPES_DEF_NAME )
+                    Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, LIST_SCOPES, DEF_NAME, SCOPES_DEF_NAME )
                 );
             }
         }
@@ -679,11 +670,11 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             else{
                 context.setDefName(SCOPES_DEF_NAME);
                 listTableScanLoader.addNode(
-                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, LIST_SCOPES, DEF_NAME, SCOPES_DEF_NAME )
+                        Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, LIST_SCOPES, DEF_NAME, SCOPES_DEF_NAME )
                 );
                 //listTableScanLoader.setDefaultCategory(LIST_SCOPES, context.getDefName());
                 listTableScanLoader.addNode(
-                        NODE_FACTORY.newScanNode( CMD.ADD_TO, LIST_SCOPES, text)
+                        Glob.SCAN_NODE_FACTORY.newScanNode( CMD.ADD_TO, LIST_SCOPES, text)
                 );
             }
         }
@@ -696,7 +687,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             if( TARGLANG_INSERT_CLOSE.equals(text) ){
                 if(!LINEBUFFER.isEmpty()){
                     context.addNode(
-                            NODE_FACTORY.newScanNode(
+                            Glob.SCAN_NODE_FACTORY.newScanNode(
                                     CMD.ADD_TO, context.getDatatype(), LINEBUFFER.dump()
                             )
                     );
@@ -707,7 +698,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                 LINEBUFFER.add(text);
                 if(Erlog.getTextStatusReporter().isEndLine()){
                     context.addNode(
-                            NODE_FACTORY.newScanNode(
+                            Glob.SCAN_NODE_FACTORY.newScanNode(
                                     CMD.ADD_TO, context.getDatatype(), LINEBUFFER.dump()
                             )
                     );
@@ -723,8 +714,8 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             switch(context.getState()){
                 case IDENTIFY:
                     context.setState(BEGIN);
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        context.setDefName(SYMBOL_TEST.stripUserDef(text));
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
+                        context.setDefName(Glob.SYMBOL_TEST.stripUserDef(text));
                         push(IF_TEST);;//current text is name, next text is part of test
                     }
                     else{
@@ -759,11 +750,11 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                         push(RX);
                     }
                     else if(listTableItemSearch.isItem(LIST_SCOPES, SCOPES_DEF_NAME, text)){ // Use a scope
-                        context.addNode(NODE_FACTORY.newPushNode(SCOPE_ITEM));
+                        context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(SCOPE_ITEM));
                         context.addNode(
-                                NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
+                                Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
                         );
-                        context.addNode(NODE_FACTORY.newPopNode(SCOPE_ITEM));
+                        context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(SCOPE_ITEM));
                     }
                     else{   // Implicit RX call
                         backPush(text, RX);
@@ -788,8 +779,8 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             switch(context.getState()){
                 case IDENTIFY:
                     context.setState(BEGIN);
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        context.setDefName(SYMBOL_TEST.stripUserDef(text));
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
+                        context.setDefName(Glob.SYMBOL_TEST.stripUserDef(text));
                     }
                     else{
                         back(text);
@@ -819,8 +810,8 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
             switch(context.getState()){
                 case IDENTIFY:
                     context.setState(BEGIN);
-                    if(SYMBOL_TEST.isUserDef(text)){
-                        context.setDefName(SYMBOL_TEST.stripUserDef(text));
+                    if(Glob.SYMBOL_TEST.isUserDef(text)){
+                        context.setDefName(Glob.SYMBOL_TEST.stripUserDef(text));
                         push(SCOPE_TEST);//current text is name, next text is part of test
                     }
                     else{
@@ -858,11 +849,11 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                         if(listTableItemSearch.isSpecialField(LIST_SCOPES, SCOPES_DEF_NAME, text)){
                             context.setSpecialScope();
                         }
-                        context.addNode(NODE_FACTORY.newPushNode(SCOPE_ITEM));
+                        context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(SCOPE_ITEM));
                         context.addNode(
-                                NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
+                                Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, SCOPE_ITEM, ITEM_NAME, text )
                         );
-                        context.addNode(NODE_FACTORY.newPopNode(SCOPE_ITEM));
+                        context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(SCOPE_ITEM));
                     }
                     else{   // Implicit RX call
                         backPush(text, RX);
@@ -884,73 +875,92 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class AddRxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            RxTargLangUtil rxTargLangUtil = RxTargLangUtil.getInstance();
-
-            if(rxTargLangUtil.findRegexAndTruncate(text, context)){
+            if(Glob.RX_TARG_LANG_UTIL.findRegexAndTruncate(text, context)){
                 DATATYPE h = RX_TARGLANG;
-                context.addNode(NODE_FACTORY.newPushNode(h));
-                context.addNode(NODE_FACTORY.newScanNode(CMD.ADD_TO, h, rxTargLangUtil.getTruncated()));
-                context.addNode(NODE_FACTORY.newPopNode(h));
+                context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(h));
+                context.addNode(
+                    Glob.SCAN_NODE_FACTORY.newScanNode(
+                        CMD.ADD_TO, h, Glob.RX_TARG_LANG_UTIL.getTruncated()
+                    )
+                );
+                context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(h));
                 return true;
             }
             else{
-                RxRangeUtil rxRangeUtil = RxRangeUtil.getInstance();
+                WordRangeUtil wordRangeUtil = Glob.WORD_RANGE_UTIL;
                 DATATYPE h = RX_WORD;
 
-                if(rxRangeUtil.findAndSetRange(text)){
-                    text = rxRangeUtil.getTruncated();
+                if(wordRangeUtil.findAndSetRange(text)){
+                    text = wordRangeUtil.getTruncated();
                 }
-                if(ValidatorRx.getInstance().assertValidRxWord(text)){
-                    context.addNode(NODE_FACTORY.newPushNode(h));
+                if(Glob.VALIDATOR_RX.assertValidRxWord(text)){
+                    TreeBuildUtil treeBuildUtil = Glob.TREE_BUILD_UTIL;
+                    context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(h));
 
                     context.addNode(
-                        NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, LO, rxRangeUtil.getLowRange())
+                            Glob.SCAN_NODE_FACTORY.newScanNode(CMD.SET_ATTRIB, h, LO, wordRangeUtil.getLowRange())
                     );
-                    context.addNode( NODE_FACTORY.newScanNode(
-                            CMD.SET_ATTRIB, h, HI, rxRangeUtil.getHighRange())
+                    context.addNode(Glob.SCAN_NODE_FACTORY.newScanNode(
+                            CMD.SET_ATTRIB, h, HI, wordRangeUtil.getHighRange())
                     );
-                    TreeFactory.TreeNode root = RX_TREE.treeFromWordPattern(text);
-                    //ArrayList<Factory_Node.ScanNode> nodes = RX_TREE.treeToScanNodeList(RX, root);
-                    //System.out.println(">>>>Root<<<<");
-                    //RX_TREE.dispPreOrder(root);
-                    FlatTree flatTree = new FlatTree(RX, root);
-                    ArrayList<Factory_Node.ScanNode> nodes = flatTree.treeToScanNodeList();
+
+                    /* Want recursive tree? use this */
+                    TreeNodeBase root = Glob.LOGIC_TREE_RX.treeFromWordPattern(text);
+                    ArrayList<ScanNode> nodes = treeBuildUtil.treeToScanNodeList(RX, root);
+
+                    System.out.println(">>>>Rx Root<<<<");
+                    treeBuildUtil.dispPreOrder(root);
+
+                    /* Want flat tree? use this * */
+                    //FlatTree flatTree = new FlatTree(RX, root);
+                    //ArrayList<ScanNode> nodes = flatTree.treeToScanNodeList();
+
                     //Commons.disp(nodes, "Flat Tree Scan Node List");
                     //testRebuild(root, nodes);
                     context.addNodes(nodes);
-                    context.addNode(NODE_FACTORY.newPopNode(h));
+                    context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(h));
                     return true;
                 }
             }
             return false;// only false on bad syntax
         }
-        private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
-            TreeFactory.TreeNode newRoot = RX_TREE.treeFromScanNodeSource(RX, nodes);
+        private void testRebuild(TreeNodeBase origRoot, ArrayList<ScanNode> nodes){
+            TreeBuildUtil treeBuildUtil = Glob.TREE_BUILD_UTIL;
+            TreeNodeBase newRoot = treeBuildUtil.treeFromScanNodeSource(RX, nodes);
             System.out.println(">>>>RX testRebuild<<<<");
             //RX_TREE.dispBreadthFirst(newRoot);
-            RX_TREE.assertEqual(origRoot, newRoot);
+            treeBuildUtil.assertEqual(origRoot, newRoot);
         }
 
     }
     public static class AddFxWord extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
+            TreeBuildUtil treeBuildUtil = Glob.TREE_BUILD_UTIL;
             DATATYPE h = FX_WORD;
-            context.addNode(NODE_FACTORY.newPushNode(h));
-            TreeFactory.TreeNode root = FX_TREE.treeFromWordPattern(text);
-            //ArrayList<Factory_Node.ScanNode> nodes = FX_TREE.treeToScanNodeList(FX, root);
+            context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(h));
+
+            /* Want recursive tree? use this */
+            TreeNodeBase root = Glob.LOGIC_TREE_FX.treeFromWordPattern(text);
+            ArrayList<ScanNode> nodes = treeBuildUtil.treeToScanNodeList(FX, root);
             //testRebuild(root, nodes);
-            FlatTree flatTree = new FlatTree(FX, root);
-            ArrayList<Factory_Node.ScanNode> nodes = flatTree.treeToScanNodeList();
+            System.out.println(">>>>Fx Root<<<<");
+            treeBuildUtil.dispPreOrder(root);
+
+            /* Want flat tree? use this */
+            //FlatTree flatTree = new FlatTree(FX, root);
+            //ArrayList<ScanNode> nodes = flatTree.treeToScanNodeList();
+
             context.addNodes(nodes);
-            context.addNode(NODE_FACTORY.newPopNode(h));
+            context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(h));
             return true;
         }
-        private void testRebuild(TreeFactory.TreeNode origRoot, ArrayList<Factory_Node.ScanNode> nodes){
-            TreeFactory.TreeNode newRoot = FX_TREE.treeFromScanNodeSource(FX, nodes);
+        private void testRebuild(TreeNodeBase origRoot, ArrayList<ScanNode> nodes){
+            TreeBuildUtil treeBuildUtil = Glob.TREE_BUILD_UTIL;
+            TreeNodeBase newRoot = treeBuildUtil.treeFromScanNodeSource(FX, nodes);
             System.out.println(">>>>FX testRebuild<<<<");
-            RX_TREE.dispBreadthFirst(newRoot);
-            FX_TREE.assertEqual(origRoot, newRoot);
+            treeBuildUtil.dispBreadthFirst(newRoot);
+            treeBuildUtil.assertEqual(origRoot, newRoot);
         }
     }
 
@@ -966,23 +976,21 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class OnPush extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            //TextSniffer.getInstance().onPush(context);
-            context.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
+            //Glob.TEXT_SNIFFER.onPush(context);
+            context.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(context.getDatatype()));
             return false;
         }
     }
     public static class OnPushList extends Strategy{
         // Lazy init allows specifying in attrib whether to use new list set or add to existing
-        private void initListTable(){
-            listTableScanLoader = ListTable.getInstance().getScanLoader();
-            listTableItemSearch = ListTable.getInstance().getItemSearch();
-        }
         @Override
         public boolean go(String text, Base_ScanItem context){
-            if(!ListTable.isInitialized()){
-                initListTable();
+            if(!Glob.LIST_TABLE.isInitialized()){
+                Glob.LIST_TABLE.initLists();
+                listTableScanLoader = Glob.LIST_TABLE.getScanLoader();
+                listTableItemSearch = Glob.LIST_TABLE.getItemSearch();
             }
-            listTableScanLoader.addNode(NODE_FACTORY.newPushNode(context.getDatatype()));
+            listTableScanLoader.addNode(Glob.SCAN_NODE_FACTORY.newPushNode(context.getDatatype()));
             return false;
         }
     }
@@ -997,9 +1005,9 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
     public static class OnPop extends Strategy{
         @Override
         public boolean go(String text, Base_ScanItem context){
-            //TextSniffer.getInstance().onPop(context);
+            //Glob.TEXT_SNIFFER.onPop(context);
             context.assertDoneState();
-            context.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
+            context.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(context.getDatatype()));
             return false;
         }
     }
@@ -1011,7 +1019,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
                 listTableScanLoader.clear();
             }
             else{
-                listTableScanLoader.addNode(NODE_FACTORY.newPopNode(context.getDatatype()));
+                listTableScanLoader.addNode(Glob.SCAN_NODE_FACTORY.newPopNode(context.getDatatype()));
                 listTableScanLoader.onPop();
             }
             return false;
@@ -1072,7 +1080,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
 //        public boolean go(String text, Base_ScanItem context){
 //            addToSymbolTable(context);
 //            context.addNode(
-//                NODE_FACTORY.newScanNode(
+//                Glob.SCAN_NODE_FACTORY.newScanNode(
 //                    CMD.PUSH, context.getDatatype(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );
@@ -1094,7 +1102,7 @@ public abstract class Factory_Strategy{ // RXFX, RX, FX, IF_ELSE
 //        @Override
 //        public boolean go(String text, Base_ScanItem context){
 //            context.addNode(
-//                NODE_FACTORY.newScanNode(
+//                Glob.SCAN_NODE_FACTORY.newScanNode(
 //                    CMD.POP, context.getDatatype(), Keywords.FIELD.DEF_NAME, this.name
 //                )
 //            );

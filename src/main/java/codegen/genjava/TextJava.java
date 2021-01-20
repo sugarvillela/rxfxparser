@@ -1,7 +1,7 @@
 package codegen.genjava;
 
 import codegen.interfaces.IText;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 
 import java.util.ArrayList;
 

@@ -4,7 +4,7 @@ import compile.scan.Base_ScanItem;
 
 import java.util.regex.Pattern;
 
-import static compile.basics.Keywords.*;
+import static langdef.Keywords.*;
 
 public class RxTargLangUtil {
     private static RxTargLangUtil instance;
@@ -16,7 +16,7 @@ public class RxTargLangUtil {
         TARG_FUN = Pattern.compile(TARG + "\\(.+\\)");
     }
 
-    public static RxTargLangUtil getInstance(){
+    public static RxTargLangUtil init(){
         return (instance == null)? (instance = new RxTargLangUtil()) : instance;
     }
 

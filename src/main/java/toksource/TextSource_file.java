@@ -1,6 +1,5 @@
 package toksource;
 
-import static compile.basics.Keywords.STATUS_FORMAT;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

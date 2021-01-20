@@ -1,22 +1,23 @@
 package compile.parse.ut;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords;
+import runstate.Glob;
+import scannode.ScanNode;
+import langdef.Keywords;
 import compile.parse.Base_ParseItem;
-import compile.sublang.RxLogicTree;
-import compile.sublang.factories.PayNodes;
-import compile.sublang.factories.TreeFactory;
+import sublang.factories.PayNodes;
+import sublang.TreeBuildUtil;
+import sublang.treenode.TreeNodeBase;
 import toksource.ScanNodeSource;
 
 import java.util.ArrayList;
-import static compile.basics.Keywords.DATATYPE.*;
+import static langdef.Keywords.DATATYPE.*;
 
 public class RxFxBuilder{
     private final Base_ParseItem parent;
     private final ScanNodeSource source;
     private final Keywords.DATATYPE datatype;
     private final PayNodes.PayNodeFactory factory;
-    private TreeFactory.TreeNode root, head;
+    private TreeNodeBase root, head;
     boolean popParent;
 
     public RxFxBuilder(Keywords.DATATYPE datatype, ScanNodeSource source, Base_ParseItem parent){
@@ -33,12 +34,12 @@ public class RxFxBuilder{
         while(!popParent && source.hasNext()){
             readNode(source.nextNode());
         }
-        RxLogicTree.getInstance().dispBreadthFirst(root);
+        Glob.TREE_BUILD_UTIL.dispBreadthFirst(root);
     }
-    public TreeFactory.TreeNode get(){
+    public TreeNodeBase get(){
         return root;
     }
-    private void readNode(Factory_Node.ScanNode currNode){
+    private void readNode(ScanNode currNode){
         System.out.println(currNode);
         switch(currNode.datatype){
             case RX_BUILDER:
@@ -53,7 +54,7 @@ public class RxFxBuilder{
                 readParentCmd(currNode);
         }
     }
-    private void readParentCmd(Factory_Node.ScanNode currNode){
+    private void readParentCmd(ScanNode currNode){
         switch(currNode.cmd){
             case SET_ATTRIB:
                 parent.setAttrib(currNode);
@@ -62,17 +63,17 @@ public class RxFxBuilder{
                 popParent = true;
         }
     }
-    private void readBuilderCmd(Factory_Node.ScanNode currNode){
+    private void readBuilderCmd(ScanNode currNode){
         switch(currNode.cmd){
             case PUSH:
                 if(root == null){
-                    root = head = TreeFactory.newTreeNode(datatype, currNode);
+                    root = head = Glob.TREE_BUILD_UTIL.newTreeNode(datatype, currNode);
                 }
                 else{
-                    TreeFactory.TreeNode treeNode = TreeFactory.newTreeNode(datatype, currNode);
+                    TreeNodeBase treeNode = Glob.TREE_BUILD_UTIL.newTreeNode(datatype, currNode);
                     treeNode.level = head.level + 1;
                     treeNode.parent = head;
-                    head.addChildExternal(treeNode);
+                    head.addChild(treeNode);
                     head = treeNode;
                 }
                 break;
@@ -81,7 +82,7 @@ public class RxFxBuilder{
                 break;
         }
     }
-    private void readPayNodeCmd(Factory_Node.ScanNode currNode){
+    private void readPayNodeCmd(ScanNode currNode){
         switch(currNode.cmd){
             case PUSH:
                 head.payNodes = new ArrayList<>();

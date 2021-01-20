@@ -1,8 +1,6 @@
 package uqlong;
 
-import uq.UqGen;
-
-import static compile.basics.Keywords.UQ_FORMAT;
+import static langdef.Keywords.UQ_FORMAT;
 
 public class UqLong implements UqGenLong{
     private final long halt;

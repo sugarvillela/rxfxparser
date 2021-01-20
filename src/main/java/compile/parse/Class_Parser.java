@@ -2,11 +2,10 @@
  */
 package compile.parse;
 
-import compile.basics.*;
-
+import compile.implstack.RxlxReader;
 import runstate.RunState;
 import toksource.ScanNodeSource;
-import compile.basics.Factory_Node.ScanNode;
+import scannode.ScanNode;
 import compile.parse.factories.Factory_ParseItem;
 
 /**
@@ -42,7 +41,7 @@ public class Class_Parser extends RxlxReader {
         return this.fin;
     }
     @Override
-    public void onCreate(){
+    public void readFile(){
         //fin = new ScanNodeSource(new TextSource_file(inName + INTERIM_FILE_EXTENSION));
         if( !fin.hasData() ){
             return;
@@ -60,7 +59,7 @@ public class Class_Parser extends RxlxReader {
         }
     }
     @Override
-    public void onQuit(){
+    public void persist(){
         //System.out.println( "parser onQuit" ); 
 //        String wErr;
 //        for(Widget w : widgets ){

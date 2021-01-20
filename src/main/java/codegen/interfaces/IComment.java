@@ -1,8 +1,6 @@
 package codegen.interfaces;
 
-import codegen.ut.FormatUtil;
-
-import java.util.ArrayList;
+import translators.ut.FormatUtil;
 
 public interface IComment extends IWidget{
     IComment add(String... text);

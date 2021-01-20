@@ -1,7 +1,7 @@
 package codegen.genjava;
 
 import codegen.interfaces.*;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 import erlog.DevErr;
 
 import java.util.ArrayList;

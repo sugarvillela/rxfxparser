@@ -1,9 +1,10 @@
 package listtable;
 
-import compile.basics.Factory_Node;
-import compile.basics.IParseItem;
-import compile.basics.Keywords;
-import compile.basics.RxlxReader;
+import runstate.Glob;
+import scannode.ScanNode;
+import compile.interfaces.IParseItem;
+import langdef.Keywords;
+import compile.implstack.RxlxReader;
 import compile.parse.Base_ParseItem;
 import erlog.DevErr;
 import toksource.ScanNodeSource;
@@ -17,7 +18,6 @@ import java.util.Map;
 public class ListTableFileLoader extends RxlxReader implements IParseItem {
     private Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
     private final Map <Keywords.DATATYPE, String> firstCategory;
-    private Factory_Node scanNodeFactory;
     private String currCategory;
 
     public ListTableFileLoader(
@@ -28,36 +28,35 @@ public class ListTableFileLoader extends RxlxReader implements IParseItem {
         super(fin);
         this.listTableMap = listTableMap;
         this.firstCategory = firstCategory;
-        scanNodeFactory = Factory_Node.getInstance();
     }
 
     @Override
-    protected Base_ParseItem get(Factory_Node.ScanNode node){
-        return new ListTable.ListTableNode(node, this.listTableMap);
+    protected Base_ParseItem get(ScanNode node){
+        return new ListTableNode(node, this.listTableMap);
     }
 
     @Override
-    public void addTo(Factory_Node.ScanNode node) {
+    public void addTo(ScanNode node) {
         DevErr.get(this).kill("found usage: addTo: ", node.toString());
 //        listTableMap.get(node.datatype).get(currCategory).addTo(node);
     }
 
     @Override
-    public void setAttrib(Factory_Node.ScanNode node) {
+    public void setAttrib(ScanNode node) {
         DevErr.get(this).kill("found usage: setAttrib: ", node.toString());
 //        listTableMap.get(node.datatype).put(node.data, this.get(node));// Add new node to map
 //        currCategory = node.data;                       // Use this category for subsequent adds to that node
     }
 
     public void persist(String fileName){
-        ArrayList<Factory_Node.ScanNode> scanNodes = new ArrayList<>();
+        ArrayList<ScanNode> scanNodes = new ArrayList<>();
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                ((ListTable.ListTableNode)inner.getValue()).populateScanNodes(scanNodes);
+                ((ListTableNode)inner.getValue()).populateScanNodes(scanNodes);
             }
         }
         if(!scanNodes.isEmpty()){
-            nodeFactory.persist(fileName, scanNodes, "Defines lists, categories and items");
+            Glob.SCAN_NODE_FACTORY.persist(fileName, scanNodes, "Defines lists, categories and items");
         }
     }
 }

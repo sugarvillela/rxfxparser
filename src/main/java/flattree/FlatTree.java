@@ -1,24 +1,23 @@
 package flattree;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords;
-import compile.sublang.factories.TreeFactory;
+import runstate.Glob;
+import scannode.ScanNode;
+import scannode.ScanNodeFactory;
+import langdef.Keywords;
+import sublang.TreeBuildUtil;
 import erlog.DevErr;
 import interfaces.DataNode;
-import toktools.TK;
-import toktools.Tokens_special;
+import sublang.treenode.TreeNodeBase;
 
 import java.util.ArrayList;
 
-import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.DATATYPE.FX_PAY_NODE;
-import static compile.basics.Keywords.FIELD.LENGTH;
-import static compile.basics.Keywords.FIELD.VAL;
-import static compile.basics.Keywords.OP.PAYLOAD;
+import static langdef.Keywords.DATATYPE.*;
+import static langdef.Keywords.DATATYPE.FX_PAY_NODE;
+import static langdef.Keywords.FIELD.LENGTH;
+import static langdef.Keywords.FIELD.VAL;
+import static langdef.Keywords.OP.PAYLOAD;
 
-public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves(root);
-    private static final Factory_Node factoryNode = Factory_Node.getInstance();
-
+public class FlatTree {  // extends LogicTree  //ArrayList<TreeNode> leaves = leaves(root);
     private Keywords.DATATYPE builderType;
 
     private final FlatNode[] treeArr;
@@ -26,9 +25,9 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
 
     /*=====Scan Time Build and Extract================================================================================*/
 
-    public FlatTree(Keywords.DATATYPE datatype, TreeNode root) {
+    public FlatTree(Keywords.DATATYPE datatype, TreeNodeBase root) {
         setBuilderType(datatype);
-        treeArr = new FlatNode[size(root)];
+        treeArr = new FlatNode[Glob.TREE_BUILD_UTIL.size(root)];
         iNew = -1;
         flatTreeFromTree(root);
     }
@@ -47,21 +46,21 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
                 DevErr.get(this).kill("Developer: " + datatype);
         }
     }
-    private void flatTreeFromTree(TreeNode root){
+    private void flatTreeFromTree(TreeNodeBase root){
         FlatNode newParent = newFlatNode(root, null);
         BuildUsingDepthFirst(root, newParent);
         disp();
     }
-    private FlatNode newFlatNode(TreeNode treeSelf, FlatNode flatParent){
+    private FlatNode newFlatNode(TreeNodeBase treeSelf, FlatNode flatParent){
         iNew++;
         int iParent = (flatParent == null)? -1 : flatParent.self;
         return (treeArr[iNew] = new FlatNode(iNew, iParent, treeSelf, treeArr));
     }
-    private void BuildUsingDepthFirst(TreeNode treeParent, FlatNode flatParent){
+    private void BuildUsingDepthFirst(TreeNodeBase treeParent, FlatNode flatParent){
         //System.out.println(oneToString(flatParent));
         if(treeParent.nodes != null){
-            ArrayList<TreeNode> treeChildNodes = treeParent.nodes;
-            for(TreeNode treeSelf : treeChildNodes){
+            ArrayList<TreeNodeBase> treeChildNodes = treeParent.nodes;
+            for(TreeNodeBase treeSelf : treeChildNodes){
                 FlatNode newParent = newFlatNode(treeSelf, flatParent);
                 flatParent.addChild(iNew);
                 BuildUsingDepthFirst(treeSelf, newParent);
@@ -69,16 +68,17 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
         }
     }
 
-    public ArrayList<Factory_Node.ScanNode> treeToScanNodeList(){
+    public ArrayList<ScanNode> treeToScanNodeList(){
+        final ScanNodeFactory nodeFactory = Glob.SCAN_NODE_FACTORY;
         Keywords.DATATYPE payNodeType = (RX_BUILDER.equals(builderType))? RX_PAY_NODE : FX_PAY_NODE;
-        ArrayList<Factory_Node.ScanNode> cmdList = new ArrayList<>();
-        cmdList.add(factoryNode.newPushNode(builderType));
+        ArrayList<ScanNode> cmdList = new ArrayList<>();
+        cmdList.add(nodeFactory.newPushNode(builderType));
         cmdList.add(
-                factoryNode.newScanNode(Keywords.CMD.SET_ATTRIB, builderType, LENGTH, String.valueOf(treeArr.length))
+                nodeFactory.newScanNode(Keywords.CMD.SET_ATTRIB, builderType, LENGTH, String.valueOf(treeArr.length))
         );
         for(FlatNode flatNode : treeArr){
             cmdList.add(
-                factoryNode.newScanNode(Keywords.CMD.ADD_TO, builderType, VAL, flatNode.toString())
+                    nodeFactory.newScanNode(Keywords.CMD.ADD_TO, builderType, VAL, flatNode.toString())
             );
             if(PAYLOAD.asChar == flatNode.op){
                 cmdList.add(nodeFactory.newPushNode(payNodeType));
@@ -90,7 +90,7 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
                 cmdList.add(nodeFactory.newPopNode(payNodeType));
             }
         }
-        cmdList.add(factoryNode.newPopNode(builderType));
+        cmdList.add(nodeFactory.newPopNode(builderType));
         return cmdList;
     }
 
@@ -155,9 +155,9 @@ public class FlatTree extends TreeFactory{ //ArrayList<TreeNode> leaves = leaves
         String out = String.join(" ", list);
         System.out.println(out);
     }
-
-    @Override
-    public TreeNode treeFromWordPattern(String text) {
-        return null;
-    }
+//
+//    @Override
+//    public TreeNodeBase treeFromWordPattern(String text) {
+//        return null;
+//    }
 }

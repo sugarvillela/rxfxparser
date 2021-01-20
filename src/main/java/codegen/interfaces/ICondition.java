@@ -1,6 +1,6 @@
 package codegen.interfaces;
 
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 
 public interface ICondition extends IWidget{
     public enum CONNECTOR implements ICondition{

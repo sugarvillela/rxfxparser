@@ -1,7 +1,7 @@
 package toksource;
 
-import static compile.basics.Keywords.LOGGABLE_FORMAT;
-import static compile.basics.Keywords.STATUS_FORMAT;
+import static langdef.Keywords.LOGGABLE_FORMAT;
+import static langdef.Keywords.STATUS_FORMAT;
 
 import interfaces.ILifeCycle;
 import toksource.interfaces.ITextSource;
@@ -57,11 +57,7 @@ public class NullSource implements ITextSource, ITextWordOrLine, ILifeCycle {
 
     @Override
     public void onPush() {}
-    @Override
-    public void onBeginStep(){}
-    @Override
-    public void onEndStep(){}
-    
+
     @Override
     public void onPop() {}
 

@@ -1,12 +1,12 @@
 package listtable;
 
-import compile.basics.Keywords;
+import langdef.Keywords;
 import compile.parse.Base_ParseItem;
 import erlog.Erlog;
 
 import java.util.Map;
 
-import static compile.basics.Keywords.DATATYPE.RAW_TEXT;
+import static langdef.Keywords.DATATYPE.RAW_TEXT;
 
 public class ListTableItemSearch {
     protected final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
@@ -20,7 +20,7 @@ public class ListTableItemSearch {
     }
 
     public boolean isItem(Keywords.DATATYPE dataType, String category, String val){
-        return ((ListTable.ListTableNode) listTableMap.get(dataType).get(category)).contains(val);
+        return ((ListTableNode) listTableMap.get(dataType).get(category)).contains(val);
     }
 
     public Keywords.DATATYPE getDataType(String text){
@@ -49,7 +49,7 @@ public class ListTableItemSearch {
     public String getCategory(String val){
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                if(((ListTable.ListTableNode)inner.getValue()).contains(val)){
+                if(((ListTableNode)inner.getValue()).contains(val)){
                     return inner.getKey();
                 }
             }
@@ -57,14 +57,14 @@ public class ListTableItemSearch {
         return null;
     }
 
-    public ListTable.ListTableNode getListTableNode(Keywords.DATATYPE datatype, String category){
+    public ListTableNode getListTableNode(Keywords.DATATYPE datatype, String category){
         Base_ParseItem listTableNode = listTableMap.get(datatype).get(category);
         if(listTableNode == null){
             String datatypeString = (datatype == null)? "NULL" : datatype.toString();
             Erlog.get(this).set(String.format("Can't find %s in %s", category, datatypeString));
             return null;
         }
-        return (ListTable.ListTableNode)listTableNode;
+        return (ListTableNode)listTableNode;
     }
     public boolean isSpecialField(Keywords.DATATYPE datatype, String category, String item){
         return item.equals(getListTableNode(datatype, category).getLastField());

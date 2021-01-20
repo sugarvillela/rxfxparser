@@ -1,14 +1,14 @@
 package compile.parse.ut;
 
-import compile.basics.Factory_Node;
-import compile.basics.Keywords;
+import scannode.ScanNode;
+import langdef.Keywords;
 import compile.parse.Base_ParseItem;
-import compile.sublang.factories.PayNodes;
+import sublang.factories.PayNodes;
 import flattree.FlatTree;
 import toksource.ScanNodeSource;
 
-import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.FIELD.LENGTH;
+import static langdef.Keywords.DATATYPE.*;
+import static langdef.Keywords.FIELD.LENGTH;
 
 public class FlatTreeBuilder{
     private final Base_ParseItem parent;
@@ -34,7 +34,7 @@ public class FlatTreeBuilder{
     public FlatTree get(){
         return flatTree;
     }
-    private void readNode(Factory_Node.ScanNode currNode){
+    private void readNode(ScanNode currNode){
         //System.out.println(currNode);
         switch(currNode.datatype){
             case RX_BUILDER:
@@ -49,7 +49,7 @@ public class FlatTreeBuilder{
                 readParentCmd(currNode);
         }
     }
-    private void readParentCmd(Factory_Node.ScanNode currNode){
+    private void readParentCmd(ScanNode currNode){
         switch(currNode.cmd){
             case SET_ATTRIB:
                 parent.setAttrib(currNode);
@@ -59,7 +59,7 @@ public class FlatTreeBuilder{
         }
     }
 
-    private void readBuilderCmd(Factory_Node.ScanNode currNode){
+    private void readBuilderCmd(ScanNode currNode){
         switch(currNode.cmd){
             case SET_ATTRIB:
                 if(LENGTH.equals(currNode.field)){
@@ -76,7 +76,7 @@ public class FlatTreeBuilder{
                 break;
         }
     }
-    private void readPayNodeCmd(Factory_Node.ScanNode currNode){
+    private void readPayNodeCmd(ScanNode currNode){
         switch(currNode.cmd){
             case ADD_TO:
                 flatTree.addPayNode(factory.payNodeFromScanNode(currNode.data));

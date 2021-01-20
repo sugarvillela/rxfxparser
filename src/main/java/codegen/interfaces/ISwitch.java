@@ -1,9 +1,5 @@
 package codegen.interfaces;
 
-import codegen.ut.FormatUtil;
-
-import java.util.ArrayList;
-
 public interface ISwitch extends IWidget {
     ISwitch startCase(String case_);
 //    ISwitch startCase(String case_, boolean addToExisting);

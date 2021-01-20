@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static compile.basics.Keywords.NULL_TEXT;
+import static langdef.Keywords.NULL_TEXT;
 
 /**Very simple functions for stuff Java does not do well, or do at all
  *

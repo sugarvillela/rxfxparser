@@ -1,12 +1,9 @@
 package compile.scan.factories;
 
-import compile.symboltable.TextSniffer;
 import erlog.DevErr;
-import erlog.Erlog;
 import compile.scan.Base_ScanItem;
-import static compile.basics.Keywords.DATATYPE;
-import static compile.basics.Keywords.DATATYPE.*;
-import static compile.basics.Keywords.USERDEF_OPEN;
+import static langdef.Keywords.DATATYPE;
+import static langdef.Keywords.DATATYPE.*;
 import static compile.scan.factories.Factory_Strategy.PushEnum.*;
 import static compile.scan.factories.Factory_Strategy.PopEnum.*;
 import static compile.scan.factories.Factory_Strategy.StrategyEnum.*;
@@ -471,7 +468,7 @@ public class Factory_ScanItem extends Factory_Strategy{
             this.strategies = strategies;
             this.onPushStrategies = onPushStrategies;
             this.onPopStrategies = onPopStrategies;
-            System.out.println("Constructor: " +this.getDebugName());
+            //System.out.println("Constructor: " +this.getDebugName());
         }
     }
     

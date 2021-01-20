@@ -1,7 +1,9 @@
 package erlog;
 
-import compile.basics.IStackComponent;
+import compile.interfaces.Debuggable;
 
+/** A separate reporting system for in-development errors.
+ *  May be removed in release version, as all programming errors should be fixed, right? Right */
 public class DevErr {
     private static DevErr instance;
 
@@ -12,8 +14,8 @@ public class DevErr {
         instance.sourceName = source;
         return instance;
     }
-    public static DevErr get(IStackComponent stackComponent){// same erasure for string and object
-        return get(stackComponent.getDebugName());
+    public static DevErr get(Debuggable debuggable){// same erasure for string and object
+        return get(debuggable.getDebugName());
     }
     public static DevErr get(Object object){// same erasure for string and object
         return get(object.getClass().getSimpleName());

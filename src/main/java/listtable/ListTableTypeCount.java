@@ -1,6 +1,6 @@
 package listtable;
 
-import compile.basics.Keywords;
+import langdef.Keywords;
 import compile.parse.Base_ParseItem;
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class ListTableTypeCount {
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
             fieldCount = 0;
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                fieldCount += ((ListTable.ListTableNode)inner.getValue()).size();
+                fieldCount += ((ListTableNode)inner.getValue()).size();
                 //System.out.println(outer.getKey() + ": " + ((ListTable.ListTableNode)inner.getValue()).size());
             }
             listSourceCounts.put(outer.getKey(), fieldCount);
@@ -45,7 +45,7 @@ public class ListTableTypeCount {
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
             m = 0;
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                m = max(m, ((ListTable.ListTableNode)inner.getValue()).size());
+                m = max(m, ((ListTableNode)inner.getValue()).size());
             }
             //System.out.println(outer.getKey() + ": max = " + m);
             listSourceMaxes.put(outer.getKey(), m);
@@ -78,7 +78,7 @@ public class ListTableTypeCount {
             System.out.println(outer.getKey() + ": max        = " + getMaxCount(outer.getKey()));
             System.out.println(outer.getKey() + ": categories = " + getCategoryCount(outer.getKey()));
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                System.out.println(inner.getKey() + ": Count = " + ((ListTable.ListTableNode)inner.getValue()).size());
+                System.out.println(inner.getKey() + ": Count = " + ((ListTableNode)inner.getValue()).size());
                 inner.getValue().disp();
             }
         }

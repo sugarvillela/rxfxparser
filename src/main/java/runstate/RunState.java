@@ -1,16 +1,12 @@
 package runstate;
 
 import codegen.Widget;
-import codegen.translators.list.ListJava;
+import translators.list.ListJava;
 import commons.Dev;
-import codegen.namegen.NameGenSimple;
-import compile.basics.Base_Stack;
-import compile.basics.Factory_Node;
+import compile.implstack.Base_Stack;
 import compile.scan.Class_Scanner;
 import compile.scan.factories.Factory_ScanItem;
 import listtable.ListTable;
-import compile.symboltable.SymbolTable;
-import compile.symboltable.TextSniffer;
 import erlog.Erlog;
 import toksource.TextSource_file;
 import toksource.TokenSource;
@@ -21,7 +17,7 @@ import toksource.interfaces.ITextStatus;
 import java.io.File;
 import java.util.ArrayList;
 
-import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
+import static langdef.Keywords.SOURCE_FILE_EXTENSION;
 
 /**
  *
@@ -42,24 +38,20 @@ public class RunState implements ChangeListener {
         Widget.setDefaultLanguage(Widget.JAVA);
         er = Erlog.get(this);
         listeners = new ArrayList<>();
-        newEnumSet = false;
+        newListSet = false;
         parseOnly = false;
         //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
         genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
-        staticState = StaticState.init();
     }
 
-    private final StaticState staticState;
     private final ArrayList<ChangeListener> listeners;
     private final Erlog er;
-    //private final Unique unique;
-    private Base_Stack currStack, pausedStack;
-    private ITextStatus pausedStatusReporter;
-    private boolean newEnumSet, scanOnly, parseOnly; // arg flags
+    private Base_Stack activeParserStack, pausedParserStack;
+    private ITextStatus pausedTextStatusReporter;
+    private boolean newListSet, scanOnly, parseOnly; // arg flags
     private String inName, projName;
     private String genPath, genPackage;
-
 
     public void initFromProperties(String path){// TODO load from properties file
 
@@ -77,63 +69,62 @@ public class RunState implements ChangeListener {
         }
         projName = inName;
 
-        System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newEnumSet);
+        System.out.printf("inName = %s, outName = %s, newEnuFile = %b \n", inName, projName, newListSet);
 
         this.addChangeListener(er);
-        this.addChangeListener(Factory_Node.getInstance());
-        this.addChangeListener(SymbolTable.getInstance());
-
+        this.addChangeListener(Glob.SCAN_NODE_FACTORY);
+        this.addChangeListener(Glob.SYMBOL_TABLE);
         if(!parseOnly){
-            TextSniffer.init();
-            TextSniffer.getInstance().sleep();
-
-            Factory_ScanItem.init();
-            Factory_ScanItem.enterPreScanMode();
-
-            Class_Scanner.init(
-                    new TokenSource(
-                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-                    )
-            );
-            Class_Scanner scanner = Class_Scanner.getInstance();
-            setCurrParserStack(scanner);
-            scanner.onCreate();
-
-            if(ListTable.getInstance() != null){
-                ListTable.getInstance().persist();
-            }
-
-            System.out.println("Pre-Scan Complete");
-
-            TextSniffer.getInstance().wake();
-            Factory_ScanItem.enterScanMode();
-
-            Class_Scanner.init(
-                    new TokenSource(
-                            new TextSource_file(inName + SOURCE_FILE_EXTENSION)
-                    )
-            );
-            scanner = Class_Scanner.getInstance();
-            setCurrParserStack(scanner);
-            scanner.onCreate();
-
-            scanner.onQuit();
-            System.out.println("Scan Complete");
-
-            SymbolTable.killInstance();
-            TextSniffer.killInstance();
+            this.scan();
         }
-        if(!scanOnly){
-            NameGenSimple.init(projName);
-            System.out.println("ListTable build or rebuild");
+//        if(!scanOnly){
+//            this.parse();
+//        }
+        //Erlog.finish();
+    }
+    private void scan(){
+        Glob.TEXT_SNIFFER.setStateSleep();
 
-            ListTable listTable = ListTable.getInstance();
-            //listTable.disp();
-            listTable.getNumGen().initCategoryNodes();
-            //listTable.getNumGen().disp();
+        Factory_ScanItem.init();
+        Factory_ScanItem.enterPreScanMode();
+
+        Class_Scanner.init(
+                new TokenSource(
+                        new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+                )
+        );
+        Class_Scanner scanner = Class_Scanner.getInstance();
+        setActiveParserStack(scanner);
+        scanner.readFile();
+
+        Glob.LIST_TABLE.persist();
+
+        System.out.println("Pre-Scan Complete");
+
+        Glob.TEXT_SNIFFER.setStateWake();
+        Factory_ScanItem.enterScanMode();
+
+        Class_Scanner.init(
+                new TokenSource(
+                        new TextSource_file(inName + SOURCE_FILE_EXTENSION)
+                )
+        );
+        scanner = Class_Scanner.getInstance();
+        setActiveParserStack(scanner);
+        scanner.readFile();
+
+        scanner.persist();
+        System.out.println("Scan Complete");
+    }
+    private void parse(){
+        System.out.println("ListTable build or rebuild");
+
+        //Glob.LIST_TABLE.disp();
+        Glob.LIST_TABLE.getNumGen().initCategoryNodes();
+        //listTable.getNumGen().disp();
 //
-            ListJava listTranslator = new ListJava();
-            listTranslator.translate();
+        ListJava listTranslator = new ListJava();
+        listTranslator.translate();
 //
 //            System.out.println("Begin Parse");
 
@@ -145,15 +136,12 @@ public class RunState implements ChangeListener {
 //            Class_Parser parser = Class_Parser.getInstance();
 //            setCurrParserStack(parser);
 //            parser.onCreate();
-        }
-
-        //Erlog.finish();
     }
     private void readArgs(String[] args){
         for(int i = 1; i < args.length; i++){
             switch(args[i]){
                 case "-n": // lists in source file; don't use a stored rxlx list file
-                    newEnumSet = true;
+                    newListSet = true;
                     break;
                 case "-p": // parse only
                     parseOnly = true;
@@ -170,7 +158,7 @@ public class RunState implements ChangeListener {
         }
 
         if(parseOnly){
-            if(newEnumSet){
+            if(newListSet){
                 er.set("-n with -p: list tables will not be created");
             }
             if(scanOnly){
@@ -203,27 +191,27 @@ public class RunState implements ChangeListener {
 //        String anon = String.format("Anon_%s_%s", type.toString(), unique.toString());
 //        return anon;
 //    }
-    public void setCurrParserStack(Base_Stack currStack){
-        this.currStack = currStack;
+    public void setActiveParserStack(Base_Stack currStack){
+        this.activeParserStack = currStack;
     }
-    public Base_Stack getCurrParserStack(){
-        return currStack;
+    public Base_Stack getActiveParserStack(){
+        return activeParserStack;
     }
-    public void pauseCurrParserStack(Base_Stack tempStack, ITextStatus tempStatusReporter){
-        pausedStack = currStack;
-        currStack = tempStack;
-        pausedStatusReporter = Erlog.getTextStatusReporter();
-        Erlog.setTextStatusReporter(tempStatusReporter);
+    public void pauseActiveParserStack(Base_Stack newActiveParserStack, ITextStatus newTextStatusReporter){
+        pausedParserStack = activeParserStack;
+        activeParserStack = newActiveParserStack;
+        pausedTextStatusReporter = Erlog.getTextStatusReporter();
+        Erlog.setTextStatusReporter(newTextStatusReporter);
     }
-    public void pauseCurrParserStack(Base_Stack tempStack){
-        pausedStack = currStack;
-        currStack = tempStack;
-        pausedStatusReporter = null;
+    public void pauseActiveParserStack(Base_Stack tempStack){
+        pausedParserStack = activeParserStack;
+        activeParserStack = tempStack;
+        pausedTextStatusReporter = null;
     }
     public void resumeCurrParserStack(){
-        currStack = pausedStack;
-        if(pausedStatusReporter != null){
-            Erlog.setTextStatusReporter(pausedStatusReporter);
+        activeParserStack = pausedParserStack;
+        if(pausedTextStatusReporter != null){
+            Erlog.setTextStatusReporter(pausedTextStatusReporter);
         }
     }
 
@@ -243,11 +231,11 @@ public class RunState implements ChangeListener {
         }
     }
 
-    public void setNewEnumSet(boolean newEnumSet){
-        this.newEnumSet = newEnumSet;
+    public void setNewListSet(boolean newListSet){
+        this.newListSet = newListSet;
     }
-    public boolean isNewEnumSet(){
-        return newEnumSet;
+    public boolean isNewListSet(){
+        return newListSet;
     }
 
     private void deleteMe(){

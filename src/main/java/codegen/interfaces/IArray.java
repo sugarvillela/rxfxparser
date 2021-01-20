@@ -1,9 +1,5 @@
 package codegen.interfaces;
 
-import codegen.ut.FormatUtil;
-
-import java.util.ArrayList;
-
 public interface IArray extends IWidget {
     IArray add(String... items);
 

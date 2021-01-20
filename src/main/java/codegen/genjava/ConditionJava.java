@@ -2,7 +2,7 @@ package codegen.genjava;
 
 import codegen.interfaces.ICondition;
 import codegen.interfaces.IWidget;
-import codegen.ut.FormatUtil;
+import translators.ut.FormatUtil;
 
 import java.util.ArrayList;
 

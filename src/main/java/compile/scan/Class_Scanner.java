@@ -1,18 +1,19 @@
 
 package compile.scan;
 
-import compile.basics.Keywords.DATATYPE;
+import langdef.Keywords.DATATYPE;
 
 import java.util.ArrayList;
 
-import static compile.basics.Keywords.CONT_LINE;
-import static compile.basics.Keywords.INTERIM_FILE_EXTENSION;
-import static compile.basics.Keywords.SOURCE_FILE_EXTENSION;
-import compile.basics.Factory_Node.ScanNode;
+import static langdef.Keywords.CONT_LINE;
+import static langdef.Keywords.INTERIM_FILE_EXTENSION;
+import static langdef.Keywords.SOURCE_FILE_EXTENSION;
+
+import runstate.Glob;
+import scannode.ScanNode;
 import compile.scan.factories.Factory_ScanItem;
 import compile.symboltable.ConstantTable;
 import listtable.ListTable;
-import compile.symboltable.SymbolTable;
 import toksource.Base_TextSource;
 import toksource.TokenSource;
 
@@ -34,22 +35,19 @@ public class Class_Scanner extends Base_Scanner {
     public static void init(TokenSource fin){
         instance = new Class_Scanner(fin);
     }
-    public static void killInstance(){
-        instance = null;
-    }
 
     private final ArrayList<ScanNode> nodes;
     protected String backText;   // repeat lines
 
     // Runs Scanner
     @Override
-    public void onCreate(){
+    public void readFile(){
         if( !fin.hasData() ){
             er.set( "Bad input file name", inName + SOURCE_FILE_EXTENSION );
         }
         this.onTextSourceChange(fin);
 
-        readFile();
+        readFileLines();
 
         if(Factory_ScanItem.isPreScanMode()){
             dispPreScanResult();
@@ -57,18 +55,16 @@ public class Class_Scanner extends Base_Scanner {
         else{
             dispScanResult();
         }
-        //readFile();
-
     }
 
     private void dispPreScanResult(){
         System.out.println("==============================================");
         System.out.println("==============================================");
         System.out.println("Constant Table Result");
-        System.out.println(ConstantTable.getInstance().toString());
+        System.out.println(Glob.CONSTANT_TABLE.toString());
 
         System.out.println("\nList Table Result");
-        ListTable.getInstance().disp();
+        Glob.LIST_TABLE.disp();
     }
 
     private void dispScanResult(){
@@ -76,15 +72,15 @@ public class Class_Scanner extends Base_Scanner {
         System.out.println("==============================================");
 
         System.out.println("\nSymbol Table Result");
-        System.out.println(SymbolTable.getInstance().toString());
+        System.out.println(Glob.SYMBOL_TABLE.toString());
     }
 
-    private final void readFile(){
+    private void readFileLines(){
         backText = null;
         String text;
 
         // start with a target language datatype
-        push(Factory_ScanItem.getInstance().get(DATATYPE.TARGLANG_BASE));//Factory_cxs
+        push(Factory_ScanItem.getInstance().get(DATATYPE.TARGLANG_BASE));
         // start in line mode for target language
         fin.setLineGetter();
         while(true){// outer loop on INCLUDE file stack level
@@ -118,17 +114,19 @@ public class Class_Scanner extends Base_Scanner {
     }
 
     private void status(String text){
-        String topInfo = (top == null)? "null" : top.getDebugName();
-        System.out.printf("%s \t \t %s >>> %s \n", topInfo, fin.readableStatus(), text);
+        boolean showStatus = true;
+        if(showStatus){
+            String topInfo = (top == null)? "null" : top.getDebugName();
+            System.out.printf("%s \t \t %s >>> %s \n", topInfo, fin.readableStatus(), text);        }
     }
 
     @Override
-    public void onQuit(){
+    public void persist(){
         System.out.println( "Scanner onQuit" );
 
         if(
             inName == null ||
-            !nodeFactory.persist(
+            !Glob.SCAN_NODE_FACTORY.persist(
                 inName + INTERIM_FILE_EXTENSION,
                     nodes,
                     "Interim file containing parser instructions"

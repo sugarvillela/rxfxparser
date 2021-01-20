@@ -2,8 +2,7 @@ package codegen.genjava;
 
 import codegen.interfaces.ISwitch;
 import codegen.interfaces.IWidget;
-import codegen.ut.FormatUtil;
-import commons.Commons;
+import translators.ut.FormatUtil;
 import erlog.DevErr;
 
 import java.util.ArrayList;

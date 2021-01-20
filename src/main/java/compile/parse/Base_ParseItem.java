@@ -29,17 +29,16 @@ package compile.parse;
     @Override
     public void onQuit() {}
     */
-import compile.basics.Base_StackItem;
-import compile.basics.Factory_Node;
-import compile.basics.Factory_Node.ScanNode;
-import compile.basics.IParseItem;
+import compile.implitem.Base_StackItem;
+import scannode.ScanNode;
+import compile.interfaces.IParseItem;
 
 public abstract class Base_ParseItem extends Base_StackItem implements IParseItem{
     protected ScanNode node;
     protected String outFileName;
     protected String defName;
         
-    public Base_ParseItem(Factory_Node.ScanNode node){
+    public Base_ParseItem(ScanNode node){
         this.node = node;
         this.debugName = node.datatype.toString();
     }
@@ -49,10 +48,10 @@ public abstract class Base_ParseItem extends Base_StackItem implements IParseIte
     }
 
     @Override
-    public void addTo(Factory_Node.ScanNode node) {}
+    public void addTo(ScanNode node) {}
 
     @Override
-    public void setAttrib(Factory_Node.ScanNode node) {
+    public void setAttrib(ScanNode node) {
         switch (node.field){
             case DEF_NAME:
                 defName = node.data;
