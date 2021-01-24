@@ -55,6 +55,7 @@ public class ValidatorRx {
         Keywords.PRIM last = NULL;
         for(DataNode payNode : nodes){
             PayNodes.RxPayNode rxPayNode = (PayNodes.RxPayNode) payNode;
+
             if(last != rxPayNode.callerType){
                 String identifier = (rxPayNode.funType == null)? rxPayNode.item : rxPayNode.funType.toString();
                 Erlog.get(this).set(
@@ -69,6 +70,7 @@ public class ValidatorRx {
         return last;
     }
     private void assertValidTest(Keywords.PRIM left, Keywords.OP op, Keywords.PRIM right, TreeNodeBase parent){
+        System.out.println(String.format("Comparing %s to %s, leafop = %s", left.toString(), right.toString(), parent.leafOpToString()));
         if(left != right){
             Erlog.get(this).set(
                     String.format("Comparing %s to %s", left.toString(), right.toString()), parent.leafOpToString()

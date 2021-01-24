@@ -8,7 +8,6 @@ package langdef;
 import runstate.Glob;
 import translators.interfaces.RxFunGen;
 import translators.rx.RxFunJava;
-import listtable.ListTable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +18,7 @@ import static langdef.Keywords.FX_DATATYPE.*;
  * @author Dave Swanson
  */
 public final class Keywords {
+    public static final String DEFAULT_PROJ_NAME = "semantic1";
     public static final String SOURCE_FILE_EXTENSION = ".rxfx";
     public static final String INTERIM_FILE_EXTENSION = ".rxlx";
 
@@ -45,6 +45,7 @@ public final class Keywords {
     public static final String CONT_LINE = "...";      // Matlab-like extension
     public static final String ACCESS_MOD = "*";       // FX access: input string instead of rx string
     public static final String TARG = "TARG";          // Specify target-language-style regex for RX
+    // TODO user-selected invalid/not-set values for store_number
 
     // List of commands to instruct parser
     public enum CMD { 
@@ -65,7 +66,7 @@ public final class Keywords {
         //NONE            (PRIM.NULL),
         LIST_BOOLEAN    (PRIM.BOOLEAN),
         LIST_DISCRETE   (PRIM.DISCRETE),
-        LIST_VOTE       (PRIM.DISCRETE),
+        LIST_VOTE       (PRIM.NUMBER),
         LIST_STRING     (PRIM.STRING),
         LIST_NUMBER     (PRIM.NUMBER),
         LIST_SCOPES     (PRIM.IMMUTABLE),
@@ -209,7 +210,8 @@ public final class Keywords {
         NUMBER     (Pattern.compile("^[0-9]+$"),            new OP[]{OP.COMPARE_GT, OP.COMPARE_LT, OP.COMPARE_EQUAL}),
         STRING     (Pattern.compile("."),                   new OP[]{OP.COMPARE_EQUAL}),
         NULL       (Pattern.compile("null"),                new OP[]{OP.COMPARE_EQUAL}),
-        IMMUTABLE  (null,                            new OP[]{}),
+        STATE      (null,                            new OP[]{OP.COMPARE_EQUAL}),
+        IMMUTABLE  (null,                            new OP[]{OP.COMPARE_EQUAL}),
         ;
 
         public final Pattern pattern;
@@ -268,28 +270,35 @@ public final class Keywords {
 
     public enum RX_PAR {// RX PARAMETER
         // Rx Functions
-        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\(()\\)$")),
-        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)\\)$")),
-        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^.+\\([-]([0-9]+)\\)$")),
-        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)[-]\\)$")),
-        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)[-]([0-9]+)\\)$")),
-        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^.+\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$")),
-        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^.+\\(([A-Za-z0-9_\\.]+)\\)$")),
-        TEST_TRUE       (DATATYPE.BOOL_TEXT,Pattern.compile("^TRUE$")),
-        TEST_FALSE      (DATATYPE.BOOL_TEXT,Pattern.compile("^FALSE$")),
-        TEST_NUM        (DATATYPE.NUM_TEXT, Pattern.compile("^[0-9]+$")),
-        CATEGORY_ITEM   (DATATYPE.LIST,     Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]*\\[([a-zA-Z][a-zA-Z0-9_]*)\\]$")),
-        TEST_TEXT       (DATATYPE.RAW_TEXT, Pattern.compile("."))
+        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\(\\)$"),                            new int[]{1}),
+        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)\\)$"),                      new int[]{1, 2}),
+        NUM_PAR_MULTI   (DATATYPE.FUN,      Pattern.compile("^(.+)\\((([0-9]+[,])+[0-9]+)\\)$"),        new int[]{1, 2}),//2 has the comma-separated list
+        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^(.+)\\([:]([0-9]+)\\)$"),                 new int[]{1, 2}),
+        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([0-9]+)[:]\\)$"),                 new int[]{1, 2}),
+        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([0-9]+)[:]([0-9]+)\\)$"),         new int[]{1, 2, 3}),//returns the numbers
+        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$"),  new int[]{1, 2}),// returns constant with $ removed
+        TEST_TRUE       (DATATYPE.BOOL_TEXT,Pattern.compile("^TRUE$"),                                  new int[]{0}),
+        TEST_FALSE      (DATATYPE.BOOL_TEXT,Pattern.compile("^FALSE$"),                                 new int[]{0}),
+        TEST_NUM        (DATATYPE.NUM_TEXT, Pattern.compile("^[0-9]+$"),                                new int[]{0}),
+        CATEGORY_ITEM   (DATATYPE.LIST,     Pattern.compile("^([A-Z][A-Z0-9_]+)\\[([A-Z][A-Z0-9_]*)\\]$"),new int[]{1, 2}),// returns category, item
+        CATEGORY        (DATATYPE.LIST,     Pattern.compile("^[A-Z][A-Z0-9_]+$"),                       new int[]{0}),
+        // no application of these yet
+        //BOOL_PAR        (DATATYPE.FUN,      Pattern.compile("^(.+)\\(((TRUE)|(FALSE))\\)$"),            new int[]{1, 2}),
+        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([A-Za-z0-9_\\.]+)\\)$"),          new int[]{1, 2}),
+        AL_NUM_PAR_MULTI(DATATYPE.FUN,      Pattern.compile("^(.+)\\((([A-Za-z0-9]+[,])+[A-Za-z0-9]+)\\)$"), new int[]{1, 2}),//2 has the comma-separated list
+        // default
+        TEST_TEXT       (DATATYPE.RAW_TEXT, Pattern.compile("."),                                       new int[]{0})
         ;
 
         public final DATATYPE datatype;
         public final Pattern pattern;
+        public final int[] groups;
 
-        private RX_PAR(DATATYPE datatype, Pattern pattern){
+        private RX_PAR(DATATYPE datatype, Pattern pattern, int[] groups){
             this.datatype = datatype;
             this.pattern = pattern;
+            this.groups = groups;
         }
-
         public static RX_PAR fromInt(int i){
             for(RX_PAR p : values()){
                 if(p.ordinal() == i){
@@ -336,6 +345,8 @@ public final class Keywords {
                 new RX_PAR[]{RX_PAR.CATEGORY_ITEM},
                 PRIM.NUMBER
         ),
+        STORE_NUM_SET(null, null, null, PRIM.NUMBER),
+        STORE_ANY_SET(null, null, null, PRIM.BOOLEAN),
         VAL_CONTAINER_INT(
                 new RxFunJava.SingleIntParam("ValContainerInt"),
                 PRIM.NULL,
@@ -381,15 +392,15 @@ public final class Keywords {
         ;
 
         public final RxFunGen translator;
-        public final PRIM outType;
-        public final RX_PAR[] parTypes;
         public final PRIM caller;
+        public final RX_PAR[] parTypes;
+        public final PRIM outType;
 
         private RX_FUN(RxFunGen translator, PRIM caller, RX_PAR[] parTypes, PRIM outType){
             this.translator = translator;
-            this.outType =outType;
-            this.parTypes = parTypes;
             this.caller = caller;
+            this.parTypes = parTypes;
+            this.outType = outType;
         }
         public static RX_FUN fromString(String text ){
             for(RX_FUN f : values()){

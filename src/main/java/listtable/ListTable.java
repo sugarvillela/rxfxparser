@@ -31,10 +31,13 @@ public class ListTable {
         //Erlog.get("ListTable").set("Happy stop");
         RunState runState = RunState.getInstance();
         if(runState.isNewListSet()){
+            //System.out.println("ListTable runState.isNewListSet = true");
             instance.fileLoader = new ListTableFileLoader(null, instance.listTableMap, instance.firstCategory);
         }
         else{
+            //System.out.println("ListTable runState.isNewListSet = false");
             String fName = instance.listTableFileName();
+            //System.out.println("ListTable fileName = " + fName);
             instance.fileLoader = new ListTableFileLoader(
                 new ScanNodeSource(new TextSource_file(fName)),
                 instance.listTableMap,

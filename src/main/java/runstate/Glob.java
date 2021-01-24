@@ -13,6 +13,7 @@ import scannode.ScanNodeFactory;
 import sublang.LogicTreeFx;
 import sublang.LogicTreeRx;
 import sublang.TreeBuildUtil;
+import sublang.rxfun.OutTypeUtil;
 import sublang.ut.*;
 
 import java.text.SimpleDateFormat;
@@ -36,6 +37,7 @@ public class Glob {
     public static final LogicTreeRx     LOGIC_TREE_RX;
     public static final LogicTreeFx     LOGIC_TREE_FX;
 
+    public static final OutTypeUtil     RX_FUN_UTIL;
     public static final ValidatorRx     VALIDATOR_RX;
     public static final ValidatorFx     VALIDATOR_FX;
     public static final RxParamUtil     RX_PARAM_UTIL;
@@ -63,6 +65,7 @@ public class Glob {
         LOGIC_TREE_RX =     LogicTreeRx.init();
         LOGIC_TREE_FX =     LogicTreeFx.init();
 
+        RX_FUN_UTIL =       OutTypeUtil.init();
         VALIDATOR_RX =      ValidatorRx.init();
         VALIDATOR_FX =      ValidatorFx.init();
         RX_PARAM_UTIL =     RxParamUtil.init();

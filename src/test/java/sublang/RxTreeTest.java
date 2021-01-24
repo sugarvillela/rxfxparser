@@ -1,42 +1,41 @@
-package demos;
+package sublang;
 
+import listtable.ListTableItemSearch;
+import runstate.Glob;
 import scannode.ScanNode;
-import sublang.TreeBuildUtil;
 import sublang.treenode.TreeNodeBase;
-import java.util.ArrayList;//RX_AND, RX_OR, RX_NOT, RX_EQ,
 
+import java.util.ArrayList;
 
-public class RxTree_ {
-    private static RxTree_ instance;
-    
-    public static RxTree_ getInstance(){
-        return (instance == null)? (instance = new RxTree_()) : instance;
+public class RxTreeTest {
+    public static void testSimpleTree(){
+        Glob.LIST_TABLE.initLists();
+        Glob.LIST_TABLE.disp();
+        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
+        TreeNodeBase root = Glob.LOGIC_TREE_RX.treeFromWordPattern(text);
+        Glob.TREE_BUILD_UTIL.dispPreOrder(root);
     }
-    protected RxTree_(){
-        //rxTree = RxLogicTree.getInstance();
+    public static void testListTableMethods(){
+        Glob.LIST_TABLE.initLists();
+        //Glob.LIST_TABLE.disp();
+        ListTableItemSearch search = Glob.LIST_TABLE.getItemSearch();
+        System.out.println("item:     datatype: " + search.getDataType("IN"));
+        System.out.println("category: datatype: " + search.getDataType("TEXT"));
+        System.out.println("datatype: datatype: " + search.getDataType("LIST_STRING"));
+
+        System.out.println("item:     datatype: " + search.getDataType("ARTICLE"));
+        System.out.println("category: datatype: " + search.getDataType("WORD_SUB_TYPE"));
+        System.out.println("datatype: datatype: " + search.getDataType("LIST_BOOLEAN"));
+
+        System.out.println("categoryByItemName(IN): " + search.categoryByItemName("IN"));
+        System.out.println("categoryByItemName(ARTICLE): " + search.categoryByItemName("ARTICLE"));
     }
-    
-    private TreeBuildUtil rxTree;
-    
-    public void test1(){
-//        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
-//        rxTree.dispBreadthFirst(root);
-//        //rxTree.dispPreOrder(root);
-    }
-    public void test2(){
-//        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-//        String text = "~(A=a&B='b')&(C=c&D=d)|~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
-//        TreeNodeBase root = rxTree.treeFromWordPattern(text);
-//        //rxTree.dispPreOrder(root);
-//        //rxTree.dispLeaves(root);
-//        rxTree.dispBreadthFirst(root);
-//        ArrayList<ScanNode> cmdList = rxTree.treeToScanNodeList(RX, root);
-//        //Commons.disp(cmdList, "\nCommandList");
-//        ArrayList<String> strList = scanNodesToString(cmdList);
-//        //TreeNode reroot = rxTree.treeFromScanNodeSource(strList);
-//        //rxTree.dispPreOrder(reroot);
-//        //rxTree.dispBreadthFirst(root);
+    public static void testSimpleFunPattern(){
+        Glob.LIST_TABLE.initLists();
+        //Glob.LIST_TABLE.disp();
+        String text = "TEXT[IN].LEN().RANGE(1,6)=TRUE&WORD_SUB_TYPE[ARTICLE]"; //
+        TreeNodeBase root = Glob.LOGIC_TREE_RX.treeFromWordPattern(text);
+        //Glob.TREE_BUILD_UTIL.dispPreOrder(root);
     }
     public void test3(){
 //        //String text = "~(A=a&B='b')&(C=c&D=d)&~(E=e&F=f)&'G'";//"dru='&'&LEN()=2";
@@ -57,8 +56,8 @@ public class RxTree_ {
 //        rxTree.dispBreadthFirst(root);
     }
     public boolean assertEqual(TreeNodeBase root1, TreeNodeBase root2){
-        ArrayList<TreeNodeBase>[] levels1 = rxTree.breadthFirst(root1);
-        ArrayList<TreeNodeBase>[] levels2 = rxTree.breadthFirst(root2);
+        ArrayList<TreeNodeBase>[] levels1 = Glob.TREE_BUILD_UTIL.breadthFirst(root1);
+        ArrayList<TreeNodeBase>[] levels2 = Glob.TREE_BUILD_UTIL.breadthFirst(root2);
         if(levels1.length != levels2.length){
             System.out.println("fail: levels1.length != levels2.length");
             return false;
@@ -82,7 +81,7 @@ public class RxTree_ {
         }
         return true;
     }
-    
+
 
     public ArrayList<String> scanNodesToString(ArrayList<ScanNode> scanNodes){
         ArrayList<String> nodesToString = new ArrayList<>();

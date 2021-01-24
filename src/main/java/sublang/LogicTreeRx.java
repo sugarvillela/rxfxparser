@@ -12,6 +12,7 @@ import listtable.ListTableNode;
 import runstate.Glob;
 import sublang.factories.PayNodes;
 import sublang.interfaces.ILogicTree;
+import sublang.rxfun.RxFunPattern;
 import sublang.treenode.TreeNodeBase;
 import erlog.DevErr;
 import erlog.Erlog;
@@ -39,18 +40,25 @@ public class LogicTreeRx implements ILogicTree {//extends LogicTree
         TreeNodeBase root = this.buildTree(text);
 
         ArrayList<TreeNodeBase> leaves = Glob.TREE_BUILD_UTIL.leaves(root);
-        this.replaceConstants(leaves);    // read constants before extend
-        this.extendLeaves(leaves);     // fix, split and unwrap
+        for(TreeNodeBase leaf : leaves){
+            RxFunPattern funPattern = new RxFunPattern(leaf.data);
+        }
 
-        leaves = Glob.TREE_BUILD_UTIL.leaves(root);    // recalculate after extend
-        this.replaceConstants(leaves);    // read constants again after extend
-        this.setPayNodes(leaves);
-        //Glob.TREE_BUILD_UTIL.dispBreadthFirst(root);
 
-        this.validateOperations(leaves);
 
-        Glob.TREE_BUILD_UTIL.dispLeaves(root);
-        Erlog.get(this).set("Happy stop");
+//        this.replaceConstants(leaves);    // read constants before extend
+
+//        this.extendLeaves(leaves);     // fix, split and unwrap
+//
+//        leaves = Glob.TREE_BUILD_UTIL.leaves(root);    // recalculate after extend
+//        this.replaceConstants(leaves);    // read constants again after extend
+//        this.setPayNodes(leaves);
+//        //Glob.TREE_BUILD_UTIL.dispBreadthFirst(root);
+//
+//        this.validateOperations(leaves);
+//
+//        Glob.TREE_BUILD_UTIL.dispLeaves(root);
+//        Erlog.get(this).set("Happy stop");
         return root;
     }
 
@@ -131,7 +139,7 @@ public class LogicTreeRx implements ILogicTree {//extends LogicTree
         Glob.RX_PARAM_UTIL.findAndSetParam(leaf, leafData);
 
         if(CATEGORY_ITEM.equals(Glob.RX_PARAM_UTIL.getParamType())){
-            leaf.data = String.format("%s[%s]",
+            leaf.data = String.format(DEFAULT_FIELD_FORMAT,
                     Glob.RX_PARAM_UTIL.getUDefCategory(),
                     Glob.RX_PARAM_UTIL.getItem()
             );

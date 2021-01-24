@@ -2,7 +2,6 @@ package sublang.ut;
 
 import langdef.Keywords;
 import listtable.ListTableItemSearch;
-import listtable.ListTable;
 import erlog.DevErr;
 import erlog.Erlog;
 import runstate.Glob;
@@ -38,7 +37,7 @@ public class RxParamUtil extends ParamUtil{
         else{
             mainText = text;
             //listTable = ListTableScanLoader.getInstance();
-            listTableItemSearch = Glob.LIST_TABLE.getItemSearch();;
+            listTableItemSearch = Glob.LIST_TABLE.getItemSearch();
             identifyPattern();
         }
     }
@@ -95,43 +94,36 @@ public class RxParamUtil extends ParamUtil{
     /** Expects mainText set */
     private void identifyPattern(){
         Keywords.RX_PAR[] parTypes = Keywords.RX_PAR.values();
+        System.out.println("\nidentifyPattern: mainText="+mainText);
         for(int pari = 0; pari < parTypes.length; pari++){
 
             matcher = parTypes[pari].pattern.matcher(mainText);
             if(matcher.find()){
                 paramType = parTypes[pari];
-
+                System.out.println("found "+paramType);
                 switch(paramType.datatype){
                     case FUN:
                         switch(paramType){
-                            case CONST_PAR:
-                                bracketText = matcher.replaceAll("$1");
-                                mainText = mainText.substring(0, mainText.length() - bracketText.length() -2);
-                                mainText = readConstant(mainText, bracketText);
-                                identifyPattern();
-                                return;
+                            case EMPTY_PAR:
+                                this.unpackEmptyParams();
                             case NUM_PAR:
-                                intValues = new int[]{
-                                    Integer.parseInt(matcher.replaceAll("$1"))
-                                };
+                                this.unpackIntParams();
                                 break;
+                            case CONST_PAR:
+                                mainText = readConstant(
+                                        matcher.group(paramType.groups[0]),
+                                        matcher.group(paramType.groups[1])
+                                );
+                                this.identifyPattern(); // recurse with unpacked constant value
+                                return;
                             case RANGE_BELOW:
-                                intValues = new int[]{
-                                    0,
-                                    Integer.parseInt(matcher.replaceAll("$1"))
-                                };
+                                this.unpackRangeBelow();
                                 break;
                             case RANGE_ABOVE:
-                                intValues = new int[]{
-                                    Integer.parseInt(matcher.replaceAll("$1")),
-                                    MAX
-                                };
+                                this.unpackRangeAbove();
                                 break;
                             case RANGE_PAR:
-                                intValues = new int[]{
-                                        Integer.parseInt(matcher.replaceAll("$1")),
-                                        Integer.parseInt(matcher.replaceAll("$2"))
-                                };
+                                this.unpackIntParams();
                                 if(intValues[0] >= intValues[1]){
                                     Erlog.get(this).set("Expected range in ascending order", mainText);
                                 }
@@ -142,14 +134,12 @@ public class RxParamUtil extends ParamUtil{
                         outType = funType.outType;
                         break;
                     case BOOL_TEXT:
-                        intValues = new int[]{
-                            (TEST_TRUE.equals(paramType))? 1 : 0
-                        };
-                        outType = BOOLEAN;
+                        mainText = String.format("VAL_CONTAINER_BOOL(%c)", (TEST_TRUE.equals(paramType))? '1' : '0');
+                        this.identifyPattern(); // recurse with value converted to function
                         break;
                     case NUM_TEXT:
-                        intValues = new int[]{Integer.parseInt(mainText)};
-                        outType = NUMBER;
+                        mainText = String.format("VAL_CONTAINER_INT(%s)", mainText);
+                        this.identifyPattern(); // recurse with value converted to function
                         break;
                     case LIST:
                         bracketText = matcher.replaceAll("$1");
@@ -168,10 +158,34 @@ public class RxParamUtil extends ParamUtil{
         }
         Erlog.get(this).set("Syntax error", mainText);
     }
+    private void unpackEmptyParams(){
+        mainText = matcher.group(paramType.groups[0]);
+    }
+    private void unpackIntParams(){
+        mainText = matcher.group(paramType.groups[0]);
+        intValues = new int[paramType.groups.length - 1];
+        for(int i = 1; i < paramType.groups.length; i++){
+            intValues[i-1] = Integer.parseInt(matcher.group(paramType.groups[i]));
+        }
+    }
+    private void unpackRangeBelow(){
+        mainText = matcher.group(paramType.groups[0]);
+        intValues = new int[]{
+                0,
+                Integer.parseInt(matcher.group(paramType.groups[1]))
+        };
+    }
+    private void unpackRangeAbove(){
+        mainText = matcher.group(paramType.groups[0]);
+        intValues = new int[]{
+                Integer.parseInt(matcher.group(paramType.groups[1])),
+                MAX
+        };
+    }
 
     private void setTypesFromItem(){// error or assume?
         String category = mainText.substring(0, mainText.length() - bracketText.length() -2);
-        if(category.equals(listTableItemSearch.getCategory(bracketText))){
+        if(category.equals(listTableItemSearch.categoryByItemName(bracketText))){
             item = bracketText;
             uDefCategory = category;
             listSource = listTableItemSearch.getDataType(uDefCategory);
@@ -185,11 +199,11 @@ public class RxParamUtil extends ParamUtil{
     }
 
     private void setTypesFromText(){
-        String tempCategory = listTableItemSearch.getCategory(mainText);
+        String tempCategory = listTableItemSearch.categoryByItemName(mainText);
         Keywords.DATATYPE tempListSource;
         if(
             tempCategory != null &&
-            (tempListSource = listTableItemSearch.getDataType(tempCategory)) != RAW_TEXT
+            (tempListSource = listTableItemSearch.getDataType(tempCategory)) != null
         ){
             fixParamType(CATEGORY_ITEM);
             item = mainText;

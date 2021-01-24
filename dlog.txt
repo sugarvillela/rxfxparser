@@ -1,1 +1,8 @@
-Error: semantic1.rxfx line 15 word 1: LogicTreeRx: Happy stop
+Error:  line 0 word 0: 
+RxFun{mainText=''
+    paramValues=null
+    paramType=EMPTY_PAR
+    callerType=null
+    outType=null
+    funType=null
+}: Unknown RX function at 

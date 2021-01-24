@@ -6,8 +6,6 @@ import erlog.Erlog;
 
 import java.util.Map;
 
-import static langdef.Keywords.DATATYPE.RAW_TEXT;
-
 public class ListTableItemSearch {
     protected final Map <Keywords.DATATYPE, Map<String, Base_ParseItem>> listTableMap;
 
@@ -24,32 +22,37 @@ public class ListTableItemSearch {
     }
 
     public Keywords.DATATYPE getDataType(String text){
-        if(text != null){
-            for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
-                if(outer.getValue().containsKey(text)){
-                    return outer.getKey();
-                }
-            }
-            String category = getCategory(text);
-            if(category != null){
-                for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
-                    if(outer.getValue().containsKey(category)){
-                        return outer.getKey();
-                    }
-                }
-            }
-            Keywords.DATATYPE datatype = Keywords.DATATYPE.fromString(text);
-            if(datatype != null){
-                return datatype;
-            }
+        Keywords.DATATYPE datatype;
+        if(text == null || (
+            (datatype = datatypeByCategoryName(text)) == null &&    // Case 1: text is a category name in the map
+            (datatype = datatypeByItemName(text)) == null &&        // Case 2: text is an item name in the map
+            (datatype = Keywords.DATATYPE.fromString(text)) == null // Case 3: text is a datatype name, not necessarily in the map
+        )){
+            return null;
         }
-        return RAW_TEXT;
+        else{
+            return datatype;
+        }
     }
 
-    public String getCategory(String val){
+    public Keywords.DATATYPE datatypeByCategoryName(String categoryName){
+        for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
+            if(outer.getValue().containsKey(categoryName)){
+                return outer.getKey();
+            }
+        }
+        return null;
+    }
+
+    public Keywords.DATATYPE datatypeByItemName(String itemName){
+        String category = categoryByItemName(itemName);
+        return (category == null)? null : datatypeByCategoryName(category);
+    }
+
+    public String categoryByItemName(String itemName){
         for (Map.Entry<Keywords.DATATYPE, Map<String, Base_ParseItem>> outer : listTableMap.entrySet()) {
             for (Map.Entry<String, Base_ParseItem> inner : outer.getValue().entrySet()) {
-                if(((ListTableNode)inner.getValue()).contains(val)){
+                if(((ListTableNode)inner.getValue()).contains(itemName)){
                     return inner.getKey();
                 }
             }

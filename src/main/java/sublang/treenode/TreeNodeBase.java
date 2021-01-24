@@ -17,6 +17,9 @@ import static langdef.Keywords.NULL_TEXT;
 import static langdef.Keywords.OP.NOT;
 import static langdef.Keywords.OP.PAYLOAD;
 
+/**
+ * Expect non-empty string
+ */
 public abstract class TreeNodeBase extends DataNode implements ITreeNode {
     protected static final Tokens_special T = new Tokens_special("", "('", TK.IGNORESKIP);
     protected static final Uq uq = new Uq();
@@ -38,7 +41,6 @@ public abstract class TreeNodeBase extends DataNode implements ITreeNode {
     public TreeNodeBase(Keywords.DATATYPE rxOrFx, String data, int level, TreeNodeBase parent) {
         this.rxOrFx = rxOrFx;
         this.op = PAYLOAD;
-        //connector = RX_PAYLOAD;
         this.id = uq.next();
         this.quoted = false;
         this.not = false;
@@ -243,7 +245,7 @@ public abstract class TreeNodeBase extends DataNode implements ITreeNode {
 
         //String paramTypeString = (paramType == null)? NULL_TEXT : paramType.toString();
         if (nodes == null) {
-            position = "LEAF " + data;
+            position = "LEAF, " + data;
         } else {
             String[] childNodes = new String[nodes.size()];
             int i = 0;

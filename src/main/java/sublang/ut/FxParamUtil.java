@@ -2,7 +2,6 @@ package sublang.ut;
 
 import langdef.Keywords;
 import listtable.ListTableItemSearch;
-import listtable.ListTable;
 import erlog.DevErr;
 import erlog.Erlog;
 import runstate.Glob;
@@ -10,7 +9,6 @@ import sublang.treenode.TreeNodeBase;
 import toktools.TK;
 import toktools.Tokens_special;
 
-import static langdef.Keywords.DATATYPE.RAW_TEXT;
 import static langdef.Keywords.FX_PAR.FUN_CAT;
 import static langdef.Keywords.FX_PAR.FUN_CAT_MULTI;
 
@@ -170,10 +168,10 @@ public class FxParamUtil extends ParamUtil{
         }
     }
     private boolean isListItem(String bracketText_){
-        uDefCategory = listTableItemSearch.getCategory(bracketText_);
+        uDefCategory = listTableItemSearch.categoryByItemName(bracketText_);
         return(
             uDefCategory != null &&
-            (listSource = listTableItemSearch.getDataType(uDefCategory)) != RAW_TEXT
+            (listSource = listTableItemSearch.getDataType(uDefCategory)) != null
         );
     }
     private void funMulti(){
@@ -209,8 +207,8 @@ public class FxParamUtil extends ParamUtil{
         }
 
         if(
-            category.equals(listTableItemSearch.getCategory(item)) &&
-            (listSource = listTableItemSearch.getDataType(category)) != RAW_TEXT
+            category.equals(listTableItemSearch.categoryByItemName(item)) &&
+            (listSource = listTableItemSearch.getDataType(category)) != null
         ){
             items[i] =       item;
             uDefCategories[i] =  category;

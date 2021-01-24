@@ -1,6 +1,7 @@
 package runstate;
 
 import codegen.Widget;
+import langdef.Keywords;
 import translators.list.ListJava;
 import commons.Dev;
 import compile.implstack.Base_Stack;
@@ -27,11 +28,18 @@ import static langdef.Keywords.SOURCE_FILE_EXTENSION;
 // TODO rename LIST datatypes to FLAG
 public class RunState implements ChangeListener {
     private static RunState instance;
-    
     public static RunState getInstance(){
-        return (instance == null)?
-                (instance = new RunState()) : instance;
+        return (instance == null)? (instance = new RunState()) : instance;
     }
+
+    private final ArrayList<ChangeListener> listeners;
+    private final Erlog er;
+    private Base_Stack activeParserStack, pausedParserStack;
+    private ITextStatus pausedTextStatusReporter;
+    private boolean newListSet, scanOnly, parseOnly; // arg flags
+    private String inName, projName;
+    private String genPath, genPackage;
+
     private RunState(){
         Dev.dispOn();
         Erlog.initErlog(Erlog.DISRUPT|Erlog.USESYSOUT);
@@ -43,24 +51,14 @@ public class RunState implements ChangeListener {
         //genPath = "C:\\Users\\daves\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//laptop
         genPath = "C:\\Users\\Dave Swanson\\OneDrive\\Documents\\GitHub\\SemanticAnalyzer\\src\\main\\java\\generated";//desktop
         genPackage = "generated";
+        inName = "semantic1";
     }
-
-    private final ArrayList<ChangeListener> listeners;
-    private final Erlog er;
-    private Base_Stack activeParserStack, pausedParserStack;
-    private ITextStatus pausedTextStatusReporter;
-    private boolean newListSet, scanOnly, parseOnly; // arg flags
-    private String inName, projName;
-    private String genPath, genPackage;
 
     public void initFromProperties(String path){// TODO load from properties file
 
     }
     public void init(String[] args){
-        if(args == null || args.length == 0){
-            inName = "semantic1";
-        }
-        else{
+        if(args != null && args.length != 0){
             inName = (args[0].endsWith(SOURCE_FILE_EXTENSION))?
                     args[0].substring(0, args[0].length() - SOURCE_FILE_EXTENSION.length()) : args[0];
             if(args.length > 1){
@@ -97,6 +95,9 @@ public class RunState implements ChangeListener {
         setActiveParserStack(scanner);
         scanner.readFile();
 
+        if(!Glob.LIST_TABLE.isInitialized()){
+            Glob.LIST_TABLE.initLists();
+        }
         Glob.LIST_TABLE.persist();
 
         System.out.println("Pre-Scan Complete");
@@ -168,7 +169,7 @@ public class RunState implements ChangeListener {
     }
 
     public String getInName(){
-        return this.inName;
+        return (inName == null)? Keywords.DEFAULT_PROJ_NAME : inName;
     }
 
     public void setProjName(String projName){
