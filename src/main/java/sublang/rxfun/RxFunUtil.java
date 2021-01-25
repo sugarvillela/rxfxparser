@@ -1,15 +1,17 @@
 package sublang.rxfun;
 
+import runstate.Glob;
+
 import static langdef.Keywords.*;
 import static langdef.Keywords.RX_FUN.*;
 
-public class OutTypeUtil {
-    private static OutTypeUtil instance;
+public class RxFunUtil {
+    private static RxFunUtil instance;
 
-    public static OutTypeUtil init(){
-        return (instance == null)? (instance = new OutTypeUtil()) : instance;
+    public static RxFunUtil init(){
+        return (instance == null)? (instance = new RxFunUtil()) : instance;
     }
-    private OutTypeUtil() {}
+    private RxFunUtil() {}
 
     public RX_FUN[] getAvailableFunctions(RxFun rxFun){
         DATATYPE listSource = rxFun.getListSource();
@@ -79,7 +81,7 @@ public class OutTypeUtil {
         return (thisFun.getFunType().outType == nextFun.getFunType().caller);
     }
     private boolean matchOneUnknown(RxFun thisFun, RxFun nextFun){
-        RX_FUN[] availableFunctions = thisFun.getOutTypeUtil().getAvailableFunctions(thisFun);
+        RX_FUN[] availableFunctions = Glob.RX_FUN_UTIL.getAvailableFunctions(thisFun);
         for (RX_FUN availableFun: availableFunctions) {
             if(nextFun.getFunType().caller == availableFun.outType){
                 thisFun.setFunType(availableFun);

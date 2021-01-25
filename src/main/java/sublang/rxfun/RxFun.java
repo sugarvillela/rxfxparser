@@ -54,7 +54,7 @@ public class RxFun implements Debuggable {
                 paramType = parType;
                 System.out.println("found " + paramType);
                 switch (paramType.datatype) {
-                    case FUN:
+                    case FUN_PAR:
                         switch (paramType) {
                             case EMPTY_PAR:
                                 this.unpackEmptyParams();

@@ -102,7 +102,7 @@ public class RxParamUtil extends ParamUtil{
                 paramType = parTypes[pari];
                 System.out.println("found "+paramType);
                 switch(paramType.datatype){
-                    case FUN:
+                    case FUN_PAR:
                         switch(paramType){
                             case EMPTY_PAR:
                                 this.unpackEmptyParams();

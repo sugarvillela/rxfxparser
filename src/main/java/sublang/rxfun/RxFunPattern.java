@@ -151,7 +151,7 @@ public class RxFunPattern {
 
         @Override
         public boolean balance(RxFun leftFun){
-            RX_FUN[] availableFunctions = leftFun.getOutTypeUtil().getAvailableFunctions(leftFun);
+            RX_FUN[] availableFunctions = Glob.RX_FUN_UTIL.getAvailableFunctions(leftFun);
             for(RX_FUN  availableFun : availableFunctions){
                 if(generateRight(leftFun, availableFun)){
                     leftFun.setFunType(availableFun);

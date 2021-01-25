@@ -73,27 +73,26 @@ public final class Keywords {
         RAW_TEXT        (PRIM.STRING),
         NUM_TEXT        (PRIM.NUMBER),
         BOOL_TEXT       (PRIM.BOOLEAN),
+        FUN_PAR,
         // Control flow data types
-        LIST,
-        TARGLANG_BASE,
-        VAR, 
-        SCOPE, 
-        RXFX,
-        FOR,
-        IF, ELSE,
-        RX, FX, SRCLANG,
+        LIST,           //RxFunUtil
+        TARGLANG_BASE,  //scan, strategy
+        VAR,            // 0
+        SCOPE,          // scan, parse
+        RXFX,           //scan, strategy
+        FOR,            //scan
+        IF, ELSE,       //scan, strategy, ut
+        RX, FX, SRCLANG,//scan, strategy, sublang, translators...
         // Constant types
-        CONSTANT,
+        CONSTANT,       //scan
         // Non-file-generating datatypes
-        ATTRIB, INCLUDE, FUN,
+        ATTRIB, INCLUDE, //scan, strategy
+        FUN,            //scan, strategy ** sublang, rxFun, RX_PAR.datatype
         // sub-datatypes not actually in the language
-        IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM,
-        RX_WORD, RX_TARGLANG, FX_WORD, RX_BUILDER, FX_BUILDER, RX_PAY_NODE, FX_PAY_NODE,//RX_STATEMENT,
+        IF_ELSE, IF_TEST, SCOPE_TEST, SCOPE_ITEM,//scan, strategy
+        RX_WORD, RX_TARGLANG, FX_WORD, RX_BUILDER, FX_BUILDER, RX_PAY_NODE, FX_PAY_NODE,//scan, parse, sublang trees
         // datatypes whose text indicators are not the same as enum name
-        TARGLANG_INSERT, COMMENT,
-        // error indicator
-        //UNKNOWN_DATATYPE,
-        // test text
+        TARGLANG_INSERT, COMMENT,//scan, strategy
 
         // Top enum ordinal gives size of list
         NUM_DATATYPES
@@ -134,6 +133,38 @@ public final class Keywords {
                 out[i] = fromString(toks[i]);
             }
             return out;
+        }
+    }
+
+    public enum LANG_STRUCT {
+
+        ;
+        private static final Pattern CHEVRONS = Pattern.compile("[<]([A-Z]+)[>]$");
+        //public final PRIM outType;
+
+        private LANG_STRUCT() {//PRIM outType
+            //this.outType = outType;
+        }
+
+        public LANG_STRUCT fromString(String text){
+            try{
+                return valueOf(text);
+            }
+            catch(IllegalArgumentException e){
+                return (isList(text))? null : null;
+            }
+        }
+        public boolean isList(String text){
+            if(text.startsWith("LIST")){
+                Matcher matcher = CHEVRONS.matcher(text);
+
+                if(matcher.find()){
+                    text = matcher.replaceAll("_$1");
+
+                }
+                return (DATATYPE.fromString(text) != null);
+            }
+            return false;
         }
     }
 
@@ -270,13 +301,13 @@ public final class Keywords {
 
     public enum RX_PAR {// RX PARAMETER
         // Rx Functions
-        EMPTY_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\(\\)$"),                            new int[]{1}),
-        NUM_PAR         (DATATYPE.FUN,      Pattern.compile("^.+\\(([0-9]+)\\)$"),                      new int[]{1, 2}),
-        NUM_PAR_MULTI   (DATATYPE.FUN,      Pattern.compile("^(.+)\\((([0-9]+[,])+[0-9]+)\\)$"),        new int[]{1, 2}),//2 has the comma-separated list
-        RANGE_BELOW     (DATATYPE.FUN,      Pattern.compile("^(.+)\\([:]([0-9]+)\\)$"),                 new int[]{1, 2}),
-        RANGE_ABOVE     (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([0-9]+)[:]\\)$"),                 new int[]{1, 2}),
-        RANGE_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([0-9]+)[:]([0-9]+)\\)$"),         new int[]{1, 2, 3}),//returns the numbers
-        CONST_PAR       (DATATYPE.FUN,      Pattern.compile("^(.+)\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$"),  new int[]{1, 2}),// returns constant with $ removed
+        EMPTY_PAR       (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\(\\)$"),                            new int[]{1}),
+        NUM_PAR         (DATATYPE.FUN_PAR,  Pattern.compile("^.+\\(([0-9]+)\\)$"),                      new int[]{1, 2}),
+        NUM_PAR_MULTI   (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\((([0-9]+[,])+[0-9]+)\\)$"),        new int[]{1, 2}),//2 has the comma-separated list
+        RANGE_BELOW     (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\([:]([0-9]+)\\)$"),                 new int[]{1, 2}),
+        RANGE_ABOVE     (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\(([0-9]+)[:]\\)$"),                 new int[]{1, 2}),
+        RANGE_PAR       (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\(([0-9]+)[:]([0-9]+)\\)$"),         new int[]{1, 2, 3}),//returns the numbers
+        CONST_PAR       (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\([$]([A-Za-z][A-Za-z0-9_]*)\\)$"),  new int[]{1, 2}),// returns constant with $ removed
         TEST_TRUE       (DATATYPE.BOOL_TEXT,Pattern.compile("^TRUE$"),                                  new int[]{0}),
         TEST_FALSE      (DATATYPE.BOOL_TEXT,Pattern.compile("^FALSE$"),                                 new int[]{0}),
         TEST_NUM        (DATATYPE.NUM_TEXT, Pattern.compile("^[0-9]+$"),                                new int[]{0}),
@@ -284,8 +315,8 @@ public final class Keywords {
         CATEGORY        (DATATYPE.LIST,     Pattern.compile("^[A-Z][A-Z0-9_]+$"),                       new int[]{0}),
         // no application of these yet
         //BOOL_PAR        (DATATYPE.FUN,      Pattern.compile("^(.+)\\(((TRUE)|(FALSE))\\)$"),            new int[]{1, 2}),
-        AL_NUM_PAR      (DATATYPE.FUN,      Pattern.compile("^(.+)\\(([A-Za-z0-9_\\.]+)\\)$"),          new int[]{1, 2}),
-        AL_NUM_PAR_MULTI(DATATYPE.FUN,      Pattern.compile("^(.+)\\((([A-Za-z0-9]+[,])+[A-Za-z0-9]+)\\)$"), new int[]{1, 2}),//2 has the comma-separated list
+        AL_NUM_PAR      (DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\(([A-Za-z0-9_\\.]+)\\)$"),          new int[]{1, 2}),
+        AL_NUM_PAR_MULTI(DATATYPE.FUN_PAR,  Pattern.compile("^(.+)\\((([A-Za-z0-9]+[,])+[A-Za-z0-9]+)\\)$"), new int[]{1, 2}),//2 has the comma-separated list
         // default
         TEST_TEXT       (DATATYPE.RAW_TEXT, Pattern.compile("."),                                       new int[]{0})
         ;
